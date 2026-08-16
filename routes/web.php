@@ -22,21 +22,21 @@ Route::get('/login/student', [AuthController::class, 'showStudentLogin'])->name(
 Route::post('/login/student', [AuthController::class, 'studentLogin']);
 Route::post('/logout/student', [AuthController::class, 'studentLogout'])->name('logout.student');
 
-// Placeholder Dashboards
+// Protected Dashboards
 Route::middleware('auth:admin')->group(function () {
     Route::get('/admin/dashboard', function () {
-        return view('dashboard', ['role' => 'Admin']);
+        return view('pages.admin.dashboard');
     })->name('dashboard.admin');
 });
 
 Route::middleware('auth:teacher')->group(function () {
     Route::get('/teacher/dashboard', function () {
-        return view('dashboard', ['role' => 'Guru']);
+        return view('pages.teacher.dashboard');
     })->name('dashboard.teacher');
 });
 
 Route::middleware('auth:student')->group(function () {
     Route::get('/student/dashboard', function () {
-        return view('dashboard', ['role' => 'Siswa']);
+        return view('pages.student.dashboard');
     })->name('dashboard.student');
 });

@@ -11,7 +11,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->redirectGuestsTo(fn (\Illuminate\Http\Request $request) => match (true) {
+            $request->is('admin/*') || $request->is('admin') => route('login.admin'),
+            $request->is('teacher/*') || $request->is('teacher') => route('login.teacher'),
+            $request->is('student/*') || $request->is('student') => route('login.student'),
+            default => '/',
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
