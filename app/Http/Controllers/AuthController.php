@@ -7,9 +7,14 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    // ADMIN
+    // ==========================================
+    // ADMIN AUTH
+    // ==========================================
     public function showAdminLogin()
     {
+        if (Auth::guard('admin')->check()) {
+            return redirect()->route('dashboard.admin');
+        }
         return view('auth.admin-login');
     }
 
@@ -22,11 +27,17 @@ class AuthController extends Controller
 
         if (Auth::guard('admin')->attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->intended('/admin/dashboard');
+            
+            $intended = session()->get('url.intended');
+            if ($intended && str_contains($intended, '/admin')) {
+                return redirect()->intended(route('dashboard.admin'));
+            }
+            
+            return redirect()->route('dashboard.admin');
         }
 
         return back()->withErrors([
-            'identity_number' => 'The provided credentials do not match our records.',
+            'identity_number' => 'NIP atau Password yang dimasukkan salah.',
         ])->onlyInput('identity_number');
     }
 
@@ -35,12 +46,17 @@ class AuthController extends Controller
         Auth::guard('admin')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect('/');
+        return redirect()->route('login.admin');
     }
 
-    // TEACHER
+    // ==========================================
+    // TEACHER AUTH
+    // ==========================================
     public function showTeacherLogin()
     {
+        if (Auth::guard('teacher')->check()) {
+            return redirect()->route('dashboard.teacher');
+        }
         return view('auth.teacher-login');
     }
 
@@ -53,11 +69,17 @@ class AuthController extends Controller
 
         if (Auth::guard('teacher')->attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->intended('/teacher/dashboard');
+
+            $intended = session()->get('url.intended');
+            if ($intended && str_contains($intended, '/teacher')) {
+                return redirect()->intended(route('dashboard.teacher'));
+            }
+
+            return redirect()->route('dashboard.teacher');
         }
 
         return back()->withErrors([
-            'identity_number' => 'The provided credentials do not match our records.',
+            'identity_number' => 'NUPTK / NIP atau Password yang dimasukkan salah.',
         ])->onlyInput('identity_number');
     }
 
@@ -66,12 +88,17 @@ class AuthController extends Controller
         Auth::guard('teacher')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect('/');
+        return redirect()->route('login.teacher');
     }
 
-    // STUDENT
+    // ==========================================
+    // STUDENT AUTH
+    // ==========================================
     public function showStudentLogin()
     {
+        if (Auth::guard('student')->check()) {
+            return redirect()->route('dashboard.student');
+        }
         return view('auth.student-login');
     }
 
@@ -84,11 +111,17 @@ class AuthController extends Controller
 
         if (Auth::guard('student')->attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->intended('/student/dashboard');
+
+            $intended = session()->get('url.intended');
+            if ($intended && str_contains($intended, '/student')) {
+                return redirect()->intended(route('dashboard.student'));
+            }
+
+            return redirect()->route('dashboard.student');
         }
 
         return back()->withErrors([
-            'identity_number' => 'The provided credentials do not match our records.',
+            'identity_number' => 'NISN atau Password yang dimasukkan salah.',
         ])->onlyInput('identity_number');
     }
 
@@ -97,6 +130,6 @@ class AuthController extends Controller
         Auth::guard('student')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect('/');
+        return redirect()->route('login.student');
     }
 }

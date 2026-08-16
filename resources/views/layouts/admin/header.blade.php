@@ -55,10 +55,10 @@
             <div class="flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 p-1 pr-3">
                 <img
                     class="h-8 w-8 rounded-full object-cover"
-                    src="https://ui-avatars.com/api/?name=Admin&background=4f46e5&color=fff&bold=true&size=64"
+                    src="https://ui-avatars.com/api/?name={{ urlencode(Auth::guard('admin')->user()->name ?? 'Admin') }}&background=4f46e5&color=fff&bold=true&size=64"
                     alt="Avatar Admin"
                 >
-                <span class="hidden sm:inline text-sm font-semibold text-gray-700">Admin</span>
+                <span class="hidden sm:inline text-sm font-semibold text-gray-700">{{ Auth::guard('admin')->user()->name ?? 'Admin' }}</span>
             </div>
         </div>
     </div>
