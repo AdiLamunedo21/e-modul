@@ -40,8 +40,8 @@
         {{-- Sengaja tidak ada @click — sesuai spesifikasi --}}
     ></div>
 
-    {{-- ─── WRAPPER UTAMA: flex row ─────────────────────────────────────── --}}
-    <div class="flex min-h-screen">
+    {{-- ─── WRAPPER UTAMA: flex row setinggi layar (App Shell) ────────── --}}
+    <div class="flex h-screen overflow-hidden">
 
         {{-- ─── SIDEBAR ─────────────────────────────────────────────────── --}}
         @include('layouts.admin.sidebar')
@@ -52,13 +52,13 @@
             ikut dalam flow flex. Saat sidebar tutup, konten melebar sendiri.
             Di MOBILE: sidebar adalah fixed overlay, jadi area ini selalu full-width.
         --}}
-        <div class="flex flex-col flex-1 min-w-0 transition-all duration-300 ease-in-out">
+        <div class="flex flex-col flex-1 min-w-0 h-full overflow-hidden transition-all duration-300 ease-in-out">
 
-            {{-- Header sticky --}}
+            {{-- Header --}}
             @include('layouts.admin.header')
 
-            {{-- Konten halaman --}}
-            <main class="flex-1 p-4 sm:p-6 lg:p-8">
+            {{-- Konten halaman (scrollable independen) --}}
+            <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
                 @yield('content')
             </main>
         </div>

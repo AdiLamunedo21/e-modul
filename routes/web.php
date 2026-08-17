@@ -2,41 +2,62 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Teacher\ModuleManagerController;
+use App\Http\Controllers\Teacher\BagianAwalController;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-// Admin Auth
-Route::get('/login/admin', [AuthController::class, 'showAdminLogin'])->name('login.admin');
+// ─── Admin Auth ────────────────────────────────────────────────────────────
+Route::get('/login/admin',  [AuthController::class, 'showAdminLogin'])->name('login.admin');
 Route::post('/login/admin', [AuthController::class, 'adminLogin']);
 Route::post('/logout/admin', [AuthController::class, 'adminLogout'])->name('logout.admin');
 
-// Teacher Auth
-Route::get('/login/teacher', [AuthController::class, 'showTeacherLogin'])->name('login.teacher');
+// ─── Teacher Auth ──────────────────────────────────────────────────────────
+Route::get('/login/teacher',  [AuthController::class, 'showTeacherLogin'])->name('login.teacher');
 Route::post('/login/teacher', [AuthController::class, 'teacherLogin']);
 Route::post('/logout/teacher', [AuthController::class, 'teacherLogout'])->name('logout.teacher');
 
-// Student Auth
-Route::get('/login/student', [AuthController::class, 'showStudentLogin'])->name('login.student');
+// ─── Student Auth ──────────────────────────────────────────────────────────
+Route::get('/login/student',  [AuthController::class, 'showStudentLogin'])->name('login.student');
 Route::post('/login/student', [AuthController::class, 'studentLogin']);
 Route::post('/logout/student', [AuthController::class, 'studentLogout'])->name('logout.student');
 
-// Protected Dashboards
-Route::middleware('auth:admin')->group(function () {
-    Route::get('/admin/dashboard', function () {
-        return view('pages.admin.dashboard');
-    })->name('dashboard.admin');
+// ─── Admin Protected ───────────────────────────────────────────────────────
+Route::middleware('auth:admin')->prefix('admin')->name('dashboard.')->group(function () {
+    Route::get('/dashboard', fn () => view('pages.admin.dashboard'))->name('admin');
 });
 
-Route::middleware('auth:teacher')->group(function () {
-    Route::get('/teacher/dashboard', function () {
-        return view('pages.teacher.dashboard');
-    })->name('dashboard.teacher');
+// ─── Teacher Protected ─────────────────────────────────────────────────────
+Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(function () {
+
+    // Dashboard utama
+    Route::get('/dashboard', fn () => view('pages.teacher.dashboard'))->name('dashboard');
+
+    // Manajer Modul (CRUD)
+    Route::get('/modules',                      [ModuleManagerController::class, 'index'])->name('modules.index');
+    Route::get('/modules/create',               [ModuleManagerController::class, 'create'])->name('modules.create');
+    Route::post('/modules',                     [ModuleManagerController::class, 'store'])->name('modules.store');
+    Route::get('/modules/{module}',             [ModuleManagerController::class, 'show'])->name('modules.show');
+    Route::patch('/modules/{module}/status',    [ModuleManagerController::class, 'updateStatus'])->name('modules.status');
+    Route::delete('/modules/{module}',          [ModuleManagerController::class, 'destroy'])->name('modules.destroy');
+
+    // Bagian Awal Editor
+    Route::get('/modules/{module}/bagian-awal',  [BagianAwalController::class, 'edit'])->name('modules.bagian-awal.edit');
+    Route::patch('/modules/{module}/bagian-awal', [BagianAwalController::class, 'update'])->name('modules.bagian-awal.update');
+
+    // Grading Center (placeholder — dikembangkan berikutnya)
+    Route::get('/grading', fn () => view('pages.teacher.grading.index'))->name('grading.index');
+
+    // Laporan PDF (placeholder)
+    Route::get('/reports', fn () => view('pages.teacher.reports.index'))->name('reports.index');
+
+    // Kelas Binaan (placeholder)
+    Route::get('/classes', fn () => view('pages.teacher.classes.index'))->name('classes.index');
 });
 
-Route::middleware('auth:student')->group(function () {
-    Route::get('/student/dashboard', function () {
-        return view('pages.student.dashboard');
-    })->name('dashboard.student');
+// ─── Student Protected ─────────────────────────────────────────────────────
+Route::middleware('auth:student')->prefix('student')->name('dashboard.')->group(function () {
+    Route::get('/dashboard', fn () => view('pages.student.dashboard'))->name('student');
 });

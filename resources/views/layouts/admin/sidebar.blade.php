@@ -21,19 +21,13 @@
     class="
         {{-- MOBILE: fixed overlay, mulai dari BAWAH header (top-16 = 64px = h-16) --}}
         fixed top-16 left-0 bottom-0 z-40
-        {{-- DESKTOP: kembali ke relative dalam flex-row, z-index normal --}}
-        lg:static lg:z-auto lg:inset-auto
+        {{-- DESKTOP: kembali ke relative dalam flex-row, tinggi penuh parent container --}}
+        lg:static lg:h-full lg:z-auto lg:inset-auto
 
         flex flex-col shrink-0
         bg-slate-900
         overflow-hidden
         transition-all duration-300 ease-in-out
-
-        {{-- DESKTOP width toggle: push/pull --}}
-        lg:w-72
-
-        {{-- MOBILE transform toggle: slide in/out --}}
-        translate-x-0
     "
     :class="{
         {{-- ── DESKTOP ─────────────────────────────────────────────── --}}
@@ -41,8 +35,8 @@
         'lg:w-0':  !sidebarOpen,
 
         {{-- ── MOBILE ──────────────────────────────────────────────── --}}
-        'w-72 translate-x-0':   sidebarOpen,
-        '-translate-x-full':   !sidebarOpen,
+        'w-72 translate-x-0':  sidebarOpen,
+        'w-72 -translate-x-full lg:translate-x-0':  !sidebarOpen,
     }"
 >
     {{-- Inner container dengan min-width agar konten tidak squash saat animasi --}}
