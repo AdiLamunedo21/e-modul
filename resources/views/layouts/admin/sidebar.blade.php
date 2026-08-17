@@ -55,7 +55,7 @@
         </div>
 
         {{-- ══ Navigasi ══ --}}
-        <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1">
+        <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
 
             {{-- Dashboard --}}
             <a href="{{ route('dashboard.admin') }}"

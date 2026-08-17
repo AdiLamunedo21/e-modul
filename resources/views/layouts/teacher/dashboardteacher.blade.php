@@ -12,6 +12,19 @@
     <style>
         [x-cloak] { display: none !important; }
         body { font-family: 'Inter', system-ui, sans-serif; }
+
+        /* Sembunyikan batang scrollbar di sidebar di semua browser */
+        aside, aside nav, .no-scrollbar {
+            -ms-overflow-style: none !important; /* IE dan Edge */
+            scrollbar-width: none !important;    /* Firefox */
+        }
+        aside::-webkit-scrollbar,
+        aside nav::-webkit-scrollbar,
+        .no-scrollbar::-webkit-scrollbar {
+            display: none !important;             /* Chrome, Safari, Opera */
+            width: 0 !important;
+            height: 0 !important;
+        }
     </style>
     @stack('styles')
     @stack('head')

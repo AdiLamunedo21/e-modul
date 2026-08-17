@@ -41,8 +41,8 @@
             </span>
         </div>
 
-        {{-- ══ Navigasi Menu Guru ══ --}}
-        <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1">
+        {{-- ══ Navigasi Menu Guru (Hidden Scrollbar for Clean Desktop View) ══ --}}
+        <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
 
             {{-- Workspace Utama --}}
             <a href="{{ route('teacher.dashboard') }}"
@@ -92,7 +92,6 @@
             </a>
 
             {{-- Rekap Laporan Nilai PDF --}}
-            <a href="#" class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-colors group">
             <a href="{{ route('teacher.reports.index') }}" class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors group
                 {{ request()->routeIs('teacher.reports.*') ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
                 <svg class="w-5 h-5 shrink-0 {{ request()->routeIs('teacher.reports.*') ? 'text-blue-400' : 'group-hover:text-blue-400' }} transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

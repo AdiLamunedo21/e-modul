@@ -11,6 +11,8 @@ class Module extends Model
     protected $casts = [
         'bagian_awal_data'  => 'array',
         'bagian_akhir_data' => 'array',
+        'pre_test_data'     => 'array',
+        'materi_data'       => 'array',
         'has_pre_test'      => 'boolean',
         'has_materi'        => 'boolean',
         'has_video'         => 'boolean',
@@ -64,4 +66,33 @@ class Module extends Model
 
         return array_values(array_filter($map, fn($_, $key) => $this->$key, ARRAY_FILTER_USE_BOTH));
     }
+
+    /** Mendapatkan daftar soal pre-test */
+    public function preTestQuestions(): array
+    {
+        if (!is_array($this->pre_test_data)) {
+            return [];
+        }
+        return $this->pre_test_data['questions'] ?? [];
+    }
+
+    /** Jumlah soal pre-test */
+    public function preTestQuestionCount(): int
+    {
+        return count($this->preTestQuestions());
+    }
+
+    /** Memeriksa apakah materi memiliki file PPT/PDF */
+    public function hasPptFile(): bool
+    {
+        return !empty($this->materi_data['ppt_file_path']);
+    }
+
+    /** Mendapatkan judul materi */
+    public function materiTitle(): string
+    {
+        return $this->materi_data['judul_materi'] ?? 'Materi Pembelajaran';
+    }
 }
+
+

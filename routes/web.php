@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Teacher\ModuleManagerController;
 use App\Http\Controllers\Teacher\BagianAwalController;
+use App\Http\Controllers\Teacher\PreTestController;
+use App\Http\Controllers\Teacher\MateriController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -44,8 +46,22 @@ Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(fu
     Route::delete('/modules/{module}',          [ModuleManagerController::class, 'destroy'])->name('modules.destroy');
 
     // Bagian Awal Editor
-    Route::get('/modules/{module}/bagian-awal',  [BagianAwalController::class, 'edit'])->name('modules.bagian-awal.edit');
-    Route::patch('/modules/{module}/bagian-awal', [BagianAwalController::class, 'update'])->name('modules.bagian-awal.update');
+    Route::get('/modules/{module}/bagian-awal',   [BagianAwalController::class, 'edit'])->name('modules.bagian-awal.edit');
+    Route::patch('/modules/{module}/bagian-awal',  [BagianAwalController::class, 'update'])->name('modules.bagian-awal.update');
+
+    // Bagian Inti: 1. Pre-test Quiz Builder
+    Route::get('/modules/{module}/pre-test',        [PreTestController::class, 'edit'])->name('modules.pre-test.edit');
+    Route::patch('/modules/{module}/pre-test',       [PreTestController::class, 'update'])->name('modules.pre-test.update');
+    Route::post('/modules/{module}/pre-test/toggle',  [PreTestController::class, 'toggle'])->name('modules.pre-test.toggle');
+    Route::get('/modules/{module}/pre-test/preview',  [PreTestController::class, 'preview'])->name('modules.pre-test.preview');
+
+    // Bagian Inti: 2. Materi & PPT
+    Route::get('/modules/{module}/materi',              [MateriController::class, 'edit'])->name('modules.materi.edit');
+    Route::patch('/modules/{module}/materi',             [MateriController::class, 'update'])->name('modules.materi.update');
+    Route::post('/modules/{module}/materi/toggle',       [MateriController::class, 'toggle'])->name('modules.materi.toggle');
+    Route::get('/modules/{module}/materi/preview',       [MateriController::class, 'preview'])->name('modules.materi.preview');
+    Route::get('/modules/{module}/materi/download-ppt',   [MateriController::class, 'downloadPpt'])->name('modules.materi.download-ppt');
+    Route::post('/modules/{module}/materi/upload-image', [MateriController::class, 'uploadImage'])->name('modules.materi.upload-image');
 
     // Grading Center (placeholder — dikembangkan berikutnya)
     Route::get('/grading', fn () => view('pages.teacher.grading.index'))->name('grading.index');

@@ -125,32 +125,66 @@
             <span class="text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">7 Toggle Opsional</span>
         </div>
 
-        <div class="space-y-2 flex-1 mb-4">
+        <div class="space-y-2 flex-1">
+            {{-- 1. Pre-test --}}
+            <div class="flex items-center justify-between rounded-xl bg-slate-50 border border-slate-200/70 p-2.5 transition-colors hover:bg-slate-100/60">
+                <span class="text-xs font-semibold text-slate-800">1. Pre-test</span>
+                <div class="flex items-center gap-2.5 shrink-0">
+                    <a href="{{ route('teacher.modules.pre-test.edit', $module) }}"
+                       class="text-[11px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-200/60 px-2.5 py-1 rounded-lg transition-colors">
+                        Edit
+                    </a>
+                    <form action="{{ route('teacher.modules.pre-test.toggle', $module) }}" method="POST" class="inline-flex items-center">
+                        @csrf
+                        <button type="button"
+                                onclick="animateToggleAndSubmit(event, this)"
+                                aria-label="Toggle Pre-test"
+                                title="Pre-test: {{ $module->has_pre_test ? 'Aktif (Klik untuk Matikan)' : 'Nonaktif (Klik untuk Nyalakan)' }}"
+                                class="relative inline-flex items-center h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500/40 {{ $module->has_pre_test ? 'bg-emerald-500 border-emerald-600' : 'bg-slate-200 border-slate-400 hover:border-slate-500' }}">
+                            <span class="pointer-events-none absolute top-[2px] left-[2px] h-5 w-5 rounded-full bg-white shadow-md border border-slate-300/90 transition-transform duration-300 ease-in-out"
+                                  style="transform: translateX({{ $module->has_pre_test ? '20px' : '0px' }});"></span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {{-- 2. Materi & PPT --}}
+            <div class="flex items-center justify-between rounded-xl bg-slate-50 border border-slate-200/70 p-2.5 transition-colors hover:bg-slate-100/60">
+                <span class="text-xs font-semibold text-slate-800">2. Materi & PPT</span>
+                <div class="flex items-center gap-2.5 shrink-0">
+                    <a href="{{ route('teacher.modules.materi.edit', $module) }}"
+                       class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/60 px-2.5 py-1 rounded-lg transition-colors">
+                        Edit
+                    </a>
+                    <form action="{{ route('teacher.modules.materi.toggle', $module) }}" method="POST" class="inline-flex items-center">
+                        @csrf
+                        <button type="button"
+                                onclick="animateToggleAndSubmit(event, this)"
+                                aria-label="Toggle Materi"
+                                title="Materi & PPT: {{ $module->has_materi ? 'Aktif (Klik untuk Matikan)' : 'Nonaktif (Klik untuk Nyalakan)' }}"
+                                class="relative inline-flex items-center h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500/40 {{ $module->has_materi ? 'bg-emerald-500 border-emerald-600' : 'bg-slate-200 border-slate-400 hover:border-slate-500' }}">
+                            <span class="pointer-events-none absolute top-[2px] left-[2px] h-5 w-5 rounded-full bg-white shadow-md border border-slate-300/90 transition-transform duration-300 ease-in-out"
+                                  style="transform: translateX({{ $module->has_materi ? '20px' : '0px' }});"></span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
             @foreach([
-                ['has_pre_test',  '1. Pre-test'],
-                ['has_materi',    '2. Materi & PPT'],
                 ['has_video',     '3. Video YouTube'],
                 ['has_embed',     '4. Praktik Embed'],
                 ['has_job_sheet', '5. Job Sheet PDF'],
                 ['has_lkpd',      '6. LKPD Kelompok'],
                 ['has_post_test', '7. Post-test'],
             ] as [$field, $label])
-                <form action="{{ route('teacher.modules.status', $module) }}" method="POST">
-                    @csrf @method('PATCH')
-                    <div class="flex items-center justify-between rounded-xl bg-slate-50 border border-slate-200/70 px-3 py-2">
-                        <span class="text-xs font-medium text-slate-700">{{ $label }}</span>
-                        <span class="text-[11px] font-bold {{ $module->$field ? 'text-emerald-600' : 'text-slate-400' }}">
-                            {{ $module->$field ? '✓ ON' : '○ OFF' }}
-                        </span>
-                    </div>
-                </form>
+                <div class="flex items-center justify-between rounded-xl bg-slate-50 border border-slate-200/70 px-3 py-2">
+                    <span class="text-xs font-medium text-slate-700">{{ $label }}</span>
+                    <span class="text-[11px] font-bold {{ $module->$field ? 'text-emerald-600' : 'text-slate-400' }}">
+                        {{ $module->$field ? '✓ ON' : '○ OFF' }}
+                    </span>
+                </div>
             @endforeach
         </div>
-
-        <a href="#" class="inline-flex items-center justify-center gap-1.5 w-full py-2.5 text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl transition-all">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            Kelola 7 Sakelar Komponen
-        </a>
     </div>
 
     {{-- BAGIAN AKHIR --}}
@@ -203,3 +237,28 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+    function animateToggleAndSubmit(event, button) {
+        event.preventDefault();
+        const form = button.closest('form');
+        const thumb = button.querySelector('span');
+        const isCurrentlyActive = button.classList.contains('bg-emerald-500');
+
+        if (isCurrentlyActive) {
+            button.classList.remove('bg-emerald-500', 'border-emerald-600');
+            button.classList.add('bg-slate-200', 'border-slate-400');
+            if (thumb) thumb.style.transform = 'translateX(0px)';
+        } else {
+            button.classList.remove('bg-slate-200', 'border-slate-400');
+            button.classList.add('bg-emerald-500', 'border-emerald-600');
+            if (thumb) thumb.style.transform = 'translateX(20px)';
+        }
+
+        setTimeout(() => {
+            form.submit();
+        }, 220);
+    }
+</script>
+@endpush
