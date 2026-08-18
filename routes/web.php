@@ -6,6 +6,9 @@ use App\Http\Controllers\Teacher\ModuleManagerController;
 use App\Http\Controllers\Teacher\BagianAwalController;
 use App\Http\Controllers\Teacher\PreTestController;
 use App\Http\Controllers\Teacher\MateriController;
+use App\Http\Controllers\Teacher\VideoController;
+use App\Http\Controllers\Teacher\EmbedController;
+use App\Http\Controllers\Teacher\JobSheetController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -62,6 +65,25 @@ Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(fu
     Route::get('/modules/{module}/materi/preview',       [MateriController::class, 'preview'])->name('modules.materi.preview');
     Route::get('/modules/{module}/materi/download-ppt',   [MateriController::class, 'downloadPpt'])->name('modules.materi.download-ppt');
     Route::post('/modules/{module}/materi/upload-image', [MateriController::class, 'uploadImage'])->name('modules.materi.upload-image');
+
+    // Bagian Inti: 3. Video YouTube & Ringkasan
+    Route::get('/modules/{module}/video',               [VideoController::class, 'edit'])->name('modules.video.edit');
+    Route::patch('/modules/{module}/video',              [VideoController::class, 'update'])->name('modules.video.update');
+    Route::post('/modules/{module}/video/toggle',        [VideoController::class, 'toggle'])->name('modules.video.toggle');
+    Route::get('/modules/{module}/video/preview',        [VideoController::class, 'preview'])->name('modules.video.preview');
+
+    // Bagian Inti: 4. Praktik Interaktif (Embed Code / Simulator)
+    Route::get('/modules/{module}/embed',               [EmbedController::class, 'edit'])->name('modules.embed.edit');
+    Route::patch('/modules/{module}/embed',              [EmbedController::class, 'update'])->name('modules.embed.update');
+    Route::post('/modules/{module}/embed/toggle',        [EmbedController::class, 'toggle'])->name('modules.embed.toggle');
+    Route::get('/modules/{module}/embed/preview',        [EmbedController::class, 'preview'])->name('modules.embed.preview');
+
+    // Bagian Inti: 5. Lembar Praktikum (Job Sheet PDF)
+    Route::get('/modules/{module}/job-sheet',           [JobSheetController::class, 'edit'])->name('modules.job-sheet.edit');
+    Route::patch('/modules/{module}/job-sheet',          [JobSheetController::class, 'update'])->name('modules.job-sheet.update');
+    Route::post('/modules/{module}/job-sheet/toggle',    [JobSheetController::class, 'toggle'])->name('modules.job-sheet.toggle');
+    Route::get('/modules/{module}/job-sheet/preview',    [JobSheetController::class, 'preview'])->name('modules.job-sheet.preview');
+    Route::get('/modules/{module}/job-sheet/download',   [JobSheetController::class, 'downloadPdf'])->name('modules.job-sheet.download');
 
     // Grading Center (placeholder — dikembangkan berikutnya)
     Route::get('/grading', fn () => view('pages.teacher.grading.index'))->name('grading.index');

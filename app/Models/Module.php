@@ -13,6 +13,9 @@ class Module extends Model
         'bagian_akhir_data' => 'array',
         'pre_test_data'     => 'array',
         'materi_data'       => 'array',
+        'video_data'        => 'array',
+        'embed_data'        => 'array',
+        'job_sheet_data'    => 'array',
         'has_pre_test'      => 'boolean',
         'has_materi'        => 'boolean',
         'has_video'         => 'boolean',
@@ -37,6 +40,26 @@ class Module extends Model
     public function studentResults()
     {
         return $this->hasMany(StudentResult::class);
+    }
+
+    public function videoSummaries()
+    {
+        return $this->hasMany(VideoSummary::class);
+    }
+
+    public function embedSubmissions()
+    {
+        return $this->hasMany(EmbedSubmission::class);
+    }
+
+    public function jobSheets()
+    {
+        return $this->hasMany(JobSheet::class);
+    }
+
+    public function jobSheetSubmissions()
+    {
+        return $this->hasManyThrough(JobSheetSubmission::class, JobSheet::class);
     }
 
     /* ─── Helpers ───────────────────────────────── */
@@ -93,6 +116,95 @@ class Module extends Model
     {
         return $this->materi_data['judul_materi'] ?? 'Materi Pembelajaran';
     }
+
+    /** Mendapatkan judul video YouTube */
+    public function videoTitle(): string
+    {
+        return $this->video_data['video_title'] ?? 'Video Pembelajaran: ' . $this->title;
+    }
+
+    /** Mendapatkan YouTube ID */
+    public function youtubeId(): ?string
+    {
+        return $this->video_data['youtube_id'] ?? null;
+    }
+
+    /** Mendapatkan Embed URL YouTube untuk iframe */
+    public function youtubeEmbedUrl(): ?string
+    {
+        $id = $this->youtubeId();
+        return $id ? "https://www.youtube-nocookie.com/embed/{$id}?rel=0" : null;
+    }
+
+    /** Mendapatkan judul praktik embed */
+    public function embedTitle(): string
+    {
+        return $this->embed_data['embed_title'] ?? 'Praktik Interaktif: ' . $this->title;
+    }
+
+    /** Mendapatkan kode embed / HTML / iframe */
+    public function embedCode(): string
+    {
+        return $this->embed_data['embed_code'] ?? '';
+    }
+
+    /** Mendapatkan tipe embed ('code' atau 'url') */
+    public function embedType(): string
+    {
+        return $this->embed_data['embed_type'] ?? 'code';
+    }
+
+    /** Mendapatkan direct embed url */
+    public function embedUrl(): ?string
+    {
+        return $this->embed_data['embed_url'] ?? null;
+    }
+
+    /** Mendapatkan daftar checklist target praktik */
+    public function embedChecklist(): array
+    {
+        if (!is_array($this->embed_data)) {
+            return [];
+        }
+        return $this->embed_data['checklist_items'] ?? [];
+    }
+
+    /** Mendapatkan judul Job Sheet */
+    public function jobSheetTitle(): string
+    {
+        return $this->job_sheet_data['job_sheet_title'] ?? 'Lembar Praktikum: ' . $this->title;
+    }
+
+    /** Memeriksa apakah Job Sheet memiliki file PDF terunggah */
+    public function hasJobSheetPdf(): bool
+    {
+        return !empty($this->job_sheet_data['pdf_file_path']);
+    }
+
+    /** Mendapatkan path file PDF Job Sheet */
+    public function jobSheetPdfPath(): ?string
+    {
+        return $this->job_sheet_data['pdf_file_path'] ?? null;
+    }
+
+    /** Mendapatkan nama asli berkas PDF Job Sheet */
+    public function jobSheetPdfName(): string
+    {
+        return $this->job_sheet_data['pdf_file_name'] ?? 'Job-Sheet-' . $this->id . '.pdf';
+    }
+
+    /** Mendapatkan daftar alat & bahan */
+    public function jobSheetTools(): array
+    {
+        if (!is_array($this->job_sheet_data)) {
+            return [];
+        }
+        return $this->job_sheet_data['tools_and_materials'] ?? [];
+    }
+
+    /** Mendapatkan petunjuk K3 / Keselamatan Kerja */
+    public function jobSheetSafety(): string
+    {
+        return $this->job_sheet_data['safety_guidelines'] ?? '';
+    }
 }
-
-

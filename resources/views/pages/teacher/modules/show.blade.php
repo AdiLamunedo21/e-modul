@@ -170,10 +170,73 @@
                 </div>
             </div>
 
+            {{-- 3. Video & Ringkasan YouTube --}}
+            <div class="flex items-center justify-between rounded-xl bg-slate-50 border border-slate-200/70 p-2.5 transition-colors hover:bg-slate-100/60">
+                <span class="text-xs font-semibold text-slate-800">3. Video YouTube</span>
+                <div class="flex items-center gap-2.5 shrink-0">
+                    <a href="{{ route('teacher.modules.video.edit', $module) }}"
+                       class="text-[11px] font-bold text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 border border-red-200/60 px-2.5 py-1 rounded-lg transition-colors">
+                        Edit
+                    </a>
+                    <form action="{{ route('teacher.modules.video.toggle', $module) }}" method="POST" class="inline-flex items-center">
+                        @csrf
+                        <button type="button"
+                                onclick="animateToggleAndSubmit(event, this)"
+                                aria-label="Toggle Video"
+                                title="Video & Ringkasan: {{ $module->has_video ? 'Aktif (Klik untuk Matikan)' : 'Nonaktif (Klik untuk Nyalakan)' }}"
+                                class="relative inline-flex items-center h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500/40 {{ $module->has_video ? 'bg-emerald-500 border-emerald-600' : 'bg-slate-200 border-slate-400 hover:border-slate-500' }}">
+                            <span class="pointer-events-none absolute top-[2px] left-[2px] h-5 w-5 rounded-full bg-white shadow-md border border-slate-300/90 transition-transform duration-300 ease-in-out"
+                                  style="transform: translateX({{ $module->has_video ? '20px' : '0px' }});"></span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {{-- 4. Praktik Embed (Simulator / Media Interaktif) --}}
+            <div class="flex items-center justify-between rounded-xl bg-slate-50 border border-slate-200/70 p-2.5 transition-colors hover:bg-slate-100/60">
+                <span class="text-xs font-semibold text-slate-800">4. Praktik Embed</span>
+                <div class="flex items-center gap-2.5 shrink-0">
+                    <a href="{{ route('teacher.modules.embed.edit', $module) }}"
+                       class="text-[11px] font-bold text-cyan-700 hover:text-cyan-900 bg-cyan-50 hover:bg-cyan-100 border border-cyan-200/60 px-2.5 py-1 rounded-lg transition-colors">
+                        Edit
+                    </a>
+                    <form action="{{ route('teacher.modules.embed.toggle', $module) }}" method="POST" class="inline-flex items-center">
+                        @csrf
+                        <button type="button"
+                                onclick="animateToggleAndSubmit(event, this)"
+                                aria-label="Toggle Praktik Embed"
+                                title="Praktik Embed: {{ $module->has_embed ? 'Aktif (Klik untuk Matikan)' : 'Nonaktif (Klik untuk Nyalakan)' }}"
+                                class="relative inline-flex items-center h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500/40 {{ $module->has_embed ? 'bg-emerald-500 border-emerald-600' : 'bg-slate-200 border-slate-400 hover:border-slate-500' }}">
+                            <span class="pointer-events-none absolute top-[2px] left-[2px] h-5 w-5 rounded-full bg-white shadow-md border border-slate-300/90 transition-transform duration-300 ease-in-out"
+                                  style="transform: translateX({{ $module->has_embed ? '20px' : '0px' }});"></span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {{-- 5. Lembar Praktikum (Job Sheet PDF) --}}
+            <div class="flex items-center justify-between rounded-xl bg-slate-50 border border-slate-200/70 p-2.5 transition-colors hover:bg-slate-100/60">
+                <span class="text-xs font-semibold text-slate-800">5. Job Sheet PDF</span>
+                <div class="flex items-center gap-2.5 shrink-0">
+                    <a href="{{ route('teacher.modules.job-sheet.edit', $module) }}"
+                       class="text-[11px] font-bold text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-200/60 px-2.5 py-1 rounded-lg transition-colors">
+                        Edit
+                    </a>
+                    <form action="{{ route('teacher.modules.job-sheet.toggle', $module) }}" method="POST" class="inline-flex items-center">
+                        @csrf
+                        <button type="button"
+                                onclick="animateToggleAndSubmit(event, this)"
+                                aria-label="Toggle Job Sheet"
+                                title="Job Sheet: {{ $module->has_job_sheet ? 'Aktif (Klik untuk Matikan)' : 'Nonaktif (Klik untuk Nyalakan)' }}"
+                                class="relative inline-flex items-center h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500/40 {{ $module->has_job_sheet ? 'bg-emerald-500 border-emerald-600' : 'bg-slate-200 border-slate-400 hover:border-slate-500' }}">
+                            <span class="pointer-events-none absolute top-[2px] left-[2px] h-5 w-5 rounded-full bg-white shadow-md border border-slate-300/90 transition-transform duration-300 ease-in-out"
+                                  style="transform: translateX({{ $module->has_job_sheet ? '20px' : '0px' }});"></span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
             @foreach([
-                ['has_video',     '3. Video YouTube'],
-                ['has_embed',     '4. Praktik Embed'],
-                ['has_job_sheet', '5. Job Sheet PDF'],
                 ['has_lkpd',      '6. LKPD Kelompok'],
                 ['has_post_test', '7. Post-test'],
             ] as [$field, $label])

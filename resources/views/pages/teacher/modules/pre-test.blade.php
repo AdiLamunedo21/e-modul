@@ -72,28 +72,34 @@
 @endif
 
 {{-- ══ Header Banner ══ --}}
-<div class="bg-gradient-to-r from-blue-700 via-indigo-700 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-blue-900/10 mb-8 relative overflow-hidden">
-    <div class="absolute -right-10 -bottom-10 w-56 h-56 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+<div class="bg-gradient-to-r from-blue-800 via-indigo-800 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-blue-950/20 mb-8 relative overflow-hidden border border-blue-700/40">
+    <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute right-1/3 -top-10 w-48 h-48 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
     <div class="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-        <div>
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-xs font-bold uppercase tracking-wider text-blue-100 mb-3">
-                <span>⚡ Bagian Inti — Komponen 1</span>
-                <span>•</span>
-                <span class="text-amber-300">Opsional (Toggle)</span>
+        <div class="space-y-3">
+            <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-950/60 backdrop-blur-md border border-white/20 text-xs font-bold tracking-wide text-white shadow-sm">
+                <span class="flex items-center gap-1.5 text-blue-200">
+                    <span>⚡</span>
+                    <span>Bagian Inti — Komponen 1</span>
+                </span>
+                <span class="text-white/30">•</span>
+                <span class="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-400/20 text-amber-300 border border-amber-400/40 uppercase tracking-wider">
+                    Opsional (Toggle)
+                </span>
             </div>
-            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Quiz Builder: Pre-test</h1>
-            <p class="text-blue-100/90 text-sm mt-1.5 max-w-2xl">
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-sm">Quiz Builder: Pre-test</h1>
+            <p class="text-slate-200 text-sm leading-relaxed max-w-2xl font-normal">
                 Rancang kuis pembuka interaktif untuk mendiagnosis kemampuan awal siswa sebelum masuk ke materi inti. Penilaian pilihan ganda dihitung secara otomatis oleh sistem.
             </p>
         </div>
 
         <div class="flex items-center gap-3 shrink-0">
             <a href="{{ route('teacher.modules.show', $module) }}"
-               class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs font-bold transition-all flex items-center gap-2 backdrop-blur-sm">
+               class="px-4 py-2.5 rounded-xl bg-slate-900/50 hover:bg-slate-900/80 text-white border border-white/25 hover:border-white/40 text-xs font-bold transition-all flex items-center gap-2 backdrop-blur-sm shadow-sm">
                 ← Kembali ke Detail
             </a>
             <a href="{{ route('teacher.modules.pre-test.preview', $module) }}" target="_blank"
-               class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold transition-all shadow-lg shadow-emerald-900/30 flex items-center gap-2">
+               class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-lg shadow-emerald-950/40 flex items-center gap-2 border border-emerald-400/30">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 Pratinjau Siswa
             </a>
