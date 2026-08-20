@@ -81,55 +81,77 @@
 {{-- ══ Grid Modul (Layout 2 Kolom: Informasi Umum (Kiri) | Komponen Inti (Kanan)) ══ --}}
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 items-stretch">
 
-    {{-- ── 1. INFORMASI UMUM (Kiri — Mandatori) ── --}}
+    {{-- ── 1. INFORMASI UMUM (Kiri — 8 Elemen dengan Toggle) ── --}}
+    @php
+        $infoItems = [
+            'cover'               => ['1. Halaman Cover', '📷', 'sec-cover', 'Cover'],
+            'kata_pengantar'      => ['2. Kata Pengantar', '✏️', 'sec-kata', 'Kata Pengantar'],
+            'daftar_isi'          => ['3. Daftar Isi', '📋', 'sec-daftar', 'Daftar Isi'],
+            'peta_konsep'         => ['4. Peta Konsep', '🗺️', 'sec-peta', 'Peta Konsep'],
+            'glosarium'           => ['5. Glosarium', '📖', 'sec-glosarium', 'Glosarium'],
+            'petunjuk_penggunaan' => ['6. Petunjuk Penggunaan', '💡', 'sec-petunjuk', 'Petunjuk Penggunaan'],
+            'tujuan_pembelajaran' => ['7. Tujuan Pembelajaran', '🎯', 'sec-tujuan', 'Tujuan Pembelajaran'],
+            'daftar_pustaka'      => ['8. Daftar Pustaka', '📚', 'sec-pustaka', 'Daftar Pustaka'],
+        ];
+        $activeInfoCount = collect($infoItems)->filter(fn($v, $k) => $module->isInfoComponentActive($k))->count();
+    @endphp
     <div class="rounded-3xl bg-white border border-slate-200/80 shadow-sm p-6 sm:p-7 flex flex-col justify-between hover:shadow-md transition-shadow">
         <div>
             <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-black text-sm shrink-0">
+                    <div class="w-9 h-9 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-md shadow-indigo-600/20">
                         1
                     </div>
                     <div>
                         <h2 class="text-base font-bold text-slate-900 leading-tight">Informasi Umum</h2>
-                        <p class="text-[11px] text-slate-400">Pendahuluan & Kelengkapan</p>
+                        <p class="text-[11px] text-slate-400">Pendahuluan & Kelengkapan (8 Komponen)</p>
                     </div>
                 </div>
-                <span class="text-[10px] font-extrabold uppercase tracking-wider bg-rose-100 text-rose-700 px-2.5 py-0.5 rounded-full border border-rose-200">
-                    Mandatori
+                <span class="text-[10px] font-extrabold uppercase tracking-wider bg-indigo-100 text-indigo-800 px-2.5 py-0.5 rounded-full border border-indigo-200">
+                    {{ $activeInfoCount }}/8 Aktif
                 </span>
             </div>
 
-            <p class="text-xs text-slate-500 mb-4 leading-relaxed">
-                Elemen kelengkapan modul pembelajaran yang wajib dilengkapi guru:
+            <p class="text-xs text-slate-500 mb-3 leading-relaxed">
+                8 elemen pembuka & referensi yang aktif di sisi siswa:
             </p>
 
-            <ul class="space-y-2.5 mb-6">
-                @foreach([
-                    'Halaman Cover (Gambar)',
-                    'Kata Pengantar',
-                    'Daftar Isi (Hyperlink)',
-                    'Peta Konsep',
-                    'Glosarium (Istilah Teknis)',
-                    'Petunjuk Penggunaan',
-                    'Tujuan Pembelajaran',
-                    'Daftar Pustaka & Referensi',
-                ] as $item)
-                    @php $filled = !empty($module->informasi_umum_data); @endphp
-                    <li class="flex items-center gap-2.5 text-xs text-slate-700 font-medium">
-                        <svg class="w-4 h-4 shrink-0 {{ $filled ? 'text-emerald-500' : 'text-slate-300' }}" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="{{ $filled ? 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z' : 'M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z' }}"/>
-                        </svg>
-                        <span>{{ $item }}</span>
-                    </li>
+            {{-- 8 Interactive Component Rows for Informasi Umum --}}
+            <div class="space-y-2 mb-4">
+                @foreach($infoItems as $key => [$label, $emoji, $anchor, $title])
+                    @php $isActive = $module->isInfoComponentActive($key); @endphp
+                    <div class="flex items-center justify-between gap-2 p-2 rounded-xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition-colors">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs shrink-0 font-bold">{{ $emoji }}</span>
+                            <span class="text-xs font-bold text-slate-800 truncate">{{ $label }}</span>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <a href="{{ route('teacher.modules.informasi-umum.edit', $module) }}#{{ $anchor }}"
+                               class="text-[11px] font-bold text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/80 px-2.5 py-1 rounded-lg transition-colors">
+                                Edit
+                            </a>
+                            <form action="{{ route('teacher.modules.informasi-umum.toggle', [$module, $key]) }}" method="POST" class="inline-flex items-center">
+                                @csrf
+                                <button type="button"
+                                        onclick="animateToggleAndSubmit(event, this)"
+                                        aria-label="Toggle {{ $title }}"
+                                        title="{{ $title }}: {{ $isActive ? 'Aktif (Klik untuk Matikan)' : 'Nonaktif (Klik untuk Nyalakan)' }}"
+                                        class="relative inline-flex items-center h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500/40 {{ $isActive ? 'bg-emerald-500 border-emerald-600' : 'bg-slate-200 border-slate-400 hover:border-slate-500' }}">
+                                    <span class="pointer-events-none absolute top-[1px] left-[1px] h-4 w-4 rounded-full bg-white shadow-sm border border-slate-300 transition-transform duration-300 ease-in-out"
+                                          style="transform: translateX({{ $isActive ? '20px' : '0px' }});"></span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 @endforeach
-            </ul>
+            </div>
         </div>
 
         <div class="pt-4 border-t border-slate-100">
             <a href="{{ route('teacher.modules.informasi-umum.edit', $module) }}"
                class="inline-flex items-center justify-center gap-2 w-full py-2.5 text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 rounded-xl transition-all shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125"/></svg>
-                Edit Informasi Umum
+                Edit Informasi Umum (Semua Form)
             </a>
         </div>
     </div>

@@ -102,6 +102,35 @@ class Module extends Model
         return array_values(array_filter($map, fn($_, $key) => $this->$key, ARRAY_FILTER_USE_BOTH));
     }
 
+    /** Memeriksa apakah sub-komponen Informasi Umum aktif (default true) */
+    public function isInfoComponentActive(string $key): bool
+    {
+        $toggles = $this->informasi_umum_data['toggles'] ?? [];
+        return isset($toggles[$key]) ? (bool)$toggles[$key] : true;
+    }
+
+    /** Daftar komponen Informasi Umum yang diaktifkan */
+    public function activeInfoComponents(): array
+    {
+        $all = [
+            'cover'               => '1. Halaman Cover',
+            'kata_pengantar'      => '2. Kata Pengantar',
+            'daftar_isi'          => '3. Daftar Isi',
+            'peta_konsep'         => '4. Peta Konsep',
+            'glosarium'           => '5. Glosarium',
+            'petunjuk_penggunaan' => '6. Petunjuk Penggunaan',
+            'tujuan_pembelajaran' => '7. Tujuan Pembelajaran',
+            'daftar_pustaka'      => '8. Daftar Pustaka',
+        ];
+        $active = [];
+        foreach ($all as $key => $label) {
+            if ($this->isInfoComponentActive($key)) {
+                $active[$key] = $label;
+            }
+        }
+        return $active;
+    }
+
     /** Mendapatkan daftar soal pre-test */
     public function preTestQuestions(): array
     {

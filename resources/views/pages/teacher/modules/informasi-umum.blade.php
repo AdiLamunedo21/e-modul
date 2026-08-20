@@ -74,7 +74,7 @@
     {{-- ── LEFT: Sticky Step Navigator (hidden on mobile) ─────────────────── --}}
     <aside class="hidden xl:block w-52 shrink-0 sticky top-0 step-nav">
         <div class="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-4">
-            <p class="text-[11px] font-extrabold uppercase tracking-widest text-slate-500 mb-4 px-1">7 Komponen</p>
+            <p class="text-[11px] font-extrabold uppercase tracking-widest text-slate-500 mb-4 px-1">8 Komponen</p>
             <nav class="space-y-1">
                 @foreach([
                     ['cover',       'sec-cover',       '📷', 'Halaman Cover'],
@@ -84,6 +84,7 @@
                     ['glosarium',   'sec-glosarium',   '📖', 'Glosarium'],
                     ['petunjuk',    'sec-petunjuk',    '💡', 'Petunjuk Penggunaan'],
                     ['tujuan',      'sec-tujuan',      '🎯', 'Tujuan Pembelajaran'],
+                    ['pustaka',     'sec-pustaka',     '📚', 'Daftar Pustaka'],
                 ] as [$id, $anchor, $emoji, $label])
                     <a href="#{{ $anchor }}" onclick="setActive(this)"
                        class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 hover:bg-blue-50 transition-colors">
@@ -444,6 +445,79 @@
             </div>
 
             {{-- ═══════════════════════════════════════════════════════════ --}}
+            {{-- 8. DAFTAR PUSTAKA & REFERENSI --}}
+            {{-- ═══════════════════════════════════════════════════════════ --}}
+            <div id="sec-pustaka" class="section-card bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center text-xs font-black shrink-0">8</div>
+                    <div>
+                        <h2 class="text-sm font-bold text-slate-900">Daftar Pustaka & Referensi</h2>
+                        <p class="text-xs text-slate-500">Daftar sumber pustaka, buku ajar, artikel, atau tautan acuan penyusunan materi modul ini.</p>
+                    </div>
+                    <span class="ml-auto text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-1 rounded-full shrink-0">Opsional</span>
+                </div>
+                <div class="p-6">
+                    {{-- Header kolom --}}
+                    <div class="hidden sm:grid grid-cols-[1.5fr_1.2fr_0.7fr_1.2fr_auto] gap-3 mb-2 px-1">
+                        <span class="text-xs font-bold uppercase tracking-wide text-slate-500">Judul Buku / Sumber</span>
+                        <span class="text-xs font-bold uppercase tracking-wide text-slate-500">Penulis / Penerbit</span>
+                        <span class="text-xs font-bold uppercase tracking-wide text-slate-500">Tahun</span>
+                        <span class="text-xs font-bold uppercase tracking-wide text-slate-500">Tautan Web (Opsional)</span>
+                        <span class="w-8"></span>
+                    </div>
+
+                    <div id="pustaka-list" class="space-y-3 mb-4">
+                        @php $pustakaItems = old('daftar_pustaka', $data['daftar_pustaka'] ?? []); @endphp
+                        @if(empty($pustakaItems))
+                            <div class="repeater-row grid grid-cols-1 sm:grid-cols-[1.5fr_1.2fr_0.7fr_1.2fr_auto] gap-3 items-start">
+                                <input type="text" name="daftar_pustaka[0][judul]" placeholder="Basis Data SMK/MAK Kelas XI"
+                                       class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+                                <input type="text" name="daftar_pustaka[0][penulis]" placeholder="Kemendikbudristek / Erlangga"
+                                       class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+                                <input type="text" name="daftar_pustaka[0][tahun]" placeholder="2023"
+                                       class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+                                <input type="url" name="daftar_pustaka[0][tautan]" placeholder="https://..."
+                                       class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+                                <button type="button" onclick="removePustakaRow(this)" class="w-8 h-8 mt-1 flex items-center justify-center text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors shrink-0">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            </div>
+                        @else
+                            @foreach($pustakaItems as $pi => $pItem)
+                                <div class="repeater-row grid grid-cols-1 sm:grid-cols-[1.5fr_1.2fr_0.7fr_1.2fr_auto] gap-3 items-start">
+                                    <input type="text" name="daftar_pustaka[{{ $pi }}][judul]"
+                                           value="{{ is_array($pItem) ? ($pItem['judul'] ?? '') : $pItem }}"
+                                           placeholder="Judul Buku / Sumber..."
+                                           class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+                                    <input type="text" name="daftar_pustaka[{{ $pi }}][penulis]"
+                                           value="{{ is_array($pItem) ? ($pItem['penulis'] ?? '') : '' }}"
+                                           placeholder="Penulis / Penerbit..."
+                                           class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+                                    <input type="text" name="daftar_pustaka[{{ $pi }}][tahun]"
+                                           value="{{ is_array($pItem) ? ($pItem['tahun'] ?? '') : '' }}"
+                                           placeholder="Tahun..."
+                                           class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+                                    <input type="url" name="daftar_pustaka[{{ $pi }}][tautan]"
+                                           value="{{ is_array($pItem) ? ($pItem['tautan'] ?? '') : '' }}"
+                                           placeholder="https://..."
+                                           class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+                                    <button type="button" onclick="removePustakaRow(this)" class="w-8 h-8 mt-1 flex items-center justify-center text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors shrink-0">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                </div>
+                            @endforeach
+                        @endif
+                    </div>
+
+                    <button type="button" onclick="addPustakaRow()"
+                            class="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded-xl transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                        Tambah Referensi Pustaka
+                    </button>
+                </div>
+            </div>
+
+            {{-- ═══════════════════════════════════════════════════════════ --}}
             {{-- SUBMIT BAR --}}
             {{-- ═══════════════════════════════════════════════════════════ --}}
             <div class="sticky bottom-0 z-20 -mx-1">
@@ -583,6 +657,34 @@ function addGlosRow() {
 }
 
 function removeGlosRow(btn) {
+    btn.closest('.repeater-row').remove();
+}
+
+/* ─── Daftar Pustaka Repeater ──────────────────────────────────── */
+let pustakaIndex = document.querySelectorAll('#pustaka-list .repeater-row').length;
+
+function addPustakaRow() {
+    const list = document.getElementById('pustaka-list');
+    const row = document.createElement('div');
+    row.className = 'repeater-row grid grid-cols-1 sm:grid-cols-[1.5fr_1.2fr_0.7fr_1.2fr_auto] gap-3 items-start';
+    row.innerHTML = `
+        <input type="text" name="daftar_pustaka[${pustakaIndex}][judul]" placeholder="Judul Buku / Sumber..."
+               class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+        <input type="text" name="daftar_pustaka[${pustakaIndex}][penulis]" placeholder="Penulis / Penerbit..."
+               class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+        <input type="text" name="daftar_pustaka[${pustakaIndex}][tahun]" placeholder="Tahun..."
+               class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+        <input type="url" name="daftar_pustaka[${pustakaIndex}][tautan]" placeholder="https://..."
+               class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+        <button type="button" onclick="removePustakaRow(this)" class="w-8 h-8 mt-1 flex items-center justify-center text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>`;
+    list.appendChild(row);
+    pustakaIndex++;
+    row.querySelector('input').focus();
+}
+
+function removePustakaRow(btn) {
     btn.closest('.repeater-row').remove();
 }
 

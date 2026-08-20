@@ -63,10 +63,21 @@ class DatabaseSeeder extends Seeder
                 'daftar_isi' => [
                     ['judul' => 'Bab 1 — Pengantar Basis Data'],
                     ['judul' => 'Bab 2 — Desain ERD & Normalisasi']
+                ],
+                'daftar_pustaka' => [
+                    ['judul' => 'Database System Concepts (7th Edition)', 'penulis' => 'Silberschatz, A., Korth, H. F., & Sudarshan, S.', 'tahun' => '2020', 'tautan' => 'https://db-book.com'],
+                    ['judul' => 'Dasar Perancangan Basis Data Relasional', 'penulis' => 'Kemendikbudristek', 'tahun' => '2023', 'tautan' => '']
+                ],
+                'toggles' => [
+                    'cover' => true,
+                    'kata_pengantar' => true,
+                    'daftar_isi' => true,
+                    'peta_konsep' => true,
+                    'glosarium' => true,
+                    'petunjuk_penggunaan' => true,
+                    'tujuan_pembelajaran' => true,
+                    'daftar_pustaka' => true,
                 ]
-            ],
-            'bagian_akhir_data' => [
-                'daftar_pustaka' => "1. Silberschatz, A. Database System Concepts.\n2. Date, C.J. An Introduction to Database Systems."
             ],
             'pre_test_data' => [
                 'judul' => 'Pre-test: Pemahaman Awal Basis Data',
