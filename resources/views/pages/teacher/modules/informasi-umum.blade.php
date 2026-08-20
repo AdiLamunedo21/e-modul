@@ -94,7 +94,7 @@
             </nav>
             {{-- Save shortcut --}}
             <div class="mt-5 pt-4 border-t border-slate-200">
-                <button form="bagian-awal-form" type="submit"
+                <button form="informasi-umum-form" type="submit"
                         class="w-full py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all shadow shadow-blue-600/20">
                     Simpan Semua
                 </button>
@@ -104,8 +104,8 @@
 
     {{-- ── RIGHT: The Form ─────────────────────────────────────────────────── --}}
     <div class="flex-1 min-w-0">
-        <form id="bagian-awal-form"
-              action="{{ route('teacher.modules.bagian-awal.update', $module) }}"
+        <form id="informasi-umum-form"
+              action="{{ route('teacher.modules.informasi-umum.update', $module) }}"
               method="POST"
               enctype="multipart/form-data"
               class="space-y-6">
@@ -210,7 +210,7 @@
                         rows="7"
                         placeholder="Contoh: Puji syukur kehadirat Tuhan Yang Maha Esa, modul Sistem Basis Data ini disusun untuk membantu siswa kelas XI memahami konsep relasi dan query SQL secara mandiri dan terstruktur..."
                         class="prose-editor w-full rounded-xl border @error('kata_pengantar') border-red-400 bg-red-50 @else border-slate-300 bg-slate-50 @enderror px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
-                    >{{ old('kata_pengantar', $data['kata_pengantar']) }}</textarea>
+                    >{{ old('kata_pengantar', $data['kata_pengantar'] ?? '') }}</textarea>
                     <div class="mt-1.5 flex items-center justify-between">
                         @error('kata_pengantar')
                             <p class="text-xs text-red-600 flex items-center gap-1">
@@ -297,7 +297,7 @@
                         rows="5"
                         placeholder="Contoh: Sistem Basis Data terdiri dari: (1) Database → berisi Tabel-tabel → setiap Tabel memiliki Kolom dan Baris. (2) DBMS → mengatur akses, query, dan integritas data melalui SQL..."
                         class="prose-editor w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
-                    >{{ old('peta_konsep_text', $data['peta_konsep_text']) }}</textarea>
+                    >{{ old('peta_konsep_text', $data['peta_konsep_text'] ?? '') }}</textarea>
                 </div>
             </div>
 
@@ -390,7 +390,7 @@
                         rows="5"
                         placeholder="Contoh: Modul ini terdiri dari 7 tahap. Pastikan Anda memiliki koneksi internet stabil untuk menonton video di Bagian Inti. Untuk pengerjaan Job Sheet, siapkan aplikasi phpMyAdmin atau MySQL Workbench di komputer Anda sebelum memulai..."
                         class="prose-editor w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
-                    >{{ old('petunjuk_penggunaan', $data['petunjuk_penggunaan']) }}</textarea>
+                    >{{ old('petunjuk_penggunaan', $data['petunjuk_penggunaan'] ?? '') }}</textarea>
                 </div>
             </div>
 
@@ -433,7 +433,7 @@
                         rows="6"
                         placeholder="Contoh: Setelah menyelesaikan modul ini, peserta didik diharapkan mampu:&#10;1. Menjelaskan konsep database relasional dan peran DBMS.&#10;2. Mengidentifikasi jenis-jenis SQL (DDL, DML, DCL).&#10;3. Menerapkan perintah SELECT, INSERT, UPDATE, dan DELETE pada phpMyAdmin.&#10;4. Merancang struktur tabel sederhana dengan normalisasi dasar."
                         class="prose-editor w-full rounded-xl border @error('tujuan_pembelajaran') border-red-400 bg-red-50 @else border-slate-300 bg-slate-50 @enderror px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
-                    >{{ old('tujuan_pembelajaran', $data['tujuan_pembelajaran']) }}</textarea>
+                    >{{ old('tujuan_pembelajaran', $data['tujuan_pembelajaran'] ?? '') }}</textarea>
                     @error('tujuan_pembelajaran')
                         <p class="mt-1.5 text-xs text-red-600 flex items-center gap-1">
                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>

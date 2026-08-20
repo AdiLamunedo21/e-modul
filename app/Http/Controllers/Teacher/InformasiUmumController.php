@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
-class BagianAwalController extends Controller
+class InformasiUmumController extends Controller
 {
     private function teacher()
     {
@@ -39,7 +39,7 @@ class BagianAwalController extends Controller
             'cover_image_path'   => null,
         ], is_array($module->bagian_awal_data) ? $module->bagian_awal_data : []);
 
-        return view('pages.teacher.modules.bagian-awal', compact('module', 'data'));
+        return view('pages.teacher.modules.informasi-umum', compact('module', 'data'));
     }
 
     /**

@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Teacher\ModuleManagerController;
-use App\Http\Controllers\Teacher\BagianAwalController;
+use App\Http\Controllers\Teacher\InformasiUmumController;
 use App\Http\Controllers\Teacher\PreTestController;
 use App\Http\Controllers\Teacher\MateriController;
 use App\Http\Controllers\Teacher\VideoController;
@@ -51,8 +51,8 @@ Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(fu
     Route::delete('/modules/{module}',          [ModuleManagerController::class, 'destroy'])->name('modules.destroy');
 
     // Informasi Umum Editor
-    Route::get('/modules/{module}/bagian-awal',   [BagianAwalController::class, 'edit'])->name('modules.bagian-awal.edit');
-    Route::patch('/modules/{module}/bagian-awal',  [BagianAwalController::class, 'update'])->name('modules.bagian-awal.update');
+    Route::get('/modules/{module}/informasi-umum',   [InformasiUmumController::class, 'edit'])->name('modules.informasi-umum.edit');
+    Route::patch('/modules/{module}/informasi-umum',  [InformasiUmumController::class, 'update'])->name('modules.informasi-umum.update');
 
     // Bagian Inti: 1. Pre-test Quiz Builder
     Route::get('/modules/{module}/pre-test',        [PreTestController::class, 'edit'])->name('modules.pre-test.edit');
