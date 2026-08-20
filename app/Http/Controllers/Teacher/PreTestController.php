@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
 use App\Models\Module;
+use App\Models\PreTest;
+use App\Models\PreTestQuestion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PreTestController extends Controller
 {
@@ -27,44 +30,40 @@ class PreTestController extends Controller
         $this->authorize($module);
         $module->load('schoolClass');
 
-        $preTestData = is_array($module->pre_test_data) ? $module->pre_test_data : [];
+        $preTest = $module->preTest()->firstOrCreate([], [
+            'title'               => 'Pre-test Pembuka',
+            'duration_minutes'    => 15,
+            'kktp'                => 75,
+            'instructions'        => 'Kerjakan soal pre-test berikut secara mandiri untuk mengukur pemahaman awal Anda sebelum memulai materi.',
+            'randomize_questions' => false,
+        ]);
 
-        $data = array_merge([
-            'judul'        => 'Pre-test Pembuka',
-            'durasi_menit' => 15,
-            'kktp'         => 75,
-            'petunjuk'     => 'Kerjakan soal pre-test berikut secara mandiri untuk mengukur pemahaman awal Anda sebelum memulai materi.',
-            'acak_soal'    => false,
-            'questions'    => [],
-        ], $preTestData);
+        $preTest->load('questions');
 
-        return view('pages.teacher.modules.pre-test', compact('module', 'data'));
+        return view('pages.teacher.modules.pre-test', compact('module', 'preTest'));
     }
 
     /**
-     * Halaman Pratinjau Pre-test — tampilan mandiri tanpa dashboard.
+     * Halaman Pratinjau Pre-test — tampilan simulasi mandiri.
      */
     public function preview(Module $module)
     {
         $this->authorize($module);
         $module->load('schoolClass');
 
-        $preTestData = is_array($module->pre_test_data) ? $module->pre_test_data : [];
+        $preTest = $module->preTest()->with('questions')->firstOrCreate([], [
+            'title'               => 'Pre-test Pembuka',
+            'duration_minutes'    => 15,
+            'kktp'                => 75,
+            'instructions'        => '',
+            'randomize_questions' => false,
+        ]);
 
-        $data = array_merge([
-            'judul'        => 'Pre-test Pembuka',
-            'durasi_menit' => 15,
-            'kktp'         => 75,
-            'petunjuk'     => '',
-            'acak_soal'    => false,
-            'questions'    => [],
-        ], $preTestData);
-
-        return view('pages.teacher.modules.preview-pre-test', compact('module', 'data'));
+        return view('pages.teacher.modules.preview-pre-test', compact('module', 'preTest'));
     }
 
     /**
-     * Simpan konfigurasi dan soal Pre-test.
+     * Simpan konfigurasi dan soal Pre-test langsung ke database.
      */
     public function update(Request $request, Module $module)
     {
@@ -73,79 +72,80 @@ class PreTestController extends Controller
         $hasPreTest = $request->boolean('has_pre_test');
 
         $rules = [
-            'judul'        => ['nullable', 'string', 'max:255'],
-            'durasi_menit' => ['nullable', 'integer', 'min:1', 'max:300'],
-            'kktp'         => ['nullable', 'integer', 'min:0', 'max:100'],
-            'petunjuk'     => ['nullable', 'string'],
-            'acak_soal'    => ['nullable'],
+            'title'               => ['nullable', 'string', 'max:255'],
+            'duration_minutes'    => ['nullable', 'integer', 'min:1', 'max:300'],
+            'kktp'                => ['nullable', 'integer', 'min:0', 'max:100'],
+            'instructions'        => ['nullable', 'string'],
+            'randomize_questions' => ['nullable'],
         ];
 
-        // Jika pre-test diaktifkan, validasi soal
+        // Validasi butir soal jika pre-test diaktifkan
         if ($hasPreTest) {
             $rules['questions']                    = ['required', 'array', 'min:1'];
-            $rules['questions.*.pertanyaan']       = ['required', 'string', 'min:3'];
-            $rules['questions.*.kunci_jawaban']    = ['required', 'string', 'in:A,B,C,D,E'];
-            $rules['questions.*.pilihan.A']        = ['required', 'string'];
-            $rules['questions.*.pilihan.B']        = ['required', 'string'];
-            $rules['questions.*.pilihan.C']        = ['nullable', 'string'];
-            $rules['questions.*.pilihan.D']        = ['nullable', 'string'];
-            $rules['questions.*.pilihan.E']        = ['nullable', 'string'];
-            $rules['questions.*.bobot']            = ['nullable', 'integer', 'min:1'];
-            $rules['questions.*.pembahasan']       = ['nullable', 'string'];
+            $rules['questions.*.question_text']    = ['required', 'string', 'min:3'];
+            $rules['questions.*.correct_answer']   = ['required', 'string', 'in:A,B,C,D,E'];
+            $rules['questions.*.options.A']        = ['required', 'string'];
+            $rules['questions.*.options.B']        = ['required', 'string'];
+            $rules['questions.*.score_weight']     = ['nullable', 'integer', 'min:1'];
+            $rules['questions.*.explanation']      = ['nullable', 'string'];
         }
 
-        $validated = $request->validate($rules, [
-            'questions.required' => 'Minimal harus ada 1 soal jika fitur Pre-test diaktifkan.',
-            'questions.min'      => 'Minimal harus ada 1 soal jika fitur Pre-test diaktifkan.',
-            'questions.*.pertanyaan.required' => 'Teks pertanyaan wajib diisi pada setiap soal.',
-            'questions.*.kunci_jawaban.required' => 'Pilih kunci jawaban yang benar (A/B/C/D/E) pada setiap soal.',
-            'questions.*.pilihan.A.required' => 'Pilihan A wajib diisi.',
-            'questions.*.pilihan.B.required' => 'Pilihan B wajib diisi.',
+        $request->validate($rules, [
+            'questions.required'                 => 'Minimal harus ada 1 butir soal jika fitur Pre-test diaktifkan.',
+            'questions.min'                      => 'Minimal harus ada 1 butir soal jika fitur Pre-test diaktifkan.',
+            'questions.*.question_text.required' => 'Teks pertanyaan wajib diisi pada setiap butir soal.',
+            'questions.*.correct_answer.required'=> 'Pilih kunci jawaban yang benar (A/B/C/D/E) pada setiap butir soal.',
+            'questions.*.options.A.required'     => 'Pilihan A wajib diisi.',
+            'questions.*.options.B.required'     => 'Pilihan B wajib diisi.',
         ]);
 
-        // Proses struktur questions
-        $cleanQuestions = [];
-        if (!empty($request->questions) && is_array($request->questions)) {
-            foreach ($request->questions as $index => $q) {
-                if (empty(trim($q['pertanyaan'] ?? ''))) {
-                    continue;
-                }
+        DB::transaction(function () use ($request, $module, $hasPreTest) {
+            // Update status flag di tabel modules
+            $module->update(['has_pre_test' => $hasPreTest]);
 
-                // Filter pilihan yang tidak kosong
-                $pilihan = [];
-                foreach (['A', 'B', 'C', 'D', 'E'] as $key) {
-                    $val = trim($q['pilihan'][$key] ?? '');
-                    if ($val !== '') {
-                        $pilihan[$key] = $val;
+            // Update / Create PreTest di tabel pre_tests
+            $preTest = $module->preTest()->firstOrCreate([]);
+            $preTest->update([
+                'title'               => $request->input('title', 'Pre-test Pembuka'),
+                'duration_minutes'    => (int) $request->input('duration_minutes', 15),
+                'kktp'                => (int) $request->input('kktp', 75),
+                'instructions'        => $request->input('instructions', ''),
+                'randomize_questions' => $request->boolean('randomize_questions'),
+            ]);
+
+            // Sinkronisasi data butir soal ke tabel pre_test_questions
+            $preTest->questions()->delete();
+
+            $order = 1;
+            if (!empty($request->questions) && is_array($request->questions)) {
+                foreach ($request->questions as $q) {
+                    $qText = trim($q['question_text'] ?? $q['pertanyaan'] ?? '');
+                    if (empty($qText)) {
+                        continue;
                     }
+
+                    $rawOptions = $q['options'] ?? $q['pilihan'] ?? [];
+                    $options = [];
+                    foreach (['A', 'B', 'C', 'D', 'E'] as $key) {
+                        $val = trim($rawOptions[$key] ?? '');
+                        if ($val !== '') {
+                            $options[$key] = $val;
+                        }
+                    }
+
+                    $preTest->questions()->create([
+                        'question_text'  => $qText,
+                        'options'        => $options,
+                        'correct_answer' => strtoupper($q['correct_answer'] ?? $q['kunci_jawaban'] ?? 'A'),
+                        'score_weight'   => !empty($q['score_weight'] ?? $q['bobot'] ?? null) ? (int) ($q['score_weight'] ?? $q['bobot']) : 10,
+                        'explanation'    => trim($q['explanation'] ?? $q['pembahasan'] ?? ''),
+                        'order_num'      => $order++,
+                    ]);
                 }
-
-                $cleanQuestions[] = [
-                    'id'            => $index + 1,
-                    'pertanyaan'    => $q['pertanyaan'],
-                    'pilihan'       => $pilihan,
-                    'kunci_jawaban' => strtoupper($q['kunci_jawaban'] ?? 'A'),
-                    'bobot'         => !empty($q['bobot']) ? (int) $q['bobot'] : 10,
-                    'pembahasan'    => $q['pembahasan'] ?? '',
-                ];
             }
-        }
+        });
 
-        $payload = [
-            'judul'        => $request->input('judul', 'Pre-test Pembuka'),
-            'durasi_menit' => (int) $request->input('durasi_menit', 15),
-            'kktp'         => (int) $request->input('kktp', 75),
-            'petunjuk'     => $request->input('petunjuk', ''),
-            'acak_soal'    => $request->boolean('acak_soal'),
-            'questions'    => $cleanQuestions,
-        ];
-
-        $module->update([
-            'has_pre_test'  => $hasPreTest,
-            'pre_test_data' => $payload,
-        ]);
-
-        $statusText = $hasPreTest ? 'diaktifkan & disimpan' : 'disimpan (status Non-Aktif)';
+        $statusText = $hasPreTest ? 'diaktifkan & disimpan ke database' : 'disimpan (status Non-Aktif)';
         return redirect()
             ->route('teacher.modules.show', $module)
             ->with('success', "Konfigurasi Pre-test berhasil {$statusText}! ✅");

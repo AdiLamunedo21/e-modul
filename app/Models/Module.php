@@ -74,6 +74,16 @@ class Module extends Model
         return $this->hasManyThrough(Submission::class, Lkpd::class);
     }
 
+    public function preTest()
+    {
+        return $this->hasOne(PreTest::class);
+    }
+
+    public function postTest()
+    {
+        return $this->hasOne(PostTest::class);
+    }
+
     /* ─── Helpers ───────────────────────────────── */
 
     /** Label badge warna sesuai status modul */
@@ -134,16 +144,55 @@ class Module extends Model
     /** Mendapatkan daftar soal pre-test */
     public function preTestQuestions(): array
     {
-        if (!is_array($this->pre_test_data)) {
-            return [];
+        if ($this->preTest && $this->preTest->questions()->exists()) {
+            return $this->preTest->questions->map(fn($q) => [
+                'id'            => $q->id,
+                'pertanyaan'    => $q->question_text,
+                'pilihan'       => $q->options ?? [],
+                'kunci_jawaban' => $q->correct_answer,
+                'bobot'         => $q->score_weight,
+                'pembahasan'    => $q->explanation ?? '',
+            ])->toArray();
         }
-        return $this->pre_test_data['questions'] ?? [];
+
+        if (is_array($this->pre_test_data)) {
+            return $this->pre_test_data['questions'] ?? [];
+        }
+
+        return [];
     }
 
     /** Jumlah soal pre-test */
     public function preTestQuestionCount(): int
     {
+        if ($this->preTest) {
+            return $this->preTest->questions()->count();
+        }
         return count($this->preTestQuestions());
+    }
+
+    /** Judul Pre-test */
+    public function preTestTitle(): string
+    {
+        return $this->preTest?->title ?? ($this->pre_test_data['judul'] ?? 'Pre-test Pembuka');
+    }
+
+    /** Durasi Pre-test */
+    public function preTestDuration(): int
+    {
+        return $this->preTest?->duration_minutes ?? (int)($this->pre_test_data['durasi_menit'] ?? 15);
+    }
+
+    /** KKTP Pre-test */
+    public function preTestKktp(): int
+    {
+        return $this->preTest?->kktp ?? (int)($this->pre_test_data['kktp'] ?? 75);
+    }
+
+    /** Petunjuk Pre-test */
+    public function preTestInstructions(): string
+    {
+        return $this->preTest?->instructions ?? ($this->pre_test_data['petunjuk'] ?? '');
     }
 
     /** Memeriksa apakah materi memiliki file PPT/PDF */
@@ -319,39 +368,54 @@ class Module extends Model
     /** Mendapatkan daftar soal post-test */
     public function postTestQuestions(): array
     {
-        if (!is_array($this->post_test_data)) {
-            return [];
+        if ($this->postTest && $this->postTest->questions()->exists()) {
+            return $this->postTest->questions->map(fn($q) => [
+                'id'            => $q->id,
+                'pertanyaan'    => $q->question_text,
+                'pilihan'       => $q->options ?? [],
+                'kunci_jawaban' => $q->correct_answer,
+                'bobot'         => $q->score_weight,
+                'pembahasan'    => $q->explanation ?? '',
+            ])->toArray();
         }
-        return $this->post_test_data['questions'] ?? [];
+
+        if (is_array($this->post_test_data)) {
+            return $this->post_test_data['questions'] ?? [];
+        }
+
+        return [];
     }
 
     /** Jumlah soal post-test */
     public function postTestQuestionCount(): int
     {
+        if ($this->postTest) {
+            return $this->postTest->questions()->count();
+        }
         return count($this->postTestQuestions());
     }
 
     /** Mendapatkan judul post-test */
     public function postTestTitle(): string
     {
-        return $this->post_test_data['judul'] ?? 'Post-test: Evaluasi Pemahaman Materi';
+        return $this->postTest?->title ?? ($this->post_test_data['judul'] ?? 'Post-test: Evaluasi Pemahaman Materi');
     }
 
     /** Mendapatkan durasi pengerjaan post-test dalam menit */
     public function postTestDuration(): int
     {
-        return (int) ($this->post_test_data['durasi_menit'] ?? 20);
+        return $this->postTest?->duration_minutes ?? (int) ($this->post_test_data['durasi_menit'] ?? 20);
     }
 
     /** Mendapatkan nilai ambang batas KKTP post-test */
     public function postTestKktp(): int
     {
-        return (int) ($this->post_test_data['kktp'] ?? 75);
+        return $this->postTest?->kktp ?? (int) ($this->post_test_data['kktp'] ?? 75);
     }
 
     /** Mendapatkan petunjuk pengerjaan post-test */
     public function postTestInstructions(): string
     {
-        return $this->post_test_data['petunjuk'] ?? '';
+        return $this->postTest?->instructions ?? ($this->post_test_data['petunjuk'] ?? '');
     }
 }

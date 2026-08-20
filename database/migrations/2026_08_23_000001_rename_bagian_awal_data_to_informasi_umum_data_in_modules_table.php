@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('modules', function (Blueprint $table) {
-            $table->renameColumn('bagian_awal_data', 'informasi_umum_data');
-        });
+        if (Schema::hasColumn('modules', 'bagian_awal_data')) {
+            Schema::table('modules', function (Blueprint $table) {
+                $table->renameColumn('bagian_awal_data', 'informasi_umum_data');
+            });
+        }
     }
 
     /**
@@ -21,8 +23,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('modules', function (Blueprint $table) {
-            $table->renameColumn('informasi_umum_data', 'bagian_awal_data');
-        });
+        if (Schema::hasColumn('modules', 'informasi_umum_data')) {
+            Schema::table('modules', function (Blueprint $table) {
+                $table->renameColumn('informasi_umum_data', 'bagian_awal_data');
+            });
+        }
     }
 };

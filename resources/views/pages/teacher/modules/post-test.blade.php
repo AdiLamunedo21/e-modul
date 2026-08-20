@@ -151,67 +151,60 @@
 
                 {{-- Fields --}}
                 <div class="space-y-5 pt-6">
-                    {{-- Row 1: Judul Post-test --}}
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1.5">Judul Post-test</label>
-                        <input type="text" name="judul" value="{{ old('judul', $data['judul'] ?? 'Post-test: Evaluasi Pemahaman Materi') }}"
+                        <input type="text" name="title" value="{{ old('title', $postTest->title ?? 'Post-test: Evaluasi Pemahaman Materi') }}"
                                placeholder="Contoh: Post-test: Evaluasi Akhir Konsep & Perancangan Basis Data"
                                class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 focus:border-teal-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all">
                     </div>
 
-                    {{-- Row 2: Durasi & KKTP --}}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1.5">Durasi Pengerjaan</label>
                             <div class="flex rounded-xl border border-slate-300 bg-slate-50 overflow-hidden focus-within:border-teal-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-teal-500/20 transition-all shadow-sm">
-                                <input type="number" name="durasi_menit" min="1" max="180"
-                                       value="{{ old('durasi_menit', $data['durasi_menit'] ?? 20) }}"
+                                <input type="number" name="duration_minutes" min="1" max="180"
+                                       value="{{ old('duration_minutes', $postTest->duration_minutes ?? 20) }}"
                                        class="w-full bg-transparent px-4 py-2.5 text-sm text-slate-900 focus:outline-none">
                                 <span class="inline-flex items-center px-3.5 bg-slate-100 text-xs font-bold text-slate-500 border-l border-slate-200 select-none shrink-0">
                                     Menit
                                 </span>
                             </div>
-                            <p class="text-[11px] text-slate-400 mt-1">Timer otomatis berjalan saat siswa membuka halaman Post-test.</p>
                         </div>
 
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1.5">Kriteria Ketuntasan (KKTP)</label>
                             <div class="flex rounded-xl border border-slate-300 bg-slate-50 overflow-hidden focus-within:border-teal-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-teal-500/20 transition-all shadow-sm">
                                 <input type="number" name="kktp" min="0" max="100"
-                                       value="{{ old('kktp', $data['kktp'] ?? 75) }}"
+                                       value="{{ old('kktp', $postTest->kktp ?? 75) }}"
                                        class="w-full bg-transparent px-4 py-2.5 text-sm text-slate-900 focus:outline-none">
                                 <span class="inline-flex items-center px-3.5 bg-slate-100 text-xs font-bold text-slate-500 border-l border-slate-200 select-none shrink-0">
                                     Poin
                                 </span>
                             </div>
-                            <p class="text-[11px] text-slate-400 mt-1">Standar nilai ketuntasan minimal evaluasi formatif.</p>
                         </div>
                     </div>
 
-                    {{-- Row 3: Acak Urutan Soal --}}
                     <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
                         <label class="flex items-start gap-3 cursor-pointer">
-                            <input type="checkbox" name="acak_soal" value="1"
+                            <input type="checkbox" name="randomize_questions" value="1"
                                    class="w-4 h-4 mt-0.5 text-teal-600 rounded border-slate-300 focus:ring-teal-500"
-                                   {{ old('acak_soal', $data['acak_soal'] ?? false) ? 'checked' : '' }}>
+                                   {{ old('randomize_questions', $postTest->randomize_questions ?? false) ? 'checked' : '' }}>
                             <div>
                                 <span class="text-xs font-bold text-slate-800">Acak Urutan Butir Soal</span>
-                                <p class="text-[11px] text-slate-500 mt-0.5">Jika dicentang, urutan nomor soal akan diacak otomatis untuk setiap siswa saat mengerjakan.</p>
+                                <p class="text-[11px] text-slate-500 mt-0.5">Jika dicentang, urutan nomor soal akan diacak.</p>
                             </div>
                         </label>
                     </div>
 
-                    {{-- Row 4: Petunjuk Pengerjaan --}}
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1.5">Petunjuk Pengerjaan</label>
-                        <textarea name="petunjuk" rows="2"
+                        <textarea name="instructions" rows="2"
                                   placeholder="Tuliskan panduan pengerjaan post-test untuk siswa..."
-                                  class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 focus:border-teal-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all resize-none">{{ old('petunjuk', $data['petunjuk'] ?? '') }}</textarea>
+                                  class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 focus:border-teal-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all resize-none">{{ old('instructions', $postTest->instructions ?? '') }}</textarea>
                     </div>
                 </div>
             </div>
 
-            {{-- 2. Question Builder Section --}}
             <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
                     <div class="flex items-center gap-3">
@@ -220,7 +213,7 @@
                         </div>
                         <div>
                             <h2 class="text-base font-bold text-slate-900">Daftar Soal Pilihan Ganda Post-test</h2>
-                            <p class="text-xs text-slate-500">Buat butir soal evaluasi, tentukan pilihan A–E, dan tandai satu kunci jawaban yang benar.</p>
+                            <p class="text-xs text-slate-500">Buat butir soal evaluasi.</p>
                         </div>
                     </div>
 
@@ -228,30 +221,27 @@
                         <button type="button" onclick="loadSamplePostTestQuestions()"
                                 class="px-3.5 py-2 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all flex items-center gap-1.5">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
-                            Muat Contoh Soal
+                            Muat Contoh
                         </button>
                         <button type="button" onclick="addNewQuestion()"
                                 class="px-4 py-2 text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-xl shadow shadow-teal-600/20 transition-all flex items-center gap-1.5">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                            Tambah Soal Baru
+                            Tambah Soal
                         </button>
                     </div>
                 </div>
 
-                {{-- Container Soal --}}
                 <div id="questions-container" class="space-y-6">
                     @php
-                        $questions = old('questions', $data['questions'] ?? []);
+                        $questions = old('questions', $postTest->questions ?? []);
                     @endphp
 
-                    @if(empty($questions))
-                        {{-- Placeholder jika belum ada soal --}}
+                    @if(empty($questions) || (is_countable($questions) && count($questions) === 0))
                         <div id="empty-state" class="text-center py-12 px-4 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
                             <div class="w-14 h-14 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mx-auto mb-3">
                                 <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/></svg>
                             </div>
-                            <h3 class="text-sm font-bold text-slate-800">Belum ada butir soal Post-test</h3>
-                            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Klik tombol <strong>"Tambah Soal Baru"</strong> atau gunakan <strong>"Muat Contoh Soal"</strong> untuk melengkapi kuis evaluasi ini.</p>
+                            <h3 class="text-sm font-bold text-slate-800">Belum ada butir soal tersimpan</h3>
                             <button type="button" onclick="addNewQuestion()" class="mt-4 px-4 py-2 text-xs font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-xl transition-all">
                                 + Tambah Soal Pertama
                             </button>
@@ -263,128 +253,87 @@
                     @endif
                 </div>
 
-                {{-- Tombol Bawah Tambah Soal --}}
                 <div class="mt-6 pt-6 border-t border-slate-100 flex items-center justify-center">
                     <button type="button" onclick="addNewQuestion()"
                             class="px-5 py-2.5 text-xs font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded-xl transition-all flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                        Tambah Soal Pilihan Ganda Berikutnya
+                        Tambah Soal Berikutnya
                     </button>
                 </div>
             </div>
-
         </div>
 
-        {{-- ── RIGHT 1 COLUMN: Sticky Navigator & Summary ────────────────────── --}}
         <div class="xl:col-span-1 space-y-6 sticky top-6">
-
-            {{-- Summary Card --}}
             <div class="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm">
                 <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-4 flex items-center justify-between">
-                    <span>Ringkasan Post-test</span>
+                    <span>Ringkasan Evaluasi</span>
                     <span class="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span>
                 </h3>
 
-                {{-- Metric Tiles (2x2 Grid) --}}
                 <div class="grid grid-cols-2 gap-2.5 mb-5">
-                    {{-- Status Post-test --}}
                     <div class="bg-slate-50 border border-slate-200/70 rounded-xl p-3 flex flex-col justify-between">
                         <span class="text-[11px] font-semibold text-slate-500">Status</span>
                         <div class="mt-1.5">
-                            <span id="summary-status" class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold {{ old('has_post_test', $module->has_post_test) ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600' }}">
-                                {{ old('has_post_test', $module->has_post_test) ? 'Aktif' : 'Nonaktif' }}
+                            <span id="summary-status" class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold {{ old('is_active', $postTest->is_active ?? false) ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600' }}">
+                                {{ old('is_active', $postTest->is_active ?? false) ? 'Aktif' : 'Nonaktif' }}
                             </span>
                         </div>
                     </div>
 
-                    {{-- Jumlah Soal --}}
                     <div class="bg-slate-50 border border-slate-200/70 rounded-xl p-3 flex flex-col justify-between">
-                        <span class="text-[11px] font-semibold text-slate-500">Butir Soal</span>
-                        <span id="summary-total-questions" class="mt-1.5 text-base font-black text-slate-900">
-                            {{ count($questions) }} Soal
-                        </span>
+                        <span class="text-[11px] font-semibold text-slate-500">Jumlah Soal</span>
+                        <div class="mt-1.5">
+                            <span id="summary-total-questions" class="text-sm font-extrabold text-slate-900">0 Soal</span>
+                        </div>
                     </div>
 
-                    {{-- Total Poin --}}
-                    <div class="bg-slate-50 border border-slate-200/70 rounded-xl p-3 flex flex-col justify-between">
-                        <span class="text-[11px] font-semibold text-slate-500">Total Bobot</span>
-                        <span id="summary-total-points" class="mt-1.5 text-base font-black text-teal-700">
-                            @php
-                                $totalPts = 0;
-                                foreach($questions as $q) {
-                                    $totalPts += (int) ($q['bobot'] ?? 10);
-                                }
-                            @endphp
-                            {{ $totalPts }} Poin
-                        </span>
+                    <div class="bg-teal-50/70 border border-teal-100 rounded-xl p-3 flex flex-col justify-between">
+                        <span class="text-[11px] font-semibold text-teal-800">Total Bobot</span>
+                        <div class="mt-1.5">
+                            <span id="summary-total-points" class="text-sm font-extrabold text-teal-800">0 Poin</span>
+                        </div>
                     </div>
 
-                    {{-- KKTP --}}
                     <div class="bg-slate-50 border border-slate-200/70 rounded-xl p-3 flex flex-col justify-between">
-                        <span class="text-[11px] font-semibold text-slate-500">KKTP Target</span>
-                        <span class="mt-1.5 text-base font-black text-amber-600">
-                            {{ $data['kktp'] ?? 75 }}
-                        </span>
+                        <span class="text-[11px] font-semibold text-slate-500">Target KKTP</span>
+                        <div class="mt-1.5">
+                            <span id="summary-kktp" class="text-sm font-extrabold text-slate-900">{{ old('kktp', $postTest->kktp ?? 75) }}</span>
+                        </div>
                     </div>
                 </div>
 
-                {{-- Quick Jump Navigator --}}
                 <div class="pt-4 border-t border-slate-100">
-                    <span class="text-xs font-bold text-slate-700 block mb-2">Navigasi Butir Soal</span>
-                    <div id="quick-jump-container" class="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto pr-1">
-                        {{-- Rendered via JS --}}
-                    </div>
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2.5">Navigasi Butir Soal</p>
+                    <div id="quick-jump-container" class="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto pr-1"></div>
+                </div>
+
+                <div class="mt-6 pt-5 border-t border-slate-100 space-y-2">
+                    <button type="submit"
+                            class="w-full py-3 px-4 text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 active:scale-95 rounded-xl shadow-md shadow-teal-600/20 transition-all flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Simpan Konfigurasi & Soal
+                    </button>
+                    <a href="{{ route('teacher.modules.show', $module) }}"
+                       class="w-full py-2.5 px-4 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all text-center block">
+                        Batal
+                    </a>
                 </div>
             </div>
-
-            {{-- Action Buttons Card --}}
-            <div class="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm space-y-3">
-                <button type="submit"
-                        class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold rounded-2xl shadow-lg shadow-emerald-600/25 transition-all text-xs flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
-                    Simpan Konfigurasi Post-test
-                </button>
-
-                <a href="{{ route('teacher.modules.post-test.preview', $module) }}" target="_blank"
-                   class="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all text-xs flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    Pratinjau Simulasi Siswa
-                </a>
-
-                <a href="{{ route('teacher.modules.show', $module) }}"
-                   class="w-full py-2.5 px-4 bg-white border border-slate-300 hover:bg-slate-50 text-slate-600 font-bold rounded-xl transition-all text-xs flex items-center justify-center">
-                    Batal & Kembali
-                </a>
-            </div>
-
-            {{-- Info Callout --}}
-            <div class="p-4 rounded-2xl bg-teal-50/70 border border-teal-200/70 text-xs text-teal-900 leading-relaxed">
-                <p class="font-bold flex items-center gap-1.5 mb-1">
-                    <span>💡</span> Tips Evaluasi Post-test:
-                </p>
-                <p>
-                    Post-test menguji pemahaman mendalam siswa setelah mempelajari materi, video, praktik embed, jobsheet, dan LKPD. Pastikan bobot tiap butir soal seimbang untuk merefleksikan capaian belajar secara adil.
-                </p>
-            </div>
-
         </div>
-
     </div>
-
 </form>
 
 @endsection
 
 @push('scripts')
 <script>
-    // Template generator untuk soal baru
     function getQuestionTemplate(index, data = {}) {
         const defaultChoices = { A: '', B: '', C: '', D: '', E: '' };
-        const pilihan = Object.assign({}, defaultChoices, data.pilihan || {});
-        const kunci = data.kunci_jawaban || 'A';
-        const bobot = data.bobot || 20;
-        const pertanyaan = data.pertanyaan || '';
-        const pembahasan = data.pembahasan || '';
+        const pilihan = Object.assign({}, defaultChoices, data.options || data.pilihan || {});
+        const kunci = data.correct_answer || data.kunci_jawaban || 'A';
+        const bobot = data.score_weight || data.bobot || 20;
+        const pertanyaan = data.question_text || data.pertanyaan || '';
+        const pembahasan = data.explanation || data.pembahasan || '';
 
         const choiceRows = ['A', 'B', 'C', 'D', 'E'].map(opt => {
             const isCorrect = (kunci === opt);
@@ -392,7 +341,7 @@
             return `
                 <div class="option-row flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 bg-slate-50/70 ${isCorrect ? 'is-correct' : ''}">
                     <label class="flex items-center gap-2 cursor-pointer shrink-0">
-                        <input type="radio" name="questions[${index}][kunci_jawaban]" value="${opt}"
+                        <input type="radio" name="questions[${index}][correct_answer]" value="${opt}"
                                ${isCorrect ? 'checked' : ''}
                                onchange="onCorrectAnswerChange(this, ${index})"
                                class="w-4 h-4 text-emerald-600 focus:ring-emerald-500">
@@ -400,7 +349,7 @@
                             ${opt}
                         </span>
                     </label>
-                    <input type="text" name="questions[${index}][pilihan][${opt}]"
+                    <input type="text" name="questions[${index}][options][${opt}]"
                            value="${escapeHtml(val)}"
                            ${opt === 'A' || opt === 'B' ? 'required' : ''}
                            placeholder="Pilihan ${opt} ${opt === 'A' || opt === 'B' ? '(Wajib)' : '(Opsional)'}..."
@@ -421,7 +370,7 @@
                     <div class="flex items-center gap-2">
                         <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1">
                             <label class="text-[11px] font-semibold text-slate-500">Bobot Poin:</label>
-                            <input type="number" name="questions[${index}][bobot]" value="${bobot}" min="1" max="100"
+                            <input type="number" name="questions[${index}][score_weight]" value="${bobot}" min="1" max="100"
                                    oninput="updateSummary()"
                                    class="w-12 text-center text-xs font-bold text-teal-700 bg-transparent focus:outline-none">
                         </div>
@@ -436,28 +385,22 @@
                     </div>
                 </div>
 
-                {{-- Teks Pertanyaan --}}
                 <div class="mb-4">
                     <label class="block text-xs font-bold text-slate-700 mb-1.5">Teks Soal / Pertanyaan</label>
-                    <textarea name="questions[${index}][pertanyaan]" rows="3" required
+                    <textarea name="questions[${index}][question_text]" rows="3" required
                               placeholder="Tuliskan butir soal evaluasi di sini..."
                               class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 focus:border-teal-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all">${escapeHtml(pertanyaan)}</textarea>
                 </div>
 
-                {{-- Pilihan Ganda (A, B, C, D, E) --}}
                 <div class="mb-4">
                     <div class="flex items-center justify-between mb-2">
                         <label class="block text-xs font-bold text-slate-700">Pilihan Jawaban & Kunci Jawaban</label>
-                        <span class="text-[11px] text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 font-semibold">
-                            Pilih radio button pada jawaban yang benar
-                        </span>
                     </div>
                     <div class="space-y-2.5">
                         ${choiceRows}
                     </div>
                 </div>
 
-                {{-- Pembahasan Jawaban (Opsional) --}}
                 <div class="pt-3 border-t border-slate-100">
                     <details class="group" ${pembahasan ? 'open' : ''}>
                         <summary class="cursor-pointer text-xs font-bold text-slate-600 hover:text-teal-700 flex items-center gap-1.5 select-none">
@@ -465,7 +408,7 @@
                             <span>Tambahkan Pembahasan / Keterangan Jawaban (Opsional)</span>
                         </summary>
                         <div class="mt-2.5 pl-5">
-                            <textarea name="questions[${index}][pembahasan]" rows="2"
+                            <textarea name="questions[${index}][explanation]" rows="2"
                                       placeholder="Tuliskan alasan atau konsep pembahasan mengapa jawaban tersebut benar..."
                                       class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-800 focus:border-teal-500 focus:bg-white focus:outline-none transition-all resize-none">${escapeHtml(pembahasan)}</textarea>
                         </div>
@@ -481,7 +424,6 @@
         return String(text).replace(/[&<>"']/g, m => map[m]);
     }
 
-    // Handler radio button kunci jawaban
     function onCorrectAnswerChange(radio, index) {
         const card = document.getElementById(`question-card-${index}`);
         if (!card) return;
@@ -506,7 +448,6 @@
         });
     }
 
-    // Tambah Soal Baru
     function addNewQuestion(data = {}) {
         const container = document.getElementById('questions-container');
         const emptyState = document.getElementById('empty-state');
@@ -525,33 +466,36 @@
         }
     }
 
-    // Duplikasi Soal
     function duplicateQuestion(index) {
         const card = document.getElementById(`question-card-${index}`);
         if (!card) return;
 
-        const pertanyaan = card.querySelector(`textarea[name="questions[${index}][pertanyaan]"]`)?.value || '';
-        const kunci = card.querySelector(`input[name="questions[${index}][kunci_jawaban]"]:checked`)?.value || 'A';
-        const bobot = card.querySelector(`input[name="questions[${index}][bobot]"]`)?.value || 20;
-        const pembahasan = card.querySelector(`textarea[name="questions[${index}][pembahasan]"]`)?.value || '';
+        const pertanyaan = card.querySelector(`textarea[name="questions[${index}][question_text]"]`)?.value
+            || card.querySelector(`textarea[name="questions[${index}][pertanyaan]"]`)?.value || '';
+        const kunci = card.querySelector(`input[name="questions[${index}][correct_answer]"]:checked`)?.value
+            || card.querySelector(`input[name="questions[${index}][kunci_jawaban]"]:checked`)?.value || 'A';
+        const bobot = card.querySelector(`input[name="questions[${index}][score_weight]"]`)?.value
+            || card.querySelector(`input[name="questions[${index}][bobot]"]`)?.value || 20;
+        const pembahasan = card.querySelector(`textarea[name="questions[${index}][explanation]"]`)?.value
+            || card.querySelector(`textarea[name="questions[${index}][pembahasan]"]`)?.value || '';
 
         const pilihan = {};
         ['A', 'B', 'C', 'D', 'E'].forEach(opt => {
-            pilihan[opt] = card.querySelector(`input[name="questions[${index}][pilihan][${opt}]"]`)?.value || '';
+            pilihan[opt] = card.querySelector(`input[name="questions[${index}][options][${opt}]"]`)?.value
+                || card.querySelector(`input[name="questions[${index}][pilihan][${opt}]"]`)?.value || '';
         });
 
         addNewQuestion({
-            pertanyaan: `${pertanyaan} (Salinan)`,
-            pilihan: pilihan,
-            kunci_jawaban: kunci,
-            bobot: bobot,
-            pembahasan: pembahasan
+            question_text: `${pertanyaan} (Salinan)`,
+            options: pilihan,
+            correct_answer: kunci,
+            score_weight: bobot,
+            explanation: pembahasan
         });
     }
 
-    // Hapus Soal
     function deleteQuestion(index) {
-        if (!confirm('Apakah Anda yakin ingin menghapus butir soal Post-test ini?')) return;
+        if (!confirm('Apakah Anda yakin ingin menghapus butir soal ini?')) return;
         const card = document.getElementById(`question-card-${index}`);
         if (card) {
             card.remove();
@@ -560,7 +504,6 @@
         }
     }
 
-    // Renumbering questions
     function renumberQuestions() {
         const container = document.getElementById('questions-container');
         const cards = container.querySelectorAll('.question-card');
@@ -573,8 +516,7 @@
                         <div class="w-14 h-14 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mx-auto mb-3">
                             <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/></svg>
                         </div>
-                        <h3 class="text-sm font-bold text-slate-800">Belum ada butir soal Post-test</h3>
-                        <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Klik tombol <strong>"Tambah Soal Baru"</strong> atau gunakan <strong>"Muat Contoh Soal"</strong> untuk melengkapi kuis evaluasi ini.</p>
+                        <h3 class="text-sm font-bold text-slate-800">Belum ada butir soal tersimpan</h3>
                         <button type="button" onclick="addNewQuestion()" class="mt-4 px-4 py-2 text-xs font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-xl transition-all">
                             + Tambah Soal Pertama
                         </button>
@@ -591,40 +533,37 @@
             const title = card.querySelector('.text-slate-800');
             if (title) title.textContent = `Pertanyaan Soal #${idx + 1}`;
 
-            // Update duplicate and delete buttons
             const dupBtn = card.querySelector('button[title="Duplikat Soal"]');
             if (dupBtn) dupBtn.setAttribute('onclick', `duplicateQuestion(${idx})`);
 
             const delBtn = card.querySelector('button[title="Hapus Soal"]');
             if (delBtn) delBtn.setAttribute('onclick', `deleteQuestion(${idx})`);
 
-            // Update input names
-            const textareaQ = card.querySelector('textarea[name^="questions"][name$="[pertanyaan]"]');
-            if (textareaQ) textareaQ.name = `questions[${idx}][pertanyaan]`;
+            const textareaQ = card.querySelector('textarea[name*="question_text"], textarea[name*="pertanyaan"]');
+            if (textareaQ) textareaQ.name = `questions[${idx}][question_text]`;
 
-            const bobotInput = card.querySelector('input[name^="questions"][name$="[bobot]"]');
+            const bobotInput = card.querySelector('input[name*="score_weight"], input[name*="bobot"]');
             if (bobotInput) {
-                bobotInput.name = `questions[${idx}][bobot]`;
+                bobotInput.name = `questions[${idx}][score_weight]`;
                 bobotInput.setAttribute('oninput', 'updateSummary()');
             }
 
-            const pembahasanTA = card.querySelector('textarea[name^="questions"][name$="[pembahasan]"]');
-            if (pembahasanTA) pembahasanTA.name = `questions[${idx}][pembahasan]`;
+            const pembahasanTA = card.querySelector('textarea[name*="explanation"], textarea[name*="pembahasan"]');
+            if (pembahasanTA) pembahasanTA.name = `questions[${idx}][explanation]`;
 
             const radioInputs = card.querySelectorAll('input[type="radio"][name^="questions"]');
             radioInputs.forEach(radio => {
-                radio.name = `questions[${idx}][kunci_jawaban]`;
+                radio.name = `questions[${idx}][correct_answer]`;
                 radio.setAttribute('onchange', `onCorrectAnswerChange(this, ${idx})`);
             });
 
             ['A', 'B', 'C', 'D', 'E'].forEach(opt => {
-                const optInput = card.querySelector(`input[name^="questions"][name*="[pilihan][${opt}]"]`);
-                if (optInput) optInput.name = `questions[${idx}][pilihan][${opt}]`;
+                const optInput = card.querySelector(`input[name*="[options][${opt}]"], input[name*="[pilihan][${opt}]"]`);
+                if (optInput) optInput.name = `questions[${idx}][options][${opt}]`;
             });
         });
     }
 
-    // Update Quick Jump and Summary
     function updateSummary() {
         const container = document.getElementById('questions-container');
         const cards = container.querySelectorAll('.question-card');
@@ -634,13 +573,12 @@
 
         let totalPoints = 0;
         cards.forEach(card => {
-            const bInput = card.querySelector('input[name$="[bobot]"]');
+            const bInput = card.querySelector('input[name*="score_weight"], input[name*="bobot"]');
             const val = parseInt(bInput?.value || 0, 10);
             totalPoints += isNaN(val) ? 0 : val;
         });
         document.getElementById('summary-total-points').textContent = `${totalPoints} Poin`;
 
-        // Update Quick Jump buttons
         const jumpContainer = document.getElementById('quick-jump-container');
         if (jumpContainer) {
             jumpContainer.innerHTML = '';
@@ -657,82 +595,20 @@
         }
     }
 
-    // Load Contoh Soal Post-Test
     function loadSamplePostTestQuestions() {
-        if (!confirm('Muat 5 contoh butir soal evaluasi Post-test Sistem Basis Data? Soal saat ini tidak akan dihapus.')) return;
+        if (!confirm('Muat 5 contoh soal?')) return;
 
         const samples = [
-            {
-                pertanyaan: 'Perintah SQL berikut digunakan untuk menggabungkan baris dari dua tabel berdasarkan relasi kolom yang cocok antar keduanya:',
-                pilihan: {
-                    A: 'INNER JOIN',
-                    B: 'UNION ALL',
-                    C: 'GROUP BY',
-                    D: 'ORDER BY',
-                    E: 'HAVING'
-                },
-                kunci_jawaban: 'A',
-                bobot: 20,
-                pembahasan: 'INNER JOIN mengembalikan baris data yang memiliki nilai yang cocok di kedua tabel berdasarkan kondisi ON.'
-            },
-            {
-                pertanyaan: 'Sebuah relasi dikatakan berada dalam Bentuk Normal Ketiga (3NF) jika memenuhi syarat 2NF dan...',
-                pilihan: {
-                    A: 'Tidak memiliki ketergantungan parsial',
-                    B: 'Tidak memiliki ketergantungan transitif pada Primary Key',
-                    C: 'Semua atribut bernilai atomik (multivalue dihilangkan)',
-                    D: 'Memiliki minimal dua Foreign Key',
-                    E: 'Tabel telah dipartisi secara horizontal'
-                },
-                kunci_jawaban: 'B',
-                bobot: 20,
-                pembahasan: 'Syarat 3NF adalah telah memenuhi 2NF serta tidak memiliki ketergantungan transitif (non-prime attribute bergantung pada non-prime attribute lainnya).'
-            },
-            {
-                pertanyaan: 'Perintah TCL (Transaction Control Language) yang digunakan untuk membatalkan seluruh operasi dalam satu unit transaksi database adalah...',
-                pilihan: {
-                    A: 'COMMIT',
-                    B: 'SAVEPOINT',
-                    C: 'ROLLBACK',
-                    D: 'REVOKE',
-                    E: 'TRUNCATE'
-                },
-                kunci_jawaban: 'C',
-                bobot: 20,
-                pembahasan: 'ROLLBACK membatalkan seluruh perubahan transaksi yang belum di-COMMIT kembali ke keadaan konsisten sebelumnya.'
-            },
-            {
-                pertanyaan: 'Struktur data database yang dibuat secara khusus untuk mempercepat proses pencarian (query retrieval) data pada tabel besar disebut...',
-                pilihan: {
-                    A: 'Trigger',
-                    B: 'Index',
-                    C: 'Stored Procedure',
-                    D: 'View',
-                    E: 'Cursor'
-                },
-                kunci_jawaban: 'B',
-                bobot: 20,
-                pembahasan: 'Index (seperti B-Tree index) digunakan untuk mengoptimasi dan mempercepat proses lookup/pencarian data pada kolom tertentu.'
-            },
-            {
-                pertanyaan: 'Blok program SQL otomatis yang akan dieksekusi oleh DBMS ketika terjadi event DML (INSERT, UPDATE, DELETE) pada suatu tabel dinamakan...',
-                pilihan: {
-                    A: 'Trigger',
-                    B: 'Transaction',
-                    C: 'Constraint',
-                    D: 'Foreign Key',
-                    E: 'Sequence'
-                },
-                kunci_jawaban: 'A',
-                bobot: 20,
-                pembahasan: 'Database Trigger adalah prosedur tersimpan yang secara otomatis terpanggil saat event DML tertentu terjadi.'
-            }
+            { question_text: 'Perintah SQL untuk menggabungkan dua tabel?', options: { A: 'JOIN', B: 'UNION', C: 'SELECT', D: 'GROUP', E: 'HAVING' }, correct_answer: 'A', score_weight: 20, explanation: 'JOIN digunakan untuk menggabungkan data.' },
+            { question_text: 'Bentuk Normal 3NF?', options: { A: '1NF', B: '2NF', C: '3NF', D: '4NF', E: '5NF' }, correct_answer: 'C', score_weight: 20, explanation: '3NF adalah bentuk normal ketiga.' },
+            { question_text: 'Perintah untuk membatalkan transaksi?', options: { A: 'COMMIT', B: 'ROLLBACK', C: 'SAVE', D: 'TRUNCATE', E: 'DELETE' }, correct_answer: 'B', score_weight: 20, explanation: 'ROLLBACK membatalkan perubahan.' },
+            { question_text: 'Struktur data untuk mempercepat pencarian?', options: { A: 'Trigger', B: 'Index', C: 'Procedure', D: 'View', E: 'Cursor' }, correct_answer: 'B', score_weight: 20, explanation: 'Index mempercepat lookup.' },
+            { question_text: 'Blok SQL otomatis?', options: { A: 'Trigger', B: 'Transaction', C: 'Constraint', D: 'Foreign Key', E: 'Sequence' }, correct_answer: 'A', score_weight: 20, explanation: 'Trigger otomatis tereksekusi.' }
         ];
 
         samples.forEach(s => addNewQuestion(s));
     }
 
-    // Toggle switch status handler
     function togglePostTestStatus(isChecked) {
         const track = document.getElementById('post-test-toggle-track');
         const thumb = document.getElementById('post-test-toggle-thumb');
@@ -740,31 +616,19 @@
         const summaryStatus = document.getElementById('summary-status');
 
         if (track && thumb) {
-            if (isChecked) {
-                track.className = 'relative w-12 h-7 rounded-full border-2 transition-colors duration-300 ease-in-out bg-emerald-500 border-emerald-600';
-                thumb.style.transform = 'translateX(20px)';
-            } else {
-                track.className = 'relative w-12 h-7 rounded-full border-2 transition-colors duration-300 ease-in-out bg-slate-200 border-slate-400 hover:border-slate-500';
-                thumb.style.transform = 'translateX(0px)';
-            }
+            track.className = `relative w-12 h-7 rounded-full border-2 transition-colors duration-300 ease-in-out ${isChecked ? 'bg-emerald-500 border-emerald-600' : 'bg-slate-200 border-slate-400'}`;
+            thumb.style.transform = `translateX(${isChecked ? '20px' : '0px'})`;
         }
-
         if (badge) {
             badge.textContent = isChecked ? 'Aktif (ON)' : 'Nonaktif (OFF)';
-            badge.className = isChecked
-                ? 'ml-3 text-xs font-extrabold uppercase px-2.5 py-1 rounded-full border transition-all duration-300 shrink-0 bg-emerald-100 text-emerald-800 border-emerald-300'
-                : 'ml-3 text-xs font-extrabold uppercase px-2.5 py-1 rounded-full border transition-all duration-300 shrink-0 bg-slate-100 text-slate-600 border-slate-300';
+            badge.className = `ml-3 text-xs font-extrabold uppercase px-2.5 py-1 rounded-full border transition-all duration-300 shrink-0 ${isChecked ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-slate-100 text-slate-600 border-slate-300'}`;
         }
-
         if (summaryStatus) {
             summaryStatus.textContent = isChecked ? 'Aktif' : 'Nonaktif';
-            summaryStatus.className = isChecked
-                ? 'inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-100 text-emerald-800'
-                : 'inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-200 text-slate-600';
+            summaryStatus.className = `inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold ${isChecked ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'}`;
         }
     }
 
-    // Init on page load
     document.addEventListener('DOMContentLoaded', function() {
         renumberQuestions();
         updateSummary();

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pratinjau Post-test — {{ $data['judul'] ?? $module->title }}</title>
+    <title>Pratinjau Post-test — {{ $postTest->title ?? $module->title }}</title>
     <link rel="icon" href="{{ asset('lgsmk.ico') }}" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800&display=swap" rel="stylesheet" />
@@ -27,7 +27,7 @@
                 <div class="w-9 h-9 rounded-xl bg-teal-500/20 text-teal-300 flex items-center justify-center text-lg shrink-0 border border-teal-400/30">🎯</div>
                 <div>
                     <h1 class="text-sm font-bold text-white">Simulasi Tampilan Post-test Siswa</h1>
-                    <p class="text-[11px] text-slate-400">Pratinjau kuis evaluasi formatif penutup Komponen Inti.</p>
+                    <p class="text-[11px] text-slate-400">Pratinjau kuis evaluasi formatif penutup tersimpan di basis data.</p>
                 </div>
             </div>
             <div class="flex items-center gap-2">
@@ -48,45 +48,47 @@
                 <div class="p-6 sm:p-8 bg-gradient-to-br from-teal-50 via-emerald-50 to-slate-50 border-b border-slate-200/70">
                     <div class="flex flex-wrap items-center gap-2 mb-3">
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-100 text-teal-800 text-xs font-bold border border-teal-200/70">
-                            ⏱️ Durasi: {{ $data['durasi_menit'] ?? 20 }} Menit
+                            ⏱️ Durasi: {{ $postTest->duration_minutes ?? 20 }} Menit
                         </span>
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold border border-amber-200/70">
-                            🎯 KKTP: {{ $data['kktp'] ?? 75 }} Poin
+                            🎯 KKTP: {{ $postTest->kktp ?? 75 }} Poin
                         </span>
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold border border-indigo-200/70">
                             🏁 Komponen 7 (Penutup Inti)
                         </span>
-                        @if(!empty($data['acak_soal']))
+                        @if(!empty($postTest->randomize_questions))
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-100 text-violet-700 text-xs font-bold">
                             🔀 Urutan Acak
                         </span>
                         @endif
                     </div>
                     <h1 class="text-2xl sm:text-3xl font-black text-slate-900 leading-tight">
-                        {{ $data['judul'] ?? 'Post-test: Evaluasi Pemahaman Materi' }}
+                        {{ $postTest->title ?? 'Post-test: Evaluasi Pemahaman Materi' }}
                     </h1>
                     <p class="text-sm text-slate-600 mt-2 font-medium">
                         {{ $module->title }} — {{ $module->schoolClass ? 'Kelas ' . $module->schoolClass->grade . ' ' . $module->schoolClass->major_name : 'Semua Kelas' }}
                     </p>
 
-                    @if(!empty($data['petunjuk']))
+                    @if(!empty($postTest->instructions))
                         <div class="mt-4 p-4 bg-white/80 backdrop-blur-sm rounded-xl border border-teal-200/60 text-xs text-slate-700 leading-relaxed">
                             <p class="font-bold text-teal-900 mb-1 flex items-center gap-1.5">
                                 <span>📋</span> Petunjuk Pengerjaan:
                             </p>
-                            <p>{{ $data['petunjuk'] }}</p>
+                            <p>{{ $postTest->instructions }}</p>
                         </div>
                     @endif
                 </div>
 
                 {{-- Daftar Soal --}}
                 <div class="p-6 sm:p-8 space-y-5">
-                    @php $questions = $data['questions'] ?? []; @endphp
+                    @php 
+                        $questions = $postTest->questions ?? collect(); 
+                    @endphp
 
-                    @if(count($questions) === 0)
+                    @if($questions->isEmpty())
                         <div class="text-center py-12">
                             <div class="text-5xl mb-4">📝</div>
-                            <h3 class="text-slate-700 font-bold text-sm">Belum ada butir soal yang dibuat.</h3>
+                            <h3 class="text-slate-700 font-bold text-sm">Belum ada butir soal yang tersimpan di database.</h3>
                             <p class="text-slate-400 text-xs mt-1">Kembali ke editor untuk menambahkan butir soal post-test.</p>
                             <a href="{{ route('teacher.modules.post-test.edit', $module) }}" class="inline-flex items-center gap-1.5 mt-4 px-4 py-2 text-xs font-bold text-teal-700 bg-teal-50 rounded-xl hover:bg-teal-100 transition-colors">
                                 ← Buka Editor Post-test
@@ -104,25 +106,25 @@
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 font-semibold text-[11px]">
-                                            Bobot: {{ $q['bobot'] ?? 20 }} Poin
+                                            Bobot: {{ $q->score_weight }} Poin
                                         </span>
                                         <span class="text-slate-400 font-medium">
-                                            Kunci Guru: <strong class="text-emerald-600">{{ $q['kunci_jawaban'] ?? '-' }}</strong>
+                                            Kunci Guru: <strong class="text-emerald-600 font-black">{{ $q->correct_answer }}</strong>
                                         </span>
                                     </div>
                                 </div>
 
                                 <p class="text-sm font-semibold text-slate-900 leading-relaxed pt-1">
-                                    {{ $q['pertanyaan'] ?? '' }}
+                                    {{ $q->question_text }}
                                 </p>
 
                                 <div class="space-y-2 pt-2">
-                                    @foreach($q['pilihan'] ?? [] as $opt => $text)
+                                    @foreach($q->options ?? [] as $opt => $text)
                                         @if(!empty(trim($text)))
-                                            @php $isCorrect = ($opt === ($q['kunci_jawaban'] ?? '')); @endphp
+                                            @php $isCorrect = ($opt === $q->correct_answer); @endphp
                                             <label class="flex items-center gap-3 p-3 rounded-xl border text-sm transition-colors cursor-pointer
-                                                {{ $isCorrect ? 'bg-emerald-50/80 border-emerald-300 text-emerald-900' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100' }}">
-                                                <input type="radio" name="preview_q_{{ $idx }}" value="{{ $opt }}" class="w-4 h-4 text-teal-600" disabled>
+                                                {{ $isCorrect ? 'bg-emerald-50/80 border-emerald-300 text-emerald-900 font-bold' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100' }}">
+                                                <input type="radio" name="preview_q_{{ $idx }}" value="{{ $opt }}" class="w-4 h-4 text-teal-600" disabled {{ $isCorrect ? 'checked' : '' }}>
                                                 <span class="w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold shrink-0
                                                     {{ $isCorrect ? 'bg-emerald-200 text-emerald-800' : 'bg-slate-200 text-slate-600' }}">
                                                     {{ $opt }}
@@ -138,12 +140,12 @@
                                     @endforeach
                                 </div>
 
-                                @if(!empty($q['pembahasan']))
+                                @if(!empty($q->explanation))
                                     <div class="mt-3 p-3.5 bg-teal-50/80 rounded-xl text-xs text-teal-900 border border-teal-100">
                                         <p class="font-bold mb-0.5 flex items-center gap-1">
                                             <span>💡</span> Pembahasan:
                                         </p>
-                                        <p class="leading-relaxed">{{ $q['pembahasan'] }}</p>
+                                        <p class="text-teal-800 leading-relaxed">{{ $q->explanation }}</p>
                                     </div>
                                 @endif
                             </div>
@@ -151,14 +153,6 @@
                     @endif
                 </div>
 
-                {{-- Footer --}}
-                <div class="px-6 sm:px-8 py-4 bg-slate-50 border-t border-slate-200/80 flex items-center justify-between text-xs text-slate-500">
-                    <span class="flex items-center gap-1.5 font-medium text-slate-600">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        Sistem penilaian otomatis aktif (Auto-grading & Penentuan KKTP)
-                    </span>
-                    <span class="text-slate-400 font-medium">{{ count($questions) }} butir soal tersimpan</span>
-                </div>
             </div>
         </div>
     </div>

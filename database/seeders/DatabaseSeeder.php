@@ -49,7 +49,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // 2 Modul (Contoh)
-        Module::create([
+        $module = Module::create([
             'teacher_id' => $teacher1->id,
             'class_id' => $class1->id,
             'title' => 'Sistem Basis Data Lanjut',
@@ -174,6 +174,90 @@ class DatabaseSeeder extends Seeder
             'has_lkpd' => true,
             'has_post_test' => true,
             'status' => 'published',
+        ]);
+
+        // Seed Pre-test Relasional
+        $preTest = \App\Models\PreTest::create([
+            'module_id'           => $module->id,
+            'title'               => 'Pre-test: Pemahaman Awal Basis Data',
+            'duration_minutes'    => 15,
+            'kktp'                => 75,
+            'instructions'        => 'Kerjakan soal-soal berikut untuk mengukur pemahaman awal Anda sebelum memulai kegiatan belajar.',
+            'randomize_questions' => false,
+        ]);
+
+        \App\Models\PreTestQuestion::create([
+            'pre_test_id'    => $preTest->id,
+            'question_text'  => 'Perangkat lunak yang digunakan untuk mengelola, membuat, dan memanipulasi database disebut...',
+            'options'        => [
+                'A' => 'DBMS (Database Management System)',
+                'B' => 'Operating System (OS)',
+                'C' => 'Spreadsheet Application',
+                'D' => 'Web Browser',
+                'E' => 'Compiler'
+            ],
+            'correct_answer' => 'A',
+            'score_weight'   => 50,
+            'explanation'    => 'DBMS adalah software pengelola basis data seperti MySQL, PostgreSQL, dan Oracle.',
+            'order_num'      => 1,
+        ]);
+
+        \App\Models\PreTestQuestion::create([
+            'pre_test_id'    => $preTest->id,
+            'question_text'  => 'Perintah SQL yang digunakan untuk mengambil data dari tabel adalah...',
+            'options'        => [
+                'A' => 'INSERT INTO',
+                'B' => 'SELECT',
+                'C' => 'UPDATE',
+                'D' => 'DROP TABLE',
+                'E' => 'ALTER TABLE'
+            ],
+            'correct_answer' => 'B',
+            'score_weight'   => 50,
+            'explanation'    => 'Perintah SELECT adalah bagian dari DQL/DML untuk query data.',
+            'order_num'      => 2,
+        ]);
+
+        // Seed Post-test Relasional
+        $postTest = \App\Models\PostTest::create([
+            'module_id'           => $module->id,
+            'title'               => 'Post-test: Evaluasi Pemahaman Sistem Basis Data',
+            'duration_minutes'    => 20,
+            'kktp'                => 75,
+            'instructions'        => 'Kerjakan soal evaluasi post-test berikut untuk mengukur ketuntasan belajar Anda setelah menyelesaikan seluruh materi dan tugas.',
+            'randomize_questions' => false,
+        ]);
+
+        \App\Models\PostTestQuestion::create([
+            'post_test_id'   => $postTest->id,
+            'question_text'  => 'Perintah SQL yang digunakan untuk menggabungkan baris dari dua tabel berdasarkan relasi kolom yang cocok antar keduanya adalah...',
+            'options'        => [
+                'A' => 'INNER JOIN',
+                'B' => 'UNION ALL',
+                'C' => 'GROUP BY',
+                'D' => 'ORDER BY',
+                'E' => 'HAVING'
+            ],
+            'correct_answer' => 'A',
+            'score_weight'   => 50,
+            'explanation'    => 'INNER JOIN mencocokkan data antar tabel berdasarkan foreign key dan primary key yang berhubungan.',
+            'order_num'      => 1,
+        ]);
+
+        \App\Models\PostTestQuestion::create([
+            'post_test_id'   => $postTest->id,
+            'question_text'  => 'Perintah TCL yang digunakan untuk membatalkan seluruh operasi transaksi database yang belum disimpan secara permanen adalah...',
+            'options'        => [
+                'A' => 'COMMIT',
+                'B' => 'SAVEPOINT',
+                'C' => 'ROLLBACK',
+                'D' => 'REVOKE',
+                'E' => 'GRANT'
+            ],
+            'correct_answer' => 'C',
+            'score_weight'   => 50,
+            'explanation'    => 'ROLLBACK membatalkan transaksi dan mengembalikan kondisi data sebelum transaksi dimulai.',
+            'order_num'      => 2,
         ]);
     }
 }

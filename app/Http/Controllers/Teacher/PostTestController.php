@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
 use App\Models\Module;
+use App\Models\PostTest;
+use App\Models\PostTestQuestion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PostTestController extends Controller
 {
@@ -27,18 +30,17 @@ class PostTestController extends Controller
         $this->authorize($module);
         $module->load('schoolClass');
 
-        $postTestData = is_array($module->post_test_data) ? $module->post_test_data : [];
+        $postTest = $module->postTest()->firstOrCreate([], [
+            'title'               => 'Post-test: Evaluasi Pemahaman Materi',
+            'duration_minutes'    => 20,
+            'kktp'                => 75,
+            'instructions'        => 'Kerjakan soal post-test berikut secara mandiri dan teliti untuk mengukur penguasaan materi setelah menyelesaikan seluruh tahapan pembelajaran.',
+            'randomize_questions' => false,
+        ]);
 
-        $data = array_merge([
-            'judul'        => 'Post-test: Evaluasi Pemahaman Materi',
-            'durasi_menit' => 20,
-            'kktp'         => 75,
-            'petunjuk'     => 'Kerjakan soal post-test berikut secara mandiri dan teliti untuk mengukur penguasaan materi setelah menyelesaikan seluruh tahapan pembelajaran.',
-            'acak_soal'    => false,
-            'questions'    => [],
-        ], $postTestData);
+        $postTest->load('questions');
 
-        return view('pages.teacher.modules.post-test', compact('module', 'data'));
+        return view('pages.teacher.modules.post-test', compact('module', 'postTest'));
     }
 
     /**
@@ -49,22 +51,19 @@ class PostTestController extends Controller
         $this->authorize($module);
         $module->load('schoolClass');
 
-        $postTestData = is_array($module->post_test_data) ? $module->post_test_data : [];
+        $postTest = $module->postTest()->with('questions')->firstOrCreate([], [
+            'title'               => 'Post-test: Evaluasi Pemahaman Materi',
+            'duration_minutes'    => 20,
+            'kktp'                => 75,
+            'instructions'        => '',
+            'randomize_questions' => false,
+        ]);
 
-        $data = array_merge([
-            'judul'        => 'Post-test: Evaluasi Pemahaman Materi',
-            'durasi_menit' => 20,
-            'kktp'         => 75,
-            'petunjuk'     => '',
-            'acak_soal'    => false,
-            'questions'    => [],
-        ], $postTestData);
-
-        return view('pages.teacher.modules.preview-post-test', compact('module', 'data'));
+        return view('pages.teacher.modules.preview-post-test', compact('module', 'postTest'));
     }
 
     /**
-     * Simpan konfigurasi dan soal Post-test.
+     * Simpan konfigurasi dan soal Post-test langsung ke database.
      */
     public function update(Request $request, Module $module)
     {
@@ -73,79 +72,80 @@ class PostTestController extends Controller
         $hasPostTest = $request->boolean('has_post_test');
 
         $rules = [
-            'judul'        => ['nullable', 'string', 'max:255'],
-            'durasi_menit' => ['nullable', 'integer', 'min:1', 'max:300'],
-            'kktp'         => ['nullable', 'integer', 'min:0', 'max:100'],
-            'petunjuk'     => ['nullable', 'string'],
-            'acak_soal'    => ['nullable'],
+            'title'               => ['nullable', 'string', 'max:255'],
+            'duration_minutes'    => ['nullable', 'integer', 'min:1', 'max:300'],
+            'kktp'                => ['nullable', 'integer', 'min:0', 'max:100'],
+            'instructions'        => ['nullable', 'string'],
+            'randomize_questions' => ['nullable'],
         ];
 
-        // Jika post-test diaktifkan, validasi butir soal
+        // Validasi butir soal jika post-test diaktifkan
         if ($hasPostTest) {
             $rules['questions']                    = ['required', 'array', 'min:1'];
-            $rules['questions.*.pertanyaan']       = ['required', 'string', 'min:3'];
-            $rules['questions.*.kunci_jawaban']    = ['required', 'string', 'in:A,B,C,D,E'];
-            $rules['questions.*.pilihan.A']        = ['required', 'string'];
-            $rules['questions.*.pilihan.B']        = ['required', 'string'];
-            $rules['questions.*.pilihan.C']        = ['nullable', 'string'];
-            $rules['questions.*.pilihan.D']        = ['nullable', 'string'];
-            $rules['questions.*.pilihan.E']        = ['nullable', 'string'];
-            $rules['questions.*.bobot']            = ['nullable', 'integer', 'min:1'];
-            $rules['questions.*.pembahasan']       = ['nullable', 'string'];
+            $rules['questions.*.question_text']    = ['required', 'string', 'min:3'];
+            $rules['questions.*.correct_answer']   = ['required', 'string', 'in:A,B,C,D,E'];
+            $rules['questions.*.options.A']        = ['required', 'string'];
+            $rules['questions.*.options.B']        = ['required', 'string'];
+            $rules['questions.*.score_weight']     = ['nullable', 'integer', 'min:1'];
+            $rules['questions.*.explanation']      = ['nullable', 'string'];
         }
 
-        $validated = $request->validate($rules, [
+        $request->validate($rules, [
             'questions.required'                 => 'Minimal harus ada 1 butir soal jika fitur Post-test diaktifkan.',
             'questions.min'                      => 'Minimal harus ada 1 butir soal jika fitur Post-test diaktifkan.',
-            'questions.*.pertanyaan.required'    => 'Teks pertanyaan wajib diisi pada setiap butir soal.',
-            'questions.*.kunci_jawaban.required' => 'Pilih kunci jawaban yang benar (A/B/C/D/E) pada setiap butir soal.',
-            'questions.*.pilihan.A.required'     => 'Pilihan A wajib diisi.',
-            'questions.*.pilihan.B.required'     => 'Pilihan B wajib diisi.',
+            'questions.*.question_text.required' => 'Teks pertanyaan wajib diisi pada setiap butir soal.',
+            'questions.*.correct_answer.required'=> 'Pilih kunci jawaban yang benar (A/B/C/D/E) pada setiap butir soal.',
+            'questions.*.options.A.required'     => 'Pilihan A wajib diisi.',
+            'questions.*.options.B.required'     => 'Pilihan B wajib diisi.',
         ]);
 
-        // Proses sanitasi struktur questions
-        $cleanQuestions = [];
-        if (!empty($request->questions) && is_array($request->questions)) {
-            foreach ($request->questions as $index => $q) {
-                if (empty(trim($q['pertanyaan'] ?? ''))) {
-                    continue;
-                }
+        DB::transaction(function () use ($request, $module, $hasPostTest) {
+            // Update status flag di tabel modules
+            $module->update(['has_post_test' => $hasPostTest]);
 
-                // Filter pilihan yang tidak kosong
-                $pilihan = [];
-                foreach (['A', 'B', 'C', 'D', 'E'] as $key) {
-                    $val = trim($q['pilihan'][$key] ?? '');
-                    if ($val !== '') {
-                        $pilihan[$key] = $val;
+            // Update / Create PostTest di tabel post_tests
+            $postTest = $module->postTest()->firstOrCreate([]);
+            $postTest->update([
+                'title'               => $request->input('title', 'Post-test: Evaluasi Pemahaman Materi'),
+                'duration_minutes'    => (int) $request->input('duration_minutes', 20),
+                'kktp'                => (int) $request->input('kktp', 75),
+                'instructions'        => $request->input('instructions', ''),
+                'randomize_questions' => $request->boolean('randomize_questions'),
+            ]);
+
+            // Sinkronisasi data butir soal ke tabel post_test_questions
+            $postTest->questions()->delete();
+
+            $order = 1;
+            if (!empty($request->questions) && is_array($request->questions)) {
+                foreach ($request->questions as $q) {
+                    $qText = trim($q['question_text'] ?? $q['pertanyaan'] ?? '');
+                    if (empty($qText)) {
+                        continue;
                     }
+
+                    $rawOptions = $q['options'] ?? $q['pilihan'] ?? [];
+                    $options = [];
+                    foreach (['A', 'B', 'C', 'D', 'E'] as $key) {
+                        $val = trim($rawOptions[$key] ?? '');
+                        if ($val !== '') {
+                            $options[$key] = $val;
+                        }
+                    }
+
+                    $postTest->questions()->create([
+                        'question_text'  => $qText,
+                        'options'        => $options,
+                        'correct_answer' => strtoupper($q['correct_answer'] ?? $q['kunci_jawaban'] ?? 'A'),
+                        'score_weight'   => !empty($q['score_weight'] ?? $q['bobot'] ?? null) ? (int) ($q['score_weight'] ?? $q['bobot']) : 10,
+                        'explanation'    => trim($q['explanation'] ?? $q['pembahasan'] ?? ''),
+                        'order_num'      => $order++,
+                    ]);
                 }
-
-                $cleanQuestions[] = [
-                    'id'            => $index + 1,
-                    'pertanyaan'    => $q['pertanyaan'],
-                    'pilihan'       => $pilihan,
-                    'kunci_jawaban' => strtoupper($q['kunci_jawaban'] ?? 'A'),
-                    'bobot'         => !empty($q['bobot']) ? (int) $q['bobot'] : 10,
-                    'pembahasan'    => $q['pembahasan'] ?? '',
-                ];
             }
-        }
+        });
 
-        $payload = [
-            'judul'        => $request->input('judul', 'Post-test: Evaluasi Pemahaman Materi'),
-            'durasi_menit' => (int) $request->input('durasi_menit', 20),
-            'kktp'         => (int) $request->input('kktp', 75),
-            'petunjuk'     => $request->input('petunjuk', ''),
-            'acak_soal'    => $request->boolean('acak_soal'),
-            'questions'    => $cleanQuestions,
-        ];
-
-        $module->update([
-            'has_post_test'  => $hasPostTest,
-            'post_test_data' => $payload,
-        ]);
-
-        $statusText = $hasPostTest ? 'diaktifkan & disimpan' : 'disimpan (status Non-Aktif)';
+        $statusText = $hasPostTest ? 'diaktifkan & disimpan ke database' : 'disimpan (status Non-Aktif)';
         return redirect()
             ->route('teacher.modules.show', $module)
             ->with('success', "Konfigurasi Post-test berhasil {$statusText}! ✅");

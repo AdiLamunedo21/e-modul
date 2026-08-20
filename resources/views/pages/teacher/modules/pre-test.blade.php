@@ -154,7 +154,7 @@
                     {{-- Row 1: Judul Pre-test --}}
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1.5">Judul Pre-test</label>
-                        <input type="text" name="judul" value="{{ old('judul', $data['judul'] ?? 'Pre-test Pembuka') }}"
+                        <input type="text" name="title" value="{{ old('title', $preTest->title ?? 'Pre-test Pembuka') }}"
                                placeholder="Contoh: Pre-test: Pemahaman Awal Konsep Basis Data"
                                class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
                     </div>
@@ -164,8 +164,8 @@
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1.5">Durasi Pengerjaan</label>
                             <div class="flex rounded-xl border border-slate-300 bg-slate-50 overflow-hidden focus-within:border-blue-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500/20 transition-all shadow-sm">
-                                <input type="number" name="durasi_menit" min="1" max="180"
-                                       value="{{ old('durasi_menit', $data['durasi_menit'] ?? 15) }}"
+                                <input type="number" name="duration_minutes" min="1" max="180"
+                                       value="{{ old('duration_minutes', $preTest->duration_minutes ?? 15) }}"
                                        class="w-full bg-transparent px-4 py-2.5 text-sm text-slate-900 focus:outline-none">
                                 <span class="inline-flex items-center px-3.5 bg-slate-100 text-xs font-bold text-slate-500 border-l border-slate-200 select-none shrink-0">
                                     Menit
@@ -178,7 +178,7 @@
                             <label class="block text-xs font-bold text-slate-700 mb-1.5">Kriteria Ketuntasan (KKTP)</label>
                             <div class="flex rounded-xl border border-slate-300 bg-slate-50 overflow-hidden focus-within:border-blue-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500/20 transition-all shadow-sm">
                                 <input type="number" name="kktp" min="0" max="100"
-                                       value="{{ old('kktp', $data['kktp'] ?? 75) }}"
+                                       value="{{ old('kktp', $preTest->kktp ?? 75) }}"
                                        class="w-full bg-transparent px-4 py-2.5 text-sm text-slate-900 focus:outline-none">
                                 <span class="inline-flex items-center px-3.5 bg-slate-100 text-xs font-bold text-slate-500 border-l border-slate-200 select-none shrink-0">
                                     Poin
@@ -191,9 +191,9 @@
                     {{-- Row 3: Acak Urutan Soal --}}
                     <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
                         <label class="flex items-start gap-3 cursor-pointer">
-                            <input type="checkbox" name="acak_soal" value="1"
+                            <input type="checkbox" name="randomize_questions" value="1"
                                    class="w-4 h-4 mt-0.5 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
-                                   {{ old('acak_soal', $data['acak_soal'] ?? false) ? 'checked' : '' }}>
+                                   {{ old('randomize_questions', $preTest->randomize_questions ?? false) ? 'checked' : '' }}>
                             <div>
                                 <span class="text-xs font-bold text-slate-800">Acak Urutan Butir Soal</span>
                                 <p class="text-[11px] text-slate-500 mt-0.5">Jika dicentang, urutan nomor soal akan diacak otomatis untuk setiap siswa saat mengerjakan.</p>
@@ -204,9 +204,9 @@
                     {{-- Row 4: Petunjuk Pengerjaan --}}
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1.5">Petunjuk Pengerjaan</label>
-                        <textarea name="petunjuk" rows="2"
+                        <textarea name="instructions" rows="2"
                                   placeholder="Tuliskan panduan untuk siswa sebelum memulai kuis..."
-                                  class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all resize-none">{{ old('petunjuk', $data['petunjuk'] ?? '') }}</textarea>
+                                  class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all resize-none">{{ old('instructions', $preTest->instructions ?? '') }}</textarea>
                     </div>
                 </div>
             </div>
@@ -219,7 +219,7 @@
                             📝
                         </div>
                         <div>
-                            <h2 class="text-base font-bold text-slate-900">Daftar Soal Pilihan Ganda</h2>
+                            <h2 class="text-base font-bold text-slate-900">Daftar Soal Pilihan Ganda (Tersimpan di Database)</h2>
                             <p class="text-xs text-slate-500">Buat pertanyaan, tentukan pilihan A–E, dan tandai satu kunci jawaban yang benar.</p>
                         </div>
                     </div>
@@ -241,24 +241,24 @@
                 {{-- Container Soal --}}
                 <div id="questions-container" class="space-y-6">
                     @php
-                        $questions = old('questions', $data['questions'] ?? []);
+                        $questions = old('questions', $preTest->questions ?? []);
                     @endphp
 
-                    @if(empty($questions))
+                    @if(empty($questions) || (is_countable($questions) && count($questions) === 0))
                         {{-- Placeholder jika belum ada soal --}}
                         <div id="empty-state" class="text-center py-12 px-4 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
                             <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center mx-auto mb-3">
                                 <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/></svg>
                             </div>
-                            <h3 class="text-sm font-bold text-slate-800">Belum ada soal dibuat</h3>
-                            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Klik tombol <strong>"Tambah Soal Baru"</strong> atau gunakan <strong>"Muat Contoh Soal"</strong> untuk mengawali kuis ini.</p>
+                            <h3 class="text-sm font-bold text-slate-800">Belum ada soal tersimpan di database</h3>
+                            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Klik tombol <strong>"Tambah Soal Baru"</strong> atau gunakan <strong>"Muat Contoh Soal"</strong> untuk menyusun butir soal.</p>
                             <button type="button" onclick="addNewQuestion()" class="mt-4 px-4 py-2 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-all">
                                 + Tambah Soal Pertama
                             </button>
                         </div>
                     @else
                         @foreach($questions as $qIndex => $question)
-                            @include('pages.teacher.modules.partials.question-card', ['qIndex' => $qIndex, 'question' => $question])
+                            @include('pages.teacher.modules.partials.question-card', ['qIndex' => $qIndex, 'question' => $question, 'accent' => 'blue'])
                         @endforeach
                     @endif
                 </div>
@@ -315,9 +315,9 @@
 
                     {{-- Nilai Maksimal --}}
                     <div class="bg-slate-50 border border-slate-200/70 rounded-xl p-3 flex flex-col justify-between">
-                        <span class="text-[11px] font-semibold text-slate-500">Nilai Maks</span>
+                        <span class="text-[11px] font-semibold text-slate-500">Target KKTP</span>
                         <div class="mt-1.5">
-                            <span class="text-sm font-extrabold text-slate-900">100</span>
+                            <span id="summary-kktp" class="text-sm font-extrabold text-slate-900">{{ old('kktp', $preTest->kktp ?? 75) }}</span>
                         </div>
                     </div>
                 </div>
@@ -335,7 +335,7 @@
                     <button type="submit"
                             class="w-full py-3 px-4 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 active:scale-95 rounded-xl shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        Simpan Semua Soal
+                        Simpan Konfigurasi & Soal
                     </button>
                     <a href="{{ route('teacher.modules.show', $module) }}"
                        class="w-full py-2.5 px-4 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all text-center block">
@@ -360,7 +360,6 @@
 </form>
 
 
-
 @endsection
 
 @push('scripts')
@@ -369,11 +368,11 @@
 
     // Template soal baru
     function getQuestionTemplate(index, data = {}) {
-        const pertanyaan = data.pertanyaan || '';
-        const pilihan = data.pilihan || { A: '', B: '', C: '', D: '', E: '' };
-        const kunci = data.kunci_jawaban || 'A';
-        const bobot = data.bobot || 10;
-        const pembahasan = data.pembahasan || '';
+        const pertanyaan = data.question_text || data.pertanyaan || '';
+        const pilihan = data.options || data.pilihan || { A: '', B: '', C: '', D: '', E: '' };
+        const kunci = data.correct_answer || data.kunci_jawaban || 'A';
+        const bobot = data.score_weight || data.bobot || 10;
+        const pembahasan = data.explanation || data.pembahasan || '';
 
         return `
         <div class="question-card fade-in-item bg-white border border-slate-200 rounded-2xl p-6 shadow-sm relative" id="question-card-${index}">
@@ -387,7 +386,7 @@
                 <div class="flex items-center gap-2">
                     <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1">
                         <label class="text-[11px] font-semibold text-slate-500">Bobot Poin:</label>
-                        <input type="number" name="questions[${index}][bobot]" value="${bobot}" min="1" max="100"
+                        <input type="number" name="questions[${index}][score_weight]" value="${bobot}" min="1" max="100"
                                oninput="updateSummary()"
                                class="w-12 text-center text-xs font-bold text-blue-600 bg-transparent focus:outline-none">
                     </div>
@@ -405,7 +404,7 @@
             {{-- Teks Pertanyaan --}}
             <div class="mb-4">
                 <label class="block text-xs font-bold text-slate-700 mb-1.5">Teks Soal / Pertanyaan</label>
-                <textarea name="questions[${index}][pertanyaan]" rows="3" required
+                <textarea name="questions[${index}][question_text]" rows="3" required
                           placeholder="Tuliskan butir soal di sini..."
                           class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">${pertanyaan}</textarea>
             </div>
@@ -423,7 +422,7 @@
                     ${['A', 'B', 'C', 'D', 'E'].map(opt => `
                         <div class="option-row flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 bg-slate-50/70 ${kunci === opt ? 'is-correct' : ''}">
                             <label class="flex items-center gap-2 cursor-pointer shrink-0">
-                                <input type="radio" name="questions[${index}][kunci_jawaban]" value="${opt}"
+                                <input type="radio" name="questions[${index}][correct_answer]" value="${opt}"
                                        ${kunci === opt ? 'checked' : ''}
                                        onchange="onCorrectAnswerChange(this, ${index})"
                                        class="w-4 h-4 text-emerald-600 focus:ring-emerald-500">
@@ -431,7 +430,7 @@
                                     ${opt}
                                 </span>
                             </label>
-                            <input type="text" name="questions[${index}][pilihan][${opt}]"
+                            <input type="text" name="questions[${index}][options][${opt}]"
                                    value="${pilihan[opt] || ''}"
                                    ${opt === 'A' || opt === 'B' ? 'required' : ''}
                                    placeholder="Pilihan ${opt} ${opt === 'A' || opt === 'B' ? '(Wajib)' : '(Opsional)'}..."
@@ -443,13 +442,13 @@
 
             {{-- Pembahasan Jawaban (Opsional) --}}
             <div class="pt-3 border-t border-slate-100">
-                <details class="group">
+                <details class="group" ${pembahasan ? 'open' : ''}>
                     <summary class="cursor-pointer text-xs font-bold text-slate-600 hover:text-blue-600 flex items-center gap-1.5 select-none">
                         <svg class="w-3.5 h-3.5 transform group-open:rotate-90 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
                         <span>Tambahkan Pembahasan / Keterangan Jawaban (Opsional)</span>
                     </summary>
                     <div class="mt-2.5 pl-5">
-                        <textarea name="questions[${index}][pembahasan]" rows="2"
+                        <textarea name="questions[${index}][explanation]" rows="2"
                                   placeholder="Tuliskan alasan mengapa jawaban tersebut benar untuk referensi..."
                                   class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none transition-all resize-none">${pembahasan}</textarea>
                     </div>
@@ -507,22 +506,27 @@
         const card = document.getElementById(`question-card-${index}`);
         if (!card) return;
 
-        const pertanyaan = card.querySelector(`textarea[name="questions[${index}][pertanyaan]"]`)?.value || '';
-        const kunci = card.querySelector(`input[name="questions[${index}][kunci_jawaban]"]:checked`)?.value || 'A';
-        const bobot = card.querySelector(`input[name="questions[${index}][bobot]"]`)?.value || 10;
-        const pembahasan = card.querySelector(`textarea[name="questions[${index}][pembahasan]"]`)?.value || '';
+        const pertanyaan = card.querySelector(`textarea[name="questions[${index}][question_text]"]`)?.value
+            || card.querySelector(`textarea[name="questions[${index}][pertanyaan]"]`)?.value || '';
+        const kunci = card.querySelector(`input[name="questions[${index}][correct_answer]"]:checked`)?.value
+            || card.querySelector(`input[name="questions[${index}][kunci_jawaban]"]:checked`)?.value || 'A';
+        const bobot = card.querySelector(`input[name="questions[${index}][score_weight]"]`)?.value
+            || card.querySelector(`input[name="questions[${index}][bobot]"]`)?.value || 10;
+        const pembahasan = card.querySelector(`textarea[name="questions[${index}][explanation]"]`)?.value
+            || card.querySelector(`textarea[name="questions[${index}][pembahasan]"]`)?.value || '';
 
         const pilihan = {};
         ['A', 'B', 'C', 'D', 'E'].forEach(opt => {
-            pilihan[opt] = card.querySelector(`input[name="questions[${index}][pilihan][${opt}]"]`)?.value || '';
+            pilihan[opt] = card.querySelector(`input[name="questions[${index}][options][${opt}]"]`)?.value
+                || card.querySelector(`input[name="questions[${index}][pilihan][${opt}]"]`)?.value || '';
         });
 
         addNewQuestion({
-            pertanyaan: `${pertanyaan} (Salinan)`,
-            pilihan: pilihan,
-            kunci_jawaban: kunci,
-            bobot: bobot,
-            pembahasan: pembahasan
+            question_text: `${pertanyaan} (Salinan)`,
+            options: pilihan,
+            correct_answer: kunci,
+            score_weight: bobot,
+            explanation: pembahasan
         });
     }
 
@@ -551,24 +555,24 @@
             if (title) title.textContent = `Pertanyaan Soal #${idx + 1}`;
 
             // Update input names
-            const textareaQ = card.querySelector('textarea[name^="questions"][name$="[pertanyaan]"]');
-            if (textareaQ) textareaQ.name = `questions[${idx}][pertanyaan]`;
+            const textareaQ = card.querySelector('textarea[name^="questions"][name*="question_text"], textarea[name^="questions"][name*="pertanyaan"]');
+            if (textareaQ) textareaQ.name = `questions[${idx}][question_text]`;
 
-            const bobotInput = card.querySelector('input[name^="questions"][name$="[bobot]"]');
-            if (bobotInput) bobotInput.name = `questions[${idx}][bobot]`;
+            const bobotInput = card.querySelector('input[name^="questions"][name*="score_weight"], input[name^="questions"][name*="bobot"]');
+            if (bobotInput) bobotInput.name = `questions[${idx}][score_weight]`;
 
-            const pembahasanTA = card.querySelector('textarea[name^="questions"][name$="[pembahasan]"]');
-            if (pembahasanTA) pembahasanTA.name = `questions[${idx}][pembahasan]`;
+            const pembahasanTA = card.querySelector('textarea[name^="questions"][name*="explanation"], textarea[name^="questions"][name*="pembahasan"]');
+            if (pembahasanTA) pembahasanTA.name = `questions[${idx}][explanation]`;
 
             const radioInputs = card.querySelectorAll('input[type="radio"][name^="questions"]');
             radioInputs.forEach(radio => {
-                radio.name = `questions[${idx}][kunci_jawaban]`;
+                radio.name = `questions[${idx}][correct_answer]`;
                 radio.setAttribute('onchange', `onCorrectAnswerChange(this, ${idx})`);
             });
 
             ['A', 'B', 'C', 'D', 'E'].forEach(opt => {
-                const optInput = card.querySelector(`input[name^="questions"][name*="[pilihan][${opt}]"]`);
-                if (optInput) optInput.name = `questions[${idx}][pilihan][${opt}]`;
+                const optInput = card.querySelector(`input[name^="questions"][name*="[options][${opt}]"], input[name^="questions"][name*="[pilihan][${opt}]"]`);
+                if (optInput) optInput.name = `questions[${idx}][options][${opt}]`;
             });
         });
     }
@@ -583,7 +587,7 @@
 
         let totalPoints = 0;
         cards.forEach(card => {
-            const bInput = card.querySelector('input[name$="[bobot]"]');
+            const bInput = card.querySelector('input[name*="score_weight"], input[name*="bobot"]');
             const val = parseInt(bInput?.value || 0, 10);
             totalPoints += isNaN(val) ? 0 : val;
         });
@@ -612,69 +616,69 @@
 
         const samples = [
             {
-                pertanyaan: 'Perangkat lunak yang digunakan untuk mengelola, membuat, dan memanipulasi database disebut...',
-                pilihan: {
+                question_text: 'Perangkat lunak yang digunakan untuk mengelola, membuat, dan memanipulasi database disebut...',
+                options: {
                     A: 'DBMS (Database Management System)',
                     B: 'Operating System (OS)',
                     C: 'Spreadsheet Application',
                     D: 'Web Browser',
                     E: 'Compiler'
                 },
-                kunci_jawaban: 'A',
-                bobot: 20,
-                pembahasan: 'DBMS (Database Management System) adalah software pengelola basis data seperti MySQL, PostgreSQL, dan Oracle.'
+                correct_answer: 'A',
+                score_weight: 20,
+                explanation: 'DBMS (Database Management System) adalah software pengelola basis data seperti MySQL, PostgreSQL, dan Oracle.'
             },
             {
-                pertanyaan: 'Perintah SQL yang digunakan untuk mengambil dan menampilkan data dari tabel adalah...',
-                pilihan: {
+                question_text: 'Perintah SQL yang digunakan untuk mengambil dan menampilkan data dari tabel adalah...',
+                options: {
                     A: 'INSERT INTO',
                     B: 'SELECT',
                     C: 'UPDATE',
                     D: 'DROP TABLE',
                     E: 'ALTER TABLE'
                 },
-                kunci_jawaban: 'B',
-                bobot: 20,
-                pembahasan: 'Perintah SELECT adalah bagian dari DML (Data Manipulation Language) yang digunakan untuk query pengambilan data.'
+                correct_answer: 'B',
+                score_weight: 20,
+                explanation: 'Perintah SELECT adalah bagian dari DML (Data Manipulation Language) yang digunakan untuk query pengambilan data.'
             },
             {
-                pertanyaan: 'Kunci (key) dalam sebuah tabel yang nilainya harus unik dan tidak boleh bernilai NULL disebut...',
-                pilihan: {
+                question_text: 'Kunci (key) dalam sebuah tabel yang nilainya harus unik dan tidak boleh bernilai NULL disebut...',
+                options: {
                     A: 'Foreign Key',
                     B: 'Primary Key',
                     C: 'Candidate Key',
                     D: 'Composite Key',
                     E: 'Alternate Key'
                 },
-                kunci_jawaban: 'B',
-                bobot: 20,
-                pembahasan: 'Primary Key secara mutlak harus unik pada setiap baris dan tidak boleh kosong (NOT NULL).'
+                correct_answer: 'B',
+                score_weight: 20,
+                explanation: 'Primary Key secara mutlak harus unik pada setiap baris dan tidak boleh kosong (NOT NULL).'
             },
             {
-                pertanyaan: 'Kelompok perintah SQL yang digunakan untuk mendefinisikan struktur database (seperti CREATE, ALTER, DROP) tergolong ke dalam...',
-                pilihan: {
+                question_text: 'Kelompok perintah SQL yang digunakan untuk mendefinisikan struktur database (seperti CREATE, ALTER, DROP) tergolong ke dalam...',
+                options: {
                     A: 'DML (Data Manipulation Language)',
                     B: 'DDL (Data Definition Language)',
                     C: 'DCL (Data Control Language)',
                     D: 'TCL (Transaction Control Language)',
                     E: 'DQL (Data Query Language)'
                 },
-                kunci_jawaban: 'B',
-                bobot: 20,
-                pembahasan: 'DDL (Data Definition Language) mengurus struktur skema database.'
+                correct_answer: 'B',
+                score_weight: 20,
+                explanation: 'DDL (Data Definition Language) mengurus struktur skema database.'
             },
             {
-                pertanyaan: 'Proses pengelompokan atribut-atribut data untuk mencegah duplikasi (redundansi) dan anomali disebut...',
-                pilihan: {
+                question_text: 'Proses pengelompokan atribut-atribut data untuk mencegah duplikasi (redundansi) dan anomali disebut...',
+                options: {
                     A: 'Normalisasi',
                     B: 'Denormalisasi',
                     C: 'Indexing',
                     D: 'Query Optimization',
                     E: 'Backup & Restore'
                 },
-                kunci_jawaban: 'A',
-                bobot: 20,
-                pembahasan: 'Normalisasi adalah teknik perancangan basis data untuk mengeliminasi redundansi data.'
+                correct_answer: 'A',
+                score_weight: 20,
+                explanation: 'Normalisasi adalah teknik perancangan basis data untuk mengeliminasi redundansi data.'
             }
         ];
 

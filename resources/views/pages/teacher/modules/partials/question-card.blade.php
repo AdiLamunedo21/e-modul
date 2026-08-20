@@ -1,10 +1,18 @@
 @php
     $qId = $qIndex ?? 0;
-    $pertanyaan = $question['pertanyaan'] ?? '';
-    $pilihan = $question['pilihan'] ?? ['A' => '', 'B' => '', 'C' => '', 'D' => '', 'E' => ''];
-    $kunci = $question['kunci_jawaban'] ?? 'A';
-    $bobot = $question['bobot'] ?? 10;
-    $pembahasan = $question['pembahasan'] ?? '';
+    if (is_object($question)) {
+        $pertanyaan = $question->question_text;
+        $pilihan = $question->options ?? ['A' => '', 'B' => '', 'C' => '', 'D' => '', 'E' => ''];
+        $kunci = $question->correct_answer ?? 'A';
+        $bobot = $question->score_weight ?? 10;
+        $pembahasan = $question->explanation ?? '';
+    } else {
+        $pertanyaan = $question['question_text'] ?? $question['pertanyaan'] ?? '';
+        $pilihan = $question['options'] ?? $question['pilihan'] ?? ['A' => '', 'B' => '', 'C' => '', 'D' => '', 'E' => ''];
+        $kunci = $question['correct_answer'] ?? $question['kunci_jawaban'] ?? 'A';
+        $bobot = $question['score_weight'] ?? $question['bobot'] ?? 10;
+        $pembahasan = $question['explanation'] ?? $question['pembahasan'] ?? '';
+    }
     $accent = $accent ?? 'blue';
 
     $isTeal = ($accent === 'teal');
@@ -26,7 +34,7 @@
         <div class="flex items-center gap-2">
             <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1">
                 <label class="text-[11px] font-semibold text-slate-500">Bobot Poin:</label>
-                <input type="number" name="questions[{{ $qId }}][bobot]" value="{{ $bobot }}" min="1" max="100"
+                <input type="number" name="questions[{{ $qId }}][score_weight]" value="{{ $bobot }}" min="1" max="100"
                        oninput="updateSummary()"
                        class="w-12 text-center text-xs font-bold {{ $pointColor }} bg-transparent focus:outline-none">
             </div>
@@ -44,7 +52,7 @@
     {{-- Teks Pertanyaan --}}
     <div class="mb-4">
         <label class="block text-xs font-bold text-slate-700 mb-1.5">Teks Soal / Pertanyaan</label>
-        <textarea name="questions[{{ $qId }}][pertanyaan]" rows="3" required
+        <textarea name="questions[{{ $qId }}][question_text]" rows="3" required
                   placeholder="Tuliskan butir soal di sini..."
                   class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 {{ $focusClass }} focus:bg-white focus:outline-none focus:ring-2 transition-all">{{ $pertanyaan }}</textarea>
     </div>
@@ -66,7 +74,7 @@
                 @endphp
                 <div class="option-row flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 bg-slate-50/70 {{ $isCorrect ? 'is-correct' : '' }}">
                     <label class="flex items-center gap-2 cursor-pointer shrink-0">
-                        <input type="radio" name="questions[{{ $qId }}][kunci_jawaban]" value="{{ $opt }}"
+                        <input type="radio" name="questions[{{ $qId }}][correct_answer]" value="{{ $opt }}"
                                {{ $isCorrect ? 'checked' : '' }}
                                onchange="onCorrectAnswerChange(this, {{ $qId }})"
                                class="w-4 h-4 text-emerald-600 focus:ring-emerald-500">
@@ -74,7 +82,7 @@
                             {{ $opt }}
                         </span>
                     </label>
-                    <input type="text" name="questions[{{ $qId }}][pilihan][{{ $opt }}]"
+                    <input type="text" name="questions[{{ $qId }}][options][{{ $opt }}]"
                            value="{{ $optVal }}"
                            {{ $opt === 'A' || $opt === 'B' ? 'required' : '' }}
                            placeholder="Pilihan {{ $opt }} {{ $opt === 'A' || $opt === 'B' ? '(Wajib)' : '(Opsional)' }}..."
@@ -92,7 +100,7 @@
                 <span>Tambahkan Pembahasan / Keterangan Jawaban (Opsional)</span>
             </summary>
             <div class="mt-2.5 pl-5">
-                <textarea name="questions[{{ $qId }}][pembahasan]" rows="2"
+                <textarea name="questions[{{ $qId }}][explanation]" rows="2"
                           placeholder="Tuliskan alasan mengapa jawaban tersebut benar untuk referensi..."
                           class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-800 {{ $optFocus }} focus:bg-white focus:outline-none transition-all resize-none">{{ $pembahasan }}</textarea>
             </div>

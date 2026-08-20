@@ -260,6 +260,10 @@ erDiagram
     STUDENTS ||--o{ JOB_SHEET_SUBMISSIONS : "mengunggah Job Sheet"
     STUDENTS ||--o{ EMBED_SUBMISSIONS : "mengunggah Screenshot"
     STUDENTS ||--o{ VIDEO_SUMMARIES : "menulis ringkasan"
+    MODULES ||--o| PRE_TESTS : "memiliki konfigurasi"
+    PRE_TESTS ||--o{ PRE_TEST_QUESTIONS : "memiliki butir soal"
+    MODULES ||--o| POST_TESTS : "memiliki konfigurasi"
+    POST_TESTS ||--o{ POST_TEST_QUESTIONS : "memiliki butir soal"
     MODULES ||--o{ JOB_SHEETS : "memiliki instrumen"
     MODULES ||--o{ LKPDS : "memiliki instrumen"
     JOB_SHEETS ||--o{ JOB_SHEET_SUBMISSIONS : "menerima tugas"
@@ -304,6 +308,44 @@ erDiagram
         boolean has_post_test "Toggle Post-test"
         string status "draft | published | closed"
     }
+    PRE_TESTS {
+        bigint id PK
+        bigint module_id FK
+        string title
+        int duration_minutes
+        int kktp
+        text instructions
+        boolean randomize_questions
+    }
+    PRE_TEST_QUESTIONS {
+        bigint id PK
+        bigint pre_test_id FK
+        text question_text
+        json options "A, B, C, D, E"
+        string correct_answer "A / B / C / D / E"
+        int score_weight
+        text explanation
+        int order_num
+    }
+    POST_TESTS {
+        bigint id PK
+        bigint module_id FK
+        string title
+        int duration_minutes
+        int kktp
+        text instructions
+        boolean randomize_questions
+    }
+    POST_TEST_QUESTIONS {
+        bigint id PK
+        bigint post_test_id FK
+        text question_text
+        json options "A, B, C, D, E"
+        string correct_answer "A / B / C / D / E"
+        int score_weight
+        text explanation
+        int order_num
+    }
     JOB_SHEETS {
         bigint id PK
         bigint module_id FK
@@ -331,7 +373,7 @@ erDiagram
     EMBED_SUBMISSIONS {
         bigint id PK
         bigint module_id FK
-        bigint student_id FK
+        string student_id FK
         string screenshot_path
         int manual_score
     }
