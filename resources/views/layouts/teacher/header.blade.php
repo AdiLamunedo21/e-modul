@@ -55,13 +55,6 @@
                 >
             </div>
 
-            {{-- Tombol Cepat Buat Modul (Desktop) --}}
-            <a href="#" class="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm hover:shadow transition-all">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-                <span>Buat Modul</span>
-            </a>
 
             {{-- Profile Pill Guru --}}
             <div class="flex items-center gap-2.5 rounded-full border border-gray-200 bg-gray-50 p-1 pr-3">
