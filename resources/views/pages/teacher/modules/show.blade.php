@@ -81,7 +81,7 @@
 {{-- ══ Grid 3 Babak Modul (Layout 3 Kolom: Bagian Awal (Kiri) | Bagian Inti (Tengah) | Bagian Akhir (Kanan)) ══ --}}
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 items-stretch">
 
-    {{-- ── 1. BAGIAN AWAL (Kiri — Mandatori) ── --}}
+    {{-- ── 1. INFORMASI UMUM (Kiri — Mandatori) ── --}}
     <div class="rounded-3xl bg-white border border-slate-200/80 shadow-sm p-6 sm:p-7 flex flex-col justify-between hover:shadow-md transition-shadow">
         <div>
             <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
@@ -90,8 +90,8 @@
                         1
                     </div>
                     <div>
-                        <h2 class="text-base font-bold text-slate-900 leading-tight">Bagian Awal</h2>
-                        <p class="text-[11px] text-slate-400">Pendahuluan Modul</p>
+                        <h2 class="text-base font-bold text-slate-900 leading-tight">Informasi Umum</h2>
+                        <p class="text-[11px] text-slate-400">Pendahuluan</p>
                     </div>
                 </div>
                 <span class="text-[10px] font-extrabold uppercase tracking-wider bg-rose-100 text-rose-700 px-2.5 py-0.5 rounded-full border border-rose-200">
@@ -128,7 +128,7 @@
             <a href="{{ route('teacher.modules.bagian-awal.edit', $module) }}"
                class="inline-flex items-center justify-center gap-2 w-full py-2.5 text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 rounded-xl transition-all shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125"/></svg>
-                Edit Bagian Awal
+                Edit Informasi Umum
             </a>
         </div>
     </div>
