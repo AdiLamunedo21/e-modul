@@ -1,7 +1,7 @@
 @extends('layouts.teacher.dashboardteacher')
 
-@section('title', 'Edit Bagian Awal — ' . $module->title)
-@section('page-title', 'Editor Bagian Awal')
+@section('title', 'Edit Informasi Umum — ' . $module->title)
+@section('page-title', 'Editor Informasi Umum')
 
 @push('head')
 <style>
@@ -43,7 +43,7 @@
     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
     <a href="{{ route('teacher.modules.show', $module) }}" class="hover:text-blue-600 transition-colors truncate max-w-[12rem]">{{ $module->title }}</a>
     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
-    <span class="font-semibold text-slate-800">Bagian Awal</span>
+    <span class="font-semibold text-slate-800">Informasi Umum</span>
 </nav>
 
 {{-- Flash --}}
@@ -460,7 +460,7 @@
                         <button type="submit"
                                 class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-7 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 active:scale-95 rounded-xl shadow shadow-blue-600/20 transition-all">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            Simpan Bagian Awal
+                            Simpan Informasi Umum
                         </button>
                     </div>
                 </div>

@@ -69,7 +69,7 @@ class ModuleManagerController extends Controller
 
         return redirect()
             ->route('teacher.modules.show', $module)
-            ->with('success', 'Modul baru berhasil dibuat! Lanjutkan dengan mengisi Bagian Awal.');
+            ->with('success', 'Modul baru berhasil dibuat! Lanjutkan dengan mengisi Informasi Umum.');
     }
 
     /**

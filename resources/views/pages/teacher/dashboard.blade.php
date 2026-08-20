@@ -261,7 +261,7 @@
                     <h3 class="text-base font-bold text-slate-700">
                         Object-Oriented Programming (OOP) Lanjutan dengan PHP 8.2
                     </h3>
-                    <p class="text-xs text-slate-500">Tahap pengerjaan: Form Bagian Awal (Kata Pengantar, Glosarium) telah terisi.</p>
+                    <p class="text-xs text-slate-500">Tahap pengerjaan: Form Informasi Umum (Kata Pengantar, Glosarium) telah terisi.</p>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
                     <a href="#" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-blue-600 bg-white border border-blue-200 hover:bg-blue-50 rounded-xl transition-all">
@@ -409,7 +409,7 @@
             <ul class="mt-4 space-y-2 text-xs text-blue-50">
                 <li class="flex items-start gap-2">
                     <span class="font-bold text-white bg-blue-500/40 rounded px-1.5 py-0.5">1</span>
-                    <span><strong>Bagian Awal:</strong> Cover, Kata Pengantar, Glosarium & Capaian.</span>
+                    <span><strong>Informasi Umum:</strong> Cover, Kata Pengantar, Glosarium & Capaian.</span>
                 </li>
                 <li class="flex items-start gap-2">
                     <span class="font-bold text-white bg-blue-500/40 rounded px-1.5 py-0.5">2</span>

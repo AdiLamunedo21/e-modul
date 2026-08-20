@@ -78,7 +78,7 @@
     </div>
 </div>
 
-{{-- ══ Grid 3 Babak Modul (Layout 3 Kolom: Bagian Awal (Kiri) | Bagian Inti (Tengah) | Bagian Akhir (Kanan)) ══ --}}
+{{-- ══ Grid 3 Babak Modul (Layout 3 Kolom: Informasi Umum (Kiri) | Bagian Inti (Tengah) | Bagian Akhir (Kanan)) ══ --}}
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 items-stretch">
 
     {{-- ── 1. INFORMASI UMUM (Kiri — Mandatori) ── --}}

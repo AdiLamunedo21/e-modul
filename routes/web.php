@@ -50,7 +50,7 @@ Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(fu
     Route::patch('/modules/{module}/status',    [ModuleManagerController::class, 'updateStatus'])->name('modules.status');
     Route::delete('/modules/{module}',          [ModuleManagerController::class, 'destroy'])->name('modules.destroy');
 
-    // Bagian Awal Editor
+    // Informasi Umum Editor
     Route::get('/modules/{module}/bagian-awal',   [BagianAwalController::class, 'edit'])->name('modules.bagian-awal.edit');
     Route::patch('/modules/{module}/bagian-awal',  [BagianAwalController::class, 'update'])->name('modules.bagian-awal.update');
 

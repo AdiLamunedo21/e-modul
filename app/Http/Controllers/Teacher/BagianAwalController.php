@@ -21,7 +21,7 @@ class BagianAwalController extends Controller
     }
 
     /**
-     * Halaman edit Bagian Awal.
+     * Halaman edit Informasi Umum.
      */
     public function edit(Module $module)
     {
@@ -43,7 +43,7 @@ class BagianAwalController extends Controller
     }
 
     /**
-     * Proses simpan Bagian Awal.
+     * Proses simpan Informasi Umum.
      */
     public function update(Request $request, Module $module)
     {
@@ -114,6 +114,6 @@ class BagianAwalController extends Controller
 
         return redirect()
             ->route('teacher.modules.show', $module)
-            ->with('success', 'Bagian Awal berhasil disimpan! ✅');
+            ->with('success', 'Informasi Umum berhasil disimpan! ✅');
     }
 }
