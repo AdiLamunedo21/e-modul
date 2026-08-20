@@ -150,7 +150,7 @@
                         Sistem Basis Data: Konsep Relasi & Query SQL (DDL / DML)
                     </h3>
                     
-                    {{-- 7 Toggle Bagian Inti yang Aktif (sesuai PRD) --}}
+                    {{-- 7 Toggle Komponen Inti yang Aktif (sesuai PRD) --}}
                     <div class="flex flex-wrap items-center gap-1.5 pt-1">
                         <span class="text-[11px] font-bold text-slate-500 mr-1">7 Komponen Inti Aktif:</span>
                         <span class="text-[10px] font-semibold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md border border-indigo-100">1. Pre-test</span>
@@ -209,7 +209,7 @@
                         Pemrograman Web: RESTful API dengan Arsitektur Laravel
                     </h3>
                     
-                    {{-- 7 Toggle Bagian Inti yang Aktif --}}
+                    {{-- 7 Toggle Komponen Inti yang Aktif --}}
                     <div class="flex flex-wrap items-center gap-1.5 pt-1">
                         <span class="text-[11px] font-bold text-slate-500 mr-1">7 Komponen Inti Aktif:</span>
                         <span class="text-[10px] font-semibold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md border border-indigo-100">2. Materi & PPT</span>
@@ -413,7 +413,7 @@
                 </li>
                 <li class="flex items-start gap-2">
                     <span class="font-bold text-white bg-blue-500/40 rounded px-1.5 py-0.5">2</span>
-                    <span><strong>Bagian Inti:</strong> 7 Toggle bebas dihidupkan (Pre-test, Video, LKPD, dll).</span>
+                    <span><strong>Komponen Inti:</strong> 7 Toggle bebas dihidupkan (Pre-test, Video, LKPD, dll).</span>
                 </li>
                 <li class="flex items-start gap-2">
                     <span class="font-bold text-white bg-blue-500/40 rounded px-1.5 py-0.5">3</span>

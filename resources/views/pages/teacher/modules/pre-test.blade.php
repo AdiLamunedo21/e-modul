@@ -1,7 +1,7 @@
 @extends('layouts.teacher.dashboardteacher')
 
 @section('title', 'Editor Pre-test — ' . $module->title)
-@section('page-title', 'Editor Pre-test (Bagian Inti)')
+@section('page-title', 'Editor Pre-test (Komponen Inti)')
 
 @push('head')
 <style>
@@ -46,7 +46,7 @@
     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
     <a href="{{ route('teacher.modules.show', $module) }}" class="hover:text-blue-600 transition-colors truncate max-w-[12rem]">{{ $module->title }}</a>
     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
-    <span class="font-semibold text-slate-800">Bagian Inti: Pre-test</span>
+    <span class="font-semibold text-slate-800">Komponen Inti: Pre-test</span>
 </nav>
 
 {{-- Flash Message --}}
@@ -80,7 +80,7 @@
             <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-950/60 backdrop-blur-md border border-white/20 text-xs font-bold tracking-wide text-white shadow-sm">
                 <span class="flex items-center gap-1.5 text-blue-200">
                     <span>⚡</span>
-                    <span>Bagian Inti — Komponen 1</span>
+                    <span>Komponen Inti — Komponen 1</span>
                 </span>
                 <span class="text-white/30">•</span>
                 <span class="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-400/20 text-amber-300 border border-amber-400/40 uppercase tracking-wider">
@@ -126,7 +126,7 @@
                         </div>
                         <div>
                             <h2 class="text-base font-bold text-slate-900">Aktivasi & Pengaturan Pre-test</h2>
-                            <p class="text-xs text-slate-500 mt-0.5">Jika diaktifkan, halaman Pre-test akan muncul sebagai langkah pertama Bagian Inti bagi siswa.</p>
+                            <p class="text-xs text-slate-500 mt-0.5">Jika diaktifkan, halaman Pre-test akan muncul sebagai langkah pertama Komponen Inti bagi siswa.</p>
                         </div>
                     </div>
 

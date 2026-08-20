@@ -54,13 +54,13 @@ Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(fu
     Route::get('/modules/{module}/informasi-umum',   [InformasiUmumController::class, 'edit'])->name('modules.informasi-umum.edit');
     Route::patch('/modules/{module}/informasi-umum',  [InformasiUmumController::class, 'update'])->name('modules.informasi-umum.update');
 
-    // Bagian Inti: 1. Pre-test Quiz Builder
+    // Komponen Inti: 1. Pre-test Quiz Builder
     Route::get('/modules/{module}/pre-test',        [PreTestController::class, 'edit'])->name('modules.pre-test.edit');
     Route::patch('/modules/{module}/pre-test',       [PreTestController::class, 'update'])->name('modules.pre-test.update');
     Route::post('/modules/{module}/pre-test/toggle',  [PreTestController::class, 'toggle'])->name('modules.pre-test.toggle');
     Route::get('/modules/{module}/pre-test/preview',  [PreTestController::class, 'preview'])->name('modules.pre-test.preview');
 
-    // Bagian Inti: 2. Materi & PPT
+    // Komponen Inti: 2. Materi & PPT
     Route::get('/modules/{module}/materi',              [MateriController::class, 'edit'])->name('modules.materi.edit');
     Route::patch('/modules/{module}/materi',             [MateriController::class, 'update'])->name('modules.materi.update');
     Route::post('/modules/{module}/materi/toggle',       [MateriController::class, 'toggle'])->name('modules.materi.toggle');
@@ -68,33 +68,33 @@ Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(fu
     Route::get('/modules/{module}/materi/download-ppt',   [MateriController::class, 'downloadPpt'])->name('modules.materi.download-ppt');
     Route::post('/modules/{module}/materi/upload-image', [MateriController::class, 'uploadImage'])->name('modules.materi.upload-image');
 
-    // Bagian Inti: 3. Video YouTube & Ringkasan
+    // Komponen Inti: 3. Video YouTube & Ringkasan
     Route::get('/modules/{module}/video',               [VideoController::class, 'edit'])->name('modules.video.edit');
     Route::patch('/modules/{module}/video',              [VideoController::class, 'update'])->name('modules.video.update');
     Route::post('/modules/{module}/video/toggle',        [VideoController::class, 'toggle'])->name('modules.video.toggle');
     Route::get('/modules/{module}/video/preview',        [VideoController::class, 'preview'])->name('modules.video.preview');
 
-    // Bagian Inti: 4. Praktik Interaktif (Embed Code / Simulator)
+    // Komponen Inti: 4. Praktik Interaktif (Embed Code / Simulator)
     Route::get('/modules/{module}/embed',               [EmbedController::class, 'edit'])->name('modules.embed.edit');
     Route::patch('/modules/{module}/embed',              [EmbedController::class, 'update'])->name('modules.embed.update');
     Route::post('/modules/{module}/embed/toggle',        [EmbedController::class, 'toggle'])->name('modules.embed.toggle');
     Route::get('/modules/{module}/embed/preview',        [EmbedController::class, 'preview'])->name('modules.embed.preview');
 
-    // Bagian Inti: 5. Lembar Praktikum (Job Sheet PDF)
+    // Komponen Inti: 5. Lembar Praktikum (Job Sheet PDF)
     Route::get('/modules/{module}/job-sheet',           [JobSheetController::class, 'edit'])->name('modules.job-sheet.edit');
     Route::patch('/modules/{module}/job-sheet',          [JobSheetController::class, 'update'])->name('modules.job-sheet.update');
     Route::post('/modules/{module}/job-sheet/toggle',    [JobSheetController::class, 'toggle'])->name('modules.job-sheet.toggle');
     Route::get('/modules/{module}/job-sheet/preview',    [JobSheetController::class, 'preview'])->name('modules.job-sheet.preview');
     Route::get('/modules/{module}/job-sheet/download',   [JobSheetController::class, 'downloadPdf'])->name('modules.job-sheet.download');
 
-    // Bagian Inti: 6. Tugas LKPD (Kerjasama Kelompok / Individu)
+    // Komponen Inti: 6. Tugas LKPD (Kerjasama Kelompok / Individu)
     Route::get('/modules/{module}/lkpd',               [LkpdController::class, 'edit'])->name('modules.lkpd.edit');
     Route::patch('/modules/{module}/lkpd',              [LkpdController::class, 'update'])->name('modules.lkpd.update');
     Route::post('/modules/{module}/lkpd/toggle',        [LkpdController::class, 'toggle'])->name('modules.lkpd.toggle');
     Route::get('/modules/{module}/lkpd/preview',        [LkpdController::class, 'preview'])->name('modules.lkpd.preview');
     Route::get('/modules/{module}/lkpd/download',       [LkpdController::class, 'downloadPdf'])->name('modules.lkpd.download');
 
-    // Bagian Inti: 7. Post-test (Kuis Penutup Pembelajaran)
+    // Komponen Inti: 7. Post-test (Kuis Penutup Pembelajaran)
     Route::get('/modules/{module}/post-test',           [PostTestController::class, 'edit'])->name('modules.post-test.edit');
     Route::patch('/modules/{module}/post-test',          [PostTestController::class, 'update'])->name('modules.post-test.update');
     Route::post('/modules/{module}/post-test/toggle',    [PostTestController::class, 'toggle'])->name('modules.post-test.toggle');

@@ -49,7 +49,7 @@
                 <div class="flex items-center gap-2 text-xs font-bold text-slate-500">
                     <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700">E-Modul: {{ $module->title }}</span>
                     <span>/</span>
-                    <span class="text-red-600">Bagian Inti (Kegiatan Belajar)</span>
+                    <span class="text-red-600">Komponen Inti (Kegiatan Belajar)</span>
                 </div>
                 <div class="flex items-center gap-2">
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-200">

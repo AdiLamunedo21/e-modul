@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('teacher_id')->constrained('teachers')->onDelete('cascade');
             $table->foreignId('class_id')->constrained('classes')->onDelete('cascade');
             $table->string('title');
-            $table->text('bagian_awal_data')->nullable(); // JSON
+            $table->text('informasi_umum_data')->nullable(); // JSON
             $table->text('bagian_akhir_data')->nullable(); // JSON
             $table->boolean('has_pre_test')->default(false);
             $table->boolean('has_materi')->default(false);

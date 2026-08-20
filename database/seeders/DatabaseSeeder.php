@@ -53,7 +53,7 @@ class DatabaseSeeder extends Seeder
             'teacher_id' => $teacher1->id,
             'class_id' => $class1->id,
             'title' => 'Sistem Basis Data Lanjut',
-            'bagian_awal_data' => [
+            'informasi_umum_data' => [
                 'kata_pengantar' => 'Puji syukur kami panjatkan kepada Tuhan Yang Maha Esa atas tersusunnya modul Sistem Basis Data ini.',
                 'tujuan_pembelajaran' => 'Memahami konsep basis data relasional dan operasi dasar SQL.',
                 'glosarium' => [

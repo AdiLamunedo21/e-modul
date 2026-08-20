@@ -17,7 +17,7 @@
     <div class="mb-8">
         <h1 class="text-2xl font-extrabold text-slate-900">Buat E-Modul Baru</h1>
         <p class="mt-1.5 text-sm text-slate-500">
-            Langkah awal: tentukan judul dan target kelas. Setelah tersimpan sebagai <strong>Draft</strong>, Anda bisa mengisi konten Informasi Umum, mengaktifkan 7 komponen Bagian Inti, dan Bagian Akhir melalui halaman detail modul.
+            Langkah awal: tentukan judul dan target kelas. Setelah tersimpan sebagai <strong>Draft</strong>, Anda bisa mengisi konten Informasi Umum, mengaktifkan 7 Komponen Inti, dan Bagian Akhir melalui halaman detail modul.
         </p>
     </div>
 
@@ -85,7 +85,7 @@
                 <div class="space-y-1.5">
                     @foreach([
                         ['1', 'Informasi Umum (Mandatori)', 'Cover, Kata Pengantar, Peta Konsep, Glosarium, Tujuan Pembelajaran.'],
-                        ['2', 'Bagian Inti (7 Toggle Opsional)', 'Pre-test, Materi+PPT, Video YouTube, Praktik Embed, Job Sheet, LKPD, Post-test.'],
+                        ['2', 'Komponen Inti (7 Toggle Opsional)', 'Pre-test, Materi+PPT, Video YouTube, Praktik Embed, Job Sheet, LKPD, Post-test.'],
                         ['3', 'Bagian Akhir (Mandatori)', 'Evaluasi Sumatif, Kunci Jawaban KKTP, & Daftar Pustaka.'],
                     ] as [$no, $title, $desc])
                         <div class="flex items-start gap-2.5 text-xs text-blue-800">

@@ -108,7 +108,7 @@
                                 {{ $module->title }}
                             </a>
 
-                            {{-- 7 Komponen Bagian Inti --}}
+                            {{-- 7 Komponen Inti --}}
                             @if(count($comps) > 0)
                                 <div class="flex flex-wrap items-center gap-1.5">
                                     <span class="text-[11px] font-bold text-slate-500 mr-1">{{ count($comps) }} Komponen Aktif:</span>
@@ -119,7 +119,7 @@
                                     @endforeach
                                 </div>
                             @else
-                                <p class="text-xs text-slate-400 italic">Belum ada komponen Bagian Inti yang diaktifkan.</p>
+                                <p class="text-xs text-slate-400 italic">Belum ada Komponen Inti yang diaktifkan.</p>
                             @endif
                         </div>
 

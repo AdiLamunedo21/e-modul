@@ -9,7 +9,7 @@ class Module extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'bagian_awal_data'  => 'array',
+        'informasi_umum_data' => 'array',
         'bagian_akhir_data' => 'array',
         'pre_test_data'     => 'array',
         'materi_data'       => 'array',
@@ -86,7 +86,7 @@ class Module extends Model
         };
     }
 
-    /** Daftar 7 komponen Bagian Inti yang diaktifkan */
+    /** Daftar 7 Komponen Inti yang diaktifkan */
     public function activeComponents(): array
     {
         $map = [

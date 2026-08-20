@@ -27,7 +27,7 @@
                 <div class="w-9 h-9 rounded-xl bg-teal-500/20 text-teal-300 flex items-center justify-center text-lg shrink-0 border border-teal-400/30">🎯</div>
                 <div>
                     <h1 class="text-sm font-bold text-white">Simulasi Tampilan Post-test Siswa</h1>
-                    <p class="text-[11px] text-slate-400">Pratinjau kuis evaluasi formatif penutup Bagian Inti.</p>
+                    <p class="text-[11px] text-slate-400">Pratinjau kuis evaluasi formatif penutup Komponen Inti.</p>
                 </div>
             </div>
             <div class="flex items-center gap-2">

@@ -28,7 +28,7 @@ class InformasiUmumController extends Controller
         $this->authorize($module);
         $module->load('schoolClass');
 
-        // Pastikan bagian_awal_data selalu array dengan keys lengkap
+        // Pastikan informasi_umum_data selalu array dengan keys lengkap
         $data = array_merge([
             'kata_pengantar'     => '',
             'daftar_isi'         => [],   // [{judul, anchor}]
@@ -37,7 +37,7 @@ class InformasiUmumController extends Controller
             'petunjuk_penggunaan' => '',
             'tujuan_pembelajaran' => '',
             'cover_image_path'   => null,
-        ], is_array($module->bagian_awal_data) ? $module->bagian_awal_data : []);
+        ], is_array($module->informasi_umum_data) ? $module->informasi_umum_data : []);
 
         return view('pages.teacher.modules.informasi-umum', compact('module', 'data'));
     }
@@ -69,7 +69,7 @@ class InformasiUmumController extends Controller
         ]);
 
         // --- Cover Image upload ---
-        $existingData = is_array($module->bagian_awal_data) ? $module->bagian_awal_data : [];
+        $existingData = is_array($module->informasi_umum_data) ? $module->informasi_umum_data : [];
         $coverPath = $existingData['cover_image_path'] ?? null;
 
         if ($request->hasFile('cover_image')) {
@@ -100,7 +100,7 @@ class InformasiUmumController extends Controller
             ->values()
             ->toArray();
 
-        $bagianAwal = [
+        $informasiUmum = [
             'cover_image_path'    => $coverPath,
             'kata_pengantar'      => $request->kata_pengantar,
             'daftar_isi'          => $daftarIsi,
@@ -110,7 +110,7 @@ class InformasiUmumController extends Controller
             'tujuan_pembelajaran' => $request->tujuan_pembelajaran,
         ];
 
-        $module->update(['bagian_awal_data' => $bagianAwal]);
+        $module->update(['informasi_umum_data' => $informasiUmum]);
 
         return redirect()
             ->route('teacher.modules.show', $module)

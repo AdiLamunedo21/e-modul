@@ -25,7 +25,7 @@ Sistem ini ditargetkan untuk:
 1. Memberikan fasilitas _E-Module Builder_ bagi guru untuk merakit materi yang halamannya **terbagi-bagi secara sistematis** menjadi 3 babak:
 
 - **Bagian Awal:** Berisi Cover, Kata Pengantar, Peta Konsep, Glosarium, dll.
-- **Bagian Inti (Sepenuhnya Opsional):** Guru bebas menghidupkan/mematikan 7 komponen inti (1. _Pre-test_, 2. Materi + PPT, 3. Video & Ringkasan, 4. Praktik Interaktif, 5. Lembar Praktikum, 6. Tugas LKPD, 7. _Post-test_).
+- **Komponen Inti (Sepenuhnya Opsional):** Guru bebas menghidupkan/mematikan 7 komponen inti (1. _Pre-test_, 2. Materi + PPT, 3. Video & Ringkasan, 4. Praktik Interaktif, 5. Lembar Praktikum, 6. Tugas LKPD, 7. _Post-test_).
 - **Bagian Akhir:** Berisi Evaluasi Sumatif, Kunci Jawaban (Self-Assessment), dan Daftar Pustaka.
 
 2. Menyediakan _Dashboard Personal_ bagi siswa untuk membaca E-Modul layaknya buku digital interaktif, melacak progres belajar, dan melihat transparansi nilai.
@@ -36,7 +36,7 @@ Sistem ini ditargetkan untuk:
 Untuk fase peluncuran awal (MVP), ruang lingkup aplikasi dibatasi pada:
 
 - Pengembangan antarmuka untuk 3 peran: Admin, Guru, dan Siswa.
-- Pembuatan **Dynamic E-Module Builder**. Sistem _builder_ ini tidak lagi kaku, melainkan menggunakan sistem _toggle_ (sakelar opsional) untuk 7 kegiatan di "Bagian Inti", serta memfasilitasi pembuatan "Bagian Awal" dan "Bagian Akhir".
+- Pembuatan **Dynamic E-Module Builder**. Sistem _builder_ ini tidak lagi kaku, melainkan menggunakan sistem _toggle_ (sakelar opsional) untuk 7 kegiatan di "Komponen Inti", serta memfasilitasi pembuatan "Bagian Awal" dan "Bagian Akhir".
 - Sistem navigasi siswa yang berbasis _Pagination_ (Halaman Sebelumnya / Halaman Selanjutnya) agar siswa membaca materi secara bertahap.
 - Penilaian hibrida: Otomatis (untuk soal pilihan ganda) dan manual (untuk berkas LKPD/Praktikum dan _screenshot_ interaktif), yang semuanya bergantung pada komponen apa saja yang diaktifkan oleh guru.
 
@@ -62,12 +62,12 @@ Sistem harus memisahkan wewenang dan tampilan antarmuka secara ketat berdasarkan
 Untuk menghindari disorientasi akibat _scroll_ yang terlalu panjang, materi di dalam E-Modul tidak ditampilkan dalam satu halaman penuh, melainkan dipecah menjadi tiga bagian utama layaknya buku digital interaktif:
 
 - **Bagian Awal (Pendahuluan):** Menjadi halaman pertama yang dilihat siswa untuk persiapan belajar. Guru diwajibkan (Mandatori) untuk mengisi elemen: Halaman Sampul (_Cover_), Kata Pengantar & Daftar Isi (_Hyperlink_), Peta Konsep, Glosarium, Petunjuk Penggunaan Modul, dan Tujuan Pembelajaran.
-- **Bagian Inti (Kegiatan Pembelajaran):** Merupakan "daging" dari modul yang disajikan per Kegiatan Belajar. Komponen di bagian ini bersifat **sepenuhnya opsional** dan dikendalikan oleh guru.
+- **Komponen Inti (Kegiatan Pembelajaran):** Merupakan "daging" dari modul yang disajikan per Kegiatan Belajar. Komponen di bagian ini bersifat **sepenuhnya opsional** dan dikendalikan oleh guru.
 - **Bagian Akhir (Penutup):** Menjadi alat ukur keberhasilan belajar secara keseluruhan. Berisi halaman Evaluasi (Tes Sumatif), Kunci Jawaban & Pedoman Penskoran untuk _self-assessment_ (jika nilai di bawah KKTP, sistem menyarankan siswa mengulang materi), serta Daftar Pustaka.
 
-### 2.4 Dinamika Bagian Inti (7 Fitur Opsional) & Batasan Berkas
+### 2.4 Dinamika Komponen Inti (7 Fitur Opsional) & Batasan Berkas
 
-Guru diberikan kebebasan mutlak (_Toggle System_) untuk menghidupkan atau mematikan 7 komponen di Bagian Inti. Siswa hanya akan melihat halaman yang diaktifkan oleh guru, dengan aturan navigasi yang ketat (tidak bisa melompat ke halaman selanjutnya sebelum instruksi di halaman saat ini selesai). Ketujuh komponen opsional tersebut adalah:
+Guru diberikan kebebasan mutlak (_Toggle System_) untuk menghidupkan atau mematikan 7 komponen di Komponen Inti. Siswa hanya akan melihat halaman yang diaktifkan oleh guru, dengan aturan navigasi yang ketat (tidak bisa melompat ke halaman selanjutnya sebelum instruksi di halaman saat ini selesai). Ketujuh komponen opsional tersebut adalah:
 
 1. **Pre-test:** Kuis awal pembuka kegiatan belajar.
 2. **Materi + PPT:** Uraian konsep beserta sematan presentasi.
@@ -79,9 +79,9 @@ Guru diberikan kebebasan mutlak (_Toggle System_) untuk menghidupkan atau memati
 
 ### 2.5 Sistem Penilaian Adaptif, Laporan, & Kebijakan Revisi
 
-- **Penilaian Adaptif:** Mesin penilaian (_Grading System_) akan beradaptasi dengan komponen yang diaktifkan guru pada Bagian Inti, ditambah dengan skor Tes Sumatif pada Bagian Akhir. Sistem menggunakan hibrida penilaian otomatis (kuis) dan manual (berkas tugas/gambar).
+- **Penilaian Adaptif:** Mesin penilaian (_Grading System_) akan beradaptasi dengan komponen yang diaktifkan guru pada Komponen Inti, ditambah dengan skor Tes Sumatif pada Bagian Akhir. Sistem menggunakan hibrida penilaian otomatis (kuis) dan manual (berkas tugas/gambar).
 - **Kebijakan Unggah Ulang (Re-submission):** Siswa diizinkan membatalkan dan mengunggah ulang file _Job Sheet_, LKPD, atau _Screenshot_ Praktik **hanya jika** guru belum memberikan nilai (status di _database_ masih `pending`). Jika guru sudah menilainya (status `graded`), tombol unggah ulang akan terkunci otomatis.
-- **Pembuatan Laporan Dinamis (PDF Generator):** Sistem mampu mengagregasi seluruh komponen nilai (yang diaktifkan) beserta teks ringkasan video ke dalam satu laporan PDF yang utuh. Kolom tabel pada PDF akan otomatis menyesuaikan (menambah atau menghilang) berdasarkan pengaturan 7 fitur opsional di Bagian Inti tersebut.
+- **Pembuatan Laporan Dinamis (PDF Generator):** Sistem mampu mengagregasi seluruh komponen nilai (yang diaktifkan) beserta teks ringkasan video ke dalam satu laporan PDF yang utuh. Kolom tabel pada PDF akan otomatis menyesuaikan (menambah atau menghilang) berdasarkan pengaturan 7 fitur opsional di Komponen Inti tersebut.
 
 ## 3. **Core Features (Fitur Utama)**
 
@@ -93,7 +93,7 @@ Pusat komando bagi pihak manajemen sekolah (Kurikulum atau Kepala Sekolah) untuk
 
 - **Manajemen Master Data:** Menu untuk menambah, mengubah, atau menonaktifkan entitas pengguna (akun Guru dan Siswa) serta mengatur struktur akademik (Daftar Kelas dan Jurusan, seperti Sistem Basis Data).
 - **Monitoring Produktivitas Guru:** Panel analitik yang menampilkan daftar guru aktif beserta jumlah E-Modul yang telah mereka buat dan distribusikan kepada siswa.
-- **Quality Control (Pratinjau Modul):** Admin memiliki tombol khusus (_Preview_) untuk meninjau isi Bagian Awal, Bagian Inti, dan Bagian Akhir modul yang dibuat oleh guru tanpa memiliki hak edit. Hal ini mempermudah proses evaluasi kelayakan materi sesuai standar sekolah.
+- **Quality Control (Pratinjau Modul):** Admin memiliki tombol khusus (_Preview_) untuk meninjau isi Bagian Awal, Komponen Inti, dan Bagian Akhir modul yang dibuat oleh guru tanpa memiliki hak edit. Hal ini mempermudah proses evaluasi kelayakan materi sesuai standar sekolah.
 
 ### 3.2 Dashboard Guru (Teacher Workspace)
 
@@ -114,7 +114,7 @@ Portal transparan dan terstruktur yang dirancang untuk mencegah siswa kebingunga
 Ini adalah jantung dari platform. Sebuah editor visual berkonsep modular bagi guru untuk merakit E-Modul tanpa keahlian _coding_. Fitur di dalam _builder_ ini dipecah menjadi 3 blok:
 
 - **Editor Bagian Awal (Mandatori):** Form terstruktur bagi guru untuk menyusun Halaman Sampul (_Cover_ yang menarik), Kata Pengantar, Daftar Isi interaktif, Peta Konsep, Glosarium (untuk istilah teknis), Petunjuk Penggunaan, dan Tujuan Pembelajaran (Capaian).
-- **Panel Bagian Inti (7 Toggle Opsional):** Kumpulan sakelar (hidup/mati) independen. Guru dapat secara bebas memilih untuk memasukkan 1. _Pre-test_ (Quiz Builder), 2. Materi + PPT (Rich Text Editor), 3. Video & Ringkasan (Integrasi Tautan YouTube), 4. Praktik Interaktif (Embed Code HTML/CSS), 5. Lembar Praktikum (Upload PDF _Job Sheet_), 6. Tugas LKPD (Upload PDF Studi Kasus), dan 7. _Post-test_.
+- **Panel Komponen Inti (7 Toggle Opsional):** Kumpulan sakelar (hidup/mati) independen. Guru dapat secara bebas memilih untuk memasukkan 1. _Pre-test_ (Quiz Builder), 2. Materi + PPT (Rich Text Editor), 3. Video & Ringkasan (Integrasi Tautan YouTube), 4. Praktik Interaktif (Embed Code HTML/CSS), 5. Lembar Praktikum (Upload PDF _Job Sheet_), 6. Tugas LKPD (Upload PDF Studi Kasus), dan 7. _Post-test_.
 - **Editor Bagian Akhir (Mandatori):** Form untuk menyusun Evaluasi (Tes Sumatif), Kunci Jawaban berserta pedoman penskoran (dilengkapi logika rekomendasi pengulangan materi jika di bawah KKTP), dan Daftar Pustaka.
 
 ### 3.5 Interactive Student UI (Antarmuka Belajar Paginated & Restriktif)
@@ -123,7 +123,7 @@ Antarmuka pengerjaan modul bagi siswa yang didesain dengan konsep navigasi _Pagi
 
 ### 3.6 PDF Report Generator (Pembangkit Laporan Dinamis)
 
-Fitur ekstraksi dan konversi data penilaian dari basis data ke dalam bentuk dokumen PDF siap cetak untuk pelaporan nilai kelas. Sistem ini menggunakan logika pemrograman _Auto-formatting_ yang cerdas; sistem akan mendeteksi pengaturan "Bagian Inti" pada modul terkait, lalu secara dinamis memunculkan atau menyembunyikan kolom penilaian di tabel PDF agar hasil cetak tetap rapi dan relevan.
+Fitur ekstraksi dan konversi data penilaian dari basis data ke dalam bentuk dokumen PDF siap cetak untuk pelaporan nilai kelas. Sistem ini menggunakan logika pemrograman _Auto-formatting_ yang cerdas; sistem akan mendeteksi pengaturan "Komponen Inti" pada modul terkait, lalu secara dinamis memunculkan atau menyembunyikan kolom penilaian di tabel PDF agar hasil cetak tetap rapi dan relevan.
 
 ## 4. **User Flow (Alur Pengguna)**
 
@@ -137,7 +137,7 @@ Alur ini menggambarkan bagaimana guru menyusun modul yang terbagi menjadi 3 bagi
 2. **Pembuatan Modul (E-Module Builder):** Guru menekan tombol "Buat Modul Baru", memasukkan judul "Sistem Basis Data", menetapkan kelas/jurusan, dan mulai mengisi 3 blok utama:
 
 - **Setup Bagian Awal:** Guru mengunggah gambar _Cover_, mengetik Kata Pengantar, menyusun Peta Konsep, mengisi Glosarium (contoh: definisi _Query_, _Entity_), dan menetapkan Tujuan Pembelajaran.
-- **Setup Bagian Inti (Opsional):** Guru bebas menghidupkan _toggle_ komponen yang diinginkan. Dalam skenario ini, guru menghidupkan semua 7 fitur (1. _Pre-test_, 2. Materi+PPT, 3. Video YouTube, 4. _Embed_ Praktik, 5. _Job Sheet_ PDF, 6. LKPD PDF, 7. _Post-test_).
+- **Setup Komponen Inti (Opsional):** Guru bebas menghidupkan _toggle_ komponen yang diinginkan. Dalam skenario ini, guru menghidupkan semua 7 fitur (1. _Pre-test_, 2. Materi+PPT, 3. Video YouTube, 4. _Embed_ Praktik, 5. _Job Sheet_ PDF, 6. LKPD PDF, 7. _Post-test_).
 - **Setup Bagian Akhir:** Guru menginput soal Evaluasi Sumatif, menyusun Kunci Jawaban (beserta pedoman KKTP), dan menulis Daftar Pustaka.
 
 3. **Publikasi & Pemantauan:** Guru menekan tombol "Publish". Selama masa pengerjaan, guru memantau _Progress Bar_ kelulusan siswa.
@@ -156,7 +156,7 @@ Alur ini difokuskan pada pengalaman siswa bernama Bagas saat menavigasi E-Modul 
 
 1. **Pemeriksaan Tugas Harian:** Bagas _login_ menggunakan NISN. Di _Dashboard Personal_ tab **"Tugas Aktif"**, Bagas mengeklik modul "Sistem Basis Data" dan masuk ke mode layar penuh.
 2. **Membaca Bagian Awal (Pendahuluan):** Halaman pertama menampilkan _Cover_, Kata Pengantar, Peta Konsep, Glosarium, dan Tujuan Pembelajaran. Setelah paham arah materi, Bagas mengeklik tombol "Selanjutnya".
-3. **Menjalani Bagian Inti (Navigasi Mengikat):** Bagas harus melewati tahapan berikut halaman demi halaman (sesuai yang diaktifkan guru) tanpa bisa melompat:
+3. **Menjalani Komponen Inti (Navigasi Mengikat):** Bagas harus melewati tahapan berikut halaman demi halaman (sesuai yang diaktifkan guru) tanpa bisa melompat:
 
 - **Halaman 1:** Mengerjakan _Pre-test_.
 - **Halaman 2:** Membaca uraian materi dan melihat PPT.
@@ -175,7 +175,7 @@ Alur ini mendeskripsikan bagaimana pihak kurikulum menggunakan sistem ini untuk 
 
 1. **Pengaturan Sistem Awal:** Admin _login_, masuk ke menu _Master Data_ untuk meregistrasi akun guru/siswa baru dan mengatur hierarki kelas beserta jurusannya.
 2. **Pemantauan Produktivitas:** Admin membuka menu "Monitoring Guru" untuk melihat tabel statistik produktivitas guru dalam merancang E-Modul.
-3. **Quality Control (Pratinjau Bertahap):** Admin mengeklik salah satu modul untuk masuk ke mode "Preview". Admin dapat menelusuri halaman demi halaman mulai dari Bagian Awal, mengecek kelengkapan 7 fitur di Bagian Inti, hingga mengecek tingkat kesulitan Evaluasi Sumatif di Bagian Akhir. Hal ini memastikan seluruh bahan ajar sesuai dengan standar mutu sekolah sebelum atau saat diakses oleh siswa.
+3. **Quality Control (Pratinjau Bertahap):** Admin mengeklik salah satu modul untuk masuk ke mode "Preview". Admin dapat menelusuri halaman demi halaman mulai dari Bagian Awal, mengecek kelengkapan 7 fitur di Komponen Inti, hingga mengecek tingkat kesulitan Evaluasi Sumatif di Bagian Akhir. Hal ini memastikan seluruh bahan ajar sesuai dengan standar mutu sekolah sebelum atau saat diakses oleh siswa.
 
 ## 5. **Architecture (Arsitektur Sistem)**
 
@@ -195,7 +195,7 @@ Mengingat entitas pengguna telah dinormalisasi menjadi tiga tabel yang berdiri s
 
 ### 5.3 Pemrosesan Logika MVC pada E-Modul Dinamis
 
-- **Model:** Bertugas mengelola interaksi ke basis data MySQL. _Model_ akan mengekstrak struktur JSON atau relasi _boolean_ dari tabel modul untuk mendeteksi komponen "Bagian Inti" mana saja yang diaktifkan oleh guru (misal: mengecek apakah `has_video = true` dan `has_lkpd = true`).
+- **Model:** Bertugas mengelola interaksi ke basis data MySQL. _Model_ akan mengekstrak struktur JSON atau relasi _boolean_ dari tabel modul untuk mendeteksi komponen "Komponen Inti" mana saja yang diaktifkan oleh guru (misal: mengecek apakah `has_video = true` dan `has_lkpd = true`).
 - **View:** Menggunakan **Blade Templating Engine** (dipadukan dengan Tailwind CSS). _View_ bertugas merender antarmuka E-Modul secara _paginated_ (berbasis halaman terpisah). _View_ akan menyembunyikan atau menonaktifkan (_disable_) tombol "Halaman Selanjutnya" jika persyaratan di halaman tersebut belum dipenuhi siswa.
 - **Controller:** Berperan sebagai otak penjaga gerbang (_Gatekeeper_). _Controller_ berisi logika validasi pergerakan siswa. Jika siswa mencoba meretas URL untuk melompat langsung ke Halaman Evaluasi Sumatif (Bagian Akhir) tanpa menyelesaikan tugas unggah LKPD di halaman sebelumnya, _Controller_ akan menolak _request_ tersebut dan mengembalikan siswa ke halaman LKPD.
 
@@ -251,7 +251,7 @@ sequenceDiagram
 
 ## 6. **Database Schema (Skema Basis Data)**
 
-Sistem ini menggunakan basis data relasional (MySQL / MariaDB) yang dirancang untuk mendukung tingkat fleksibilitas E-Modul yang dinamis. Tabel `MODULES` dirancang layaknya konfigurasi _builder_ yang menyimpan metadata Bagian Awal dan Bagian Akhir, beserta 7 kolom _boolean_ (sakelar aktif/mati) yang mengontrol fitur opsional di Bagian Inti.
+Sistem ini menggunakan basis data relasional (MySQL / MariaDB) yang dirancang untuk mendukung tingkat fleksibilitas E-Modul yang dinamis. Tabel `MODULES` dirancang layaknya konfigurasi _builder_ yang menyimpan metadata Bagian Awal dan Bagian Akhir, beserta 7 kolom _boolean_ (sakelar aktif/mati) yang mengontrol fitur opsional di Komponen Inti.
 
 Tabel pengguna tetap dinormalisasi menjadi tiga entitas terpisah: `ADMINS`, `TEACHERS`, dan `STUDENTS` untuk menjamin keamanan akses lintas peran.
 
@@ -303,7 +303,7 @@ erDiagram
         bigint teacher_id FK
         bigint class_id FK
         string title
-        text bagian_awal_data "JSON: Cover, Glosarium, dll"
+        text informasi_umum_data "JSON: Cover, Glosarium, dll"
         text bagian_akhir_data "JSON: Daftar Pustaka"
         boolean has_pre_test
         boolean has_materi
@@ -384,9 +384,9 @@ Tabel ini memuat struktur pengaturan modul secara utuh untuk menopang sistem _bu
 - `id` (BigInt): _Primary Key_.
 - `teacher_id` (BigInt): _Foreign Key_ ke tabel `TEACHERS`.
 - `title` (String): Judul modul E-Learning.
-- `bagian_awal_data` (JSON/Text): Menyimpan gabungan teks/path gambar untuk Halaman Sampul, Kata Pengantar, Peta Konsep, Glosarium, dan Tujuan Pembelajaran agar tabel tidak terlalu gemuk.
+- `informasi_umum_data` (JSON/Text): Menyimpan gabungan teks/path gambar untuk Halaman Sampul, Kata Pengantar, Peta Konsep, Glosarium, dan Tujuan Pembelajaran agar tabel tidak terlalu gemuk.
 - `bagian_akhir_data` (JSON/Text): Menyimpan teks Daftar Pustaka dan pengaturan Kunci Jawaban.
-- **[ 7 Toggle Bagian Inti ]** (Tipe Boolean): `has_pre_test`, `has_materi`, `has_video`, `has_embed`, `has_job_sheet`, `has_lkpd`, `has_post_test`. (Siswa hanya akan di-render halamannya jika nilai kolom-kolom ini _True_).
+- **[ 7 Toggle Komponen Inti ]** (Tipe Boolean): `has_pre_test`, `has_materi`, `has_video`, `has_embed`, `has_job_sheet`, `has_lkpd`, `has_post_test`. (Siswa hanya akan di-render halamannya jika nilai kolom-kolom ini _True_).
 - `status` (Enum): `draft`, `published`, `closed`.
 
 **3. Tabel Penyimpanan Rekam Jejak (Submissions)**
@@ -398,7 +398,7 @@ Sistem memisahkan tempat penyimpanan (_repository_) berdasarkan jenis aktivitas/
 - **`SUBMISSIONS` (LKPD)**: Menyimpan file (Maks 5MB) salinan individu dari hasil analisis pemecahan masalah kelompok. (Kolom: `student_id`, `uploaded_file_path`, `manual_score`).
 
 **4. Tabel `STUDENT_RESULTS` (Agregasi Nilai Akhir & Adaptif)**
-Tabel ini merekam semua nilai (otomatis maupun manual) yang diperoleh siswa dari Bagian Inti hingga Evaluasi Sumatif di Bagian Akhir. Kolom-kolom bernilai _integer_ di bawah ini diatur agar _Nullable_ (dapat bernilai kosong) karena tidak semua E-Modul akan menggunakan komponen tersebut secara penuh.
+Tabel ini merekam semua nilai (otomatis maupun manual) yang diperoleh siswa dari Komponen Inti hingga Evaluasi Sumatif di Bagian Akhir. Kolom-kolom bernilai _integer_ di bawah ini diatur agar _Nullable_ (dapat bernilai kosong) karena tidak semua E-Modul akan menggunakan komponen tersebut secara penuh.
 
 - `id` (BigInt): _Primary Key_.
 - `student_id` (BigInt): _Foreign Key_ ke `STUDENTS`.
@@ -430,18 +430,18 @@ Bagian ini menetapkan standar teknologi pendukung yang akan digunakan oleh tim p
 - **Templating & Styling:** **Blade Templating + Tailwind CSS**
   Kombinasi ini memastikan antarmuka platform, terutama pada Area Belajar Siswa, dapat dirender dengan sangat cepat dan _mobile-friendly_. Blade akan digunakan untuk membangun antarmuka navigasi _Wizard_/_Pagination_ yang secara dinamis menampilkan atau menyembunyikan halaman materi berdasarkan 7 sakelar opsi yang diaktifkan oleh guru di _database_.
 - **Rich Text & Editor Modular:**
-  Pustaka JavaScript pendukung seperti **TinyMCE** atau **Quill.js** akan diintegrasikan di dalam halaman _E-Module Builder_. Editor ini sangat krusial untuk memfasilitasi guru saat menyusun elemen di "Bagian Awal" (Kata Pengantar, Glosarium), menyusun "Materi", hingga menempelkan _Embed Code_ pada "Bagian Inti".
+  Pustaka JavaScript pendukung seperti **TinyMCE** atau **Quill.js** akan diintegrasikan di dalam halaman _E-Module Builder_. Editor ini sangat krusial untuk memfasilitasi guru saat menyusun elemen di "Bagian Awal" (Kata Pengantar, Glosarium), menyusun "Materi", hingga menempelkan _Embed Code_ pada "Komponen Inti".
 
 ### 7.3 Database & Penyimpanan Berkas
 
 - **Basis Data Relasional (JSON Supported):** **MySQL / MariaDB**
-  Sistem ini memanfaatkan kemampuan MySQL modern dalam memanipulasi tipe data JSON (_JSON casting_ di Laravel). Hal ini digunakan pada tabel `MODULES` (kolom `bagian_awal_data` dan `bagian_akhir_data`) agar konfigurasi metadata yang panjang dapat disimpan dengan efisien tanpa perlu membuat puluhan kolom tambahan.
+  Sistem ini memanfaatkan kemampuan MySQL modern dalam memanipulasi tipe data JSON (_JSON casting_ di Laravel). Hal ini digunakan pada tabel `MODULES` (kolom `informasi_umum_data` dan `bagian_akhir_data`) agar konfigurasi metadata yang panjang dapat disimpan dengan efisien tanpa perlu membuat puluhan kolom tambahan.
 - **Manajemen Berkas (File Storage) & Validasi:** **Laravel Local Storage / Symlink**
   Infrastruktur penyimpanan sistem untuk menangani keluar-masuknya berkas secara aman. _Backend_ akan dilengkapi dengan validasi MIME _type_ dan batas ukuran fail yang ketat (maksimal 2 MB untuk format JPG/PNG pada praktik _embed_, dan maksimal 5 MB untuk format PDF pada LKPD/Lembar Praktikum).
 
 ### 7.4 Ekspor Laporan & Infrastruktur Server
 
 - **PDF Generator Dinamis:** **`barryvdh/laravel-dompdf`**
-  Pustaka krusial untuk mengonversi tampilan rekapitulasi HTML ke PDF siap cetak. Logika _rendering_ diatur secara sangat dinamis; sistem akan membaca status _boolean_ dari 7 fitur di Bagian Inti, lalu menyesuaikan penambahan atau penghapusan kolom nilai (_Pre-test_, Video, _Job Sheet_, dll.) pada dokumen akhir secara otomatis.
+  Pustaka krusial untuk mengonversi tampilan rekapitulasi HTML ke PDF siap cetak. Logika _rendering_ diatur secara sangat dinamis; sistem akan membaca status _boolean_ dari 7 fitur di Komponen Inti, lalu menyesuaikan penambahan atau penghapusan kolom nilai (_Pre-test_, Video, _Job Sheet_, dll.) pada dokumen akhir secara otomatis.
 - **Konfigurasi Server & Deployment:**
   Aplikasi ini disiapkan untuk _deployment_ pada _server_ Apache standar sekolah. Pengelolaan perutean (_routing_) dan optimasi keamanan akan dikonfigurasi secara maksimal memanfaatkan fail **`.htaccess`** pada direktori _public_ _server_, memastikan dokumen tugas individu siswa dan tangkapan layar praktik terlindungi dari akses publik (URL statis) yang tidak sah.

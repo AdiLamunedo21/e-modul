@@ -388,7 +388,7 @@
                     <textarea
                         name="petunjuk_penggunaan"
                         rows="5"
-                        placeholder="Contoh: Modul ini terdiri dari 7 tahap. Pastikan Anda memiliki koneksi internet stabil untuk menonton video di Bagian Inti. Untuk pengerjaan Job Sheet, siapkan aplikasi phpMyAdmin atau MySQL Workbench di komputer Anda sebelum memulai..."
+                        placeholder="Contoh: Modul ini terdiri dari 7 tahap. Pastikan Anda memiliki koneksi internet stabil untuk menonton video di Komponen Inti. Untuk pengerjaan Job Sheet, siapkan aplikasi phpMyAdmin atau MySQL Workbench di komputer Anda sebelum memulai..."
                         class="prose-editor w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                     >{{ old('petunjuk_penggunaan', $data['petunjuk_penggunaan'] ?? '') }}</textarea>
                 </div>

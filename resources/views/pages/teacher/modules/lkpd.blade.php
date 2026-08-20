@@ -1,7 +1,7 @@
 @extends('layouts.teacher.dashboardteacher')
 
 @section('title', 'Editor LKPD (Lembar Kerja Peserta Didik) — ' . $module->title)
-@section('page-title', 'Editor LKPD / Studi Kasus (Bagian Inti)')
+@section('page-title', 'Editor LKPD / Studi Kasus (Komponen Inti)')
 
 @push('head')
 <style>
@@ -23,7 +23,7 @@
     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
     <a href="{{ route('teacher.modules.show', $module) }}" class="hover:text-blue-600 transition-colors truncate max-w-[12rem]">{{ $module->title }}</a>
     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
-    <span class="font-semibold text-slate-800">Bagian Inti: Tugas LKPD</span>
+    <span class="font-semibold text-slate-800">Komponen Inti: Tugas LKPD</span>
 </nav>
 
 {{-- Flash Messages --}}
@@ -64,7 +64,7 @@
             <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-950/60 backdrop-blur-md border border-white/20 text-xs font-bold tracking-wide text-white shadow-sm">
                 <span class="flex items-center gap-1.5 text-indigo-200">
                     <span>👥</span>
-                    <span>Bagian Inti — Komponen 6</span>
+                    <span>Komponen Inti — Komponen 6</span>
                 </span>
                 <span class="text-white/30">•</span>
                 <span class="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-indigo-400/20 text-indigo-300 border border-indigo-400/40 uppercase tracking-wider">
@@ -113,7 +113,7 @@
                                 <h2 class="text-base font-bold text-slate-900">Aktivasi Komponen LKPD</h2>
                             </div>
                             <p class="text-xs text-slate-500 leading-relaxed max-w-xl">
-                                Jika diaktifkan, halaman LKPD akan muncul pada urutan ke-6 Bagian Inti di alur belajar siswa. Siswa wajib mengunggah file laporan PDF untuk dapat melanjutkan ke tahap berikutnya.
+                                Jika diaktifkan, halaman LKPD akan muncul pada urutan ke-6 Komponen Inti di alur belajar siswa. Siswa wajib mengunggah file laporan PDF untuk dapat melanjutkan ke tahap berikutnya.
                             </p>
                         </div>
 
