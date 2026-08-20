@@ -78,8 +78,8 @@
     </div>
 </div>
 
-{{-- ══ Grid 3 Babak Modul (Layout 3 Kolom: Informasi Umum (Kiri) | Komponen Inti (Tengah) | Bagian Akhir (Kanan)) ══ --}}
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 items-stretch">
+{{-- ══ Grid Modul (Layout 2 Kolom: Informasi Umum (Kiri) | Komponen Inti (Kanan)) ══ --}}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 items-stretch">
 
     {{-- ── 1. INFORMASI UMUM (Kiri — Mandatori) ── --}}
     <div class="rounded-3xl bg-white border border-slate-200/80 shadow-sm p-6 sm:p-7 flex flex-col justify-between hover:shadow-md transition-shadow">
@@ -91,7 +91,7 @@
                     </div>
                     <div>
                         <h2 class="text-base font-bold text-slate-900 leading-tight">Informasi Umum</h2>
-                        <p class="text-[11px] text-slate-400">Pendahuluan</p>
+                        <p class="text-[11px] text-slate-400">Pendahuluan & Kelengkapan</p>
                     </div>
                 </div>
                 <span class="text-[10px] font-extrabold uppercase tracking-wider bg-rose-100 text-rose-700 px-2.5 py-0.5 rounded-full border border-rose-200">
@@ -100,7 +100,7 @@
             </div>
 
             <p class="text-xs text-slate-500 mb-4 leading-relaxed">
-                7 elemen pembuka pembelajaran yang wajib dilengkapi guru:
+                Elemen kelengkapan modul pembelajaran yang wajib dilengkapi guru:
             </p>
 
             <ul class="space-y-2.5 mb-6">
@@ -112,6 +112,7 @@
                     'Glosarium (Istilah Teknis)',
                     'Petunjuk Penggunaan',
                     'Tujuan Pembelajaran',
+                    'Daftar Pustaka & Referensi',
                 ] as $item)
                     @php $filled = !empty($module->informasi_umum_data); @endphp
                     <li class="flex items-center gap-2.5 text-xs text-slate-700 font-medium">
@@ -133,7 +134,7 @@
         </div>
     </div>
 
-    {{-- ── 2. KOMPONEN INTI (Tengah — 7 Toggle Opsional) ── --}}
+    {{-- ── 2. KOMPONEN INTI (Kanan — 7 Toggle Opsional) ── --}}
     <div class="rounded-3xl bg-white border border-slate-200/80 shadow-sm p-6 sm:p-7 flex flex-col justify-between hover:shadow-md transition-shadow">
         <div>
             <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
@@ -143,7 +144,7 @@
                     </div>
                     <div>
                         <h2 class="text-base font-bold text-slate-900 leading-tight">Komponen Inti</h2>
-                        <p class="text-[11px] text-slate-400">Kegiatan Belajar</p>
+                        <p class="text-[11px] text-slate-400">Kegiatan Belajar (7 Toggle Opsional)</p>
                     </div>
                 </div>
                 <span class="text-[10px] font-extrabold uppercase tracking-wider bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full border border-blue-200">
@@ -157,6 +158,12 @@
 
             {{-- 7 Interactive Component Rows --}}
             <div class="space-y-2 mb-4">
+
+                {{-- Sub-kategori: Bagian Awal --}}
+                <div class="flex items-center gap-2 pt-1 pb-0.5">
+                    <span class="text-[10px] font-black uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/80">Bagian Awal</span>
+                    <div class="h-px bg-slate-200/80 flex-1"></div>
+                </div>
 
                 {{-- 1. Pre-test --}}
                 <div class="flex items-center justify-between gap-2 p-2 rounded-xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition-colors">
@@ -181,6 +188,12 @@
                             </button>
                         </form>
                     </div>
+                </div>
+
+                {{-- Sub-kategori: Bagian Inti --}}
+                <div class="flex items-center gap-2 pt-2 pb-0.5">
+                    <span class="text-[10px] font-black uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/80">Bagian Inti</span>
+                    <div class="h-px bg-slate-200/80 flex-1"></div>
                 </div>
 
                 {{-- 2. Materi & PPT --}}
@@ -256,6 +269,12 @@
                             </button>
                         </form>
                     </div>
+                </div>
+
+                {{-- Sub-kategori: Bagian Akhir --}}
+                <div class="flex items-center gap-2 pt-2 pb-0.5">
+                    <span class="text-[10px] font-black uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/80">Bagian Akhir</span>
+                    <div class="h-px bg-slate-200/80 flex-1"></div>
                 </div>
 
                 {{-- 5. Job Sheet PDF --}}
@@ -340,55 +359,6 @@
             <span class="text-[11px] text-slate-400 text-center block">
                 Gunakan tombol sakelar untuk menyalakan/mematikan komponen secara instan.
             </span>
-        </div>
-    </div>
-
-    {{-- ── 3. BAGIAN AKHIR (Kanan — Mandatori) ── --}}
-    <div class="rounded-3xl bg-white border border-slate-200/80 shadow-sm p-6 sm:p-7 flex flex-col justify-between hover:shadow-md transition-shadow">
-        <div>
-            <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-black text-sm shrink-0">
-                        3
-                    </div>
-                    <div>
-                        <h2 class="text-base font-bold text-slate-900 leading-tight">Bagian Akhir</h2>
-                        <p class="text-[11px] text-slate-400">Evaluasi & Penutup</p>
-                    </div>
-                </div>
-                <span class="text-[10px] font-extrabold uppercase tracking-wider bg-rose-100 text-rose-700 px-2.5 py-0.5 rounded-full border border-rose-200">
-                    Mandatori
-                </span>
-            </div>
-
-            <p class="text-xs text-slate-500 mb-4 leading-relaxed">
-                Instrumen tes sumatif dan kriteria kelulusan KKTP:
-            </p>
-
-            <ul class="space-y-2.5 mb-6">
-                @foreach([
-                    'Soal Evaluasi (Tes Sumatif)',
-                    'Kunci Jawaban & Pedoman KKTP',
-                    'Logika Rekomendasi Pengulangan',
-                    'Daftar Pustaka & Referensi',
-                ] as $item)
-                    @php $filled = !empty($module->bagian_akhir_data); @endphp
-                    <li class="flex items-center gap-2.5 text-xs text-slate-700 font-medium">
-                        <svg class="w-4 h-4 shrink-0 {{ $filled ? 'text-emerald-500' : 'text-slate-300' }}" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="{{ $filled ? 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z' : 'M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z' }}"/>
-                        </svg>
-                        <span>{{ $item }}</span>
-                    </li>
-                @endforeach
-            </ul>
-        </div>
-
-        <div class="pt-4 border-t border-slate-100">
-            <a href="#"
-               class="inline-flex items-center justify-center gap-2 w-full py-2.5 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 rounded-xl transition-all shadow-sm">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125"/></svg>
-                Edit Bagian Akhir
-            </a>
         </div>
     </div>
 
