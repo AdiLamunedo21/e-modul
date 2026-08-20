@@ -16,6 +16,8 @@ class Module extends Model
         'video_data'        => 'array',
         'embed_data'        => 'array',
         'job_sheet_data'    => 'array',
+        'lkpd_data'         => 'array',
+        'post_test_data'    => 'array',
         'has_pre_test'      => 'boolean',
         'has_materi'        => 'boolean',
         'has_video'         => 'boolean',
@@ -62,6 +64,16 @@ class Module extends Model
         return $this->hasManyThrough(JobSheetSubmission::class, JobSheet::class);
     }
 
+    public function lkpds()
+    {
+        return $this->hasMany(Lkpd::class);
+    }
+
+    public function lkpdSubmissions()
+    {
+        return $this->hasManyThrough(Submission::class, Lkpd::class);
+    }
+
     /* ─── Helpers ───────────────────────────────── */
 
     /** Label badge warna sesuai status modul */
@@ -83,7 +95,7 @@ class Module extends Model
             'has_video'     => '3. Video YouTube',
             'has_embed'     => '4. Praktik Embed',
             'has_job_sheet' => '5. Job Sheet PDF',
-            'has_lkpd'      => '6. LKPD Kelompok',
+            'has_lkpd'      => '6. Tugas LKPD',
             'has_post_test' => '7. Post-test',
         ];
 
@@ -206,5 +218,111 @@ class Module extends Model
     public function jobSheetSafety(): string
     {
         return $this->job_sheet_data['safety_guidelines'] ?? '';
+    }
+
+    /* ─── LKPD Helpers ─────────────────────────── */
+
+    /** Mendapatkan judul LKPD */
+    public function lkpdTitle(): string
+    {
+        return $this->lkpd_data['lkpd_title'] ?? 'Lembar Kerja Peserta Didik: ' . $this->title;
+    }
+
+    /** Mode pengerjaan: 'group' (kelompok) atau 'individual' (individu) */
+    public function lkpdWorkMode(): string
+    {
+        return $this->lkpd_data['work_mode'] ?? 'group';
+    }
+
+    /** Apakah mode pengerjaan adalah kelompok */
+    public function isLkpdGroup(): bool
+    {
+        return $this->lkpdWorkMode() === 'group';
+    }
+
+    /** Ukuran kelompok / jumlah anggota */
+    public function lkpdGroupSize(): string
+    {
+        return $this->lkpd_data['group_size'] ?? '3 - 4 Siswa';
+    }
+
+    /** Deskripsi skenario studi kasus teknis */
+    public function lkpdCaseStudy(): string
+    {
+        return $this->lkpd_data['case_study'] ?? '';
+    }
+
+    /** Petunjuk & tahapan kerja */
+    public function lkpdInstructions(): string
+    {
+        return $this->lkpd_data['instructions'] ?? '';
+    }
+
+    /** Rubrik / kriteria penilaian LKPD */
+    public function lkpdRubric(): array
+    {
+        if (!is_array($this->lkpd_data)) {
+            return [];
+        }
+        return $this->lkpd_data['assessment_rubric'] ?? [];
+    }
+
+    /** Memeriksa apakah LKPD memiliki file PDF panduan terunggah */
+    public function hasLkpdPdf(): bool
+    {
+        return !empty($this->lkpd_data['pdf_file_path']);
+    }
+
+    /** Mendapatkan path file PDF panduan LKPD */
+    public function lkpdPdfPath(): ?string
+    {
+        return $this->lkpd_data['pdf_file_path'] ?? null;
+    }
+
+    /** Mendapatkan nama asli berkas PDF LKPD */
+    public function lkpdPdfName(): string
+    {
+        return $this->lkpd_data['pdf_file_name'] ?? 'LKPD-' . $this->id . '.pdf';
+    }
+
+    /* ─── Post-Test Helpers ─────────────────────── */
+
+    /** Mendapatkan daftar soal post-test */
+    public function postTestQuestions(): array
+    {
+        if (!is_array($this->post_test_data)) {
+            return [];
+        }
+        return $this->post_test_data['questions'] ?? [];
+    }
+
+    /** Jumlah soal post-test */
+    public function postTestQuestionCount(): int
+    {
+        return count($this->postTestQuestions());
+    }
+
+    /** Mendapatkan judul post-test */
+    public function postTestTitle(): string
+    {
+        return $this->post_test_data['judul'] ?? 'Post-test: Evaluasi Pemahaman Materi';
+    }
+
+    /** Mendapatkan durasi pengerjaan post-test dalam menit */
+    public function postTestDuration(): int
+    {
+        return (int) ($this->post_test_data['durasi_menit'] ?? 20);
+    }
+
+    /** Mendapatkan nilai ambang batas KKTP post-test */
+    public function postTestKktp(): int
+    {
+        return (int) ($this->post_test_data['kktp'] ?? 75);
+    }
+
+    /** Mendapatkan petunjuk pengerjaan post-test */
+    public function postTestInstructions(): string
+    {
+        return $this->post_test_data['petunjuk'] ?? '';
     }
 }

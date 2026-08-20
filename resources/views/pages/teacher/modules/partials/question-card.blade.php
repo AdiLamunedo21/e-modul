@@ -5,12 +5,20 @@
     $kunci = $question['kunci_jawaban'] ?? 'A';
     $bobot = $question['bobot'] ?? 10;
     $pembahasan = $question['pembahasan'] ?? '';
+    $accent = $accent ?? 'blue';
+
+    $isTeal = ($accent === 'teal');
+    $badgeBg = $isTeal ? 'bg-teal-600 shadow-teal-500/30' : 'bg-blue-600 shadow-blue-500/30';
+    $pointColor = $isTeal ? 'text-teal-700' : 'text-blue-600';
+    $focusClass = $isTeal ? 'focus:border-teal-500 focus:ring-teal-500/20' : 'focus:border-blue-500 focus:ring-blue-500/20';
+    $optFocus = $isTeal ? 'focus:border-teal-500 focus:ring-teal-500' : 'focus:border-blue-500 focus:ring-blue-500';
+    $hoverText = $isTeal ? 'hover:text-teal-700' : 'hover:text-blue-600';
 @endphp
 
 <div class="question-card fade-in-item bg-white border border-slate-200 rounded-2xl p-6 shadow-sm relative" id="question-card-{{ $qId }}">
     <div class="flex items-center justify-between gap-4 mb-4 pb-3 border-b border-slate-100">
         <div class="flex items-center gap-2.5">
-            <span class="q-number-badge w-7 h-7 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xs font-black shadow-sm shadow-blue-500/30">
+            <span class="q-number-badge w-7 h-7 rounded-xl {{ $badgeBg }} text-white flex items-center justify-center text-xs font-black shadow-sm">
                 {{ $qId + 1 }}
             </span>
             <span class="text-xs font-bold text-slate-800">Pertanyaan Soal #{{ $qId + 1 }}</span>
@@ -20,7 +28,7 @@
                 <label class="text-[11px] font-semibold text-slate-500">Bobot Poin:</label>
                 <input type="number" name="questions[{{ $qId }}][bobot]" value="{{ $bobot }}" min="1" max="100"
                        oninput="updateSummary()"
-                       class="w-12 text-center text-xs font-bold text-blue-600 bg-transparent focus:outline-none">
+                       class="w-12 text-center text-xs font-bold {{ $pointColor }} bg-transparent focus:outline-none">
             </div>
             <button type="button" onclick="duplicateQuestion({{ $qId }})" title="Duplikat Soal"
                     class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-all">
@@ -38,7 +46,7 @@
         <label class="block text-xs font-bold text-slate-700 mb-1.5">Teks Soal / Pertanyaan</label>
         <textarea name="questions[{{ $qId }}][pertanyaan]" rows="3" required
                   placeholder="Tuliskan butir soal di sini..."
-                  class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">{{ $pertanyaan }}</textarea>
+                  class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 {{ $focusClass }} focus:bg-white focus:outline-none focus:ring-2 transition-all">{{ $pertanyaan }}</textarea>
     </div>
 
     {{-- Pilihan Ganda (A, B, C, D, E) --}}
@@ -70,7 +78,7 @@
                            value="{{ $optVal }}"
                            {{ $opt === 'A' || $opt === 'B' ? 'required' : '' }}
                            placeholder="Pilihan {{ $opt }} {{ $opt === 'A' || $opt === 'B' ? '(Wajib)' : '(Opsional)' }}..."
-                           class="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all">
+                           class="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 {{ $optFocus }} focus:outline-none focus:ring-1 transition-all">
                 </div>
             @endforeach
         </div>
@@ -79,14 +87,14 @@
     {{-- Pembahasan Jawaban (Opsional) --}}
     <div class="pt-3 border-t border-slate-100">
         <details class="group" {{ !empty($pembahasan) ? 'open' : '' }}>
-            <summary class="cursor-pointer text-xs font-bold text-slate-600 hover:text-blue-600 flex items-center gap-1.5 select-none">
+            <summary class="cursor-pointer text-xs font-bold text-slate-600 {{ $hoverText }} flex items-center gap-1.5 select-none">
                 <svg class="w-3.5 h-3.5 transform group-open:rotate-90 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
                 <span>Tambahkan Pembahasan / Keterangan Jawaban (Opsional)</span>
             </summary>
             <div class="mt-2.5 pl-5">
                 <textarea name="questions[{{ $qId }}][pembahasan]" rows="2"
                           placeholder="Tuliskan alasan mengapa jawaban tersebut benar untuk referensi..."
-                          class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none transition-all resize-none">{{ $pembahasan }}</textarea>
+                          class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-800 {{ $optFocus }} focus:bg-white focus:outline-none transition-all resize-none">{{ $pembahasan }}</textarea>
             </div>
         </details>
     </div>

@@ -9,6 +9,8 @@ use App\Http\Controllers\Teacher\MateriController;
 use App\Http\Controllers\Teacher\VideoController;
 use App\Http\Controllers\Teacher\EmbedController;
 use App\Http\Controllers\Teacher\JobSheetController;
+use App\Http\Controllers\Teacher\LkpdController;
+use App\Http\Controllers\Teacher\PostTestController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -84,6 +86,19 @@ Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(fu
     Route::post('/modules/{module}/job-sheet/toggle',    [JobSheetController::class, 'toggle'])->name('modules.job-sheet.toggle');
     Route::get('/modules/{module}/job-sheet/preview',    [JobSheetController::class, 'preview'])->name('modules.job-sheet.preview');
     Route::get('/modules/{module}/job-sheet/download',   [JobSheetController::class, 'downloadPdf'])->name('modules.job-sheet.download');
+
+    // Bagian Inti: 6. Tugas LKPD (Kerjasama Kelompok / Individu)
+    Route::get('/modules/{module}/lkpd',               [LkpdController::class, 'edit'])->name('modules.lkpd.edit');
+    Route::patch('/modules/{module}/lkpd',              [LkpdController::class, 'update'])->name('modules.lkpd.update');
+    Route::post('/modules/{module}/lkpd/toggle',        [LkpdController::class, 'toggle'])->name('modules.lkpd.toggle');
+    Route::get('/modules/{module}/lkpd/preview',        [LkpdController::class, 'preview'])->name('modules.lkpd.preview');
+    Route::get('/modules/{module}/lkpd/download',       [LkpdController::class, 'downloadPdf'])->name('modules.lkpd.download');
+
+    // Bagian Inti: 7. Post-test (Kuis Penutup Pembelajaran)
+    Route::get('/modules/{module}/post-test',           [PostTestController::class, 'edit'])->name('modules.post-test.edit');
+    Route::patch('/modules/{module}/post-test',          [PostTestController::class, 'update'])->name('modules.post-test.update');
+    Route::post('/modules/{module}/post-test/toggle',    [PostTestController::class, 'toggle'])->name('modules.post-test.toggle');
+    Route::get('/modules/{module}/post-test/preview',    [PostTestController::class, 'preview'])->name('modules.post-test.preview');
 
     // Grading Center (placeholder — dikembangkan berikutnya)
     Route::get('/grading', fn () => view('pages.teacher.grading.index'))->name('grading.index');

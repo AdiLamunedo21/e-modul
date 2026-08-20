@@ -118,6 +118,43 @@ class DatabaseSeeder extends Seeder
                 'ppt_file_name' => null,
                 'ppt_file_size' => null,
             ],
+            'post_test_data' => [
+                'judul' => 'Post-test: Evaluasi Pemahaman Sistem Basis Data',
+                'durasi_menit' => 20,
+                'kktp' => 75,
+                'petunjuk' => 'Kerjakan soal evaluasi post-test berikut untuk mengukur ketuntasan belajar Anda setelah menyelesaikan seluruh materi dan tugas.',
+                'acak_soal' => false,
+                'questions' => [
+                    [
+                        'id' => 1,
+                        'pertanyaan' => 'Perintah SQL yang digunakan untuk menggabungkan baris dari dua tabel berdasarkan relasi kolom yang cocok antar keduanya adalah...',
+                        'pilihan' => [
+                            'A' => 'INNER JOIN',
+                            'B' => 'UNION ALL',
+                            'C' => 'GROUP BY',
+                            'D' => 'ORDER BY',
+                            'E' => 'HAVING'
+                        ],
+                        'kunci_jawaban' => 'A',
+                        'bobot' => 50,
+                        'pembahasan' => 'INNER JOIN mencocokkan data antar tabel berdasarkan foreign key dan primary key yang berhubungan.'
+                    ],
+                    [
+                        'id' => 2,
+                        'pertanyaan' => 'Perintah TCL yang digunakan untuk membatalkan seluruh operasi transaksi database yang belum disimpan secara permanen adalah...',
+                        'pilihan' => [
+                            'A' => 'COMMIT',
+                            'B' => 'SAVEPOINT',
+                            'C' => 'ROLLBACK',
+                            'D' => 'REVOKE',
+                            'E' => 'GRANT'
+                        ],
+                        'kunci_jawaban' => 'C',
+                        'bobot' => 50,
+                        'pembahasan' => 'ROLLBACK membatalkan transaksi dan mengembalikan kondisi data sebelum transaksi dimulai.'
+                    ]
+                ]
+            ],
             'has_pre_test' => true,
             'has_materi' => true,
             'has_video' => true,

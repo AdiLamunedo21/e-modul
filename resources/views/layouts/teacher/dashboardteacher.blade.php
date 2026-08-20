@@ -65,7 +65,9 @@
 
             {{-- Konten halaman (scrollable independen) --}}
             <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-                @yield('content')
+                <div class="w-full max-w-7xl mx-auto">
+                    @yield('content')
+                </div>
             </main>
         </div>
     </div>
