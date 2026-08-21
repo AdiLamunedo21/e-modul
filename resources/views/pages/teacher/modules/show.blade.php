@@ -222,7 +222,7 @@
                         </div>
                         <div>
                             <h2 class="text-base font-bold text-slate-900 leading-tight">Pendahuluan</h2>
-                            <p class="text-[11px] text-slate-400">Capaian & Kerangka Konsep (3 Komponen)</p>
+                            <p class="text-[11px] text-slate-400">Capaian, Konsep & Pre-test (4 Komponen)</p>
                         </div>
                     </div>
                     <span class="text-[10px] font-extrabold uppercase tracking-wider {{ $sec2['badge_color'] }} px-2.5 py-0.5 rounded-full border">
@@ -265,7 +265,7 @@
                                             title="{{ $comp['name'] }}: {{ $comp['is_active'] ? 'Aktif (Klik untuk Nonaktifkan)' : 'Nonaktif (Klik untuk Aktifkan)' }}"
                                             class="relative inline-flex items-center h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500/40 {{ $comp['is_active'] ? 'bg-emerald-500 border-emerald-600' : 'bg-slate-200 border-slate-400 hover:border-slate-500' }}">
                                         <span class="pointer-events-none absolute top-[1px] left-[1px] h-4 w-4 rounded-full bg-white shadow-sm border border-slate-300 transition-transform duration-300 ease-in-out"
-                                              style="transform: translateX({{ $comp['is_active'] ? '20px' : '0px' }});"></span>
+                                               style="transform: translateX({{ $comp['is_active'] ? '20px' : '0px' }});"></span>
                                     </button>
                                 </form>
                             </div>
@@ -274,11 +274,16 @@
                 </div>
             </div>
 
-            <div class="mt-auto pt-4 border-t border-slate-100">
+            <div class="mt-auto pt-4 border-t border-slate-100 space-y-2">
                 <a href="{{ $sec2['edit_all_url'] }}"
                    class="inline-flex items-center justify-center gap-2 w-full py-2.5 text-xs font-bold text-teal-700 bg-teal-50 border border-teal-200 hover:bg-teal-100 rounded-xl transition-all shadow-xs">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125"/></svg>
                     {{ $sec2['edit_all_label'] }}
+                </a>
+                <a href="{{ route('teacher.modules.pre-test.edit', $module) }}"
+                   class="inline-flex items-center justify-center gap-2 w-full py-2.5 text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl transition-all shadow-xs">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 16.875h3.375m0 0h3.375m-3.375 0V13.5m0 3.375v3.375M6 10.5h2.25a2.25 2.25 0 002.25-2.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v2.25A2.25 2.25 0 006 10.5zm0 9.75h2.25A2.25 2.25 0 0010.5 18v-2.25a2.25 2.25 0 00-2.25-2.25H6a2.25 2.25 0 00-2.25 2.25V18A2.25 2.25 0 006 20.25zm9.75-9.75H18a2.25 2.25 0 002.25-2.25V6A2.25 2.25 0 0018 3.75h-2.25A2.25 2.25 0 0013.5 6v2.25a2.25 2.25 0 002.25 2.25z"/></svg>
+                    Edit / Kelola Soal Pre-test
                 </a>
             </div>
         </div>
@@ -363,7 +368,7 @@
                                             title="{{ $comp['name'] }}: {{ $comp['is_active'] ? 'Aktif (Klik untuk Nonaktifkan)' : 'Nonaktif (Klik untuk Aktifkan)' }}"
                                             class="relative inline-flex items-center h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500/40 {{ $comp['is_active'] ? 'bg-emerald-500 border-emerald-600' : 'bg-slate-200 border-slate-400 hover:border-slate-500' }}">
                                         <span class="pointer-events-none absolute top-[1px] left-[1px] h-4 w-4 rounded-full bg-white shadow-sm border border-slate-300 transition-transform duration-300 ease-in-out"
-                                              style="transform: translateX({{ $comp['is_active'] ? '20px' : '0px' }});"></span>
+                                               style="transform: translateX({{ $comp['is_active'] ? '20px' : '0px' }});"></span>
                                     </button>
                                 </form>
                             </div>
@@ -392,7 +397,7 @@
                         </div>
                         <div>
                             <h2 class="text-base font-bold text-slate-900 leading-tight">Evaluasi & Latihan</h2>
-                            <p class="text-[11px] text-slate-400">Pre-test, Game Kuis & LKPD (3 Komponen)</p>
+                            <p class="text-[11px] text-slate-400">Game Edukasi & LKPD (2 Komponen)</p>
                         </div>
                     </div>
                     <span class="text-[10px] font-extrabold uppercase tracking-wider {{ $sec4['badge_color'] }} px-2.5 py-0.5 rounded-full border">
@@ -443,7 +448,7 @@
                                             title="{{ $comp['name'] }}: {{ $comp['is_active'] ? 'Aktif (Klik untuk Nonaktifkan)' : 'Nonaktif (Klik untuk Aktifkan)' }}"
                                             class="relative inline-flex items-center h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500/40 {{ $comp['is_active'] ? 'bg-emerald-500 border-emerald-600' : 'bg-slate-200 border-slate-400 hover:border-slate-500' }}">
                                         <span class="pointer-events-none absolute top-[1px] left-[1px] h-4 w-4 rounded-full bg-white shadow-sm border border-slate-300 transition-transform duration-300 ease-in-out"
-                                              style="transform: translateX({{ $comp['is_active'] ? '20px' : '0px' }});"></span>
+                                               style="transform: translateX({{ $comp['is_active'] ? '20px' : '0px' }});"></span>
                                     </button>
                                 </form>
                             </div>

@@ -119,7 +119,7 @@ Ruang kerja eksklusif bagi pendidik untuk merancang, mendistribusikan, dan menge
 
 - **Manajer Modul (Module Manager):** Halaman yang menampilkan seluruh daftar E-Modul milik guru dengan status (_Draft_, _Published_, atau _Closed_) dan _Progress Bar_ pengumpulan tugas siswa secara _real-time_.
 - **E-Module Detail & Builder (5 Bagian):** Antarmuka terstruktur menampilkan 5 Bagian Utama E-Modul, progress bar kesiapan (contoh: `14/15 Komponen Aktif`), kartu 2-kolom seimbang, tombol edit langsung per-elemen, dan sakelar instan (AJAX toggle switch).
-- **Dedicated Component Editors:** Setiap bagian memiliki halaman editor terisolasi (Editor 1. Bagian Awal - 4 Komponen: Cover, Kata Pengantar, Daftar Isi, Petunjuk; Editor 2. Pendahuluan - 3 Komponen: Tujuan Pembelajaran & Capaian, Peta Konsep, Glosarium; Editor Pre-test; Editor Materi & PPT; Editor Video; Editor Embed; Editor Job Sheet; Editor LKPD; dan Editor Post-test).
+- **Dedicated Component Editors:** Setiap bagian memiliki halaman editor terisolasi (Editor Bagian Awal - 4 Komponen: Cover, Kata Pengantar, Daftar Isi, Petunjuk; Editor Pendahuluan - 3 Komponen: Tujuan Pembelajaran & Capaian, Peta Konsep, Glosarium; Editor Pre-test Diagnostik; Editor Materi & PPT; Editor Video; Editor Embed Praktik; Editor Job Sheet; Editor LKPD; dan Editor Post-test).
 - **Simulation Preview:** Kemudahan guru dalam mensimulasikan tampilan persis seperti yang akan dilihat siswa sebelum modul dipublikasikan.
 - **Grading Center (Pusat Penilaian Adaptif):** Panel terpadu bagi guru untuk memeriksa dan memberikan nilai manual terhadap Ringkasan Video, tangkapan layar Praktik Interaktif, serta file tugas PDF _Job Sheet_ dan LKPD.
 

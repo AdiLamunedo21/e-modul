@@ -26,32 +26,34 @@ class ModuleShowInterfaceTest extends TestCase
         $response->assertStatus(200);
 
         // 1. Bagian Awal
-        $response->assertSee('1. Bagian Awal');
+        $response->assertSee('Bagian Awal');
         $response->assertSee('Halaman Sampul (Cover)');
         $response->assertSee('Kata Pengantar');
         $response->assertSee('Daftar Isi');
         $response->assertSee('Petunjuk Penggunaan');
 
         // 2. Pendahuluan
-        $response->assertSee('2. Pendahuluan');
+        $response->assertSee('Pendahuluan');
         $response->assertSee('Tujuan Pembelajaran &amp; Capaian', false);
         $response->assertSee('Peta Konsep');
         $response->assertSee('Glosarium');
+        $response->assertSee('Pre-test (Soal Latihan Diagnostik)');
+        $response->assertSee('Edit 3 Komponen Pendahuluan');
+        $response->assertSee('Edit / Kelola Soal Pre-test');
 
         // 3. Kegiatan Belajar (Isi Materi)
-        $response->assertSee('3. Kegiatan Belajar (Isi Materi)');
+        $response->assertSee('Kegiatan Belajar (Isi Materi)');
         $response->assertSee('Uraian Materi Pembelajaran &amp; PPT', false);
         $response->assertSee('Multimedia Video Pembelajaran');
         $response->assertSee('Lembar Kerja Praktik (Job Sheet)');
 
         // 4. Evaluasi & Latihan
-        $response->assertSee('4. Evaluasi &amp; Latihan', false);
-        $response->assertSee('Pre-test (Soal Latihan Diagnostik)');
+        $response->assertSee('Evaluasi &amp; Latihan', false);
         $response->assertSee('Game Edukasi &amp; Media Interaktif', false);
         $response->assertSee('Tugas LKPD &amp; Umpan Balik', false);
 
         // 5. Bagian Akhir
-        $response->assertSee('5. Bagian Akhir');
+        $response->assertSee('Bagian Akhir');
         $response->assertSee('Post-test (Tes Akhir Modul)');
         $response->assertSee('Daftar Pustaka');
     }

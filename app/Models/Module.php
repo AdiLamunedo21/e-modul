@@ -229,6 +229,17 @@ class Module extends Model
                 'toggle_url'  => route('teacher.modules.pendahuluan.toggle', [$this, 'glosarium']),
                 'preview_url' => null,
             ],
+            'pre_test' => [
+                'key'         => 'pre_test',
+                'name'        => 'Pre-test (Soal Latihan Diagnostik)',
+                'emoji'       => '⚡',
+                'badge'       => 'Soal Latihan Awal',
+                'desc'        => 'Soal latihan awal dan diagnostik kemampuan prasyarat siswa',
+                'is_active'   => (bool)$this->has_pre_test,
+                'edit_url'    => route('teacher.modules.pre-test.edit', $this),
+                'toggle_url'  => route('teacher.modules.pre-test.toggle', $this),
+                'preview_url' => route('teacher.modules.pre-test.preview', $this),
+            ],
         ];
     }
 
@@ -276,17 +287,6 @@ class Module extends Model
     public function evaluasiLatihanComponents(): array
     {
         return [
-            'pre_test' => [
-                'key'         => 'pre_test',
-                'name'        => 'Pre-test (Soal Latihan Diagnostik)',
-                'emoji'       => '⚡',
-                'badge'       => 'Soal Latihan Awal',
-                'desc'        => 'Soal latihan awal dan diagnostik kemampuan prasyarat siswa',
-                'is_active'   => (bool)$this->has_pre_test,
-                'edit_url'    => route('teacher.modules.pre-test.edit', $this),
-                'toggle_url'  => route('teacher.modules.pre-test.toggle', $this),
-                'preview_url' => route('teacher.modules.pre-test.preview', $this),
-            ],
             'embed' => [
                 'key'         => 'embed',
                 'name'        => 'Game Edukasi & Media Interaktif',
@@ -370,7 +370,7 @@ class Module extends Model
                 'id'           => 'sec-pendahuluan',
                 'number'       => 2,
                 'title'        => 'Pendahuluan',
-                'subtitle'     => 'Rumusan capaian pembelajaran, tujuan pembelajaran, dan kompetensi yang harus dicapai.',
+                'subtitle'     => 'Rumusan capaian pembelajaran, tujuan pembelajaran, alur konsep materi, glosarium, dan pre-test diagnostik.',
                 'theme'        => 'teal',
                 'header_bg'    => 'bg-teal-600',
                 'badge_color'  => 'bg-teal-100 text-teal-800 border-teal-200',
@@ -400,7 +400,7 @@ class Module extends Model
                 'id'           => 'sec-evaluasi-latihan',
                 'number'       => 4,
                 'title'        => 'Evaluasi & Latihan',
-                'subtitle'     => 'Soal latihan, uji kompetensi, game edukasi interaktif (seperti kuis online), serta umpan balik (feedback).',
+                'subtitle'     => 'Game edukasi interaktif (seperti kuis online) serta penugasan lembar kerja peserta didik (LKPD).',
                 'theme'        => 'amber',
                 'header_bg'    => 'bg-amber-600',
                 'badge_color'  => 'bg-amber-100 text-amber-800 border-amber-200',
@@ -408,8 +408,8 @@ class Module extends Model
                 'components'   => $sec4,
                 'active_count' => collect($sec4)->filter(fn($c) => $c['is_active'])->count(),
                 'total_count'  => count($sec4),
-                'edit_all_url' => route('teacher.modules.pre-test.edit', $this),
-                'edit_all_label' => 'Kelola Soal Pre-test',
+                'edit_all_url' => route('teacher.modules.lkpd.edit', $this),
+                'edit_all_label' => 'Kelola Tugas LKPD',
             ],
             'bagian_akhir' => [
                 'id'           => 'sec-bagian-akhir',

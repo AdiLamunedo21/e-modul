@@ -80,7 +80,7 @@
             <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-950/60 backdrop-blur-md border border-white/20 text-xs font-bold tracking-wide text-white shadow-sm">
                 <span class="flex items-center gap-1.5 text-blue-200">
                     <span>⚡</span>
-                    <span>Komponen Inti — Komponen 1</span>
+                    <span>Pendahuluan — Pre-test Diagnostik</span>
                 </span>
                 <span class="text-white/30">•</span>
                 <span class="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-400/20 text-amber-300 border border-amber-400/40 uppercase tracking-wider">
