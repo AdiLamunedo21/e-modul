@@ -6,7 +6,6 @@ use App\Http\Controllers\Teacher\ModuleManagerController;
 use App\Http\Controllers\Teacher\BagianAwalController;
 use App\Http\Controllers\Teacher\PendahuluanController;
 use App\Http\Controllers\Teacher\DaftarPustakaController;
-use App\Http\Controllers\Teacher\InformasiUmumController;
 use App\Http\Controllers\Teacher\PreTestController;
 use App\Http\Controllers\Teacher\MateriController;
 use App\Http\Controllers\Teacher\VideoController;
@@ -63,11 +62,6 @@ Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(fu
     Route::get('/modules/{module}/pendahuluan',                 [PendahuluanController::class, 'edit'])->name('modules.pendahuluan.edit');
     Route::patch('/modules/{module}/pendahuluan',                [PendahuluanController::class, 'update'])->name('modules.pendahuluan.update');
     Route::post('/modules/{module}/pendahuluan/toggle/{component}', [PendahuluanController::class, 'toggle'])->name('modules.pendahuluan.toggle');
-
-    // Informasi Umum Editor & Toggle
-    Route::get('/modules/{module}/informasi-umum',                  [InformasiUmumController::class, 'edit'])->name('modules.informasi-umum.edit');
-    Route::patch('/modules/{module}/informasi-umum',                 [InformasiUmumController::class, 'update'])->name('modules.informasi-umum.update');
-    Route::post('/modules/{module}/informasi-umum/toggle/{component}', [InformasiUmumController::class, 'toggle'])->name('modules.informasi-umum.toggle');
 
     // Komponen Inti: 1. Pre-test Quiz Builder
     Route::get('/modules/{module}/pre-test',        [PreTestController::class, 'edit'])->name('modules.pre-test.edit');

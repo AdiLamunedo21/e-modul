@@ -569,15 +569,11 @@
                 </div>
             </div>
 
-            <div class="mt-auto pt-4 border-t border-white/10 flex flex-col sm:flex-row gap-3">
+            <div class="mt-auto pt-4 border-t border-white/10">
                 <a href="{{ route('teacher.grading.show', $module) }}"
-                   class="inline-flex items-center justify-center gap-2 flex-1 py-3 text-xs font-bold text-slate-900 bg-emerald-400 hover:bg-emerald-300 rounded-xl transition-all shadow-md shadow-emerald-500/20">
+                   class="inline-flex items-center justify-center gap-2 w-full py-3 text-xs font-bold text-slate-900 bg-emerald-400 hover:bg-emerald-300 rounded-xl transition-all shadow-md shadow-emerald-500/20">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     Buka Matriks Nilai
-                </a>
-                <a href="{{ route('teacher.modules.informasi-umum.edit', $module) }}"
-                   class="inline-flex items-center justify-center gap-2 py-3 px-4 text-xs font-bold text-white bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl transition-all">
-                    Form Lengkap
                 </a>
             </div>
         </div>
@@ -586,24 +582,12 @@
 </div>
 
 {{-- ══ Footer Actions ══ --}}
-<div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-200/80">
+<div class="flex items-center justify-between gap-4 pt-6 border-t border-slate-200/80">
     <a href="{{ route('teacher.modules.index') }}"
        class="inline-flex items-center gap-2 px-6 py-3 text-xs sm:text-sm font-bold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-2xl transition-all shadow-sm">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
         Kembali ke Manajer Modul
     </a>
-    <div class="flex items-center gap-3">
-        <a href="{{ route('teacher.modules.informasi-umum.edit', $module) }}"
-           class="inline-flex items-center gap-2 px-5 py-3 text-xs sm:text-sm font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 rounded-2xl transition-all shadow-sm">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125"/></svg>
-            Editor Informasi Umum
-        </a>
-        <a href="{{ route('teacher.grading.show', $module) }}"
-           class="inline-flex items-center gap-2 px-6 py-3 text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-2xl shadow-lg shadow-blue-600/25 transition-all">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            Grading Center Modul Ini
-        </a>
-    </div>
 </div>
 
 @endsection

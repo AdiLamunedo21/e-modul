@@ -18,16 +18,16 @@ Pengembangan platform ini diinisiasi untuk memecahkan masalah utama (_pain point
 
 ### 1.3 Tujuan Utama (Objectives)
 
-Tujuan dari proyek ini adalah membangun portal E-Modul terpusat berbasis **Laravel** dengan sistem manajemen akses multi-peran (Admin, Guru, dan Siswa).
+Tujuan dari proyek ini adalah membangun portal E-Modul terpusat berbasis **Laravel 11** dengan sistem manajemen akses multi-peran (Admin, Guru, dan Siswa).
 
 Sistem ini ditargetkan untuk:
 
-1. Memberikan fasilitas _E-Module Builder_ bagi guru untuk merakit materi secara terstruktur menjadi **5 Bagian Umum Standar E-Modul**:
-   - **1. Bagian Awal:** Halaman sampul (_cover_), kata pengantar, daftar isi, serta petunjuk penggunaan e-modul bagi siswa dan guru (tersimpan dalam `informasi_umum_data`).
-   - **2. Pendahuluan:** Rumusan capaian pembelajaran, tujuan pembelajaran, peta konsep, dan glosarium istilah/kompetensi yang harus dicapai (tersimpan dalam `informasi_umum_data`).
-   - **3. Kegiatan Belajar (Isi Materi):** Uraian materi pembelajaran & PPT (`has_materi`), multimedia video pembelajaran YouTube (`has_video`), serta lembar kerja praktik / _Job Sheet_ PDF (`has_job_sheet`).
-   - **4. Evaluasi & Latihan:** Soal latihan diagnostik / Pre-test (`has_pre_test`), game edukasi interaktif & kuis online (`has_embed`), serta tugas LKPD & umpan balik / _feedback_ (`has_lkpd`).
-   - **5. Bagian Akhir:** Rangkuman materi, tes akhir modul / Post-test (`has_post_test`), dan daftar pustaka rujukan (tersimpan dalam `informasi_umum_data`).
+1. Memberikan fasilitas _E-Module Builder_ bagi guru untuk merakit materi secara terstruktur menjadi **5 Bagian Umum Standar E-Modul (15 Komponen Fleksibel)**:
+   - **1. Bagian Awal (4 Komponen):** Halaman sampul (_cover_), kata pengantar, daftar isi, serta petunjuk penggunaan e-modul bagi siswa dan guru (dikelola mandiri via `BagianAwalController`).
+   - **2. Pendahuluan (4 Komponen):** Rumusan tujuan pembelajaran & capaian, peta konsep alur materi, glosarium istilah (dikelola via `PendahuluanController`), serta soal latihan diagnostik / Pre-test (`has_pre_test` dikelola via `PreTestController`).
+   - **3. Kegiatan Belajar / Isi Materi (2 Komponen):** Uraian materi pembelajaran berbasis teks & slide PPT (`has_materi`), serta multimedia video pembelajaran YouTube & resume (`has_video`).
+   - **4. Evaluasi & Latihan (3 Komponen):** Game edukasi interaktif & media embed simulator (`has_embed`), lembar kerja praktik / _Job Sheet_ PDF (`has_job_sheet`), serta tugas lembar kerja peserta didik & umpan balik / LKPD (`has_lkpd`).
+   - **5. Bagian Akhir (2 Komponen):** Tes akhir modul / Post-test (`has_post_test`), dan daftar pustaka kepustakaan & rujukan (dikelola mandiri via `DaftarPustakaController`).
 2. Menyediakan _Dashboard Personal_ bagi siswa untuk membaca E-Modul layaknya buku digital interaktif, melacak progres belajar per halaman, dan melihat transparansi nilai.
 3. Memfasilitasi guru dengan *Grading Center* adaptif yang otomatis menyesuaikan matriks nilai dengan komponen evaluasi yang diaktifkan.
 4. Memungkinkan sekolah mengekspor seluruh hasil belajar siswa ke dalam satu dokumen laporan (PDF) yang kolomnya otomatis menyesuaikan dengan komponen aktif pada modul.
@@ -37,7 +37,7 @@ Sistem ini ditargetkan untuk:
 Untuk fase peluncuran awal (MVP), ruang lingkup aplikasi dibatasi pada:
 
 - Pengembangan antarmuka untuk 3 peran: Admin, Guru, dan Siswa.
-- Pembuatan **Dynamic E-Module Builder** dengan arsitektur 5 Bagian Umum E-Modul (15 total komponen terintegrasi).
+- Pembuatan **Dynamic E-Module Builder** dengan arsitektur 5 Bagian Umum E-Modul (15 total komponen terisolasi).
 - Sistem sakelar instan (Toggle Switch) yang memungkinkan guru mengaktifkan/menonaktifkan komponen di setiap bagian.
 - Sistem navigasi siswa yang berbasis _Pagination_ (Halaman Sebelumnya / Halaman Selanjutnya) agar siswa membaca materi secara bertahap dan terarah.
 - Penilaian hibrida: Otomatis (untuk soal pilihan ganda Pre-test & Post-test) dan manual (untuk ringkasan video, bukti _screenshot_ praktik interaktif, serta berkas tugas LKPD dan _Job Sheet_), yang seluruhnya beradaptasi dengan komponen yang diaktifkan oleh guru.
@@ -70,24 +70,24 @@ Untuk menghindari disorientasi akibat _scroll_ yang terlalu panjang dan menerapk
 │                                STRUKTUR 5 BAGIAN E-MODUL                                 │
 ├───────────────────────────────┬──────────────────────────────────────────────────────────┤
 │ 1. Bagian Awal                │ • Halaman Sampul (Cover)                                 │
-│    (Identitas & Pengantar)    │ • Kata Pengantar                                         │
+│    (4 Komponen Pengantar)     │ • Kata Pengantar                                         │
 │                               │ • Daftar Isi                                             │
 │                               │ • Petunjuk Penggunaan bagi Siswa & Guru                  │
 ├───────────────────────────────┼──────────────────────────────────────────────────────────┤
 │ 2. Pendahuluan                │ • Tujuan Pembelajaran & Rumusan Capaian                  │
-│    (Capaian & Kerangka)       │ • Peta Konsep (Diagram Alur Materi)                      │
+│    (4 Komponen Orientasi)     │ • Peta Konsep (Diagram Alur Materi)                      │
 │                               │ • Glosarium (Kata Kunci & Istilah Penting)               │
+│                               │ • Soal Latihan Diagnostik / Pre-test (has_pre_test)      │
 ├───────────────────────────────┼──────────────────────────────────────────────────────────┤
 │ 3. Kegiatan Belajar           │ • Uraian Materi Pembelajaran & Slide PPT (has_materi)    │
-│    (Isi Materi Pembelajaran)  │ • Multimedia Video YouTube & Resume (has_video)          │
-│                               │ • Lembar Kerja Praktik / Job Sheet PDF (has_job_sheet)   │
+│    (2 Komponen Isi Materi)    │ • Multimedia Video YouTube & Resume (has_video)          │
 ├───────────────────────────────┼──────────────────────────────────────────────────────────┤
-│ 4. Evaluasi & Latihan         │ • Soal Latihan Awal / Pre-test (has_pre_test)            │
-│    (Kuis, Game & Tugas)       │ • Game Edukasi Interaktif & Embed Quiz (has_embed)       │
+│ 4. Evaluasi & Latihan         │ • Game Edukasi Interaktif & Embed Simulator (has_embed)  │
+│    (3 Komponen Praktik/Tugas) │ • Lembar Kerja Praktik / Job Sheet PDF (has_job_sheet)   │
 │                               │ • Tugas LKPD & Umpan Balik / Feedback (has_lkpd)         │
 ├───────────────────────────────┼──────────────────────────────────────────────────────────┤
 │ 5. Bagian Akhir               │ • Tes Akhir Modul / Post-test (has_post_test)            │
-│    (Evaluasi Akhir & Rujukan) │ • Daftar Pustaka & Referensi Kepustakaan                 │
+│    (2 Komponen Penutup)       │ • Daftar Pustaka & Referensi Kepustakaan                 │
 └───────────────────────────────┴──────────────────────────────────────────────────────────┘
 ```
 
@@ -119,7 +119,17 @@ Ruang kerja eksklusif bagi pendidik untuk merancang, mendistribusikan, dan menge
 
 - **Manajer Modul (Module Manager):** Halaman yang menampilkan seluruh daftar E-Modul milik guru dengan status (_Draft_, _Published_, atau _Closed_) dan _Progress Bar_ pengumpulan tugas siswa secara _real-time_.
 - **E-Module Detail & Builder (5 Bagian):** Antarmuka terstruktur menampilkan 5 Bagian Utama E-Modul, progress bar kesiapan (contoh: `14/15 Komponen Aktif`), kartu 2-kolom seimbang, tombol edit langsung per-elemen, dan sakelar instan (AJAX toggle switch).
-- **Dedicated Component Editors:** Setiap bagian memiliki halaman editor terisolasi (Editor Bagian Awal - 4 Komponen: Cover, Kata Pengantar, Daftar Isi, Petunjuk; Editor Pendahuluan - 3 Komponen: Tujuan Pembelajaran & Capaian, Peta Konsep, Glosarium; Editor Pre-test Diagnostik; Editor Materi & PPT; Editor Video; Editor Embed Praktik; Editor Job Sheet; Editor LKPD; Editor Post-test; dan Editor Daftar Pustaka).
+- **Dedicated Modular Component Editors:** Setiap bagian memiliki halaman editor terisolasi:
+  - `Editor Bagian Awal` (4 Komponen: Cover, Kata Pengantar, Daftar Isi, Petunjuk).
+  - `Editor Pendahuluan` (3 Komponen: Tujuan Pembelajaran & Capaian, Peta Konsep, Glosarium).
+  - `Editor Pre-test Diagnostik` (Quiz Builder Soal Pilihan Ganda).
+  - `Editor Materi Pembelajaran & PPT` (Rich text editor & PPT embed).
+  - `Editor Multimedia Video` (Integrasi YouTube & instruksi resume).
+  - `Editor Praktik Interaktif (Embed)` (Kode simulator & embed web).
+  - `Editor Lembar Kerja Praktik (Job Sheet)` (Panduan praktikum & berkas PDF).
+  - `Editor Tugas LKPD` (Penugasan lembar kerja & instrumen PDF).
+  - `Editor Post-test` (Quiz Builder evaluasi akhir modul).
+  - `Editor Daftar Pustaka` (Tabel rujukan buku, jurnal, dan sumber digital).
 - **Simulation Preview:** Kemudahan guru dalam mensimulasikan tampilan persis seperti yang akan dilihat siswa sebelum modul dipublikasikan.
 - **Grading Center (Pusat Penilaian Adaptif):** Panel terpadu bagi guru untuk memeriksa dan memberikan nilai manual terhadap Ringkasan Video, tangkapan layar Praktik Interaktif, serta file tugas PDF _Job Sheet_ dan LKPD.
 
@@ -147,11 +157,11 @@ Fitur ekspor data penilaian kelas ke format dokumen PDF siap cetak dengan tata l
 1. **Autentikasi & Dasbor Awal:** Guru melakukan _login_ dan membuka "Manajer Modul".
 2. **Pembuatan Modul:** Guru menekan "Buat Modul Baru", memasukkan judul dan target kelas. Modul tersimpan dengan status `draft`.
 3. **Penyusunan Konten (Module Detail 5 Bagian):**
-   - **Bagian Awal:** Guru mengisi Cover, Kata Pengantar, Daftar Isi, dan Petunjuk Penggunaan.
-   - **Pendahuluan:** Guru menyusun Tujuan Pembelajaran, Capaian Pembelajaran, Peta Konsep, dan Glosarium.
-   - **Kegiatan Belajar:** Guru mengisi Materi & PPT, tautan Video YouTube, dan file Job Sheet PDF.
-   - **Evaluasi & Latihan:** Guru merakit soal Pre-test, kode embed simulasi/game edukasi, dan instruksi tugas LKPD.
-   - **Bagian Akhir:** Guru merakit soal Post-test dan mengisi Daftar Pustaka referensi.
+   - **Bagian Awal:** Guru mengedit Cover, Kata Pengantar, Daftar Isi, dan Petunjuk Penggunaan via Editor Bagian Awal.
+   - **Pendahuluan:** Guru menyusun Tujuan Pembelajaran, Capaian Pembelajaran, Peta Konsep, dan Glosarium via Editor Pendahuluan, serta menyusun kuis diagnostik via Editor Pre-test.
+   - **Kegiatan Belajar:** Guru mengisi Materi & PPT via Editor Materi, serta tautan Video YouTube via Editor Video.
+   - **Evaluasi & Latihan:** Guru mengatur game interaktif via Editor Embed, mengunggah panduan via Editor Job Sheet, dan menyusun tugas via Editor LKPD.
+   - **Bagian Akhir:** Guru merakit soal tes penutup via Editor Post-test dan menyusun sumber rujukan via Editor Daftar Pustaka.
 4. **Simulasi Pratinjau:** Guru membuka fitur Preview pada tiap komponen untuk memastikan kesesuaian materi.
 5. **Publikasi:** Guru menekan tombol "Publish Modul" sehingga modul dapat diakses oleh siswa pada kelas target.
 6. **Evaluasi di Grading Center:** Guru meninjau penugasan siswa yang masuk, membaca ringkasan video, memeriksa screenshot praktik, mengunduh file tugas, dan memasukkan nilai manual.
@@ -161,10 +171,10 @@ Fitur ekspor data penilaian kelas ke format dokumen PDF siap cetak dengan tata l
 
 1. **Pemeriksaan Tugas:** Siswa _login_ menggunakan NISN dan membuka modul yang aktif di tab **"Tugas Aktif"**.
 2. **Tahap 1 — Bagian Awal:** Siswa melihat Cover, membaca Kata Pengantar, memeriksa Daftar Isi, dan memahami Petunjuk Penggunaan.
-3. **Tahap 2 — Pendahuluan:** Siswa membaca Rumusan Capaian & Tujuan Pembelajaran, mencermati Peta Konsep, dan membaca Glosarium istilah.
-4. **Tahap 3 — Kegiatan Belajar:** Siswa membaca uraian Materi & slide PPT, menyimak Video YouTube & mengetik ringkasan, serta mengunduh/mengerjakan panduan Job Sheet PDF.
-5. **Tahap 4 — Evaluasi & Latihan:** Siswa mengerjakan Pre-test diagnostik, memainkan kuis/game interaktif embed & mengunggah screenshot, serta berdiskusi tugas LKPD & mengunggah PDF mandiri.
-6. **Tahap 5 — Bagian Akhir:** Siswa mengerjakan Post-test akhir modul dan melihat Daftar Pustaka.
+3. **Tahap 2 — Pendahuluan:** Siswa membaca Rumusan Capaian & Tujuan Pembelajaran, mencermati Peta Konsep, membaca Glosarium istilah, dan mengerjakan Pre-test diagnostik jika aktif.
+4. **Tahap 3 — Kegiatan Belajar:** Siswa membaca uraian Materi & slide PPT, menyimak Video YouTube & mengetik ringkasan.
+5. **Tahap 4 — Evaluasi & Latihan:** Siswa memainkan game interaktif/simulator embed & mengunggah screenshot, mengunduh/mengerjakan Job Sheet praktikum, serta berdiskusi tugas LKPD & mengunggah salinan PDF.
+6. **Tahap 5 — Bagian Akhir:** Siswa mengerjakan Post-test akhir modul dan mencermati Daftar Pustaka rujukan.
 7. **Penyelesaian & Transisi:** Siswa menyelesaikan modul, status modul berpindah ke tab **"Riwayat Selesai"**, dan nilai dapat dipantau secara transparan.
 
 ---
@@ -189,10 +199,19 @@ Sistem menerapkan arsitektur **Multi-Guard Authentication** bawaan Laravel denga
   - Mengelola interaksi basis data dan JSON casting pada `informasi_umum_data`.
   - Menyediakan helper terstruktur untuk 5 Bagian: `moduleSectionsSummary()`, `bagianAwalComponents()`, `pendahuluanComponents()`, `kegiatanBelajarComponents()`, `evaluasiLatihanComponents()`, `bagianAkhirComponents()`.
   - Helper status dan penilaian: `statusLabel()`, `activeComponents()`, `activeGradedComponents()`.
-- **Controller Pengelola Konten:**
-  - `InformasiUmumController`: Mengelola data pembuka & rujukan pada `informasi_umum_data` (Bagian Awal: cover, kata pengantar, daftar isi, petunjuk; Pendahuluan: capaian, tujuan, peta konsep, glosarium; Bagian Akhir: daftar pustaka).
-  - `PreTestController`, `MateriController`, `VideoController`, `EmbedController`, `JobSheetController`, `LkpdController`, `PostTestController`: Mengelola konten interaktif dan flag boolean masing-masing.
-  - `GradingController`: Mengelola matriks penilaian adaptif dan perhitungan nilai siswa.
+- **Controller Pengelola Konten Mandiri:**
+  - `BagianAwalController`: Mengelola 4 komponen awal (cover, kata pengantar, daftar isi, petunjuk penggunaan).
+  - `PendahuluanController`: Mengelola 3 komponen orientasi konsep (tujuan pembelajaran, peta konsep, glosarium).
+  - `PreTestController`: Mengelola konfigurasi dan butir soal kuis diagnostik Pre-test.
+  - `MateriController`: Mengelola naskah materi pembelajaran dan file presentasi slide PPT.
+  - `VideoController`: Mengelola integrasi video YouTube dan tugas ringkasan siswa.
+  - `EmbedController`: Mengelola media interaktif embed dan bukti pengerjaan siswa.
+  - `JobSheetController`: Mengelola lembar kerja praktik (Job Sheet PDF) pada bagian Evaluasi & Latihan.
+  - `LkpdController`: Mengelola lembar kerja peserta didik (LKPD PDF) pada bagian Evaluasi & Latihan.
+  - `PostTestController`: Mengelola konfigurasi dan butir soal kuis evaluasi akhir modul Post-test.
+  - `DaftarPustakaController`: Mengelola daftar referensi buku, modul ajar, jurnal, dan tautan digital pada Bagian Akhir.
+  - `GradingController`: Mengelola matriks penilaian adaptif dan rekapitulasi nilai siswa.
+  - `ModuleManagerController`: Mengelola siklus hidup modul (CRUD, status draft/publish/closed).
 
 ### 5.4 Sequence Diagram Alur Belajar 5 Bagian
 
@@ -206,7 +225,7 @@ sequenceDiagram
     Note over Guru, DB: FASE PERAKITAN 5 BAGIAN MODUL
     Guru->>Server: Konfigurasi Bagian Awal & Pendahuluan
     Server->>DB: Simpan informasi_umum_data ke tabel MODULES
-    Guru->>Server: Toggle Aktifkan Komponen (Pre-test, Video, LKPD, Post-test)
+    Guru->>Server: Toggle Aktifkan Komponen (Pre-test, Video, Job Sheet, LKPD, Post-test)
     Server->>DB: Update boolean flags (has_pre_test=true, has_video=true, dll)
     Guru->>Server: Publish Modul (status = published)
     Server->>DB: Update status MODULES = 'published'
@@ -216,22 +235,22 @@ sequenceDiagram
     Server->>DB: Ambil struktur komponen aktif
     DB-->>Server: Return data komponen aktif
     
-    opt 4. Evaluasi & Latihan (Pre-test Aktif)
+    opt 2. Pendahuluan (Pre-test Aktif)
         Server-->>Siswa: Render Soal Pre-test
         Siswa->>Server: Submit Jawaban Pre-test
         Server->>DB: Simpan pre_test_score ke STUDENT_RESULTS
     end
 
-    opt 3. Kegiatan Belajar (Materi, Video, Job Sheet)
+    opt 3. Kegiatan Belajar (Materi & Video)
         Server-->>Siswa: Render Materi & Video Player & Form Ringkasan
         Siswa->>Server: Submit Teks Ringkasan Video
         Server->>DB: Simpan ke tabel VIDEO_SUMMARIES
     end
 
-    opt 4. Evaluasi & Latihan (LKPD & Embed)
-        Server-->>Siswa: Render Lembar LKPD & Dropzone File
-        Siswa->>Server: Upload Berkas PDF LKPD (Salinan Individu)
-        Server->>DB: Simpan file path ke tabel SUBMISSIONS
+    opt 4. Evaluasi & Latihan (Embed, Job Sheet, LKPD)
+        Server-->>Siswa: Render Game Interaktif, Job Sheet PDF & LKPD
+        Siswa->>Server: Upload Berkas PDF Job Sheet & LKPD
+        Server->>DB: Simpan file path ke tabel SUBMISSIONS & JOB_SHEET_SUBMISSIONS
     end
 
     opt 5. Bagian Akhir (Post-test Aktif)
@@ -246,7 +265,7 @@ sequenceDiagram
     Note over Guru, DB: FASE PENILAIAN & LAPORAN
     Guru->>Server: Buka Grading Center
     Server-->>Guru: Tampilkan berkas tugas & ringkasan siswa
-    Guru->>Server: Simpan Skor Manual (Video, LKPD, dll)
+    Guru->>Server: Simpan Skor Manual (Video, Job Sheet, LKPD, dll)
     Server->>DB: Update nilai akhir & set grading_status = 'graded'
     Guru->>Server: Unduh Laporan Rekapitulasi PDF
     Server-->>Guru: Generate Dokumen PDF Dinamis
@@ -309,13 +328,13 @@ erDiagram
         bigint class_id FK
         string title
         text informasi_umum_data "JSON: Cover, Kata Pengantar, Peta Konsep, Glosarium, Petunjuk, Capaian, Daftar Pustaka"
-        boolean has_pre_test "Toggle Pre-test (Evaluasi & Latihan)"
-        boolean has_materi "Toggle Materi + PPT (Kegiatan Belajar)"
-        boolean has_video "Toggle Video YouTube (Kegiatan Belajar)"
-        boolean has_embed "Toggle Praktik Embed (Evaluasi & Latihan)"
-        boolean has_job_sheet "Toggle Job Sheet PDF (Kegiatan Belajar)"
-        boolean has_lkpd "Toggle Tugas LKPD (Evaluasi & Latihan)"
-        boolean has_post_test "Toggle Post-test (Bagian Akhir)"
+        boolean has_pre_test "Toggle Pre-test (Bagian 2. Pendahuluan)"
+        boolean has_materi "Toggle Materi + PPT (Bagian 3. Kegiatan Belajar)"
+        boolean has_video "Toggle Video YouTube (Bagian 3. Kegiatan Belajar)"
+        boolean has_embed "Toggle Praktik Embed (Bagian 4. Evaluasi & Latihan)"
+        boolean has_job_sheet "Toggle Job Sheet PDF (Bagian 4. Evaluasi & Latihan)"
+        boolean has_lkpd "Toggle Tugas LKPD (Bagian 4. Evaluasi & Latihan)"
+        boolean has_post_test "Toggle Post-test (Bagian 5. Bagian Akhir)"
         string status "draft | published | closed"
     }
     PRE_TESTS {
@@ -422,11 +441,11 @@ erDiagram
 - `title` (String): Judul modul pembelajaran.
 - `informasi_umum_data` (JSON/Text): Menyimpan struktur data Cover, Kata Pengantar, Peta Konsep, Glosarium, Petunjuk Penggunaan, Tujuan Pembelajaran, dan Daftar Pustaka.
 - **[ 7 Sakelar Fitur Interaktif ]**:
-  - `has_pre_test` (Boolean — Bagian 4. Evaluasi & Latihan)
+  - `has_pre_test` (Boolean — Bagian 2. Pendahuluan)
   - `has_materi` (Boolean — Bagian 3. Kegiatan Belajar)
   - `has_video` (Boolean — Bagian 3. Kegiatan Belajar)
   - `has_embed` (Boolean — Bagian 4. Evaluasi & Latihan)
-  - `has_job_sheet` (Boolean — Bagian 3. Kegiatan Belajar)
+  - `has_job_sheet` (Boolean — Bagian 4. Evaluasi & Latihan)
   - `has_lkpd` (Boolean — Bagian 4. Evaluasi & Latihan)
   - `has_post_test` (Boolean — Bagian 5. Bagian Akhir)
 - `status` (Enum): `'draft'`, `'published'`, `'closed'`.
@@ -461,8 +480,140 @@ erDiagram
 ### 7.2 Frontend & UI
 - **Templating:** Blade Templating Engine.
 - **Styling:** Tailwind CSS dengan desain modern responsif, transisi micro-animation, dan color palette harmonis.
+- **Asset Bundler:** Vite 7.
 - **Komponen Interaktif:** TinyMCE / Quill.js untuk editor teks kaya, serta AJAX toggle handler untuk manipulasi sakelar builder tanpa reload.
 
 ### 7.3 Penyimpanan Berkas & Pelaporan
 - **File Storage:** Laravel Storage Symlink dengan validasi MIME-type (Maksimal 2 MB untuk screenshot praktik, Maksimal 5 MB untuk PDF Job Sheet / LKPD, Maksimal 3 MB untuk Cover).
 - **PDF Reporting:** `barryvdh/laravel-dompdf` untuk konversi laporan penilaian dinamis siap cetak.
+
+---
+
+## 8. **Project Folder Structure (Struktur Direktori Proyek)**
+
+Struktur direktori codebase disusun secara bersih, modular, dan mengikuti konvensi standar Laravel 11:
+
+```
+e-modul/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── AuthController.php              # Multi-guard authentication (Admin, Teacher, Student)
+│   │   │   ├── Controller.php                  # Base Controller
+│   │   │   └── Teacher/                        # Dedicated Workspace & Modular Component Editors
+│   │   │       ├── BagianAwalController.php    # Editor Bagian 1 (Cover, Kata Pengantar, Daftar Isi, Petunjuk)
+│   │   │       ├── PendahuluanController.php   # Editor Bagian 2 (Tujuan Pembelajaran, Peta Konsep, Glosarium)
+│   │   │       ├── PreTestController.php       # Editor Pre-test (Kuis Diagnostik & Builder Soal)
+│   │   │       ├── MateriController.php        # Editor Materi Pembelajaran & Upload PPT
+│   │   │       ├── VideoController.php         # Editor Video YouTube & Pengaturan Resume
+│   │   │       ├── EmbedController.php         # Editor Simulator Embed & Praktik Interaktif
+│   │   │       ├── JobSheetController.php      # Editor Lembar Kerja Praktik (Job Sheet PDF)
+│   │   │       ├── LkpdController.php          # Editor Lembar Kerja Peserta Didik (LKPD PDF)
+│   │   │       ├── PostTestController.php      # Editor Post-test (Evaluasi Akhir Modul & Builder Soal)
+│   │   │       ├── DaftarPustakaController.php # Editor Bagian 5 (Daftar Pustaka & Referensi Rujukan)
+│   │   │       ├── GradingController.php       # Matriks Penilaian Adaptif & Rekapitulasi Nilai Siswa
+│   │   │       └── ModuleManagerController.php # Manajer Modul (CRUD, Publish, Close, Detail Modul)
+│   │   └── Middleware/
+│   │       └── Authenticate.php                # Multi-guard authentication middleware handler
+│   └── Models/
+│       ├── Admin.php                           # Model entitas Administrator
+│       ├── Teacher.php                         # Model entitas Guru
+│       ├── Student.php                         # Model entitas Siswa
+│       ├── SchoolClass.php                     # Model entitas Kelas & Jurusan
+│       ├── Module.php                          # Model E-Modul Sentral & Helper 5 Bagian
+│       ├── PreTest.php                         # Model konfigurasi Pre-test
+│       ├── PreTestQuestion.php                 # Model butir soal Pre-test
+│       ├── PostTest.php                        # Model konfigurasi Post-test
+│       ├── PostTestQuestion.php                # Model butir soal Post-test
+│       ├── JobSheet.php                        # Model instrumen Job Sheet
+│       ├── JobSheetSubmission.php              # Model tugas pengumpulan Job Sheet siswa
+│       ├── Lkpd.php                            # Model instrumen LKPD
+│       ├── Submission.php                      # Model tugas pengumpulan LKPD siswa
+│       ├── EmbedSubmission.php                 # Model bukti tangkapan layar praktik embed
+│       ├── VideoSummary.php                    # Model teks ringkasan video pembelajaran
+│       └── StudentResult.php                   # Model agregasi nilai adaptif per siswa
+├── database/
+│   ├── factories/                              # Database model factories
+│   ├── migrations/                             # Migration skema tabel basis data
+│   └── seeders/
+│       └── DatabaseSeeder.php                  # Data awal pengguna, kelas, dan modul demonstrasi
+├── public/
+│   ├── build/                                  # Aset terkompilasi Vite (CSS & JS bundles)
+│   └── storage/                                # Symlink ke storage/app/public
+├── resources/
+│   ├── css/
+│   │   └── app.css                             # Tailwind CSS stylesheet
+│   ├── js/
+│   │   └── app.js                              # JavaScript entry point
+│   └── views/
+│       ├── layouts/
+│       │   ├── admin/                          # Layout master dasbor admin
+│       │   ├── teacher/                        # Layout master workspace guru (dashboardteacher.blade.php)
+│       │   └── student/                        # Layout master portal belajar siswa
+│       └── pages/
+│           ├── admin/
+│           │   └── dashboard.blade.php         # Dasbor supervisi admin
+│           ├── student/
+│           │   └── dashboard.blade.php         # Portal belajar & tab tugas/riwayat siswa
+│           └── teacher/
+│               ├── classes/
+│               │   └── index.blade.php         # Daftar kelas binaan guru
+│               ├── grading/
+│               │   ├── index.blade.php         # Index pusat penilaian guru
+│               │   └── show.blade.php          # Matriks penilaian adaptif modul per siswa
+│               ├── modules/
+│               │   ├── index.blade.php         # Manajer Modul (Daftar seluruh e-modul guru)
+│               │   ├── create.blade.php        # Form pembuatan modul baru
+│               │   ├── show.blade.php          # Detail Modul Utama & Builder 5 Bagian
+│               │   ├── bagian-awal/
+│               │   │   └── edit.blade.php      # Editor Bagian Awal (4 Komponen)
+│               │   ├── pendahuluan/
+│               │   │   └── edit.blade.php      # Editor Pendahuluan (3 Komponen Konsep)
+│               │   ├── daftar-pustaka/
+│               │   │   └── edit.blade.php      # Editor Daftar Pustaka (Kepustakaan & Rujukan)
+│               │   ├── pre-test.blade.php      # Editor Quiz Builder Pre-test Diagnostik
+│               │   ├── preview-pre-test.blade.php # Pratinjau simulasi Pre-test
+│               │   ├── materi.blade.php        # Editor Materi Pembelajaran & PPT
+│               │   ├── preview-materi.blade.php # Pratinjau simulasi Materi
+│               │   ├── video.blade.php         # Editor Video YouTube & Resume
+│               │   ├── preview-video.blade.php # Pratinjau simulasi Video
+│               │   ├── embed.blade.php         # Editor Game Interaktif / Simulator Embed
+│               │   ├── preview-embed.blade.php # Pratinjau simulasi Embed
+│               │   ├── job-sheet.blade.php     # Editor Lembar Kerja Praktik (Job Sheet PDF)
+│               │   ├── preview-job-sheet.blade.php # Pratinjau simulasi Job Sheet
+│               │   ├── lkpd.blade.php          # Editor Tugas LKPD PDF
+│               │   ├── preview-lkpd.blade.php  # Pratinjau simulasi LKPD
+│               │   ├── post-test.blade.php     # Editor Quiz Builder Post-test Akhir Modul
+│               │   ├── preview-post-test.blade.php # Pratinjau simulasi Post-test
+│               │   └── partials/               # Komponen Blade parsial
+│               └── reports/
+│                   └── index.blade.php         # Template rekapitulasi laporan PDF
+├── routes/
+│   ├── web.php                                 # Rute aplikasi (Multi-guard auth & teacher sub-editors)
+│   └── console.php                             # Rute perintah artisan CLI
+├── storage/
+│   └── app/
+│       └── public/
+│           ├── covers/                         # Berkas sampul modul pembelajaran
+│           ├── job_sheets/                     # Berkas PDF panduan Job Sheet guru
+│           ├── job_sheet_submissions/          # Berkas tugas Job Sheet yang diunggah siswa
+│           ├── lkpds/                          # Berkas PDF instrumen LKPD guru
+│           ├── lkpd_submissions/               # Berkas tugas LKPD yang diunggah siswa
+│           ├── ppts/                           # Berkas presentasi PPT modul
+│           └── screenshots/                    # Berkas bukti tangkapan layar praktik embed
+├── tests/
+│   ├── Feature/
+│   │   ├── BagianAwalTest.php                  # Pengujian fitur Editor Bagian Awal
+│   │   ├── PendahuluanTest.php                 # Pengujian fitur Editor Pendahuluan
+│   │   ├── DaftarPustakaTest.php               # Pengujian fitur Editor Daftar Pustaka
+│   │   ├── ModuleShowInterfaceTest.php         # Pengujian antarmuka 5 bagian modul
+│   │   ├── GradingCenterTest.php               # Pengujian matriks adaptif Grading Center
+│   │   └── ExampleTest.php                     # Pengujian respon HTTP dasar
+│   └── Unit/
+│       └── ExampleTest.php                     # Pengujian unit logic dasar
+├── composer.json                               # Dependensi PHP & konfigurasi Laravel
+├── package.json                                # Dependensi Node.js, Vite & Tailwind CSS
+├── tailwind.config.js                          # Konfigurasi Tailwind CSS
+├── vite.config.js                              # Konfigurasi build asset Vite
+└── prd.md                                      # Dokumen Spesifikasi Kebutuhan Proyek (PRD)
+```
