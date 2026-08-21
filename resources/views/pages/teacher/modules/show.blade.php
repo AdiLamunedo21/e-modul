@@ -166,7 +166,7 @@
                     </div>
                     <div>
                         <h2 class="text-base font-bold text-slate-900 leading-tight">Komponen Inti</h2>
-                        <p class="text-[11px] text-slate-400">Kegiatan Belajar (7 Toggle Opsional)</p>
+                        <p class="text-[11px] text-slate-400">Kegiatan Pembelajaran (7 Toggle Opsional)</p>
                     </div>
                 </div>
                 <span class="text-[10px] font-extrabold uppercase tracking-wider bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full border border-blue-200">

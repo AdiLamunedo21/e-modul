@@ -259,5 +259,131 @@ class DatabaseSeeder extends Seeder
             'explanation'    => 'ROLLBACK membatalkan transaksi dan mengembalikan kondisi data sebelum transaksi dimulai.',
             'order_num'      => 2,
         ]);
+
+        // Seed JobSheet & LKPD untuk modul
+        $jobSheet = \App\Models\JobSheet::create([
+            'module_id'     => $module->id,
+            'pdf_file_path' => 'job_sheets/jobsheet_basis_data.pdf',
+        ]);
+
+        $lkpd = \App\Models\Lkpd::create([
+            'module_id'     => $module->id,
+            'pdf_file_path' => 'lkpds/lkpd_studi_kasus_database.pdf',
+        ]);
+
+        $student1 = \App\Models\Student::where('identity_number', 'NISN001')->first();
+        $student2 = \App\Models\Student::where('identity_number', 'NISN002')->first();
+        $student3 = \App\Models\Student::where('identity_number', 'NISN003')->first();
+
+        // ─── Submissions Siswa 1 (Sudah Dinilai Tuntas / Graded) ───
+        if ($student1) {
+            \App\Models\VideoSummary::create([
+                'module_id'    => $module->id,
+                'student_id'   => $student1->id,
+                'summary_text' => 'Video ini menjelaskan arsitektur client-server DBMS, konsep relasi antar tabel (Primary Key & Foreign Key), serta implementasi query JOIN dalam pengelolaan basis data relasional.',
+                'manual_score' => 90,
+            ]);
+
+            \App\Models\EmbedSubmission::create([
+                'module_id'       => $module->id,
+                'student_id'      => $student1->id,
+                'screenshot_path' => 'embed_submissions/sample_terminal.png',
+                'manual_score'    => 85,
+            ]);
+
+            \App\Models\JobSheetSubmission::create([
+                'job_sheet_id'       => $jobSheet->id,
+                'student_id'         => $student1->id,
+                'uploaded_file_path' => 'job_sheet_submissions/laporan_praktik_siswa1.pdf',
+                'manual_score'       => 90,
+            ]);
+
+            \App\Models\Submission::create([
+                'lkpd_id'            => $lkpd->id,
+                'student_id'         => $student1->id,
+                'uploaded_file_path' => 'lkpd_submissions/jawaban_lkpd_siswa1.pdf',
+                'manual_score'       => 95,
+            ]);
+
+            \App\Models\StudentResult::create([
+                'student_id'      => $student1->id,
+                'module_id'       => $module->id,
+                'pre_test_score'  => 100,
+                'video_score'     => 90,
+                'embed_score'     => 85,
+                'job_sheet_score' => 90,
+                'lkpd_score'      => 95,
+                'post_test_score' => 100,
+                'summative_score' => 93,
+                'grading_status'  => 'graded',
+            ]);
+        }
+
+        // ─── Submissions Siswa 2 (Menunggu Penilaian / Pending) ───
+        if ($student2) {
+            \App\Models\VideoSummary::create([
+                'module_id'    => $module->id,
+                'student_id'   => $student2->id,
+                'summary_text' => 'Saya telah mempelajari definisi perintah SQL DDL dan DML. Pemahaman tentang kunci primer sangat penting untuk mencegah inkonsistensi redundansi data.',
+                'manual_score' => null,
+            ]);
+
+            \App\Models\EmbedSubmission::create([
+                'module_id'       => $module->id,
+                'student_id'      => $student2->id,
+                'screenshot_path' => 'embed_submissions/sample_terminal.png',
+                'manual_score'    => null,
+            ]);
+
+            \App\Models\JobSheetSubmission::create([
+                'job_sheet_id'       => $jobSheet->id,
+                'student_id'         => $student2->id,
+                'uploaded_file_path' => 'job_sheet_submissions/laporan_praktik_siswa2.pdf',
+                'manual_score'       => null,
+            ]);
+
+            \App\Models\Submission::create([
+                'lkpd_id'            => $lkpd->id,
+                'student_id'         => $student2->id,
+                'uploaded_file_path' => 'lkpd_submissions/jawaban_lkpd_siswa2.pdf',
+                'manual_score'       => null,
+            ]);
+
+            \App\Models\StudentResult::create([
+                'student_id'      => $student2->id,
+                'module_id'       => $module->id,
+                'pre_test_score'  => 50,
+                'video_score'     => null,
+                'embed_score'     => null,
+                'job_sheet_score' => null,
+                'lkpd_score'      => null,
+                'post_test_score' => 100,
+                'summative_score' => 75,
+                'grading_status'  => 'pending',
+            ]);
+        }
+
+        // ─── Submissions Siswa 3 (Baru mengerjakan sebagian) ───
+        if ($student3) {
+            \App\Models\VideoSummary::create([
+                'module_id'    => $module->id,
+                'student_id'   => $student3->id,
+                'summary_text' => 'Ringkasan singkat mengenai pengantar basis data dan fungsi DBMS pada industri perangkat lunak modern.',
+                'manual_score' => null,
+            ]);
+
+            \App\Models\StudentResult::create([
+                'student_id'      => $student3->id,
+                'module_id'       => $module->id,
+                'pre_test_score'  => 100,
+                'video_score'     => null,
+                'embed_score'     => null,
+                'job_sheet_score' => null,
+                'lkpd_score'      => null,
+                'post_test_score' => null,
+                'summative_score' => 100,
+                'grading_status'  => 'pending',
+            ]);
+        }
     }
 }

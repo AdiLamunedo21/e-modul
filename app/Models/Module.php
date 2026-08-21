@@ -418,4 +418,96 @@ class Module extends Model
     {
         return $this->postTest?->instructions ?? ($this->post_test_data['petunjuk'] ?? '');
     }
+
+    /** Daftar komponen penilaian yang aktif pada modul */
+    public function activeGradedComponents(): array
+    {
+        $components = [];
+
+        if ($this->has_pre_test) {
+            $components['pre_test'] = [
+                'name'      => 'Pre-test',
+                'field'     => 'pre_test_score',
+                'type'      => 'auto',
+                'badge'     => 'bg-blue-100 text-blue-800 border-blue-200',
+                'icon'      => '📝',
+                'max_score' => 100,
+            ];
+        }
+        if ($this->has_video) {
+            $components['video'] = [
+                'name'      => 'Ringkasan Video',
+                'field'     => 'video_score',
+                'type'      => 'manual',
+                'badge'     => 'bg-red-100 text-red-800 border-red-200',
+                'icon'      => '🎬',
+                'max_score' => 100,
+            ];
+        }
+        if ($this->has_embed) {
+            $components['embed'] = [
+                'name'      => 'Praktik Embed',
+                'field'     => 'embed_score',
+                'type'      => 'manual',
+                'badge'     => 'bg-violet-100 text-violet-800 border-violet-200',
+                'icon'      => '⚡',
+                'max_score' => 100,
+            ];
+        }
+        if ($this->has_job_sheet) {
+            $components['job_sheet'] = [
+                'name'      => 'Job Sheet (PDF)',
+                'field'     => 'job_sheet_score',
+                'type'      => 'manual',
+                'badge'     => 'bg-amber-100 text-amber-800 border-amber-200',
+                'icon'      => '📋',
+                'max_score' => 100,
+            ];
+        }
+        if ($this->has_lkpd) {
+            $components['lkpd'] = [
+                'name'      => 'Tugas LKPD',
+                'field'     => 'lkpd_score',
+                'type'      => 'manual',
+                'badge'     => 'bg-cyan-100 text-cyan-800 border-cyan-200',
+                'icon'      => '📑',
+                'max_score' => 100,
+            ];
+        }
+        if ($this->has_post_test) {
+            $components['post_test'] = [
+                'name'      => 'Post-test',
+                'field'     => 'post_test_score',
+                'type'      => 'auto',
+                'badge'     => 'bg-teal-100 text-teal-800 border-teal-200',
+                'icon'      => '🎯',
+                'max_score' => 100,
+            ];
+        }
+
+        return $components;
+    }
+
+    /** Statistik penilaian modul */
+    public function gradingStats(): array
+    {
+        $totalStudents = $this->schoolClass ? $this->schoolClass->students()->count() : 0;
+        $results = $this->studentResults;
+
+        $submittedCount = $results->count();
+        $gradedCount    = $results->where('grading_status', 'graded')->count();
+        $pendingCount   = $results->where('grading_status', 'pending')->count();
+
+        $avgScore = $gradedCount > 0 ? (int) round($results->where('grading_status', 'graded')->avg('summative_score')) : 0;
+        $progressPct = $totalStudents > 0 ? (int) round(($gradedCount / $totalStudents) * 100) : 0;
+
+        return [
+            'total_students'  => $totalStudents,
+            'submitted_count' => $submittedCount,
+            'graded_count'    => $gradedCount,
+            'pending_count'   => $pendingCount,
+            'avg_score'       => $avgScore,
+            'progress_pct'    => $progressPct,
+        ];
+    }
 }

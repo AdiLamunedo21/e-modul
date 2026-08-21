@@ -70,24 +70,24 @@
     </div>
 
     {{-- Card 3: Antrean Grading Center --}}
-    <div class="rounded-2xl bg-white p-5 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
+    <a href="{{ route('teacher.grading.index') }}" class="block rounded-2xl bg-white p-5 border border-slate-200/80 shadow-sm hover:shadow-md hover:border-amber-300 transition-all group">
         <div class="flex items-center justify-between">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Perlu Dinilai (Grading)</span>
-            <div class="p-2.5 rounded-xl bg-amber-50 text-amber-600 border border-amber-100">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 group-hover:text-amber-700 transition-colors">Perlu Dinilai (Grading)</span>
+            <div class="p-2.5 rounded-xl bg-amber-50 text-amber-600 border border-amber-100 group-hover:bg-amber-100 transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
                 </svg>
             </div>
         </div>
         <div class="mt-4 flex items-baseline gap-2">
-            <span class="text-3xl font-black text-amber-600">18</span>
-            <span class="text-xs font-semibold text-slate-500">Tugas Menunggu</span>
+            <span class="text-3xl font-black text-amber-600">Buka</span>
+            <span class="text-xs font-semibold text-slate-500">Grading Center</span>
         </div>
         <div class="mt-3 flex items-center gap-1 text-xs font-semibold text-amber-600">
             <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
-            <span>LKPD, Job Sheet & Screenshot</span>
+            <span>Periksa Tugas Siswa →</span>
         </div>
-    </div>
+    </a>
 
     {{-- Card 4: Rata-rata Progres Pengumpulan --}}
     <div class="rounded-2xl bg-white p-5 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">

@@ -11,6 +11,7 @@ use App\Http\Controllers\Teacher\EmbedController;
 use App\Http\Controllers\Teacher\JobSheetController;
 use App\Http\Controllers\Teacher\LkpdController;
 use App\Http\Controllers\Teacher\PostTestController;
+use App\Http\Controllers\Teacher\GradingController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -101,8 +102,12 @@ Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(fu
     Route::post('/modules/{module}/post-test/toggle',    [PostTestController::class, 'toggle'])->name('modules.post-test.toggle');
     Route::get('/modules/{module}/post-test/preview',    [PostTestController::class, 'preview'])->name('modules.post-test.preview');
 
-    // Grading Center (placeholder — dikembangkan berikutnya)
-    Route::get('/grading', fn () => view('pages.teacher.grading.index'))->name('grading.index');
+    // Grading Center (Pusat Penilaian Adaptif)
+    Route::get('/grading',                                                  [GradingController::class, 'index'])->name('grading.index');
+    Route::get('/grading/modules/{module}',                                 [GradingController::class, 'show'])->name('grading.show');
+    Route::get('/grading/modules/{module}/students/{student}',              [GradingController::class, 'getStudentDetail'])->name('grading.student.detail');
+    Route::post('/grading/modules/{module}/students/{student}',             [GradingController::class, 'updateStudentGrade'])->name('grading.student.update');
+    Route::post('/grading/modules/{module}/batch',                          [GradingController::class, 'batchUpdate'])->name('grading.batch.update');
 
     // Laporan PDF (placeholder)
     Route::get('/reports', fn () => view('pages.teacher.reports.index'))->name('reports.index');
