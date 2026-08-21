@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Teacher\ModuleManagerController;
+use App\Http\Controllers\Teacher\BagianAwalController;
+use App\Http\Controllers\Teacher\PendahuluanController;
 use App\Http\Controllers\Teacher\InformasiUmumController;
 use App\Http\Controllers\Teacher\PreTestController;
 use App\Http\Controllers\Teacher\MateriController;
@@ -50,6 +52,16 @@ Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(fu
     Route::get('/modules/{module}',             [ModuleManagerController::class, 'show'])->name('modules.show');
     Route::patch('/modules/{module}/status',    [ModuleManagerController::class, 'updateStatus'])->name('modules.status');
     Route::delete('/modules/{module}',          [ModuleManagerController::class, 'destroy'])->name('modules.destroy');
+
+    // 1. Bagian Awal: 4 Komponen (Cover, Kata Pengantar, Daftar Isi, Petunjuk Penggunaan)
+    Route::get('/modules/{module}/bagian-awal',                 [BagianAwalController::class, 'edit'])->name('modules.bagian-awal.edit');
+    Route::patch('/modules/{module}/bagian-awal',                [BagianAwalController::class, 'update'])->name('modules.bagian-awal.update');
+    Route::post('/modules/{module}/bagian-awal/toggle/{component}', [BagianAwalController::class, 'toggle'])->name('modules.bagian-awal.toggle');
+
+    // 2. Pendahuluan: 3 Komponen (Tujuan Pembelajaran & Capaian, Peta Konsep, Glosarium)
+    Route::get('/modules/{module}/pendahuluan',                 [PendahuluanController::class, 'edit'])->name('modules.pendahuluan.edit');
+    Route::patch('/modules/{module}/pendahuluan',                [PendahuluanController::class, 'update'])->name('modules.pendahuluan.update');
+    Route::post('/modules/{module}/pendahuluan/toggle/{component}', [PendahuluanController::class, 'toggle'])->name('modules.pendahuluan.toggle');
 
     // Informasi Umum Editor & Toggle
     Route::get('/modules/{module}/informasi-umum',                  [InformasiUmumController::class, 'edit'])->name('modules.informasi-umum.edit');

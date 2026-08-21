@@ -149,7 +149,7 @@
                             1
                         </div>
                         <div>
-                            <h2 class="text-base font-bold text-slate-900 leading-tight">1. Bagian Awal</h2>
+                            <h2 class="text-base font-bold text-slate-900 leading-tight">Bagian Awal</h2>
                             <p class="text-[11px] text-slate-400">Identitas & Pengantar (4 Komponen)</p>
                         </div>
                     </div>
@@ -221,7 +221,7 @@
                             2
                         </div>
                         <div>
-                            <h2 class="text-base font-bold text-slate-900 leading-tight">2. Pendahuluan</h2>
+                            <h2 class="text-base font-bold text-slate-900 leading-tight">Pendahuluan</h2>
                             <p class="text-[11px] text-slate-400">Capaian & Kerangka Konsep (3 Komponen)</p>
                         </div>
                     </div>
@@ -311,7 +311,7 @@
                             3
                         </div>
                         <div>
-                            <h2 class="text-base font-bold text-slate-900 leading-tight">3. Kegiatan Belajar (Isi Materi)</h2>
+                            <h2 class="text-base font-bold text-slate-900 leading-tight">Kegiatan Belajar (Isi Materi)</h2>
                             <p class="text-[11px] text-slate-400">Materi, Slide PPT, Video & Job Sheet (3 Komponen)</p>
                         </div>
                     </div>
@@ -391,7 +391,7 @@
                             4
                         </div>
                         <div>
-                            <h2 class="text-base font-bold text-slate-900 leading-tight">4. Evaluasi & Latihan</h2>
+                            <h2 class="text-base font-bold text-slate-900 leading-tight">Evaluasi & Latihan</h2>
                             <p class="text-[11px] text-slate-400">Pre-test, Game Kuis & LKPD (3 Komponen)</p>
                         </div>
                     </div>
@@ -489,7 +489,7 @@
                             5
                         </div>
                         <div>
-                            <h2 class="text-base font-bold text-slate-900 leading-tight">5. Bagian Akhir</h2>
+                            <h2 class="text-base font-bold text-slate-900 leading-tight">Bagian Akhir</h2>
                             <p class="text-[11px] text-slate-400">Post-test & Daftar Pustaka (2 Komponen)</p>
                         </div>
                     </div>
