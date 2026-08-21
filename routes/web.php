@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Teacher\ModuleManagerController;
 use App\Http\Controllers\Teacher\BagianAwalController;
 use App\Http\Controllers\Teacher\PendahuluanController;
+use App\Http\Controllers\Teacher\DaftarPustakaController;
 use App\Http\Controllers\Teacher\InformasiUmumController;
 use App\Http\Controllers\Teacher\PreTestController;
 use App\Http\Controllers\Teacher\MateriController;
@@ -113,6 +114,11 @@ Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(fu
     Route::patch('/modules/{module}/post-test',          [PostTestController::class, 'update'])->name('modules.post-test.update');
     Route::post('/modules/{module}/post-test/toggle',    [PostTestController::class, 'toggle'])->name('modules.post-test.toggle');
     Route::get('/modules/{module}/post-test/preview',    [PostTestController::class, 'preview'])->name('modules.post-test.preview');
+
+    // 5. Bagian Akhir: Daftar Pustaka (Kepustakaan & Rujukan)
+    Route::get('/modules/{module}/daftar-pustaka',          [DaftarPustakaController::class, 'edit'])->name('modules.daftar-pustaka.edit');
+    Route::patch('/modules/{module}/daftar-pustaka',         [DaftarPustakaController::class, 'update'])->name('modules.daftar-pustaka.update');
+    Route::post('/modules/{module}/daftar-pustaka/toggle',   [DaftarPustakaController::class, 'toggle'])->name('modules.daftar-pustaka.toggle');
 
     // Grading Center (Pusat Penilaian Adaptif)
     Route::get('/grading',                                                  [GradingController::class, 'index'])->name('grading.index');

@@ -317,7 +317,7 @@
                         </div>
                         <div>
                             <h2 class="text-base font-bold text-slate-900 leading-tight">Kegiatan Belajar (Isi Materi)</h2>
-                            <p class="text-[11px] text-slate-400">Materi, Slide PPT, Video & Job Sheet (3 Komponen)</p>
+                            <p class="text-[11px] text-slate-400">Materi PPT & Multimedia Video (2 Komponen)</p>
                         </div>
                     </div>
                     <span class="text-[10px] font-extrabold uppercase tracking-wider {{ $sec3['badge_color'] }} px-2.5 py-0.5 rounded-full border">
@@ -330,7 +330,7 @@
                 </p>
 
                 {{-- Component List --}}
-                <div class="space-y-2.5 mb-4">
+                <div class="space-y-2.5">
                     @foreach($sec3['components'] as $key => $comp)
                         <div class="flex items-center justify-between gap-3 p-3 rounded-2xl bg-slate-50/80 border border-slate-200/70 hover:bg-slate-100/70 transition-colors">
                             <div class="flex items-start gap-3 min-w-0">
@@ -376,14 +376,6 @@
                     @endforeach
                 </div>
             </div>
-
-            <div class="mt-auto pt-4 border-t border-slate-100">
-                <a href="{{ $sec3['edit_all_url'] }}"
-                   class="inline-flex items-center justify-center gap-2 w-full py-2.5 text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl transition-all shadow-xs">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
-                    {{ $sec3['edit_all_label'] }}
-                </a>
-            </div>
         </div>
 
         {{-- ── 4. EVALUASI & LATIHAN ── --}}
@@ -397,7 +389,7 @@
                         </div>
                         <div>
                             <h2 class="text-base font-bold text-slate-900 leading-tight">Evaluasi & Latihan</h2>
-                            <p class="text-[11px] text-slate-400">Game Edukasi & LKPD (2 Komponen)</p>
+                            <p class="text-[11px] text-slate-400">Game Edukasi, Job Sheet & LKPD (3 Komponen)</p>
                         </div>
                     </div>
                     <span class="text-[10px] font-extrabold uppercase tracking-wider {{ $sec4['badge_color'] }} px-2.5 py-0.5 rounded-full border">
@@ -410,7 +402,7 @@
                 </p>
 
                 {{-- Component List --}}
-                <div class="space-y-2.5 mb-4">
+                <div class="space-y-2.5">
                     @foreach($sec4['components'] as $key => $comp)
                         <div class="flex items-center justify-between gap-3 p-3 rounded-2xl bg-slate-50/80 border border-slate-200/70 hover:bg-slate-100/70 transition-colors">
                             <div class="flex items-start gap-3 min-w-0">
@@ -456,14 +448,6 @@
                     @endforeach
                 </div>
             </div>
-
-            <div class="mt-auto pt-4 border-t border-slate-100">
-                <a href="{{ $sec4['edit_all_url'] }}"
-                   class="inline-flex items-center justify-center gap-2 w-full py-2.5 text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 hover:bg-amber-100 rounded-xl transition-all shadow-xs">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
-                    {{ $sec4['edit_all_label'] }}
-                </a>
-            </div>
         </div>
 
     </div>
@@ -508,7 +492,7 @@
                 </p>
 
                 {{-- Component List --}}
-                <div class="space-y-2.5 mb-4">
+                <div class="space-y-2.5">
                     @foreach($sec5['components'] as $key => $comp)
                         <div class="flex items-center justify-between gap-3 p-3 rounded-2xl bg-slate-50/80 border border-slate-200/70 hover:bg-slate-100/70 transition-colors">
                             <div class="flex items-start gap-3 min-w-0">
@@ -546,21 +530,13 @@
                                             title="{{ $comp['name'] }}: {{ $comp['is_active'] ? 'Aktif (Klik untuk Nonaktifkan)' : 'Nonaktif (Klik untuk Aktifkan)' }}"
                                             class="relative inline-flex items-center h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500/40 {{ $comp['is_active'] ? 'bg-emerald-500 border-emerald-600' : 'bg-slate-200 border-slate-400 hover:border-slate-500' }}">
                                         <span class="pointer-events-none absolute top-[1px] left-[1px] h-4 w-4 rounded-full bg-white shadow-sm border border-slate-300 transition-transform duration-300 ease-in-out"
-                                              style="transform: translateX({{ $comp['is_active'] ? '20px' : '0px' }});"></span>
+                                               style="transform: translateX({{ $comp['is_active'] ? '20px' : '0px' }});"></span>
                                     </button>
                                 </form>
                             </div>
                         </div>
                     @endforeach
                 </div>
-            </div>
-
-            <div class="mt-auto pt-4 border-t border-slate-100">
-                <a href="{{ $sec5['edit_all_url'] }}"
-                   class="inline-flex items-center justify-center gap-2 w-full py-2.5 text-xs font-bold text-rose-700 bg-rose-50 border border-rose-200 hover:bg-rose-100 rounded-xl transition-all shadow-xs">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    {{ $sec5['edit_all_label'] }}
-                </a>
             </div>
         </div>
 

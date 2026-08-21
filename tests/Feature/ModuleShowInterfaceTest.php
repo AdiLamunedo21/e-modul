@@ -45,16 +45,20 @@ class ModuleShowInterfaceTest extends TestCase
         $response->assertSee('Kegiatan Belajar (Isi Materi)');
         $response->assertSee('Uraian Materi Pembelajaran &amp; PPT', false);
         $response->assertSee('Multimedia Video Pembelajaran');
-        $response->assertSee('Lembar Kerja Praktik (Job Sheet)');
+        $response->assertDontSee('Buka Editor Materi & PPT');
 
         // 4. Evaluasi & Latihan
         $response->assertSee('Evaluasi &amp; Latihan', false);
         $response->assertSee('Game Edukasi &amp; Media Interaktif', false);
+        $response->assertSee('Lembar Kerja Praktik (Job Sheet)');
         $response->assertSee('Tugas LKPD &amp; Umpan Balik', false);
+        $response->assertDontSee('Kelola Tugas LKPD');
 
         // 5. Bagian Akhir
         $response->assertSee('Bagian Akhir');
         $response->assertSee('Post-test (Tes Akhir Modul)');
         $response->assertSee('Daftar Pustaka');
+        $response->assertDontSee('Edit Daftar Pustaka');
+        $response->assertDontSee('Kelola Soal Post-test');
     }
 }
