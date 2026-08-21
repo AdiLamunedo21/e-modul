@@ -7,6 +7,16 @@ use App\Models\Module;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * =============================================================================
+ * CONTROLLER: EmbedController
+ * =============================================================================
+ * KLASIFIKASI E-MODUL: Bagian 4 — Evaluasi & Latihan (Game Edukasi & Praktik Embed)
+ * -----------------------------------------------------------------------------
+ * Controller ini mengelola kode embed simulator, kuis online (Wordwall, Quizizz, Geogebra),
+ * dan pengunggahan bukti screenshot praktik siswa yang dikontrol oleh flag `has_embed`.
+ * =============================================================================
+ */
 class EmbedController extends Controller
 {
     private function teacher()
@@ -16,7 +26,7 @@ class EmbedController extends Controller
 
     private function authorize(Module $module): void
     {
-        abort_if($module->teacher_id !== $this->teacher()->id, 403);
+        abort_if($module->teacher_id !== $this->teacher()->id, 403, 'Anda tidak memiliki akses ke modul ini.');
     }
 
     /**

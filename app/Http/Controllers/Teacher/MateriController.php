@@ -8,6 +8,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * =============================================================================
+ * CONTROLLER: MateriController
+ * =============================================================================
+ * KLASIFIKASI E-MODUL: Bagian 3 — Kegiatan Belajar (Uraian Materi & PPT)
+ * -----------------------------------------------------------------------------
+ * Controller ini mengelola teks isi uraian materi pembelajaran, upload file PPT/PDF,
+ * dan penyisipan gambar yang dikontrol oleh flag `has_materi`.
+ * =============================================================================
+ */
 class MateriController extends Controller
 {
     private function teacher()
@@ -17,7 +27,7 @@ class MateriController extends Controller
 
     private function authorize(Module $module): void
     {
-        abort_if($module->teacher_id !== $this->teacher()->id, 403);
+        abort_if($module->teacher_id !== $this->teacher()->id, 403, 'Anda tidak memiliki akses ke modul ini.');
     }
 
     /**

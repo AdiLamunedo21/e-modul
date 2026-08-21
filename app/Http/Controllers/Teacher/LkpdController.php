@@ -9,6 +9,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * =============================================================================
+ * CONTROLLER: LkpdController
+ * =============================================================================
+ * KLASIFIKASI E-MODUL: Bagian 4 — Evaluasi & Latihan (Tugas LKPD & Umpan Balik)
+ * -----------------------------------------------------------------------------
+ * Controller ini mengelola berkas PDF LKPD studi kasus kelompok / penugasan mandiri
+ * dan pengunggahan berkas tugas siswa yang dikontrol oleh flag `has_lkpd`.
+ * =============================================================================
+ */
 class LkpdController extends Controller
 {
     private function teacher()
@@ -18,7 +28,7 @@ class LkpdController extends Controller
 
     private function authorize(Module $module): void
     {
-        abort_if($module->teacher_id !== $this->teacher()->id, 403);
+        abort_if($module->teacher_id !== $this->teacher()->id, 403, 'Anda tidak memiliki akses ke modul ini.');
     }
 
     /**

@@ -10,6 +10,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * =============================================================================
+ * CONTROLLER: PreTestController
+ * =============================================================================
+ * KLASIFIKASI E-MODUL: Bagian 4 — Evaluasi & Latihan (Soal Latihan Diagnostik)
+ * -----------------------------------------------------------------------------
+ * Controller ini mengelola konfigurasi kuis Pre-test dan butir-butir soal
+ * pilihan ganda (PreTest & PreTestQuestion) yang dikontrol oleh flag `has_pre_test`.
+ * =============================================================================
+ */
 class PreTestController extends Controller
 {
     private function teacher()
@@ -19,7 +29,7 @@ class PreTestController extends Controller
 
     private function authorize(Module $module): void
     {
-        abort_if($module->teacher_id !== $this->teacher()->id, 403);
+        abort_if($module->teacher_id !== $this->teacher()->id, 403, 'Anda tidak memiliki akses ke modul ini.');
     }
 
     /**

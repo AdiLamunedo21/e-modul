@@ -9,6 +9,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * =============================================================================
+ * CONTROLLER: JobSheetController
+ * =============================================================================
+ * KLASIFIKASI E-MODUL: Bagian 3 — Kegiatan Belajar (Lembar Kerja Praktik / Job Sheet)
+ * -----------------------------------------------------------------------------
+ * Controller ini mengelola berkas PDF instruksi kerja bengkel/lab dan form unggah
+ * hasil pengerjaan job sheet siswa yang dikontrol oleh flag `has_job_sheet`.
+ * =============================================================================
+ */
 class JobSheetController extends Controller
 {
     private function teacher()
@@ -18,7 +28,7 @@ class JobSheetController extends Controller
 
     private function authorize(Module $module): void
     {
-        abort_if($module->teacher_id !== $this->teacher()->id, 403);
+        abort_if($module->teacher_id !== $this->teacher()->id, 403, 'Anda tidak memiliki akses ke modul ini.');
     }
 
     /**

@@ -15,6 +15,25 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * =============================================================================
+ * CONTROLLER: GradingController
+ * =============================================================================
+ * PUSAT PENILAIAN ADAPTIF (GRADING CENTER):
+ * -----------------------------------------------------------------------------
+ * Controller ini mengelola penilaian gabungan otomatis dan manual untuk seluruh
+ * komponen evaluasi yang diaktifkan guru pada modul:
+ * - Pre-test (Otomatis)          -> Bagian 4. Evaluasi & Latihan
+ * - Resume Video (Manual)        -> Bagian 3. Kegiatan Belajar
+ * - Screenshot Embed (Manual)    -> Bagian 4. Evaluasi & Latihan
+ * - Berkas Job Sheet PDF (Manual)-> Bagian 3. Kegiatan Belajar
+ * - Berkas Tugas LKPD (Manual)   -> Bagian 4. Evaluasi & Latihan
+ * - Post-test (Otomatis)         -> Bagian 5. Bagian Akhir
+ * 
+ * Matriks penilaian di frontend dan ekspor nilai secara otomatis beradaptasi
+ * hanya merender kolom komponen yang aktif pada modul (`Module::activeGradedComponents()`).
+ * =============================================================================
+ */
 class GradingController extends Controller
 {
     /**

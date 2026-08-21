@@ -8,6 +8,31 @@ use App\Models\SchoolClass;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * =============================================================================
+ * CONTROLLER: ModuleManagerController
+ * =============================================================================
+ * 
+ * PANDUAN PENGEMBANG (DEVELOPER ARCHITECTURE NOTES):
+ * -----------------------------------------------------------------------------
+ * Controller ini adalah pusat kendali utama bagi Guru untuk mengelola siklus 
+ * hidup E-Modul (CRUD, Status Publikasi, dan Visualisasi Detail Modul).
+ * 
+ * STRUKTUR MODUL TERPADU (5 BAGIAN UTAMA):
+ * Saat method `show(Module $module)` dipanggil, view `pages.teacher.modules.show` 
+ * akan merender data 5 Bagian Umum E-Modul secara dinamis menggunakan helper 
+ * method di Model `Module.php`:
+ * 
+ * 1. Bagian Awal          : `Module::bagianAwalComponents()` (Cover, Kata Pengantar, Daftar Isi, Petunjuk)
+ * 2. Pendahuluan          : `Module::pendahuluanComponents()` (Tujuan & Capaian, Peta Konsep, Glosarium)
+ * 3. Kegiatan Belajar     : `Module::kegiatanBelajarComponents()` (Materi & PPT, Video YouTube, Job Sheet)
+ * 4. Evaluasi & Latihan   : `Module::evaluasiLatihanComponents()` (Pre-test, Praktik Embed, Tugas LKPD)
+ * 5. Bagian Akhir         : `Module::bagianAkhirComponents()` (Post-test, Daftar Pustaka)
+ * 
+ * Seluruh ringkasan metrik, persentase komponen aktif, dan navigasi anchor
+ * dihasilkan secara terpusat oleh method `Module::moduleSectionsSummary()`.
+ * =============================================================================
+ */
 class ModuleManagerController extends Controller
 {
     private function teacher()
@@ -16,7 +41,8 @@ class ModuleManagerController extends Controller
     }
 
     /**
-     * Halaman Manajer Modul — daftar semua modul milik guru ini.
+     * Halaman Manajer Modul — menampilkan daftar semua modul milik guru yang sedang login.
+     * Mendukung tab filter status: all, draft, published, closed.
      */
     public function index(Request $request)
     {
@@ -24,7 +50,7 @@ class ModuleManagerController extends Controller
             ->where('teacher_id', $this->teacher()->id)
             ->latest();
 
-        // Filter by status tab
+        // Filter berdasarkan tab status jika ada
         if ($request->filled('status') && in_array($request->status, ['draft', 'published', 'closed'])) {
             $query->where('status', $request->status);
         }
@@ -42,7 +68,7 @@ class ModuleManagerController extends Controller
     }
 
     /**
-     * Form buat modul baru (langkah 1: isi judul & target kelas).
+     * Form buat modul baru (langkah 1: input judul modul & target kelas).
      */
     public function create()
     {
@@ -51,7 +77,8 @@ class ModuleManagerController extends Controller
     }
 
     /**
-     * Simpan modul baru sebagai draft.
+     * Menyimpan modul baru ke database dengan status default 'draft',
+     * lalu mengarahkan guru ke halaman Detail Modul 5 Bagian.
      */
     public function store(Request $request)
     {
@@ -69,11 +96,13 @@ class ModuleManagerController extends Controller
 
         return redirect()
             ->route('teacher.modules.show', $module)
-            ->with('success', 'Modul baru berhasil dibuat! Lanjutkan dengan mengisi Informasi Umum.');
+            ->with('success', 'Modul baru berhasil dibuat! Lanjutkan dengan mengisi konten 5 Bagian E-Modul.');
     }
 
     /**
-     * Halaman detail modul (ringkasan progress & navigasi ke bagian-bagian).
+     * Halaman Detail Modul:
+     * Menampilkan dashboard visual 5 Bagian Standar E-Modul, progress bar aktivasi komponen,
+     * tombol edit langsung, serta sakelar toggle instan untuk setiap komponen.
      */
     public function show(Module $module)
     {
@@ -83,7 +112,7 @@ class ModuleManagerController extends Controller
     }
 
     /**
-     * Ubah status publish / draft / closed.
+     * Memperbarui status publikasi modul (draft -> published -> closed).
      */
     public function updateStatus(Request $request, Module $module)
     {
@@ -96,16 +125,16 @@ class ModuleManagerController extends Controller
         $module->update(['status' => $validated['status']]);
 
         $label = match($validated['status']) {
-            'published' => 'Modul berhasil dipublikasikan!',
+            'published' => 'Modul berhasil dipublikasikan dan dapat diakses siswa!',
             'closed'    => 'Modul ditutup dan tidak bisa diakses siswa.',
-            default     => 'Modul dikembalikan ke Draft.',
+            default     => 'Modul dikembalikan ke status Draft.',
         };
 
         return back()->with('success', $label);
     }
 
     /**
-     * Hapus modul beserta semua relasinya.
+     * Menghapus modul beserta seluruh relasi data anak (cascade).
      */
     public function destroy(Module $module)
     {

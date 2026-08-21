@@ -141,6 +141,294 @@ class Module extends Model
         return $active;
     }
 
+    /** 1. Bagian Awal Components */
+    public function bagianAwalComponents(): array
+    {
+        return [
+            'cover' => [
+                'key'         => 'cover',
+                'name'        => 'Halaman Sampul (Cover)',
+                'emoji'       => '📷',
+                'badge'       => 'Identitas Visual',
+                'desc'        => 'Halaman sampul depan dan identitas visual modul pembelajaran',
+                'is_active'   => $this->isInfoComponentActive('cover'),
+                'edit_url'    => route('teacher.modules.informasi-umum.edit', $this) . '#sec-cover',
+                'toggle_url'  => route('teacher.modules.informasi-umum.toggle', [$this, 'cover']),
+                'preview_url' => null,
+            ],
+            'kata_pengantar' => [
+                'key'         => 'kata_pengantar',
+                'name'        => 'Kata Pengantar',
+                'emoji'       => '✏️',
+                'badge'       => 'Prakata Guru',
+                'desc'        => 'Sambutan pembuka dan kata pengantar modul dari guru pengampu',
+                'is_active'   => $this->isInfoComponentActive('kata_pengantar'),
+                'edit_url'    => route('teacher.modules.informasi-umum.edit', $this) . '#sec-kata',
+                'toggle_url'  => route('teacher.modules.informasi-umum.toggle', [$this, 'kata_pengantar']),
+                'preview_url' => null,
+            ],
+            'daftar_isi' => [
+                'key'         => 'daftar_isi',
+                'name'        => 'Daftar Isi',
+                'emoji'       => '📋',
+                'badge'       => 'Navigasi Modul',
+                'desc'        => 'Daftar isi dan struktur navigasi halaman modul pembelajaran',
+                'is_active'   => $this->isInfoComponentActive('daftar_isi'),
+                'edit_url'    => route('teacher.modules.informasi-umum.edit', $this) . '#sec-daftar',
+                'toggle_url'  => route('teacher.modules.informasi-umum.toggle', [$this, 'daftar_isi']),
+                'preview_url' => null,
+            ],
+            'petunjuk_penggunaan' => [
+                'key'         => 'petunjuk_penggunaan',
+                'name'        => 'Petunjuk Penggunaan',
+                'emoji'       => '💡',
+                'badge'       => 'Panduan Belajar',
+                'desc'        => 'Petunjuk penggunaan e-modul bagi siswa dan guru',
+                'is_active'   => $this->isInfoComponentActive('petunjuk_penggunaan'),
+                'edit_url'    => route('teacher.modules.informasi-umum.edit', $this) . '#sec-petunjuk',
+                'toggle_url'  => route('teacher.modules.informasi-umum.toggle', [$this, 'petunjuk_penggunaan']),
+                'preview_url' => null,
+            ],
+        ];
+    }
+
+    /** 2. Pendahuluan Components */
+    public function pendahuluanComponents(): array
+    {
+        return [
+            'tujuan_pembelajaran' => [
+                'key'         => 'tujuan_pembelajaran',
+                'name'        => 'Tujuan Pembelajaran & Capaian',
+                'emoji'       => '🎯',
+                'badge'       => 'Target Capaian',
+                'desc'        => 'Rumusan capaian pembelajaran, tujuan, dan kompetensi yang harus dicapai',
+                'is_active'   => $this->isInfoComponentActive('tujuan_pembelajaran'),
+                'edit_url'    => route('teacher.modules.informasi-umum.edit', $this) . '#sec-tujuan',
+                'toggle_url'  => route('teacher.modules.informasi-umum.toggle', [$this, 'tujuan_pembelajaran']),
+                'preview_url' => null,
+            ],
+            'peta_konsep' => [
+                'key'         => 'peta_konsep',
+                'name'        => 'Peta Konsep',
+                'emoji'       => '🗺️',
+                'badge'       => 'Alur Konsep',
+                'desc'        => 'Diagram alur konsep materi dan keterkaitan kompetensi',
+                'is_active'   => $this->isInfoComponentActive('peta_konsep'),
+                'edit_url'    => route('teacher.modules.informasi-umum.edit', $this) . '#sec-peta',
+                'toggle_url'  => route('teacher.modules.informasi-umum.toggle', [$this, 'peta_konsep']),
+                'preview_url' => null,
+            ],
+            'glosarium' => [
+                'key'         => 'glosarium',
+                'name'        => 'Glosarium',
+                'emoji'       => '📖',
+                'badge'       => 'Istilah Penting',
+                'desc'        => 'Daftar istilah penting dan definisi kata kunci materi pembelajaran',
+                'is_active'   => $this->isInfoComponentActive('glosarium'),
+                'edit_url'    => route('teacher.modules.informasi-umum.edit', $this) . '#sec-glosarium',
+                'toggle_url'  => route('teacher.modules.informasi-umum.toggle', [$this, 'glosarium']),
+                'preview_url' => null,
+            ],
+        ];
+    }
+
+    /** 3. Kegiatan Belajar (Isi Materi) Components */
+    public function kegiatanBelajarComponents(): array
+    {
+        return [
+            'materi' => [
+                'key'         => 'materi',
+                'name'        => 'Uraian Materi Pembelajaran & PPT',
+                'emoji'       => '📖',
+                'badge'       => 'Uraian Materi',
+                'desc'        => 'Uraian materi pembelajaran berbasis teks, slide PPT interaktif, & ringkasan materi',
+                'is_active'   => (bool)$this->has_materi,
+                'edit_url'    => route('teacher.modules.materi.edit', $this),
+                'toggle_url'  => route('teacher.modules.materi.toggle', $this),
+                'preview_url' => route('teacher.modules.materi.preview', $this),
+            ],
+            'video' => [
+                'key'         => 'video',
+                'name'        => 'Multimedia Video Pembelajaran',
+                'emoji'       => '▶️',
+                'badge'       => 'Elemen Multimedia',
+                'desc'        => 'Tautan video pembelajaran interaktif (YouTube) dengan ringkasan otomatis',
+                'is_active'   => (bool)$this->has_video,
+                'edit_url'    => route('teacher.modules.video.edit', $this),
+                'toggle_url'  => route('teacher.modules.video.toggle', $this),
+                'preview_url' => route('teacher.modules.video.preview', $this),
+            ],
+            'job_sheet' => [
+                'key'         => 'job_sheet',
+                'name'        => 'Lembar Kerja Praktik (Job Sheet)',
+                'emoji'       => '📑',
+                'badge'       => 'Lembar Kerja',
+                'desc'        => 'Lembar kerja petunjuk instruksi praktikum siswa (file PDF)',
+                'is_active'   => (bool)$this->has_job_sheet,
+                'edit_url'    => route('teacher.modules.job-sheet.edit', $this),
+                'toggle_url'  => route('teacher.modules.job-sheet.toggle', $this),
+                'preview_url' => route('teacher.modules.job-sheet.preview', $this),
+            ],
+        ];
+    }
+
+    /** 4. Evaluasi & Latihan Components */
+    public function evaluasiLatihanComponents(): array
+    {
+        return [
+            'pre_test' => [
+                'key'         => 'pre_test',
+                'name'        => 'Pre-test (Soal Latihan Diagnostik)',
+                'emoji'       => '⚡',
+                'badge'       => 'Soal Latihan Awal',
+                'desc'        => 'Soal latihan awal dan diagnostik kemampuan prasyarat siswa',
+                'is_active'   => (bool)$this->has_pre_test,
+                'edit_url'    => route('teacher.modules.pre-test.edit', $this),
+                'toggle_url'  => route('teacher.modules.pre-test.toggle', $this),
+                'preview_url' => route('teacher.modules.pre-test.preview', $this),
+            ],
+            'embed' => [
+                'key'         => 'embed',
+                'name'        => 'Game Edukasi & Media Interaktif',
+                'emoji'       => '🎮',
+                'badge'       => 'Kuis & Game Online',
+                'desc'        => 'Game edukasi interaktif, kuis online (Wordwall, Quizizz), & simulator embed',
+                'is_active'   => (bool)$this->has_embed,
+                'edit_url'    => route('teacher.modules.embed.edit', $this),
+                'toggle_url'  => route('teacher.modules.embed.toggle', $this),
+                'preview_url' => route('teacher.modules.embed.preview', $this),
+            ],
+            'lkpd' => [
+                'key'         => 'lkpd',
+                'name'        => 'Tugas LKPD & Umpan Balik',
+                'emoji'       => '👥',
+                'badge'       => 'Umpan Balik (Feedback)',
+                'desc'        => 'Lembar kerja peserta didik (kelompok/individu), pengumpulan tugas & umpan balik nilai',
+                'is_active'   => (bool)$this->has_lkpd,
+                'edit_url'    => route('teacher.modules.lkpd.edit', $this),
+                'toggle_url'  => route('teacher.modules.lkpd.toggle', $this),
+                'preview_url' => route('teacher.modules.lkpd.preview', $this),
+            ],
+        ];
+    }
+
+    /** 5. Bagian Akhir Components */
+    public function bagianAkhirComponents(): array
+    {
+        return [
+            'post_test' => [
+                'key'         => 'post_test',
+                'name'        => 'Post-test (Tes Akhir Modul)',
+                'emoji'       => '🎯',
+                'badge'       => 'Tes Akhir Modul',
+                'desc'        => 'Tes akhir modul & uji kompetensi untuk evaluasi ketercapaian belajar siswa',
+                'is_active'   => (bool)$this->has_post_test,
+                'edit_url'    => route('teacher.modules.post-test.edit', $this),
+                'toggle_url'  => route('teacher.modules.post-test.toggle', $this),
+                'preview_url' => route('teacher.modules.post-test.preview', $this),
+            ],
+            'daftar_pustaka' => [
+                'key'         => 'daftar_pustaka',
+                'name'        => 'Daftar Pustaka',
+                'emoji'       => '📚',
+                'badge'       => 'Kepustakaan & Rujukan',
+                'desc'        => 'Daftar pustaka, referensi buku, jurnal ilmiah, dan sumber bacaan penyusun',
+                'is_active'   => $this->isInfoComponentActive('daftar_pustaka'),
+                'edit_url'    => route('teacher.modules.informasi-umum.edit', $this) . '#sec-pustaka',
+                'toggle_url'  => route('teacher.modules.informasi-umum.toggle', [$this, 'daftar_pustaka']),
+                'preview_url' => null,
+            ],
+        ];
+    }
+
+    /** Ringkasan 5 Bagian Standar E-Modul */
+    public function moduleSectionsSummary(): array
+    {
+        $sec1 = $this->bagianAwalComponents();
+        $sec2 = $this->pendahuluanComponents();
+        $sec3 = $this->kegiatanBelajarComponents();
+        $sec4 = $this->evaluasiLatihanComponents();
+        $sec5 = $this->bagianAkhirComponents();
+
+        return [
+            'bagian_awal' => [
+                'id'           => 'sec-bagian-awal',
+                'number'       => 1,
+                'title'        => 'Bagian Awal',
+                'subtitle'     => 'Halaman sampul (cover), kata pengantar, daftar isi, serta petunjuk penggunaan e-modul bagi siswa dan guru.',
+                'theme'        => 'indigo',
+                'header_bg'    => 'bg-indigo-600',
+                'badge_color'  => 'bg-indigo-100 text-indigo-800 border-indigo-200',
+                'icon_bg'      => 'bg-indigo-100 text-indigo-700',
+                'components'   => $sec1,
+                'active_count' => collect($sec1)->filter(fn($c) => $c['is_active'])->count(),
+                'total_count'  => count($sec1),
+                'edit_all_url' => route('teacher.modules.informasi-umum.edit', $this) . '#sec-cover',
+                'edit_all_label' => 'Edit Bagian Awal (Informasi Umum)',
+            ],
+            'pendahuluan' => [
+                'id'           => 'sec-pendahuluan',
+                'number'       => 2,
+                'title'        => 'Pendahuluan',
+                'subtitle'     => 'Rumusan capaian pembelajaran, tujuan pembelajaran, dan kompetensi yang harus dicapai.',
+                'theme'        => 'teal',
+                'header_bg'    => 'bg-teal-600',
+                'badge_color'  => 'bg-teal-100 text-teal-800 border-teal-200',
+                'icon_bg'      => 'bg-teal-100 text-teal-700',
+                'components'   => $sec2,
+                'active_count' => collect($sec2)->filter(fn($c) => $c['is_active'])->count(),
+                'total_count'  => count($sec2),
+                'edit_all_url' => route('teacher.modules.informasi-umum.edit', $this) . '#sec-tujuan',
+                'edit_all_label' => 'Edit Pendahuluan (Capaian & Glosarium)',
+            ],
+            'kegiatan_belajar' => [
+                'id'           => 'sec-kegiatan-belajar',
+                'number'       => 3,
+                'title'        => 'Kegiatan Belajar (Isi Materi)',
+                'subtitle'     => 'Uraian materi pembelajaran, lembar kerja, serta elemen multimedia seperti tautan video, audio, atau animasi.',
+                'theme'        => 'blue',
+                'header_bg'    => 'bg-blue-600',
+                'badge_color'  => 'bg-blue-100 text-blue-800 border-blue-200',
+                'icon_bg'      => 'bg-blue-100 text-blue-700',
+                'components'   => $sec3,
+                'active_count' => collect($sec3)->filter(fn($c) => $c['is_active'])->count(),
+                'total_count'  => count($sec3),
+                'edit_all_url' => route('teacher.modules.materi.edit', $this),
+                'edit_all_label' => 'Buka Editor Materi & PPT',
+            ],
+            'evaluasi_latihan' => [
+                'id'           => 'sec-evaluasi-latihan',
+                'number'       => 4,
+                'title'        => 'Evaluasi & Latihan',
+                'subtitle'     => 'Soal latihan, uji kompetensi, game edukasi interaktif (seperti kuis online), serta umpan balik (feedback).',
+                'theme'        => 'amber',
+                'header_bg'    => 'bg-amber-600',
+                'badge_color'  => 'bg-amber-100 text-amber-800 border-amber-200',
+                'icon_bg'      => 'bg-amber-100 text-amber-800',
+                'components'   => $sec4,
+                'active_count' => collect($sec4)->filter(fn($c) => $c['is_active'])->count(),
+                'total_count'  => count($sec4),
+                'edit_all_url' => route('teacher.modules.pre-test.edit', $this),
+                'edit_all_label' => 'Kelola Soal Pre-test',
+            ],
+            'bagian_akhir' => [
+                'id'           => 'sec-bagian-akhir',
+                'number'       => 5,
+                'title'        => 'Bagian Akhir',
+                'subtitle'     => 'Rangkuman materi, tes akhir modul, daftar pustaka, dan profil pengembang.',
+                'theme'        => 'rose',
+                'header_bg'    => 'bg-rose-600',
+                'badge_color'  => 'bg-rose-100 text-rose-800 border-rose-200',
+                'icon_bg'      => 'bg-rose-100 text-rose-700',
+                'components'   => $sec5,
+                'active_count' => collect($sec5)->filter(fn($c) => $c['is_active'])->count(),
+                'total_count'  => count($sec5),
+                'edit_all_url' => route('teacher.modules.post-test.edit', $this),
+                'edit_all_label' => 'Kelola Soal Post-test',
+            ],
+        ];
+    }
+
     /** Mendapatkan daftar soal pre-test */
     public function preTestQuestions(): array
     {

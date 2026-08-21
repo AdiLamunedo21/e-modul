@@ -7,6 +7,16 @@ use App\Models\Module;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * =============================================================================
+ * CONTROLLER: VideoController
+ * =============================================================================
+ * KLASIFIKASI E-MODUL: Bagian 3 — Kegiatan Belajar (Multimedia Video YouTube)
+ * -----------------------------------------------------------------------------
+ * Controller ini mengelola tautan video pembelajaran YouTube, instruksi resume,
+ * dan fitur ringkasan video siswa yang dikontrol oleh flag `has_video`.
+ * =============================================================================
+ */
 class VideoController extends Controller
 {
     private function teacher()
@@ -16,7 +26,7 @@ class VideoController extends Controller
 
     private function authorize(Module $module): void
     {
-        abort_if($module->teacher_id !== $this->teacher()->id, 403);
+        abort_if($module->teacher_id !== $this->teacher()->id, 403, 'Anda tidak memiliki akses ke modul ini.');
     }
 
     /**

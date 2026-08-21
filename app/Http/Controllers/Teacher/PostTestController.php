@@ -10,6 +10,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * =============================================================================
+ * CONTROLLER: PostTestController
+ * =============================================================================
+ * KLASIFIKASI E-MODUL: Bagian 5 — Bagian Akhir (Tes Akhir Modul / Uji Kompetensi)
+ * -----------------------------------------------------------------------------
+ * Controller ini mengelola kuis evaluasi akhir modul dan butir-butir soal
+ * pilihan ganda (PostTest & PostTestQuestion) yang dikontrol oleh flag `has_post_test`.
+ * =============================================================================
+ */
 class PostTestController extends Controller
 {
     private function teacher()
@@ -19,7 +29,7 @@ class PostTestController extends Controller
 
     private function authorize(Module $module): void
     {
-        abort_if($module->teacher_id !== $this->teacher()->id, 403);
+        abort_if($module->teacher_id !== $this->teacher()->id, 403, 'Anda tidak memiliki akses ke modul ini.');
     }
 
     /**
