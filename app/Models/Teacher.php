@@ -14,4 +14,17 @@ class Teacher extends Authenticatable
     {
         return $this->hasMany(Module::class);
     }
+
+    /**
+     * Mengambil daftar kelas binaan (kelas-kelas yang memiliki modul dari guru ini).
+     */
+    public function assignedClasses()
+    {
+        return $this->modules()
+            ->with('schoolClass')
+            ->get()
+            ->pluck('schoolClass')
+            ->filter()
+            ->unique('id');
+    }
 }

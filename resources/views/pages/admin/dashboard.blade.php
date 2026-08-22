@@ -131,7 +131,7 @@
                     </svg>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-semibold text-gray-900 group-hover:text-amber-600">Unduh Laporan Nilai (PDF)</p>
+                    <p class="text-sm font-semibold text-gray-900 group-hover:text-amber-600">Unduh Laporan Nilai (Excel .xlsx)</p>
                     <p class="text-xs text-gray-500 mt-0.5">Rekap nilai kelas otomatis & adaptif</p>
                 </div>
                 <svg class="w-5 h-5 text-gray-300 group-hover:text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

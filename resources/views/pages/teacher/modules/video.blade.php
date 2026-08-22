@@ -390,8 +390,8 @@
                         </p>
                     </div>
                     <div class="bg-slate-800/80 rounded-xl p-4 border border-slate-700/60 space-y-1.5">
-                        <p class="font-bold text-blue-400 flex items-center gap-1.5">
-                            <span>⭐</span> Penilaian di Grading Center & PDF
+                        <p class="font-bold text-emerald-400 flex items-center gap-1.5">
+                            <span>⭐</span> Penilaian di Grading Center & Rekap Excel
                         </p>
                         <p class="text-slate-300 leading-relaxed text-[11px]">
                             Hasil ketikan ringkasan tersimpan ke tabel <code class="text-amber-300">video_summaries</code>. Guru memberikan skor manual (0-100) yang otomatis masuk ke rekap nilai akhir.

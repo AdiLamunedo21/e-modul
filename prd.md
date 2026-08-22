@@ -30,7 +30,7 @@ Sistem ini ditargetkan untuk:
    - **5. Bagian Akhir (2 Komponen):** Tes akhir modul / Post-test (`has_post_test`), dan daftar pustaka kepustakaan & rujukan (dikelola mandiri via `DaftarPustakaController`).
 2. Menyediakan _Dashboard Personal_ bagi siswa untuk membaca E-Modul layaknya buku digital interaktif, melacak progres belajar per halaman, dan melihat transparansi nilai.
 3. Memfasilitasi guru dengan *Grading Center* adaptif yang otomatis menyesuaikan matriks nilai dengan komponen evaluasi yang diaktifkan.
-4. Memungkinkan sekolah mengekspor seluruh hasil belajar siswa ke dalam satu dokumen laporan (PDF) yang kolomnya otomatis menyesuaikan dengan komponen aktif pada modul.
+4. Memungkinkan sekolah mengekspor seluruh hasil belajar siswa ke dalam berkas spreadsheet / Excel (.xlsx) yang kolomnya otomatis menyesuaikan dengan komponen aktif pada modul dan dapat diedit atau diolah lebih lanjut di Microsoft Excel.
 
 ### 1.4 Ruang Lingkup Proyek (Scope of Work)
 
@@ -99,7 +99,7 @@ Guru diberikan kebebasan mutlak (_Toggle System_) untuk menghidupkan atau memati
 
 - **Penilaian Adaptif:** Mesin penilaian (_Grading System_) beradaptasi secara dinamis dengan komponen evaluasi yang diaktifkan guru (Pre-test, Video, Embed, Job Sheet, LKPD, Post-test). Sistem menggunakan kombinasi penilaian otomatis (pilihan ganda) dan manual (tugas/berkas PDF/screenshot/ringkasan teks).
 - **Kebijakan Unggah Ulang (Re-submission):** Siswa diizinkan membatalkan dan mengunggah ulang file _Job Sheet_, LKPD, atau _Screenshot_ Praktik **hanya jika** guru belum memberikan nilai (status di database masih `pending`). Jika guru sudah menilainya (status `graded`), form unggah terkunci otomatis.
-- **Pembuatan Laporan Dinamis (PDF Generator):** Sistem mampu mengagregasi seluruh komponen nilai yang diaktifkan beserta data siswa ke dalam satu laporan PDF siap cetak dengan kolom yang menyesuaikan secara otomatis.
+- **Pembuatan Laporan Dinamis (Spreadsheet / Excel .XLSX Generator):** Sistem mampu mengagregasi seluruh komponen nilai yang diaktifkan beserta data siswa ke dalam berkas spreadsheet Excel (`.xlsx`) yang dapat diedit dan diolah secara leluasa oleh guru/sekolah, dengan tata letak kolom yang menyesuaikan secara dinamis terhadap komponen aktif pada modul.
 
 ---
 
@@ -144,9 +144,9 @@ Portal belajar yang transparan dan terstruktur bagi siswa:
 
 Antarmuka pengerjaan modul bagi siswa berbasis halaman terpisah (_Pagination_) melewati 5 bagian belajar. Navigasi bersifat mengikat (_restriktif_); tombol "Selanjutnya" terkunci jika instruksi pada halaman saat ini belum tuntas.
 
-### 3.5 PDF Report Generator (Pembangkit Laporan Dinamis)
+### 3.5 Spreadsheet / Excel Report Generator (Pembangkit Laporan Dinamis .XLSX)
 
-Fitur ekspor data penilaian kelas ke format dokumen PDF siap cetak dengan tata letak kolom tabel yang secara dinamis beradaptasi terhadap komponen aktif pada modul.
+Fitur ekspor data penilaian kelas ke format berkas spreadsheet (.xlsx / Microsoft Excel) yang dapat diedit, diformat, dan diolah lebih lanjut oleh guru atau pihak sekolah, dengan tata letak kolom tabel yang secara dinamis beradaptasi terhadap komponen aktif pada modul.
 
 ---
 
@@ -165,7 +165,7 @@ Fitur ekspor data penilaian kelas ke format dokumen PDF siap cetak dengan tata l
 4. **Simulasi Pratinjau:** Guru membuka fitur Preview pada tiap komponen untuk memastikan kesesuaian materi.
 5. **Publikasi:** Guru menekan tombol "Publish Modul" sehingga modul dapat diakses oleh siswa pada kelas target.
 6. **Evaluasi di Grading Center:** Guru meninjau penugasan siswa yang masuk, membaca ringkasan video, memeriksa screenshot praktik, mengunduh file tugas, dan memasukkan nilai manual.
-7. **Pencetakan Laporan:** Guru mengunduh Rekapitulasi Laporan PDF nilai kelas.
+7. **Ekspor Laporan Nilai:** Guru mengunduh Rekapitulasi Laporan Spreadsheet Excel (.xlsx) nilai kelas untuk pengolahan lebih lanjut atau arsip nilai.
 
 ### 4.2 Alur Siswa (Student Flow) — Pengalaman Belajar 5 Tahap
 
@@ -267,8 +267,8 @@ sequenceDiagram
     Server-->>Guru: Tampilkan berkas tugas & ringkasan siswa
     Guru->>Server: Simpan Skor Manual (Video, Job Sheet, LKPD, dll)
     Server->>DB: Update nilai akhir & set grading_status = 'graded'
-    Guru->>Server: Unduh Laporan Rekapitulasi PDF
-    Server-->>Guru: Generate Dokumen PDF Dinamis
+    Guru->>Server: Unduh Laporan Rekapitulasi Excel (.xlsx)
+    Server-->>Guru: Generate Berkas Spreadsheet Dinamis (.xlsx)
 ```
 
 ---
@@ -485,7 +485,7 @@ erDiagram
 
 ### 7.3 Penyimpanan Berkas & Pelaporan
 - **File Storage:** Laravel Storage Symlink dengan validasi MIME-type (Maksimal 2 MB untuk screenshot praktik, Maksimal 5 MB untuk PDF Job Sheet / LKPD, Maksimal 3 MB untuk Cover).
-- **PDF Reporting:** `barryvdh/laravel-dompdf` untuk konversi laporan penilaian dinamis siap cetak.
+- **Spreadsheet / Excel Reporting:** `maatwebsite/excel` (atau `phpoffice/phpspreadsheet`) untuk ekspor laporan rekapitulasi nilai dinamis ke format spreadsheet (.xlsx / Microsoft Excel) yang fleksibel dan dapat diedit.
 
 ---
 
@@ -496,6 +496,8 @@ Struktur direktori codebase disusun secara bersih, modular, dan mengikuti konven
 ```
 e-modul/
 ├── app/
+│   ├── Exports/                                # Export handler spreadsheet / Excel
+│   │   └── ModuleGradesExport.php              # Logika penataan kolom adaptif & format Excel (.xlsx)
 │   ├── Http/
 │   │   ├── Controllers/
 │   │   │   ├── AuthController.php              # Multi-guard authentication (Admin, Teacher, Student)
@@ -587,7 +589,7 @@ e-modul/
 │               │   ├── preview-post-test.blade.php # Pratinjau simulasi Post-test
 │               │   └── partials/               # Komponen Blade parsial
 │               └── reports/
-│                   └── index.blade.php         # Template rekapitulasi laporan PDF
+│                   └── index.blade.php         # Halaman pratinjau & ekspor rekapitulasi laporan nilai (.xlsx)
 ├── routes/
 │   ├── web.php                                 # Rute aplikasi (Multi-guard auth & teacher sub-editors)
 │   └── console.php                             # Rute perintah artisan CLI

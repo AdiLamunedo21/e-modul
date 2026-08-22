@@ -86,7 +86,7 @@
                     @foreach([
                         ['1', 'Informasi Umum (Mandatori)', 'Cover, Kata Pengantar, Peta Konsep, Glosarium, Tujuan Pembelajaran.'],
                         ['2', 'Komponen Inti (7 Toggle Opsional)', 'Pre-test, Materi+PPT, Video YouTube, Praktik Embed, Job Sheet, LKPD, Post-test.'],
-                        ['3', 'Bagian Akhir (Mandatori)', 'Evaluasi Sumatif, Kunci Jawaban KKTP, & Daftar Pustaka.'],
+                        ['3', 'Bagian Akhir (Mandatori)', 'Evaluasi Sumatif, Kunci Jawaban & Standar Nilai, & Daftar Pustaka.'],
                     ] as [$no, $title, $desc])
                         <div class="flex items-start gap-2.5 text-xs text-blue-800">
                             <span class="font-black bg-blue-200 text-blue-800 rounded px-1.5 py-0.5 shrink-0">{{ $no }}</span>

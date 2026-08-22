@@ -14,6 +14,8 @@ use App\Http\Controllers\Teacher\JobSheetController;
 use App\Http\Controllers\Teacher\LkpdController;
 use App\Http\Controllers\Teacher\PostTestController;
 use App\Http\Controllers\Teacher\GradingController;
+use App\Http\Controllers\Teacher\ReportController;
+use App\Http\Controllers\Teacher\ClassController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -121,11 +123,15 @@ Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(fu
     Route::post('/grading/modules/{module}/students/{student}',             [GradingController::class, 'updateStudentGrade'])->name('grading.student.update');
     Route::post('/grading/modules/{module}/batch',                          [GradingController::class, 'batchUpdate'])->name('grading.batch.update');
 
-    // Laporan PDF (placeholder)
-    Route::get('/reports', fn () => view('pages.teacher.reports.index'))->name('reports.index');
+    // Laporan Spreadsheet / Excel (.xlsx)
+    Route::get('/reports',                                  [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/modules/{module}/export',          [ReportController::class, 'exportModule'])->name('reports.export.module');
+    Route::get('/modules/{module}/export-grades',           [ReportController::class, 'exportModule'])->name('modules.export.grades');
 
-    // Kelas Binaan (placeholder)
-    Route::get('/classes', fn () => view('pages.teacher.classes.index'))->name('classes.index');
+    // Kelas Binaan & Direktori Siswa
+    Route::get('/classes',                                                  [ClassController::class, 'index'])->name('classes.index');
+    Route::get('/classes/{class}',                                          [ClassController::class, 'show'])->name('classes.show');
+    Route::get('/classes/{class}/students/{student}/summary',               [ClassController::class, 'getStudentAcademicSummary'])->name('classes.student.summary');
 });
 
 // ─── Student Protected ─────────────────────────────────────────────────────

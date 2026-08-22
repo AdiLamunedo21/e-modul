@@ -51,7 +51,7 @@
                             ⏱️ Durasi: {{ $preTest->duration_minutes ?? 15 }} Menit
                         </span>
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold border border-amber-200/70">
-                            🎯 KKTP: {{ $preTest->kktp ?? 75 }} Poin
+                            🎯 Batas Nilai: {{ $preTest->kktp ?? 75 }} Poin
                         </span>
                         @if(!empty($preTest->randomize_questions))
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-100 text-violet-700 text-xs font-bold">

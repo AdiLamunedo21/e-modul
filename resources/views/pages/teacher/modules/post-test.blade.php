@@ -89,7 +89,7 @@
             </div>
             <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-sm">Quiz Builder: Post-test</h1>
             <p class="text-slate-200 text-sm leading-relaxed max-w-2xl font-normal">
-                Rancang kuis evaluasi formatif penutup untuk mengukur ketuntasan belajar siswa setelah menyelesaikan seluruh rangkaian materi. Sistem secara otomatis menghitung nilai dan memeriksa pencapaian KKTP.
+                Rancang kuis evaluasi formatif penutup untuk mengukur ketuntasan belajar siswa setelah menyelesaikan seluruh rangkaian materi. Sistem secara otomatis menghitung nilai dan memeriksa pencapaian batas nilai kelulusan.
             </p>
         </div>
 
@@ -172,7 +172,7 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Kriteria Ketuntasan (KKTP)</label>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Batas Nilai Kelulusan</label>
                             <div class="flex rounded-xl border border-slate-300 bg-slate-50 overflow-hidden focus-within:border-teal-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-teal-500/20 transition-all shadow-sm">
                                 <input type="number" name="kktp" min="0" max="100"
                                        value="{{ old('kktp', $postTest->kktp ?? 75) }}"
@@ -295,7 +295,7 @@
                     </div>
 
                     <div class="bg-slate-50 border border-slate-200/70 rounded-xl p-3 flex flex-col justify-between">
-                        <span class="text-[11px] font-semibold text-slate-500">Target KKTP</span>
+                        <span class="text-[11px] font-semibold text-slate-500">Batas Nilai</span>
                         <div class="mt-1.5">
                             <span id="summary-kktp" class="text-sm font-extrabold text-slate-900">{{ old('kktp', $postTest->kktp ?? 75) }}</span>
                         </div>

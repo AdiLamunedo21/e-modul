@@ -51,7 +51,7 @@
                             ⏱️ Durasi: {{ $postTest->duration_minutes ?? 20 }} Menit
                         </span>
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold border border-amber-200/70">
-                            🎯 KKTP: {{ $postTest->kktp ?? 75 }} Poin
+                            🎯 Batas Nilai: {{ $postTest->kktp ?? 75 }} Poin
                         </span>
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold border border-indigo-200/70">
                             🏁 Komponen 7 (Penutup Inti)

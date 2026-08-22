@@ -175,7 +175,7 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Kriteria Ketuntasan (KKTP)</label>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Batas Nilai Kelulusan</label>
                             <div class="flex rounded-xl border border-slate-300 bg-slate-50 overflow-hidden focus-within:border-blue-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500/20 transition-all shadow-sm">
                                 <input type="number" name="kktp" min="0" max="100"
                                        value="{{ old('kktp', $preTest->kktp ?? 75) }}"
@@ -315,7 +315,7 @@
 
                     {{-- Nilai Maksimal --}}
                     <div class="bg-slate-50 border border-slate-200/70 rounded-xl p-3 flex flex-col justify-between">
-                        <span class="text-[11px] font-semibold text-slate-500">Target KKTP</span>
+                        <span class="text-[11px] font-semibold text-slate-500">Batas Nilai</span>
                         <div class="mt-1.5">
                             <span id="summary-kktp" class="text-sm font-extrabold text-slate-900">{{ old('kktp', $preTest->kktp ?? 75) }}</span>
                         </div>
@@ -350,7 +350,7 @@
                     💡 Tips Penilaian Pre-test:
                 </p>
                 <p class="text-[11px]">
-                    Siswa langsung mendapatkan nilai saat menuntaskan seluruh butir soal. Nilai pre-test akan dicatat pada rekapitulasi penilaian dan disajikan di Laporan PDF jika diaktifkan.
+                    Siswa langsung mendapatkan nilai saat menuntaskan seluruh butir soal. Nilai pre-test akan dicatat pada rekapitulasi penilaian dan disajikan di Laporan Excel (.xlsx) jika diaktifkan.
                 </p>
             </div>
 

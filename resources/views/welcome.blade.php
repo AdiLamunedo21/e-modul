@@ -170,7 +170,7 @@
                             </svg>
                         </div>
                         <h3 class="font-heading text-xl font-bold text-slate-900 mb-3">Penilaian Adaptif</h3>
-                        <p class="text-slate-600 leading-relaxed">Sistem penilaian cerdas yang otomatis menyesuaikan dengan komponen aktif, dilengkapi pembuat laporan PDF dinamis.</p>
+                        <p class="text-slate-600 leading-relaxed">Sistem penilaian cerdas yang otomatis menyesuaikan dengan komponen aktif, dilengkapi ekspor laporan spreadsheet Excel (.xlsx) dinamis.</p>
                     </div>
                 </div>
             </div>
