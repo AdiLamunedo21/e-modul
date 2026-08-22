@@ -42,6 +42,11 @@ class Module extends Model
         return $this->belongsTo(SchoolClass::class, 'class_id');
     }
 
+    public function subject()
+    {
+        return $this->belongsTo(Subject::class, 'subject_id');
+    }
+
     public function clonedFrom()
     {
         return $this->belongsTo(Module::class, 'cloned_from_id');
@@ -832,6 +837,7 @@ class Module extends Model
         $cloned = self::create([
             'teacher_id'          => $targetTeacher->id,
             'class_id'            => $targetClassId,
+            'subject_id'          => $this->subject_id,
             'title'               => $newTitle,
             'informasi_umum_data' => $this->informasi_umum_data,
             'bagian_akhir_data'   => $this->bagian_akhir_data,

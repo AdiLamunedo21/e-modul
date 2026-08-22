@@ -288,12 +288,20 @@
                             </div>
                         </div>
 
-                        {{-- Target Grade & Major Badge --}}
-                        @if($mod->schoolClass)
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-xl text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200 shrink-0">
-                                {{ $mod->schoolClass->grade }} {{ $mod->schoolClass->major_name }}
-                            </span>
-                        @endif
+                        {{-- Target Grade, Major & Subject Badge --}}
+                        <div class="flex items-center gap-1.5 flex-wrap justify-end">
+                            @if($mod->subject)
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-bold {{ $mod->subject->badgeClasses() }}">
+                                    <span>{{ $mod->subject->icon }}</span>
+                                    <span>{{ $mod->subject->name }}</span>
+                                </span>
+                            @endif
+                            @if($mod->schoolClass)
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-xl text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200 shrink-0">
+                                    {{ $mod->schoolClass->grade }} {{ $mod->schoolClass->major_name }}
+                                </span>
+                            @endif
+                        </div>
                     </div>
 
                     {{-- Title --}}

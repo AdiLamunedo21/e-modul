@@ -16,7 +16,9 @@ use App\Http\Controllers\Teacher\PostTestController;
 use App\Http\Controllers\Teacher\GradingController;
 use App\Http\Controllers\Teacher\ReportController;
 use App\Http\Controllers\Teacher\ClassController;
+use App\Http\Controllers\Teacher\DashboardController;
 use App\Http\Controllers\Teacher\ModuleLibraryController;
+use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -46,7 +48,7 @@ Route::middleware('auth:admin')->prefix('admin')->name('dashboard.')->group(func
 Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(function () {
 
     // Dashboard utama
-    Route::get('/dashboard', fn () => view('pages.teacher.dashboard'))->name('dashboard');
+    Route::get('/dashboard',                            [DashboardController::class, 'index'])->name('dashboard');
 
     // Manajer Modul (CRUD)
     Route::get('/modules',                              [ModuleManagerController::class, 'index'])->name('modules.index');
@@ -142,6 +144,8 @@ Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(fu
 });
 
 // ─── Student Protected ─────────────────────────────────────────────────────
-Route::middleware('auth:student')->prefix('student')->name('dashboard.')->group(function () {
-    Route::get('/dashboard', fn () => view('pages.student.dashboard'))->name('student');
+Route::middleware('auth:student')->prefix('student')->group(function () {
+    Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('student.dashboard');
+    // Alias untuk rute dashboard.student
+    Route::get('/portal', [StudentDashboardController::class, 'index'])->name('dashboard.student');
 });

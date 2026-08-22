@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Teacher;
 use App\Http\Controllers\Controller;
 use App\Models\Module;
 use App\Models\SchoolClass;
+use App\Models\Subject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -42,13 +43,22 @@ class ModuleManagerController extends Controller
 
     /**
      * Halaman Manajer Modul — menampilkan daftar semua modul milik guru yang sedang login.
-     * Mendukung tab filter status: all, draft, published, closed.
+     * Mendukung pemilahan mata pelajaran (Subject Switcher) dan tab filter status.
      */
     public function index(Request $request)
     {
-        $query = Module::with(['schoolClass'])
-            ->where('teacher_id', $this->teacher()->id)
+        $teacher = $this->teacher();
+        $teacherSubjects = $teacher->subjects()->get();
+
+        $query = Module::with(['schoolClass', 'subject'])
+            ->where('teacher_id', $teacher->id)
             ->latest();
+
+        // Filter berdasarkan Mata Pelajaran jika dipilih
+        $selectedSubjectId = $request->filled('subject_id') ? (int) $request->subject_id : null;
+        if ($selectedSubjectId) {
+            $query->where('subject_id', $selectedSubjectId);
+        }
 
         // Filter berdasarkan tab status jika ada
         if ($request->filled('status') && in_array($request->status, ['draft', 'published', 'closed'])) {
@@ -57,23 +67,47 @@ class ModuleManagerController extends Controller
 
         $modules = $query->paginate(10)->withQueryString();
 
+        // Hitung statistik modul global & per subjek untuk guru ini
+        $baseQuery = Module::where('teacher_id', $teacher->id);
+        if ($selectedSubjectId) {
+            $baseQuery->where('subject_id', $selectedSubjectId);
+        }
+
         $counts = [
-            'all'       => Module::where('teacher_id', $this->teacher()->id)->count(),
-            'published' => Module::where('teacher_id', $this->teacher()->id)->where('status', 'published')->count(),
-            'draft'     => Module::where('teacher_id', $this->teacher()->id)->where('status', 'draft')->count(),
-            'closed'    => Module::where('teacher_id', $this->teacher()->id)->where('status', 'closed')->count(),
+            'all'       => (clone $baseQuery)->count(),
+            'published' => (clone $baseQuery)->where('status', 'published')->count(),
+            'draft'     => (clone $baseQuery)->where('status', 'draft')->count(),
+            'closed'    => (clone $baseQuery)->where('status', 'closed')->count(),
         ];
 
-        return view('pages.teacher.modules.index', compact('modules', 'counts'));
+        // Hitung total modul per mata pelajaran milik guru
+        $subjectCounts = [];
+        $totalAllSubjects = Module::where('teacher_id', $teacher->id)->count();
+        foreach ($teacherSubjects as $sub) {
+            $subjectCounts[$sub->id] = Module::where('teacher_id', $teacher->id)->where('subject_id', $sub->id)->count();
+        }
+
+        return view('pages.teacher.modules.index', compact(
+            'modules',
+            'counts',
+            'teacherSubjects',
+            'subjectCounts',
+            'totalAllSubjects',
+            'selectedSubjectId'
+        ));
     }
 
     /**
-     * Form buat modul baru (langkah 1: input judul modul & target kelas).
+     * Form buat modul baru (langkah 1: input judul modul, mata pelajaran & target kelas).
      */
     public function create()
     {
+        $teacher = $this->teacher();
+        $teacherSubjects = $teacher->subjects()->get();
+        $allSubjects = Subject::orderBy('name')->get();
         $classes = SchoolClass::orderBy('grade')->orderBy('major_name')->get();
-        return view('pages.teacher.modules.create', compact('classes'));
+
+        return view('pages.teacher.modules.create', compact('classes', 'teacherSubjects', 'allSubjects'));
     }
 
     /**
@@ -83,12 +117,19 @@ class ModuleManagerController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title'    => ['required', 'string', 'max:255'],
-            'class_id' => ['required', 'exists:classes,id'],
+            'title'      => ['required', 'string', 'max:255'],
+            'class_id'   => ['required', 'exists:classes,id'],
+            'subject_id' => ['required', 'exists:subjects,id'],
+        ], [
+            'title.required'      => 'Judul E-Modul wajib diisi.',
+            'class_id.required'   => 'Pilih target kelas / jurusan.',
+            'subject_id.required' => 'Pilih mata pelajaran pengampu untuk modul ini.',
+            'subject_id.exists'   => 'Mata pelajaran yang dipilih tidak valid.',
         ]);
 
         $module = Module::create([
             'teacher_id' => $this->teacher()->id,
+            'subject_id' => $validated['subject_id'],
             'title'      => $validated['title'],
             'class_id'   => $validated['class_id'],
             'status'     => 'draft',
@@ -107,7 +148,7 @@ class ModuleManagerController extends Controller
     public function show(Module $module)
     {
         $this->authorizeModule($module);
-        $module->load('schoolClass');
+        $module->load(['schoolClass', 'subject']);
         return view('pages.teacher.modules.show', compact('module'));
     }
 

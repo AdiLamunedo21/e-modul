@@ -231,7 +231,7 @@
                         <span>Panduan Penulisan Daftar Pustaka</span>
                     </div>
                     <p class="text-[11px] text-rose-900/80 leading-relaxed">
-                        Sertakan seluruh referensi buku teks, modul kurikulum merdeka/K13, dokumentasi resmi, atau video referensi yang digunakan dalam menyusun materi.
+                        Sertakan seluruh referensi buku teks, modul pembelajaran kejuruan/K13, dokumentasi resmi, atau video referensi yang digunakan dalam menyusun materi.
                     </p>
                     <ul class="text-[11px] text-rose-900/80 space-y-1.5 list-disc list-inside">
                         <li>Gunakan nama penulis atau institusi penerbit resmi.</li>

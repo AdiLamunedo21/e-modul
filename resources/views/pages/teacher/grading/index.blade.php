@@ -129,9 +129,32 @@
 </div>
 
 {{-- ══ Toolbar & Filter ══ --}}
-<div class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-sm mb-6">
+<div class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-sm mb-6 space-y-4">
+    {{-- Subject Quick Switcher Tabs (jika guru punya mapel) --}}
+    @if($teacherSubjects->isNotEmpty())
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-slate-100">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mr-2 shrink-0">Mapel:</span>
+            <a href="{{ route('teacher.grading.index', array_filter(['class_id' => request('class_id'), 'status' => request('status'), 'search' => request('search')])) }}"
+               class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap
+                   {{ !$selectedSubjectId ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30' : 'bg-slate-50 text-slate-600 hover:bg-slate-100' }}">
+                Semua Mapel
+            </a>
+            @foreach($teacherSubjects as $ts)
+                <a href="{{ route('teacher.grading.index', array_filter(['subject_id' => $ts->id, 'class_id' => request('class_id'), 'status' => request('status'), 'search' => request('search')])) }}"
+                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap
+                       {{ $selectedSubjectId === $ts->id ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30' : 'bg-slate-50 text-slate-600 hover:bg-slate-100' }}">
+                    <span>{{ $ts->icon }}</span>
+                    <span>{{ $ts->name }}</span>
+                </a>
+            @endforeach
+        </div>
+    @endif
+
     <form method="GET" action="{{ route('teacher.grading.index') }}" class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-        
+        @if(request('subject_id'))
+            <input type="hidden" name="subject_id" value="{{ request('subject_id') }}">
+        @endif
+
         {{-- Search Input --}}
         <div class="relative flex-1 min-w-[240px] flex items-center">
             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -146,6 +169,17 @@
 
         {{-- Dropdowns & Filter Buttons --}}
         <div class="flex flex-wrap items-center gap-3">
+            {{-- Filter Mata Pelajaran Dropdown --}}
+            <select name="subject_id" onchange="this.form.submit()"
+                    class="px-3.5 py-2.5 text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+                <option value="">Semua Mata Pelajaran</option>
+                @foreach($teacherSubjects as $ts)
+                    <option value="{{ $ts->id }}" {{ request('subject_id') == $ts->id ? 'selected' : '' }}>
+                        {{ $ts->icon }} {{ $ts->name }}
+                    </option>
+                @endforeach
+            </select>
+
             {{-- Filter Kelas --}}
             <select name="class_id" onchange="this.form.submit()"
                     class="px-3.5 py-2.5 text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
@@ -166,7 +200,7 @@
                 <option value="closed" {{ request('status') === 'closed' ? 'selected' : '' }}>Closed (Selesai)</option>
             </select>
 
-            @if(request()->hasAny(['search', 'class_id', 'status']))
+            @if(request()->hasAny(['search', 'class_id', 'status', 'subject_id']))
                 <a href="{{ route('teacher.grading.index') }}"
                    class="px-3 py-2.5 text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl transition-colors">
                     ✕ Reset Filter
@@ -198,16 +232,25 @@
                 $mStats = $module->gradingStats();
                 $statusInfo = $module->statusLabel();
                 $activeComps = $module->activeGradedComponents();
+                $subject = $module->subject;
             @endphp
             <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm hover:shadow-md hover:border-blue-200 transition-all flex flex-col justify-between group">
                 
                 {{-- Top Bar: Status & Kelas --}}
                 <div>
                     <div class="flex items-center justify-between gap-2 mb-3">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase border {{ $statusInfo['color'] }}">
-                            {{ $statusInfo['label'] }}
-                        </span>
-                        <span class="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase border {{ $statusInfo['color'] }}">
+                                {{ $statusInfo['label'] }}
+                            </span>
+                            @if($subject)
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold {{ $subject->badgeClasses() }}">
+                                    <span>{{ $subject->icon }}</span>
+                                    <span>{{ $subject->name }}</span>
+                                </span>
+                            @endif
+                        </div>
+                        <span class="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full shrink-0">
                             {{ $module->schoolClass ? $module->schoolClass->full_name : 'Semua Kelas' }}
                         </span>
                     </div>

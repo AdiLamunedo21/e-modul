@@ -49,6 +49,64 @@
                 @enderror
             </div>
 
+            {{-- Mata Pelajaran --}}
+            <div>
+                <label for="subject_id" class="block text-sm font-bold text-slate-700 mb-1.5">
+                    Mata Pelajaran <span class="text-red-500">*</span>
+                </label>
+                <select
+                    name="subject_id"
+                    id="subject_id"
+                    required
+                    class="w-full rounded-xl border @error('subject_id') border-red-400 bg-red-50 @else border-slate-300 bg-slate-50 @enderror px-4 py-3 text-sm text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                >
+                    <option value="" disabled selected>Pilih Mata Pelajaran...</option>
+                    @if($teacherSubjects->isNotEmpty())
+                        <optgroup label="⭐ Tanggung Jawab Mengajar Anda">
+                            @foreach($teacherSubjects as $subject)
+                                <option value="{{ $subject->id }}" {{ old('subject_id') == $subject->id ? 'selected' : '' }}>
+                                    {{ $subject->icon }} {{ $subject->name }} ({{ $subject->code ?? 'MAPEL' }})
+                                </option>
+                            @endforeach
+                        </optgroup>
+                        @php
+                            $otherSubjects = $allSubjects->whereNotIn('id', $teacherSubjects->pluck('id'));
+                        @endphp
+                        @if($otherSubjects->isNotEmpty())
+                            <optgroup label="Mata Pelajaran Lainnya">
+                                @foreach($otherSubjects as $subject)
+                                    <option value="{{ $subject->id }}" {{ old('subject_id') == $subject->id ? 'selected' : '' }}>
+                                        {{ $subject->icon }} {{ $subject->name }} ({{ $subject->code ?? 'MAPEL' }})
+                                    </option>
+                                @endforeach
+                            </optgroup>
+                        @endif
+                    @else
+                        @foreach($allSubjects as $subject)
+                            <option value="{{ $subject->id }}" {{ old('subject_id') == $subject->id ? 'selected' : '' }}>
+                                {{ $subject->icon }} {{ $subject->name }} ({{ $subject->code ?? 'MAPEL' }})
+                            </option>
+                        @endforeach
+                    @endif
+                </select>
+                @error('subject_id')
+                    <p class="mt-1.5 text-xs text-red-600 flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                        {{ $message }}
+                    </p>
+                @enderror
+                @if($teacherSubjects->isNotEmpty())
+                    <p class="mt-1.5 text-xs text-slate-500 flex items-center gap-1.5">
+                        <span class="text-blue-600 font-semibold">Tanggung Jawab Mapel Anda:</span>
+                        @foreach($teacherSubjects as $ts)
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold {{ $ts->badgeClasses() }}">
+                                {{ $ts->icon }} {{ $ts->name }}
+                            </span>
+                        @endforeach
+                    </p>
+                @endif
+            </div>
+
             {{-- Target Kelas --}}
             <div>
                 <label for="class_id" class="block text-sm font-bold text-slate-700 mb-1.5">

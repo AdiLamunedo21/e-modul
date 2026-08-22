@@ -35,13 +35,21 @@ class ClassController extends Controller
     public function index(Request $request)
     {
         $teacher = $this->teacher();
+        $teacherSubjects = $teacher->subjects()->get();
+        $selectedSubjectId = $request->filled('subject_id') ? (int) $request->subject_id : null;
 
-        // Query hanya kelas-kelas yang memiliki modul dari guru ini
-        $query = SchoolClass::whereHas('modules', function ($q) use ($teacher) {
+        // Query hanya kelas-kelas yang memiliki modul dari guru ini (bisa difilter per subject_id)
+        $query = SchoolClass::whereHas('modules', function ($q) use ($teacher, $selectedSubjectId) {
                 $q->where('teacher_id', $teacher->id);
+                if ($selectedSubjectId) {
+                    $q->where('subject_id', $selectedSubjectId);
+                }
             })
-            ->with(['students', 'modules' => function ($q) use ($teacher) {
-                $q->where('teacher_id', $teacher->id)->with('studentResults');
+            ->with(['students', 'modules' => function ($q) use ($teacher, $selectedSubjectId) {
+                $q->where('teacher_id', $teacher->id)->with(['studentResults', 'subject']);
+                if ($selectedSubjectId) {
+                    $q->where('subject_id', $selectedSubjectId);
+                }
             }]);
 
         // Filter Tingkat Kelas (X, XI, XII)
@@ -68,11 +76,16 @@ class ClassController extends Controller
         // Hitung statistik per kelas untuk guru ini
         $classes->transform(function ($class) use ($teacher) {
             $class->stats = $class->statsForTeacher($teacher->id);
+            $class->subjects_list = $class->modules->pluck('subject')->filter()->unique('id');
             return $class;
         });
 
         // Statistik Keseluruhan Guru
-        $allTeacherModules = Module::where('teacher_id', $teacher->id)->with('studentResults')->get();
+        $baseModulesQuery = Module::where('teacher_id', $teacher->id);
+        if ($selectedSubjectId) {
+            $baseModulesQuery->where('subject_id', $selectedSubjectId);
+        }
+        $allTeacherModules = $baseModulesQuery->with('studentResults')->get();
         $assignedClassIds = $allTeacherModules->pluck('class_id')->filter()->unique();
         $totalStudentsInAssignedClasses = Student::whereIn('class_id', $assignedClassIds)->count();
         $allResults = $allTeacherModules->pluck('studentResults')->flatten();
@@ -88,7 +101,12 @@ class ClassController extends Controller
         ];
 
         // Data untuk dropdown filter (hanya dari kelas binaan guru ini)
-        $teacherClassesQuery = SchoolClass::whereHas('modules', fn ($q) => $q->where('teacher_id', $teacher->id));
+        $teacherClassesQuery = SchoolClass::whereHas('modules', function ($q) use ($teacher, $selectedSubjectId) {
+            $q->where('teacher_id', $teacher->id);
+            if ($selectedSubjectId) {
+                $q->where('subject_id', $selectedSubjectId);
+            }
+        });
         $availableGrades = (clone $teacherClassesQuery)->select('grade')->distinct()->orderBy('grade')->pluck('grade');
         $availableMajors = (clone $teacherClassesQuery)->select('major_name')->distinct()->orderBy('major_name')->pluck('major_name');
 
@@ -96,7 +114,9 @@ class ClassController extends Controller
             'classes',
             'globalStats',
             'availableGrades',
-            'availableMajors'
+            'availableMajors',
+            'teacherSubjects',
+            'selectedSubjectId'
         ));
     }
 

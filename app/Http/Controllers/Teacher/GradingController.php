@@ -42,9 +42,16 @@ class GradingController extends Controller
     public function index(Request $request)
     {
         $teacher = Auth::guard('teacher')->user();
+        $teacherSubjects = $teacher->subjects()->get();
 
         $query = Module::where('teacher_id', $teacher->id)
-            ->with(['schoolClass.students', 'studentResults']);
+            ->with(['schoolClass.students', 'studentResults', 'subject']);
+
+        // Filter Mata Pelajaran
+        $selectedSubjectId = $request->filled('subject_id') ? (int) $request->subject_id : null;
+        if ($selectedSubjectId) {
+            $query->where('subject_id', $selectedSubjectId);
+        }
 
         // Filter status modul jika ada
         if ($request->filled('status')) {
@@ -66,8 +73,12 @@ class GradingController extends Controller
 
         $modules = $query->latest()->get();
 
-        // Hitung statistik global penilaian guru
-        $allTeacherModules = Module::where('teacher_id', $teacher->id)->with('studentResults')->get();
+        // Hitung statistik global penilaian guru (berdasarkan subject_id jika difilter)
+        $baseStatQuery = Module::where('teacher_id', $teacher->id);
+        if ($selectedSubjectId) {
+            $baseStatQuery->where('subject_id', $selectedSubjectId);
+        }
+        $allTeacherModules = $baseStatQuery->with('studentResults')->get();
         $allResults = $allTeacherModules->pluck('studentResults')->flatten();
 
         $stats = [
@@ -83,7 +94,7 @@ class GradingController extends Controller
 
         $classes = $teacher->modules()->with('schoolClass')->get()->pluck('schoolClass')->filter()->unique('id');
 
-        return view('pages.teacher.grading.index', compact('modules', 'stats', 'classes'));
+        return view('pages.teacher.grading.index', compact('modules', 'stats', 'classes', 'teacherSubjects', 'selectedSubjectId'));
     }
 
     /**

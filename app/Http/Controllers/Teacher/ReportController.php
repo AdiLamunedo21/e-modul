@@ -33,9 +33,16 @@ class ReportController extends Controller
     public function index(Request $request)
     {
         $teacher = $this->teacher();
+        $teacherSubjects = $teacher->subjects()->get();
 
         $query = Module::where('teacher_id', $teacher->id)
-            ->with(['schoolClass.students', 'studentResults']);
+            ->with(['schoolClass.students', 'studentResults', 'subject']);
+
+        // Filter Mata Pelajaran
+        $selectedSubjectId = $request->filled('subject_id') ? (int) $request->subject_id : null;
+        if ($selectedSubjectId) {
+            $query->where('subject_id', $selectedSubjectId);
+        }
 
         // Filter status modul (published / draft / closed)
         if ($request->filled('status')) {
@@ -55,8 +62,12 @@ class ReportController extends Controller
 
         $modules = $query->latest()->paginate(10)->withQueryString();
 
-        // Hitung statistik rekapitulasi laporan
-        $allTeacherModules = Module::where('teacher_id', $teacher->id)->with('studentResults')->get();
+        // Hitung statistik rekapitulasi laporan (sesuai filter subject jika ada)
+        $baseStatQuery = Module::where('teacher_id', $teacher->id);
+        if ($selectedSubjectId) {
+            $baseStatQuery->where('subject_id', $selectedSubjectId);
+        }
+        $allTeacherModules = $baseStatQuery->with('studentResults')->get();
         $allResults = $allTeacherModules->pluck('studentResults')->flatten();
         $gradedResults = $allResults->where('grading_status', 'graded');
 
@@ -70,7 +81,7 @@ class ReportController extends Controller
 
         $classes = $teacher->modules()->with('schoolClass')->get()->pluck('schoolClass')->filter()->unique('id');
 
-        return view('pages.teacher.reports.index', compact('modules', 'stats', 'classes'));
+        return view('pages.teacher.reports.index', compact('modules', 'stats', 'classes', 'teacherSubjects', 'selectedSubjectId'));
     }
 
     /**

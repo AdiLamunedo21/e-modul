@@ -32,15 +32,18 @@ Sistem ini ditargetkan untuk:
 3. Memfasilitasi guru dengan *Grading Center* adaptif yang otomatis menyesuaikan matriks nilai dengan komponen evaluasi yang diaktifkan.
 4. Memungkinkan sekolah mengekspor seluruh hasil belajar siswa ke dalam berkas spreadsheet / Excel (.xlsx) yang kolomnya otomatis menyesuaikan dengan komponen aktif pada modul dan dapat diedit atau diolah lebih lanjut di Microsoft Excel.
 5. Menyediakan **Library Modul (Repositori Kolaboratif Antar-Guru)** untuk saling berbagi pemikiran dan instrumen pembelajaran digital, di mana guru dapat membagikan modul karyanya, meninjau kurikulum modul guru lain, dan melakukan penyalinan mendalam (*deep clone*) ke *workspace* pribadi untuk disesuaikan secara mandiri tanpa mengubah modul sumber asli.
+6. Mengintegrasikan **Manajemen Mata Pelajaran (Mapel) & Multi-Tanggung Jawab Guru**, memungkinkan seorang guru mengampu 2 atau lebih mata pelajaran (misal: Informatika dan Teknik Elektro), memilih mapel saat membuat modul, serta menyaring/beralih mapel secara cepat (*Subject Switcher*) di Manajer Modul, Grading Center, Laporan Nilai, dan Kelas Binaan.
 
 ### 1.4 Ruang Lingkup Proyek (Scope of Work)
 
 Untuk fase peluncuran awal (MVP), ruang lingkup aplikasi dibatasi pada:
 
 - Pengembangan antarmuka untuk 3 peran: Admin, Guru, dan Siswa.
-- Pembuatan **Dynamic E-Module Builder** dengan arsitektur 5 Bagian Umum E-Modul (15 total komponen terisolasi).
+- Manajemen Master Data Mata Pelajaran dan relasi tanggung jawab mengajar multi-mapel per guru.
+- Pembuatan **Dynamic E-Module Builder** dengan label/dropdown pilihan Mata Pelajaran dan arsitektur 5 Bagian Umum E-Modul (15 total komponen terisolasi).
 - Sistem sakelar instan (Toggle Switch) yang memungkinkan guru mengaktifkan/menonaktifkan komponen di setiap bagian.
 - Sistem **Library Modul & Repositori Kolaboratif** (fitur berbagi izin, katalog publik sekolah, pratinjau kurikulum, dan kloning instrumen pembelajaran).
+- Sistem penyaringan dinamis (*Subject Switcher & Filters*) pada Manajer Modul, Grading Center, Laporan Nilai, dan Kelas Binaan.
 - Sistem navigasi siswa yang berbasis _Pagination_ (Halaman Sebelumnya / Halaman Selanjutnya) agar siswa membaca materi secara bertahap dan terarah.
 - Penilaian hibrida: Otomatis (untuk soal pilihan ganda Pre-test & Post-test) dan manual (untuk ringkasan video, bukti _screenshot_ praktik interaktif, serta berkas tugas LKPD dan _Job Sheet_), yang seluruhnya beradaptasi dengan komponen yang diaktifkan oleh guru.
 
@@ -61,7 +64,7 @@ Sistem harus memisahkan wewenang dan tampilan antarmuka secara ketat berdasarkan
 ### 2.2 Transparansi Dasbor dan Manajemen Portofolio
 
 - **Transparansi Belajar Siswa:** Halaman dasbor siswa memisahkan status modul menjadi _Active/To-Do_ (Tugas Aktif) dan _Completed_ (Riwayat Selesai). Untuk E-Modul di tab _Completed_, sistem menampilkan rincian nilai akhir siswa secara transparan sesuai komponen yang aktif.
-- **Manajemen Portofolio Guru:** Dasbor guru dilengkapi dengan halaman "Manajer Modul" untuk melihat riwayat seluruh modul yang pernah dirakit, status publikasinya (_Draft/Published/Closed_), dan memantau persentase pengumpulan tugas siswa secara _real-time_.
+- **Manajemen Portofolio Guru:** Dasbor guru dilengkapi dengan halaman "Manajer Modul" untuk melihat riwayat seluruh modul yang pernah dirakit, status publikasinya (_Draft/Published/Closed_), memfilter per mata pelajaran (*Subject Switcher*), dan memantau persentase pengumpulan tugas siswa secara _real-time_.
 
 ### 2.3 Struktur 5 Bagian Umum E-Modul (Modular & Paginated System)
 
@@ -103,6 +106,17 @@ Guru diberikan kebebasan mutlak (_Toggle System_) untuk menghidupkan atau memati
 - **Kebijakan Unggah Ulang (Re-submission):** Siswa diizinkan membatalkan dan mengunggah ulang file _Job Sheet_, LKPD, atau _Screenshot_ Praktik **hanya jika** guru belum memberikan nilai (status di database masih `pending`). Jika guru sudah menilainya (status `graded`), form unggah terkunci otomatis.
 - **Pembuatan Laporan Dinamis (Spreadsheet / Excel .XLSX Generator):** Sistem mampu mengagregasi seluruh komponen nilai yang diaktifkan beserta data siswa ke dalam berkas spreadsheet Excel (`.xlsx`) yang dapat diedit dan diolah secara leluasa oleh guru/sekolah, dengan tata letak kolom yang menyesuaikan secara dinamis terhadap komponen aktif pada modul.
 
+### 2.6 Manajemen Mata Pelajaran & Tanggung Jawab Mengajar Multi-Mapel
+
+- **Relasi Multi-Mapel Guru:** Sistem mendukung pemetaan relasi *Many-to-Many* antara guru dan mata pelajaran (`teacher_subjects`). Seorang guru dapat memiliki tanggung jawab mengajar lebih dari 1 mata pelajaran (contoh: Guru Budi Santoso mengampu mata pelajaran **Informatika** dan **Teknik Elektro**).
+- **Pemilihan Mata Pelajaran Wajib:** Saat guru membuat E-Modul baru di menu *Buat E-Modul*, guru diwajibkan memilih satu mata pelajaran yang ditautkan ke modul tersebut (`subject_id`), dengan *optgroup* khusus yang menonjolkan mata pelajaran yang menjadi tanggung jawab mengajar guru bersangkutan.
+- **Subject Switcher di Manajer Modul:** Pada antarmuka Manajer Modul, sistem menyediakan bilah beralih (*Subject Switcher*) dinamis yang menampilkan pilihan mata pelajaran tanggung jawab guru beserta jumlah modul masing-masing, sehingga guru dapat memfilter katalog modulnya per mata pelajaran atau melihat seluruh modul secara keseluruhan.
+- **Penyaringan Terpadu di Seluruh Fitur Guru:**
+  - **Grading Center (`/teacher/grading`):** Menyediakan filter cepat (*quick-tabs*) dan dropdown filter mata pelajaran untuk memeriksa penugasan modul per mapel.
+  - **Laporan Nilai (`/teacher/reports`):** Memungkinkan guru menyaring rekapitulasi nilai dan mengunduh berkas spreadsheet nilai per mata pelajaran.
+  - **Daftar Kelas Binaan (`/teacher/classes`):** Memungkinkan penyaringan kelas berdasarkan mapel yang diajarkan dan menampilkan badge mata pelajaran pada kartu kelas binaan.
+  - **Profil & Header Guru:** Menampilkan ringkasan mata pelajaran yang diampu pada *profile pill* header dan *banner greeting* dashboard.
+
 ---
 
 ## 3. **Core Features (Fitur Utama)**
@@ -119,8 +133,9 @@ Pusat kendali bagi pihak manajemen sekolah (Kurikulum atau Kepala Sekolah) untuk
 
 Ruang kerja eksklusif bagi pendidik untuk merancang, mendistribusikan, dan mengevaluasi modul pembelajaran:
 
-- **Manajer Modul (Module Manager):** Halaman yang menampilkan seluruh daftar E-Modul milik guru dengan status (_Draft_, _Published_, atau _Closed_) dan _Progress Bar_ pengumpulan tugas siswa secara _real-time_.
-- **E-Module Detail & Builder (5 Bagian):** Antarmuka terstruktur menampilkan 5 Bagian Utama E-Modul, progress bar kesiapan (contoh: `14/15 Komponen Aktif`), kartu 2-kolom seimbang, tombol edit langsung per-elemen, dan sakelar instan (AJAX toggle switch).
+- **Manajer Modul (Module Manager):** Halaman yang menampilkan seluruh daftar E-Modul milik guru dengan **Bilah Pemilih Mata Pelajaran (Subject Switcher)** di bagian atas, status (_Draft_, _Published_, atau _Closed_), filter status terintegrasi, badge mata pelajaran pada kartu modul, dan _Progress Bar_ pengumpulan tugas siswa secara _real-time_.
+- **Form Pembuatan Modul Baru:** Form pembuatan modul dilengkapi dengan input pilihan **Mata Pelajaran \*** (dengan *optgroup* penanda tanggung jawab mapel guru), input judul modul, dan pilihan target kelas.
+- **E-Module Detail & Builder (5 Bagian):** Antarmuka terstruktur menampilkan 5 Bagian Utama E-Modul, badge mata pelajaran & target kelas pada header, progress bar kesiapan (contoh: `14/15 Komponen Aktif`), kartu 2-kolom seimbang, tombol edit langsung per-elemen, dan sakelar instan (AJAX toggle switch).
 - **Dedicated Modular Component Editors:** Setiap bagian memiliki halaman editor terisolasi:
   - `Editor Bagian Awal` (4 Komponen: Cover, Kata Pengantar, Daftar Isi, Petunjuk).
   - `Editor Pendahuluan` (3 Komponen: Tujuan Pembelajaran & Capaian, Peta Konsep, Glosarium).
@@ -133,13 +148,15 @@ Ruang kerja eksklusif bagi pendidik untuk merancang, mendistribusikan, dan menge
   - `Editor Post-test` (Quiz Builder evaluasi akhir modul).
   - `Editor Daftar Pustaka` (Tabel rujukan buku, jurnal, dan sumber digital).
 - **Simulation Preview:** Kemudahan guru dalam mensimulasikan tampilan persis seperti yang akan dilihat siswa sebelum modul dipublikasikan.
-- **Grading Center (Pusat Penilaian Adaptif):** Panel terpadu bagi guru untuk memeriksa dan memberikan nilai manual terhadap Ringkasan Video, tangkapan layar Praktik Interaktif, serta file tugas PDF _Job Sheet_ dan LKPD.
+- **Grading Center (Pusat Penilaian Adaptif):** Panel terpadu bagi guru untuk memeriksa dan memberikan nilai manual terhadap Ringkasan Video, tangkapan layar Praktik Interaktif, serta file tugas PDF _Job Sheet_ dan LKPD, dilengkapi dengan bilah *quick-tabs* dan dropdown filter Mata Pelajaran.
+- **Laporan Nilai (Report Center):** Panel rekapitulasi nilai siswa dan ekspor spreadsheet (.xlsx) yang dilengkapi dengan bilah filter Mata Pelajaran dan filter kelas.
+- **Daftar Kelas Binaan (Classes Directory):** Panel pemantauan kelas binaan dengan filter Mata Pelajaran dan penanda badge mapel yang diampu pada tiap kelas.
 
 ### 3.3 Dashboard Siswa (Student Portal)
 
 Portal belajar yang transparan dan terstruktur bagi siswa:
 
-- **Tab Tugas Aktif (To-Do):** Menampilkan daftar E-Modul yang ditugaskan untuk kelas siswa dan wajib diselesaikan.
+- **Tab Tugas Aktif (To-Do):** Menampilkan daftar E-Modul yang ditugaskan untuk kelas siswa dan wajib diselesaikan, lengkap dengan badge nama mata pelajaran dan guru pengampu.
 - **Tab Riwayat Nilai (Completed):** Menyimpan rekam jejak E-Modul yang telah diselesaikan beserta rincian nilai transparan untuk setiap komponen yang dinilai oleh guru.
 
 ### 3.4 Interactive Student UI (Antarmuka Belajar Paginated & Restriktif)
@@ -156,18 +173,19 @@ Fitur ekspor data penilaian kelas ke format berkas spreadsheet (.xlsx / Microsof
 
 ### 4.1 Alur Guru (Teacher Flow) — Perancangan 5 Bagian & Penilaian
 
-1. **Autentikasi & Dasbor Awal:** Guru melakukan _login_ dan membuka "Manajer Modul".
-2. **Pembuatan Modul:** Guru menekan "Buat Modul Baru", memasukkan judul dan target kelas. Modul tersimpan dengan status `draft`.
-3. **Penyusunan Konten (Module Detail 5 Bagian):**
+1. **Autentikasi & Dasbor Awal:** Guru melakukan _login_, melihat mata pelajaran yang menjadi tanggung jawabnya pada *profile pill* header dan *banner workspace*, lalu membuka "Manajer Modul".
+2. **Pemilihan Mapel di Manajer Modul:** Guru dapat memilih bilah mata pelajaran (*Subject Switcher*) untuk menyaring modul sesuai mapel tertentu (misal: Informatika atau Teknik Elektro) atau memilih "Semua Mata Pelajaran".
+3. **Pembuatan Modul:** Guru menekan "Buat Modul Baru", memilih **Mata Pelajaran \***, memasukkan judul modul, dan memilih target kelas. Modul tersimpan dengan status `draft`.
+4. **Penyusunan Konten (Module Detail 5 Bagian):**
    - **Bagian Awal:** Guru mengedit Cover, Kata Pengantar, Daftar Isi, dan Petunjuk Penggunaan via Editor Bagian Awal.
    - **Pendahuluan:** Guru menyusun Tujuan Pembelajaran, Capaian Pembelajaran, Peta Konsep, dan Glosarium via Editor Pendahuluan, serta menyusun kuis diagnostik via Editor Pre-test.
    - **Kegiatan Belajar:** Guru mengisi Materi & PPT via Editor Materi, serta tautan Video YouTube via Editor Video.
    - **Evaluasi & Latihan:** Guru mengatur game interaktif via Editor Embed, mengunggah panduan via Editor Job Sheet, dan menyusun tugas via Editor LKPD.
    - **Bagian Akhir:** Guru merakit soal tes penutup via Editor Post-test dan menyusun sumber rujukan via Editor Daftar Pustaka.
-4. **Simulasi Pratinjau:** Guru membuka fitur Preview pada tiap komponen untuk memastikan kesesuaian materi.
-5. **Publikasi:** Guru menekan tombol "Publish Modul" sehingga modul dapat diakses oleh siswa pada kelas target.
-6. **Evaluasi di Grading Center:** Guru meninjau penugasan siswa yang masuk, membaca ringkasan video, memeriksa screenshot praktik, mengunduh file tugas, dan memasukkan nilai manual.
-7. **Ekspor Laporan Nilai:** Guru mengunduh Rekapitulasi Laporan Spreadsheet Excel (.xlsx) nilai kelas untuk pengolahan lebih lanjut atau arsip nilai.
+5. **Simulasi Pratinjau:** Guru membuka fitur Preview pada tiap komponen untuk memastikan kesesuaian materi.
+6. **Publikasi:** Guru menekan tombol "Publish Modul" sehingga modul dapat diakses oleh siswa pada kelas target.
+7. **Evaluasi di Grading Center:** Guru meninjau penugasan siswa yang masuk dengan filter Mata Pelajaran, membaca ringkasan video, memeriksa screenshot praktik, mengunduh file tugas, dan memasukkan nilai manual.
+8. **Ekspor Laporan Nilai:** Guru menyaring laporan berdasarkan Mata Pelajaran dan mengunduh Rekapitulasi Laporan Spreadsheet Excel (.xlsx) nilai kelas untuk pengolahan lebih lanjut atau arsip nilai.
 
 ### 4.2 Alur Siswa (Student Flow) — Pengalaman Belajar 5 Tahap
 
@@ -197,8 +215,17 @@ Sistem menerapkan arsitektur **Multi-Guard Authentication** bawaan Laravel denga
 
 ### 5.3 Pemetaan Data & Logika MVC pada 5 Bagian E-Modul
 
+- **Model (`Subject.php`):**
+  - Mengelola master data mata pelajaran (`name`, `code`, `icon`, `color`, `description`).
+  - Relasi *Many-to-Many* ke `teachers` melalui tabel pivot `teacher_subjects`, serta relasi *One-to-Many* ke `modules`.
+  - Menyediakan helper visual styling: `badgeClasses()`, `softBgColor()`, `textColor()`.
+- **Model (`Teacher.php`):**
+  - Relasi `subjects()` (*Many-to-Many*) untuk mendukung guru dengan 2 atau lebih mata pelajaran yang diampu.
+  - Helper `subjectNames()` untuk menghasilkan teks gabungan nama mapel (misal: `"Informatika & Teknik Elektro"`).
+  - Helper `assignedClasses(?int $subjectId)` untuk mengambil daftar kelas binaan dengan opsi filter per mapel.
 - **Model (`Module.php`):**
-  - Mengelola interaksi basis data dan JSON casting pada `informasi_umum_data`.
+  - Mengelola interaksi basis data, relasi ke `subject` (BelongsTo), dan JSON casting pada `informasi_umum_data`.
+  - Replikasi atribut `subject_id` saat modul disalin (*deep clone*) di Library Modul.
   - Menyediakan helper terstruktur untuk 5 Bagian: `moduleSectionsSummary()`, `bagianAwalComponents()`, `pendahuluanComponents()`, `kegiatanBelajarComponents()`, `evaluasiLatihanComponents()`, `bagianAkhirComponents()`.
   - Helper status dan penilaian: `statusLabel()`, `activeComponents()`, `activeGradedComponents()`.
 - **Controller Pengelola Konten Mandiri:**
@@ -212,8 +239,10 @@ Sistem menerapkan arsitektur **Multi-Guard Authentication** bawaan Laravel denga
   - `LkpdController`: Mengelola lembar kerja peserta didik (LKPD PDF) pada bagian Evaluasi & Latihan.
   - `PostTestController`: Mengelola konfigurasi dan butir soal kuis evaluasi akhir modul Post-test.
   - `DaftarPustakaController`: Mengelola daftar referensi buku, modul ajar, jurnal, dan tautan digital pada Bagian Akhir.
-  - `GradingController`: Mengelola matriks penilaian adaptif dan rekapitulasi nilai siswa.
-  - `ModuleManagerController`: Mengelola siklus hidup modul (CRUD, status draft/publish/closed).
+  - `GradingController`: Mengelola matriks penilaian adaptif dan rekapitulasi nilai siswa dengan filter Mata Pelajaran.
+  - `ModuleManagerController`: Mengelola siklus hidup modul (CRUD, status draft/publish/closed, filter per Mata Pelajaran via Subject Switcher).
+  - `ReportController`: Mengelola rekapitulasi laporan nilai dan ekspor spreadsheet Excel (.xlsx) dengan filter Mata Pelajaran.
+  - `ClassController`: Mengelola daftar kelas binaan dengan filter Mata Pelajaran dan pengelompokan mapel.
 
 ### 5.4 Sequence Diagram Alur Belajar 5 Bagian
 
@@ -225,6 +254,8 @@ sequenceDiagram
     actor Siswa
 
     Note over Guru, DB: FASE PERAKITAN 5 BAGIAN MODUL
+    Guru->>Server: Pilih Mata Pelajaran, Isi Judul & Target Kelas
+    Server->>DB: Simpan modul baru dengan subject_id & class_id
     Guru->>Server: Konfigurasi Bagian Awal & Pendahuluan
     Server->>DB: Simpan informasi_umum_data ke tabel MODULES
     Guru->>Server: Toggle Aktifkan Komponen (Pre-test, Video, Job Sheet, LKPD, Post-test)
@@ -265,7 +296,7 @@ sequenceDiagram
     Server->>DB: Update STUDENT_RESULTS status = 'pending'
 
     Note over Guru, DB: FASE PENILAIAN & LAPORAN
-    Guru->>Server: Buka Grading Center
+    Guru->>Server: Buka Grading Center (Filter per Mata Pelajaran)
     Server-->>Guru: Tampilkan berkas tugas & ringkasan siswa
     Guru->>Server: Simpan Skor Manual (Video, Job Sheet, LKPD, dll)
     Server->>DB: Update nilai akhir & set grading_status = 'graded'
@@ -283,6 +314,9 @@ Sistem menggunakan basis data relasional MySQL / MariaDB dengan dukungan tipe da
 
 ```mermaid
 erDiagram
+    TEACHERS ||--o{ TEACHER_SUBJECTS : "mengampu"
+    SUBJECTS ||--o{ TEACHER_SUBJECTS : "diampu oleh"
+    SUBJECTS ||--o{ MODULES : "memayungi"
     TEACHERS ||--o{ MODULES : "merakit modul"
     CLASSES ||--o{ STUDENTS : "menampung siswa"
     CLASSES ||--o{ MODULES : "ditargetkan untuk"
@@ -306,6 +340,19 @@ erDiagram
         string identity_number "NIP Admin"
         string password
     }
+    SUBJECTS {
+        bigint id PK
+        string name "Nama Mapel"
+        string code "Kode Mapel"
+        string icon "Icon Mapel"
+        string color "Palet Warna Badge"
+        text description
+    }
+    TEACHER_SUBJECTS {
+        bigint id PK
+        bigint teacher_id FK
+        bigint subject_id FK
+    }
     TEACHERS {
         bigint id PK
         string name
@@ -327,6 +374,7 @@ erDiagram
     MODULES {
         bigint id PK
         bigint teacher_id FK
+        bigint subject_id FK "Relasi ke SUBJECTS (Nullable)"
         bigint class_id FK
         string title
         text informasi_umum_data "JSON: Cover, Kata Pengantar, Peta Konsep, Glosarium, Petunjuk, Capaian, Daftar Pustaka"
@@ -436,9 +484,14 @@ erDiagram
 - `TEACHERS`: `id`, `name`, `identity_number` (NUPTK/NIP), `password`.
 - `STUDENTS`: `id`, `name`, `identity_number` (NISN), `class_id` (FK), `password`.
 
-**2. Tabel `MODULES` (Entitas Modul Sentral & Konfigurasi Builder)**
+**2. Tabel `SUBJECTS` & `TEACHER_SUBJECTS` (Master Mata Pelajaran & Pivot Multi-Mapel)**
+- `SUBJECTS`: `id` (BigInt PK), `name` (String: Nama Mapel), `code` (String Nullable: Kode Singkatan), `icon` (String Nullable: Emoji/Icon), `color` (String: Palet Warna Badge), `description` (Text Nullable).
+- `TEACHER_SUBJECTS`: `id` (BigInt PK), `teacher_id` (BigInt FK), `subject_id` (BigInt FK).
+
+**3. Tabel `MODULES` (Entitas Modul Sentral & Konfigurasi Builder)**
 - `id` (BigInt PK): Identitas unik modul.
 - `teacher_id` (BigInt FK): Relasi ke guru perakit modul.
+- `subject_id` (BigInt FK Nullable): Relasi ke mata pelajaran modul (`SUBJECTS`).
 - `class_id` (BigInt FK): Relasi ke target kelas siswa.
 - `title` (String): Judul modul pembelajaran.
 - `informasi_umum_data` (JSON/Text): Menyimpan struktur data Cover, Kata Pengantar, Peta Konsep, Glosarium, Petunjuk Penggunaan, Tujuan Pembelajaran, dan Daftar Pustaka.
@@ -452,13 +505,13 @@ erDiagram
   - `has_post_test` (Boolean — Bagian 5. Bagian Akhir)
 - `status` (Enum): `'draft'`, `'published'`, `'closed'`.
 
-**3. Tabel Rekam Penugasan (Submissions)**
+**4. Tabel Rekam Penugasan (Submissions)**
 - `VIDEO_SUMMARIES`: `id`, `module_id`, `student_id`, `summary_text`, `manual_score`.
 - `EMBED_SUBMISSIONS`: `id`, `module_id`, `student_id`, `screenshot_path`, `manual_score`.
 - `JOB_SHEET_SUBMISSIONS`: `id`, `job_sheet_id`, `student_id`, `uploaded_file_path`, `manual_score`.
 - `SUBMISSIONS` (LKPD): `id`, `lkpd_id`, `student_id`, `uploaded_file_path`, `manual_score`.
 
-**4. Tabel `STUDENT_RESULTS` (Agregasi Nilai Adaptif Siswa)**
+**5. Tabel `STUDENT_RESULTS` (Agregasi Nilai Adaptif Siswa)**
 - `id` (BigInt PK)
 - `student_id` (BigInt FK)
 - `module_id` (BigInt FK)
@@ -515,14 +568,19 @@ e-modul/
 │   │   │       ├── LkpdController.php          # Editor Lembar Kerja Peserta Didik (LKPD PDF)
 │   │   │       ├── PostTestController.php      # Editor Post-test (Evaluasi Akhir Modul & Builder Soal)
 │   │   │       ├── DaftarPustakaController.php # Editor Bagian 5 (Daftar Pustaka & Referensi Rujukan)
+│   │   │       ├── DashboardController.php     # Dasbor Workspace Guru (Quick Actions, Real Metrics, Live Queue)
 │   │   │       ├── GradingController.php       # Matriks Penilaian Adaptif & Rekapitulasi Nilai Siswa
+│   │   │       ├── ModuleLibraryController.php # Perpustakaan Modul Bersama & Kloning Kurikulum
+│   │   │       ├── ReportController.php        # Ekspor & Laporan Rekap Nilai Excel (.xlsx)
+│   │   │       ├── ClassController.php         # Manajemen Kelas Binaan & Direktori Akademik Siswa
 │   │   │       └── ModuleManagerController.php # Manajer Modul (CRUD, Publish, Close, Detail Modul)
 │   │   └── Middleware/
 │   │       └── Authenticate.php                # Multi-guard authentication middleware handler
 │   └── Models/
 │       ├── Admin.php                           # Model entitas Administrator
-│       ├── Teacher.php                         # Model entitas Guru
+│       ├── Teacher.php                         # Model entitas Guru (Multi-Mapel via teacher_subjects)
 │       ├── Student.php                         # Model entitas Siswa
+│       ├── Subject.php                         # Model entitas Master Mata Pelajaran (Mapel)
 │       ├── SchoolClass.php                     # Model entitas Kelas & Jurusan
 │       ├── Module.php                          # Model E-Modul Sentral & Helper 5 Bagian
 │       ├── PreTest.php                         # Model konfigurasi Pre-test
@@ -560,8 +618,13 @@ e-modul/
 │           ├── student/
 │           │   └── dashboard.blade.php         # Portal belajar & tab tugas/riwayat siswa
 │           └── teacher/
+│               ├── dashboard.blade.php         # Dasbor Workspace Utama Terpadu Guru
+│               ├── library/
+│               │   ├── index.blade.php         # Katalog Perpustakaan Modul Bersama
+│               │   └── show.blade.php          # Pratinjau & Kloning Modul Perpustakaan
 │               ├── classes/
-│               │   └── index.blade.php         # Daftar kelas binaan guru
+│               │   ├── index.blade.php         # Daftar kelas binaan guru
+│               │   └── show.blade.php          # Detail kelas binaan & direktori siswa
 │               ├── grading/
 │               │   ├── index.blade.php         # Index pusat penilaian guru
 │               │   └── show.blade.php          # Matriks penilaian adaptif modul per siswa
@@ -569,29 +632,12 @@ e-modul/
 │               │   ├── index.blade.php         # Manajer Modul (Daftar seluruh e-modul guru)
 │               │   ├── create.blade.php        # Form pembuatan modul baru
 │               │   ├── show.blade.php          # Detail Modul Utama & Builder 5 Bagian
-│               │   ├── bagian-awal/
-│               │   │   └── edit.blade.php      # Editor Bagian Awal (4 Komponen)
-│               │   ├── pendahuluan/
-│               │   │   └── edit.blade.php      # Editor Pendahuluan (3 Komponen Konsep)
-│               │   ├── daftar-pustaka/
-│               │   │   └── edit.blade.php      # Editor Daftar Pustaka (Kepustakaan & Rujukan)
-│               │   ├── pre-test.blade.php      # Editor Quiz Builder Pre-test Diagnostik
-│               │   ├── preview-pre-test.blade.php # Pratinjau simulasi Pre-test
-│               │   ├── materi.blade.php        # Editor Materi Pembelajaran & PPT
-│               │   ├── preview-materi.blade.php # Pratinjau simulasi Materi
-│               │   ├── video.blade.php         # Editor Video YouTube & Resume
-│               │   ├── preview-video.blade.php # Pratinjau simulasi Video
-│               │   ├── embed.blade.php         # Editor Game Interaktif / Simulator Embed
-│               │   ├── preview-embed.blade.php # Pratinjau simulasi Embed
-│               │   ├── job-sheet.blade.php     # Editor Lembar Kerja Praktik (Job Sheet PDF)
-│               │   ├── preview-job-sheet.blade.php # Pratinjau simulasi Job Sheet
-│               │   ├── lkpd.blade.php          # Editor Tugas LKPD PDF
-│               │   ├── preview-lkpd.blade.php  # Pratinjau simulasi LKPD
-│               │   ├── post-test.blade.php     # Editor Quiz Builder Post-test Akhir Modul
-│               │   ├── preview-post-test.blade.php # Pratinjau simulasi Post-test
-│               │   └── partials/               # Komponen Blade parsial
-│               └── reports/
-│                   └── index.blade.php         # Halaman pratinjau & ekspor rekapitulasi laporan nilai (.xlsx)
+│               ├── dashboard.blade.php         # Dashboard Workspace Guru (KPI, 3 Modul Terbaru, Antrean)
+│               ├── classes/                    # Manajemen kelas & siswa binaan
+│               ├── grading/                    # Pusat penilaian Grading Center
+│               ├── library/                    # Katalog perpustakaan modul bersama
+│               ├── modules/                    # Manajer & Builder modul pembelajaran
+│               └── reports/                    # Laporan & ekspor spreadsheet Excel (.xlsx)
 ├── routes/
 │   ├── web.php                                 # Rute aplikasi (Multi-guard auth & teacher sub-editors)
 │   └── console.php                             # Rute perintah artisan CLI
@@ -612,6 +658,10 @@ e-modul/
 │   │   ├── DaftarPustakaTest.php               # Pengujian fitur Editor Daftar Pustaka
 │   │   ├── ModuleShowInterfaceTest.php         # Pengujian antarmuka 5 bagian modul
 │   │   ├── GradingCenterTest.php               # Pengujian matriks adaptif Grading Center
+│   │   ├── ExcelReportTest.php                 # Pengujian ekspor spreadsheet Excel (.xlsx)
+│   │   ├── ModuleLibraryTest.php               # Pengujian repositori bersama & kloning
+│   │   ├── TeacherClassTest.php                # Pengujian direktori kelas & siswa binaan
+│   │   ├── TeacherDashboardTest.php            # Pengujian workspace terpadu & metrik dinamis
 │   │   └── ExampleTest.php                     # Pengujian respon HTTP dasar
 │   └── Unit/
 │       └── ExampleTest.php                     # Pengujian unit logic dasar

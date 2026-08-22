@@ -115,8 +115,31 @@
     </div>
 
     {{-- ══ 3. FILTER BAR ══ --}}
-    <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-sm">
+    <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-sm space-y-4">
+        {{-- Subject Quick Switcher Tabs (jika guru punya mapel) --}}
+        @if($teacherSubjects->isNotEmpty())
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-slate-100">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mr-2 shrink-0">Mapel:</span>
+                <a href="{{ route('teacher.classes.index', array_filter(['grade' => request('grade'), 'major' => request('major'), 'search' => request('search')])) }}"
+                   class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap
+                       {{ !$selectedSubjectId ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30' : 'bg-slate-50 text-slate-600 hover:bg-slate-100' }}">
+                    Semua Mapel
+                </a>
+                @foreach($teacherSubjects as $ts)
+                    <a href="{{ route('teacher.classes.index', array_filter(['subject_id' => $ts->id, 'grade' => request('grade'), 'major' => request('major'), 'search' => request('search')])) }}"
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap
+                           {{ $selectedSubjectId === $ts->id ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30' : 'bg-slate-50 text-slate-600 hover:bg-slate-100' }}">
+                        <span>{{ $ts->icon }}</span>
+                        <span>{{ $ts->name }}</span>
+                    </a>
+                @endforeach
+            </div>
+        @endif
+
         <form action="{{ route('teacher.classes.index') }}" method="GET" class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+            @if(request('subject_id'))
+                <input type="hidden" name="subject_id" value="{{ request('subject_id') }}">
+            @endif
             
             {{-- Search Bar --}}
             <div class="relative flex-1 min-w-[240px] flex items-center">
@@ -132,6 +155,17 @@
 
             {{-- Dropdown Filters & Actions --}}
             <div class="flex flex-wrap items-center gap-2.5">
+                {{-- Filter Mata Pelajaran --}}
+                <select name="subject_id" onchange="this.form.submit()"
+                        class="px-3.5 py-2.5 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-700 cursor-pointer">
+                    <option value="">Semua Mata Pelajaran</option>
+                    @foreach($teacherSubjects as $ts)
+                        <option value="{{ $ts->id }}" {{ request('subject_id') == $ts->id ? 'selected' : '' }}>
+                            {{ $ts->icon }} {{ $ts->name }}
+                        </option>
+                    @endforeach
+                </select>
+
                 {{-- Filter Tingkat --}}
                 <select name="grade" onchange="this.form.submit()"
                         class="px-3.5 py-2.5 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-700 cursor-pointer">
@@ -157,10 +191,10 @@
                 {{-- Submit Button --}}
                 <button type="submit"
                         class="px-4 py-2.5 text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-xl transition-colors shadow-sm shrink-0">
-                    Terapkan Filter
+                    Filter
                 </button>
 
-                @if(request()->hasAny(['search', 'grade', 'major']))
+                @if(request()->hasAny(['search', 'grade', 'major', 'subject_id']))
                     <a href="{{ route('teacher.classes.index') }}"
                        class="px-3.5 py-2.5 text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200/80 rounded-xl transition-all shrink-0">
                         ✕ Reset
@@ -212,6 +246,7 @@
             @foreach($classes as $class)
                 @php
                     $stats = $class->stats;
+                    $classSubjects = $class->subjects_list ?? collect();
                 @endphp
 
                 <div class="bg-white rounded-3xl border border-blue-200/80 ring-1 ring-blue-500/10 shadow-sm hover:shadow-md transition-all flex flex-col justify-between overflow-hidden group">
@@ -219,16 +254,22 @@
                     {{-- Top Header Card --}}
                     <div class="p-6 border-b border-slate-100">
                         <div class="flex items-start justify-between gap-3 mb-3">
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 flex-wrap">
                                 <span class="px-3 py-1 rounded-xl text-xs font-extrabold bg-blue-600 text-white">
                                     Kelas {{ $class->grade }}
                                 </span>
                                 <span class="px-2.5 py-1 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
                                     {{ $class->major_name }}
                                 </span>
+                                @foreach($classSubjects as $cSub)
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold {{ $cSub->badgeClasses() }}">
+                                        <span>{{ $cSub->icon }}</span>
+                                        <span>{{ $cSub->name }}</span>
+                                    </span>
+                                @endforeach
                             </div>
 
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                                 Binaan Aktif
                             </span>

@@ -5,6 +5,8 @@
 
 @section('content')
 
+<div x-data="{ deleteModalOpen: false, deleteUrl: '', deleteTitle: '' }">
+
 {{-- ══ Header Halaman ══ --}}
 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
     <div>
@@ -28,6 +30,53 @@
     </div>
 @endif
 
+{{-- ══ Subject Switcher (Pilihan Mata Pelajaran Tanggung Jawab Guru) ══ --}}
+@if($teacherSubjects->isNotEmpty())
+    <div class="mb-6 bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 rounded-2xl p-4 sm:p-5 text-white shadow-md border border-slate-700/50">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+                <h2 class="text-xs font-black uppercase tracking-wider text-slate-300">
+                    Mata Pelajaran Tanggung Jawab Mengajar ({{ $teacherSubjects->count() }})
+                </h2>
+            </div>
+            <span class="text-[11px] text-slate-400">Pilih mata pelajaran untuk memfilter daftar modul:</span>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+            {{-- Tab: Semua Mapel --}}
+            <a href="{{ route('teacher.modules.index', array_filter(['status' => request('status')])) }}"
+               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all
+                   {{ !$selectedSubjectId 
+                       ? 'bg-blue-600 text-white shadow-md shadow-blue-600/40 ring-2 ring-white/20' 
+                       : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700' }}">
+                <span>📚 Semua Mata Pelajaran</span>
+                <span class="px-1.5 py-0.5 rounded-full text-[10px] font-black {{ !$selectedSubjectId ? 'bg-white/20 text-white' : 'bg-slate-700 text-slate-300' }}">
+                    {{ $totalAllSubjects }}
+                </span>
+            </a>
+
+            {{-- Tabs: Mapel Guru --}}
+            @foreach($teacherSubjects as $subject)
+                @php
+                    $isActive = $selectedSubjectId === $subject->id;
+                    $subCount = $subjectCounts[$subject->id] ?? 0;
+                @endphp
+                <a href="{{ route('teacher.modules.index', array_filter(['subject_id' => $subject->id, 'status' => request('status')])) }}"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all
+                       {{ $isActive 
+                           ? 'bg-blue-600 text-white shadow-md shadow-blue-600/40 ring-2 ring-white/20' 
+                           : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700' }}">
+                    <span>{{ $subject->icon }} {{ $subject->name }}</span>
+                    <span class="px-1.5 py-0.5 rounded-full text-[10px] font-black {{ $isActive ? 'bg-white/20 text-white' : 'bg-slate-700 text-slate-300' }}">
+                        {{ $subCount }}
+                    </span>
+                </a>
+            @endforeach
+        </div>
+    </div>
+@endif
+
 {{-- ══ Filter Tabs ══ --}}
 <div class="flex items-center gap-1 bg-white border border-slate-200 p-1 rounded-2xl shadow-sm mb-6 self-start overflow-x-auto">
     @php
@@ -40,7 +89,10 @@
         ];
     @endphp
     @foreach ($tabs as $value => $label)
-        <a href="{{ route('teacher.modules.index', $value ? ['status' => $value] : []) }}"
+        @php
+            $params = array_filter(['status' => $value, 'subject_id' => $selectedSubjectId]);
+        @endphp
+        <a href="{{ route('teacher.modules.index', $params) }}"
            class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap
                {{ $activeStatus === $value
                    ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30'
@@ -60,8 +112,8 @@
         </div>
         <h3 class="text-lg font-bold text-slate-800 mb-2">Belum Ada Modul</h3>
         <p class="text-sm text-slate-500 max-w-sm mx-auto mb-6">
-            @if($activeStatus)
-                Tidak ada modul dengan status <strong>{{ $tabs[$activeStatus] ?? $activeStatus }}</strong>.
+            @if($selectedSubjectId || $activeStatus)
+                Tidak ada modul yang cocok dengan filter yang dipilih.
             @else
                 Anda belum membuat E-Modul apapun. Mulai rakit modul pertama dengan <em>Module Builder</em>.
             @endif
@@ -78,6 +130,7 @@
                 $badge    = $module->statusLabel();
                 $comps    = $module->activeComponents();
                 $class    = $module->schoolClass;
+                $subject  = $module->subject;
             @endphp
             <div class="rounded-2xl bg-white border border-slate-200/80 shadow-sm hover:shadow-md hover:border-blue-200 transition-all overflow-hidden">
                 <div class="p-5 sm:p-6">
@@ -85,13 +138,19 @@
 
                         {{-- ── Informasi Modul ── --}}
                         <div class="flex-1 space-y-3 min-w-0">
-                            {{-- Status & Kelas --}}
+                            {{-- Status, Subject & Kelas --}}
                             <div class="flex flex-wrap items-center gap-2">
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wide border {{ $badge['color'] }}">
                                     <span class="w-1.5 h-1.5 rounded-full
                                         {{ $module->status === 'published' ? 'bg-emerald-500' : ($module->status === 'closed' ? 'bg-slate-400' : 'bg-amber-500') }}"></span>
                                     {{ $badge['label'] }}
                                 </span>
+                                @if($subject)
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold {{ $subject->badgeClasses() }}">
+                                        <span>{{ $subject->icon }}</span>
+                                        <span>{{ $subject->name }}</span>
+                                    </span>
+                                @endif
                                 @if($module->is_shared)
                                     <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200" title="Dibagikan di Library Modul">
                                         <span>🌐 Di Library</span>
@@ -139,25 +198,6 @@
                             @endif
                         </div>
 
-                        {{-- ── Progress Bar (Published only) ── --}}
-                        @if($module->status === 'published')
-                            <div class="w-full lg:w-64 bg-slate-50 border border-slate-200/70 rounded-2xl p-4 shrink-0">
-                                @php
-                                    $totalSiswa = 0; // TODO: ambil dari DB
-                                    $selesai = 0;
-                                    $pct = $totalSiswa > 0 ? round(($selesai / $totalSiswa) * 100) : 0;
-                                @endphp
-                                <div class="flex justify-between text-xs font-semibold mb-2">
-                                    <span class="text-slate-600">Pengumpulan Siswa</span>
-                                    <span class="text-blue-600">{{ $selesai }}/{{ $totalSiswa }} ({{ $pct }}%)</span>
-                                </div>
-                                <div class="w-full bg-slate-200 rounded-full h-2">
-                                    <div class="bg-blue-600 h-2 rounded-full transition-all" style="width: {{ $pct }}%"></div>
-                                </div>
-                                <p class="mt-2 text-[11px] text-slate-500">Fitur Progress Bar aktif setelah siswa mulai mengerjakan.</p>
-                            </div>
-                        @endif
-
                         {{-- ── Action Buttons ── --}}
                         <div class="flex flex-wrap items-center gap-2 shrink-0">
                             {{-- Share to Library Quick Toggle --}}
@@ -165,7 +205,6 @@
                                 @csrf
                                 @if($module->is_shared)
                                     <button type="submit"
-                                            onclick="return confirm('Tarik modul ini dari Library Modul publik?')"
                                             class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 rounded-xl transition-all"
                                             title="Modul aktif di Library sekolah. Klik untuk menarik.">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.333A48.357 48.357 0 0012 9.75c-2.551 0-5.056.2-7.5.583V21M3 21h18M12 6.75h.008v.008H12V6.75z"/></svg>
@@ -173,7 +212,6 @@
                                     </button>
                                 @else
                                     <button type="submit"
-                                            onclick="return confirm('Bagikan modul ini ke Library Modul agar guru lain bisa menyalinnya?')"
                                             class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-600 bg-slate-50 border border-slate-200 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 rounded-xl transition-all"
                                             title="Bagikan ke Library Modul">
                                         <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"/></svg>
@@ -212,16 +250,13 @@
                                 @endif
                             </form>
 
-                            {{-- Hapus --}}
-                            <form action="{{ route('teacher.modules.destroy', $module) }}" method="POST" class="inline"
-                                  onsubmit="return confirm('Hapus modul \'{{ addslashes($module->title) }}\'? Semua data terkait akan ikut terhapus.')">
-                                @csrf @method('DELETE')
-                                <button type="submit"
-                                        class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-red-600 bg-red-50 border border-red-200 hover:bg-red-100 rounded-xl transition-all">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
-                                    Hapus
-                                </button>
-                            </form>
+                            {{-- Hapus (Membuka Modal Konfirmasi) --}}
+                            <button type="button"
+                                    @click="deleteModalOpen = true; deleteUrl = '{{ route('teacher.modules.destroy', $module) }}'; deleteTitle = '{{ addslashes($module->title) }}'"
+                                    class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 hover:bg-rose-100 rounded-xl transition-all shadow-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                                <span>Hapus</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -237,4 +272,8 @@
     @endif
 @endif
 
+{{-- Include Delete Confirmation Modal --}}
+@include('pages.teacher.modules.partials.delete-modal')
+
+</div>
 @endsection

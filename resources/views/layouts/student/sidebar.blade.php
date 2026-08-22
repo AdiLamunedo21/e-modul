@@ -1,26 +1,136 @@
-<aside class="z-20 hidden w-64 overflow-y-auto bg-white border-r border-slate-200 md:block flex-shrink-0 shadow-sm">
-    <div class="py-4 text-slate-500">
-        <a class="ml-6 text-lg font-bold text-slate-800" href="#">
-            Student Portal
-        </a>
-        <ul class="mt-6">
-            <li class="relative px-6 py-3">
-                <span class="absolute inset-y-0 left-0 w-1 bg-emerald-500 rounded-tr-lg rounded-br-lg" aria-hidden="true"></span>
-                <a class="inline-flex items-center w-full text-sm font-semibold text-emerald-700 transition-colors duration-150 hover:text-emerald-600" href="#">
-                    <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
-                        <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+{{--
+    SIDEBAR SISWA (STUDENT PORTAL)
+    ══════════════════════════════
+    DESKTOP (lg+): Push/pull layout (w-72 vs w-0)
+    MOBILE (< lg): Fixed overlay starting from top-16
+--}}
+<aside
+    class="
+        {{-- MOBILE: fixed overlay mulai dari bawah header (top-16) --}}
+        fixed top-16 left-0 bottom-0 z-40
+        {{-- DESKTOP: kembali ke flex flow, tinggi penuh parent container --}}
+        lg:static lg:h-full lg:z-auto lg:inset-auto
+
+        flex flex-col shrink-0
+        bg-slate-900
+        overflow-hidden
+        transition-all duration-300 ease-in-out
+    "
+    :class="{
+        {{-- ── DESKTOP ─────────────────────────────────────────────── --}}
+        'lg:w-72': sidebarOpen,
+        'lg:w-0': !sidebarOpen,
+
+        {{-- ── MOBILE ──────────────────────────────────────────────── --}}
+        'w-72 translate-x-0': sidebarOpen,
+        'w-72 -translate-x-full lg:translate-x-0': !sidebarOpen,
+    }"
+>
+    {{-- Inner container fixed width --}}
+    <div class="flex flex-col w-72 h-full">
+
+        {{-- ══ Logo & Identitas Sekolah ══ --}}
+        <div class="flex flex-col items-center px-6 pt-8 pb-6 border-b border-slate-700/50 shrink-0">
+            <img src="{{ asset('LGskagata.png') }}" alt="Logo SMKN 3 Yogyakarta" class="h-14 w-auto mb-3 drop-shadow-md">
+            <h1 class="text-base font-extrabold text-white tracking-wide text-center leading-tight">
+                SMKN 3 YOGYAKARTA
+            </h1>
+            <span class="mt-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/25 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-emerald-400">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                Student Portal
+            </span>
+        </div>
+
+        {{-- ══ Navigasi Menu Siswa ══ --}}
+        <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+
+            {{-- Portal Utama --}}
+            <a href="{{ route('student.dashboard') }}"
+               class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all
+                   {{ (request()->routeIs('student.dashboard') || request()->routeIs('dashboard.student')) ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/25' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                </svg>
+                Dashboard Siswa
+            </a>
+
+            {{-- Grup: Pembelajaran --}}
+            <p class="pt-6 pb-1 px-3 text-[11px] font-bold uppercase tracking-widest text-slate-500">Modul & Pembelajaran</p>
+
+            {{-- Modul Belajar Saya --}}
+            <a href="{{ route('student.dashboard', ['status' => 'all']) }}"
+               class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors group text-slate-400 hover:bg-slate-800 hover:text-white">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 shrink-0 text-emerald-400 group-hover:text-emerald-300 transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0118 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/>
                     </svg>
-                    <span class="ml-4">Tugas Aktif (To-Do)</span>
-                </a>
-            </li>
-            <li class="relative px-6 py-3">
-                <a class="inline-flex items-center w-full text-sm font-semibold text-slate-500 transition-colors duration-150 hover:text-slate-800" href="#">
-                    <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
-                        <path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                    <span>Modul Belajar</span>
+                </div>
+            </a>
+
+            {{-- Modul Sedang Dikerjakan --}}
+            <a href="{{ route('student.dashboard', ['status' => 'in_progress']) }}"
+               class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors group text-slate-400 hover:bg-slate-800 hover:text-white">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 shrink-0 text-amber-400 group-hover:text-amber-300 transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span class="ml-4">Riwayat Selesai</span>
-                </a>
-            </li>
-        </ul>
+                    <span>Sedang Dikerjakan</span>
+                </div>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    Proses
+                </span>
+            </a>
+
+            {{-- Modul Selesai --}}
+            <a href="{{ route('student.dashboard', ['status' => 'completed']) }}"
+               class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors group text-slate-400 hover:bg-slate-800 hover:text-white">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 shrink-0 text-emerald-400 group-hover:text-emerald-300 transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Riwayat Selesai</span>
+                </div>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    Lulus
+                </span>
+            </a>
+
+            {{-- Grup: Bantuan Belajar --}}
+            <p class="pt-6 pb-1 px-3 text-[11px] font-bold uppercase tracking-widest text-slate-500">Pedoman Belajar</p>
+
+            <div class="p-3.5 rounded-2xl bg-slate-800/70 border border-slate-700/60 text-slate-300">
+                <div class="flex items-center gap-2 mb-1.5">
+                    <span class="text-sm">💡</span>
+                    <h4 class="text-xs font-bold text-white">Panduan 5 Bagian</h4>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                    Selesaikan materi, kuis, praktik embed, LKPD & Job Sheet untuk mencapai kompetensi maksimal.
+                </p>
+            </div>
+        </nav>
+
+        {{-- ══ Profil Bawah & Logout Siswa ══ --}}
+        <div class="p-4 border-t border-slate-800 shrink-0">
+            <div class="flex items-center justify-between gap-3 bg-slate-800/80 p-2.5 rounded-xl border border-slate-700/50">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <img class="h-9 w-9 rounded-full object-cover ring-2 ring-emerald-500/30 shrink-0"
+                         src="https://ui-avatars.com/api/?name={{ urlencode(Auth::guard('student')->user()->name ?? 'Siswa') }}&background=059669&color=fff&bold=true&size=64"
+                         alt="Avatar">
+                    <div class="min-w-0 flex-1">
+                        <p class="text-xs font-bold text-white truncate">{{ Auth::guard('student')->user()->name ?? 'Peserta Didik' }}</p>
+                        <p class="text-[10px] text-slate-400 truncate">{{ Auth::guard('student')->user()?->schoolClass?->full_name ?? 'Siswa SMKN 3' }}</p>
+                    </div>
+                </div>
+                <form action="{{ route('logout.student') }}" method="POST">
+                    @csrf
+                    <button type="submit" title="Logout" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-700/50 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
 </aside>

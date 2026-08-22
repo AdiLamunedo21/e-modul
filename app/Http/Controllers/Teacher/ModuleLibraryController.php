@@ -38,7 +38,7 @@ class ModuleLibraryController extends Controller
     {
         $currentTeacher = $this->teacher();
 
-        $query = Module::with(['teacher', 'schoolClass', 'clonedFrom.teacher'])
+        $query = Module::with(['teacher', 'schoolClass', 'clonedFrom.teacher', 'subject'])
             ->where('is_shared', true);
 
         // Tab Filter: 'all' (semua modul bersama), 'others' (guru lain), 'my_shared' (milik saya yang dibagikan)

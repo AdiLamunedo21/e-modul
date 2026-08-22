@@ -97,7 +97,7 @@ class AuthController extends Controller
     public function showStudentLogin()
     {
         if (Auth::guard('student')->check()) {
-            return redirect()->route('dashboard.student');
+            return redirect()->route('student.dashboard');
         }
         return view('auth.student-login');
     }
@@ -114,10 +114,10 @@ class AuthController extends Controller
 
             $intended = session()->get('url.intended');
             if ($intended && str_contains($intended, '/student')) {
-                return redirect()->intended(route('dashboard.student'));
+                return redirect()->intended(route('student.dashboard'));
             }
 
-            return redirect()->route('dashboard.student');
+            return redirect()->route('student.dashboard');
         }
 
         return back()->withErrors([
