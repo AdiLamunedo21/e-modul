@@ -10,19 +10,12 @@
 {{-- ══ Header Workspace & Contextual Greeting ══ --}}
 <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
     <div>
-        <div class="flex items-center gap-2 mb-1 flex-wrap">
+        <div class="flex items-center gap-2 mb-1.5 flex-wrap">
             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200">
                 <span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
                 E-Modul Pembelajaran Interaktif
             </span>
             <span class="text-xs font-medium text-slate-400">SMKN 3 Yogyakarta</span>
-            @if($teacher->subjects->isNotEmpty())
-                <span class="text-slate-300">•</span>
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                    <span>🎯 Mapel:</span>
-                    <span>{{ $teacher->subjectNames() }}</span>
-                </span>
-            @endif
         </div>
         <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
             Selamat Datang, {{ $teacher->name ?? 'Bapak/Ibu Guru' }} 👋
@@ -30,6 +23,24 @@
         <p class="mt-1 text-sm text-slate-500 max-w-3xl">
             Kelola modul modular 5 bagian, bagikan ke perpustakaan bersama, pantau perkembangan siswa binaan, dan lakukan penilaian adaptif di <strong>Grading Center</strong>.
         </p>
+
+        {{-- Banner Tanggung Jawab Mata Pelajaran Guru --}}
+        @if($teacher->subjects->isNotEmpty())
+            <div class="mt-3.5 inline-flex items-center gap-2.5 px-3.5 py-2 rounded-2xl bg-slate-900 text-white shadow-sm border border-slate-700/60 flex-wrap">
+                <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                    <span>🎯</span>
+                    <span>Tanggung Jawab Mapel:</span>
+                </span>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                    @foreach($teacher->subjects as $subj)
+                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xl text-xs font-bold {{ $subj->badgeClasses() }}">
+                            <span>{{ $subj->icon }}</span>
+                            <span>{{ $subj->name }}</span>
+                        </span>
+                    @endforeach
+                </div>
+            </div>
+        @endif
     </div>
     
     {{-- Quick Action Hub --}}

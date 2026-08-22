@@ -81,6 +81,7 @@ class StudentDashboardTest extends TestCase
             'title'      => 'Modul Belajar Siswa ' . uniqid(),
             'status'     => 'published',
             'has_materi' => true,
+            'updated_at' => now()->addMinutes(10),
         ]);
 
         $response = $this->actingAs($student, 'student')

@@ -52,13 +52,16 @@
             </div>
 
             {{-- Profile pill --}}
-            <div class="flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 p-1 pr-3">
+            <div class="flex items-center gap-2.5 rounded-2xl sm:rounded-full border border-gray-200 bg-gray-50 p-1.5 pr-3 shadow-2xs">
                 <img
-                    class="h-8 w-8 rounded-full object-cover"
+                    class="h-8 w-8 rounded-full object-cover ring-2 ring-indigo-500/20"
                     src="https://ui-avatars.com/api/?name={{ urlencode(Auth::guard('admin')->user()->name ?? 'Admin') }}&background=4f46e5&color=fff&bold=true&size=64"
                     alt="Avatar Admin"
                 >
-                <span class="hidden sm:inline text-sm font-semibold text-gray-700">{{ Auth::guard('admin')->user()->name ?? 'Admin' }}</span>
+                <div class="hidden sm:flex flex-col text-left">
+                    <span class="text-xs font-bold text-gray-800 leading-tight">{{ Auth::guard('admin')->user()->name ?? 'Administrator' }}</span>
+                    <span class="text-[10px] text-gray-500 font-medium">{{ Auth::guard('admin')->user()->identity_number ?? '-' }} (Admin)</span>
+                </div>
             </div>
         </div>
     </div>

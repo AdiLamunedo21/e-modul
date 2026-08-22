@@ -65,9 +65,7 @@
                 >
                 <div class="hidden sm:flex flex-col text-left">
                     <span class="text-xs font-bold text-gray-800 leading-tight">{{ Auth::guard('teacher')->user()->name ?? 'Guru Pengajar' }}</span>
-                    <span class="text-[10px] text-blue-600 font-semibold truncate max-w-[190px]" title="{{ Auth::guard('teacher')->user()->subjectNames() }}">
-                        Mapel: {{ Auth::guard('teacher')->user()->subjectNames() }}
-                    </span>
+                    <span class="text-[10px] text-gray-500 font-medium">{{ Auth::guard('teacher')->user()->identity_number ?? '-' }}</span>
                 </div>
             </div>
         </div>

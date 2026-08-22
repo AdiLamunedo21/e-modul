@@ -17,10 +17,10 @@ class DatabaseSeeder extends Seeder
     {
         $password = Hash::make('password');
 
-        // 1 Admin
+        // 1 Admin (Supervisi & Manajemen Kurikulum)
         Admin::create([
-            'name' => 'Admin Utama',
-            'identity_number' => 'NIP123456',
+            'name' => 'Drs. Ahmad Fauzi, M.Pd.',
+            'identity_number' => 'NIP999001',
             'password' => $password,
         ]);
 
@@ -65,7 +65,7 @@ class DatabaseSeeder extends Seeder
         // Budi Santoso mengampu 2 Mapel: Informatika dan Teknik Elektro
         $teacher1 = Teacher::create([
             'name' => 'Budi Santoso',
-            'identity_number' => 'NUPTK001',
+            'identity_number' => 'NIP123456',
             'password' => $password,
         ]);
         $teacher1->subjects()->attach([$subjectInformatika->id, $subjectElektro->id]);
@@ -73,7 +73,7 @@ class DatabaseSeeder extends Seeder
         // Siti Aminah mengampu Matematika dan Bahasa Indonesia
         $teacher2 = Teacher::create([
             'name' => 'Siti Aminah',
-            'identity_number' => 'NUPTK002',
+            'identity_number' => 'NIP123457',
             'password' => $password,
         ]);
         $teacher2->subjects()->attach([$subjectMatematika->id, $subjectIndonesia->id]);
