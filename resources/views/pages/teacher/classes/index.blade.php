@@ -114,109 +114,113 @@
         </div>
     </div>
 
-    {{-- ══ 3. FILTER BAR & TAB NAVIGASI ══ --}}
+    {{-- ══ 3. FILTER BAR ══ --}}
     <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-sm">
-        <form action="{{ route('teacher.classes.index') }}" method="GET" class="space-y-4">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                
-                {{-- Search Bar --}}
-                <div class="relative flex-1 max-w-md">
-                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                        </svg>
-                    </div>
-                    <input type="text" name="search" value="{{ request('search') }}"
-                           placeholder="Cari tingkat kelas atau jurusan..."
-                           class="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400">
+        <form action="{{ route('teacher.classes.index') }}" method="GET" class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+            
+            {{-- Search Bar --}}
+            <div class="relative flex-1 min-w-[240px] flex items-center">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                    </svg>
                 </div>
-
-                {{-- Dropdown Filters --}}
-                <div class="flex flex-wrap items-center gap-2.5">
-                    {{-- Filter Tingkat --}}
-                    <select name="grade" onchange="this.form.submit()"
-                            class="px-3.5 py-2 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-700">
-                        <option value="">Semua Tingkat (X, XI, XII)</option>
-                        @foreach($availableGrades as $grade)
-                            <option value="{{ $grade }}" {{ request('grade') == $grade ? 'selected' : '' }}>
-                                Tingkat {{ $grade }}
-                            </option>
-                        @endforeach
-                    </select>
-
-                    {{-- Filter Jurusan --}}
-                    <select name="major" onchange="this.form.submit()"
-                            class="px-3.5 py-2 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-700">
-                        <option value="">Semua Jurusan</option>
-                        @foreach($availableMajors as $major)
-                            <option value="{{ $major }}" {{ request('major') == $major ? 'selected' : '' }}>
-                                Jurusan {{ $major }}
-                            </option>
-                        @endforeach
-                    </select>
-
-                    {{-- Submit Button --}}
-                    <button type="submit"
-                            class="px-4 py-2 text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-xl transition-colors shadow-sm">
-                        Terapkan Filter
-                    </button>
-
-                    @if(request()->hasAny(['search', 'grade', 'major', 'filter']))
-                        <a href="{{ route('teacher.classes.index') }}"
-                           class="px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl border border-red-200 transition-colors">
-                            Reset
-                        </a>
-                    @endif
-                </div>
+                <input type="text" name="search" value="{{ request('search') }}"
+                       placeholder="Cari tingkat kelas atau jurusan binaan..."
+                       class="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400">
             </div>
 
-            {{-- Quick Filter Pills --}}
-            <div class="flex items-center gap-2 pt-2 border-t border-slate-100 text-xs">
-                <span class="text-slate-400 font-semibold mr-1">Tampilkan:</span>
-                <a href="{{ route('teacher.classes.index', array_merge(request()->except('filter'), ['filter' => 'all'])) }}"
-                   class="px-3 py-1 rounded-lg font-bold transition-all {{ request('filter') !== 'assigned' ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
-                    Semua Kelas di Sekolah ({{ $classes->count() }})
-                </a>
-                <a href="{{ route('teacher.classes.index', array_merge(request()->except('filter'), ['filter' => 'assigned'])) }}"
-                   class="px-3 py-1 rounded-lg font-bold transition-all {{ request('filter') === 'assigned' ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
-                    Hanya Kelas Binaan Aktif ({{ $globalStats['total_assigned_classes'] }})
-                </a>
+            {{-- Dropdown Filters & Actions --}}
+            <div class="flex flex-wrap items-center gap-2.5">
+                {{-- Filter Tingkat --}}
+                <select name="grade" onchange="this.form.submit()"
+                        class="px-3.5 py-2.5 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-700 cursor-pointer">
+                    <option value="">Semua Tingkat (X, XI, XII)</option>
+                    @foreach($availableGrades as $grade)
+                        <option value="{{ $grade }}" {{ request('grade') == $grade ? 'selected' : '' }}>
+                            Tingkat {{ $grade }}
+                        </option>
+                    @endforeach
+                </select>
+
+                {{-- Filter Jurusan --}}
+                <select name="major" onchange="this.form.submit()"
+                        class="px-3.5 py-2.5 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-700 cursor-pointer">
+                    <option value="">Semua Jurusan Binaan</option>
+                    @foreach($availableMajors as $major)
+                        <option value="{{ $major }}" {{ request('major') == $major ? 'selected' : '' }}>
+                            Jurusan {{ $major }}
+                        </option>
+                    @endforeach
+                </select>
+
+                {{-- Submit Button --}}
+                <button type="submit"
+                        class="px-4 py-2.5 text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-xl transition-colors shadow-sm shrink-0">
+                    Terapkan Filter
+                </button>
+
+                @if(request()->hasAny(['search', 'grade', 'major']))
+                    <a href="{{ route('teacher.classes.index') }}"
+                       class="px-3.5 py-2.5 text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200/80 rounded-xl transition-all shrink-0">
+                        ✕ Reset
+                    </a>
+                @endif
             </div>
         </form>
     </div>
 
     {{-- ══ 4. GRID KARTU KELAS BINAAN ══ --}}
     @if($classes->isEmpty())
-        <div class="rounded-3xl bg-white border border-slate-200/80 shadow-sm p-12 text-center">
-            <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                </svg>
+        @if($globalStats['total_assigned_classes'] === 0)
+            {{-- State: Guru belum punya kelas binaan sama sekali --}}
+            <div class="rounded-3xl bg-white border border-slate-200/80 shadow-sm p-12 text-center">
+                <div class="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-4 border border-blue-100">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                    </svg>
+                </div>
+                <h3 class="text-base font-bold text-slate-800 mb-1">Belum Ada Kelas Binaan</h3>
+                <p class="text-xs text-slate-500 max-w-md mx-auto mb-6">
+                    Anda belum memiliki kelas binaan aktif. Buat modul pembelajaran dan pilih target kelas untuk mulai membina siswa.
+                </p>
+                <a href="{{ route('teacher.modules.create') }}"
+                   class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow transition-all">
+                    + Buat Modul Pertama
+                </a>
             </div>
-            <h3 class="text-base font-bold text-slate-800 mb-1">Tidak Ada Kelas yang Sesuai</h3>
-            <p class="text-xs text-slate-500 max-w-sm mx-auto mb-5">
-                Tidak ditemukan data kelas dengan filter pencarian saat ini. Silakan ubah filter atau reset pencarian.
-            </p>
-            <a href="{{ route('teacher.classes.index') }}"
-               class="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-xl hover:bg-blue-100 transition-colors">
-                Tampilkan Semua Kelas
-            </a>
-        </div>
+        @else
+            {{-- State: Filter tidak menemukan hasil --}}
+            <div class="rounded-3xl bg-white border border-slate-200/80 shadow-sm p-12 text-center">
+                <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                    </svg>
+                </div>
+                <h3 class="text-base font-bold text-slate-800 mb-1">Tidak Ada Kelas Binaan yang Sesuai</h3>
+                <p class="text-xs text-slate-500 max-w-sm mx-auto mb-5">
+                    Tidak ditemukan data kelas binaan dengan kriteria filter saat ini. Silakan ubah kata kunci atau reset filter pencarian.
+                </p>
+                <a href="{{ route('teacher.classes.index') }}"
+                   class="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-xl hover:bg-blue-100 transition-colors">
+                    Reset Filter Pencarian
+                </a>
+            </div>
+        @endif
     @else
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             @foreach($classes as $class)
                 @php
                     $stats = $class->stats;
-                    $isAssigned = $stats['is_assigned'];
                 @endphp
 
-                <div class="bg-white rounded-3xl border {{ $isAssigned ? 'border-blue-200/80 ring-1 ring-blue-500/10' : 'border-slate-200/80' }} shadow-sm hover:shadow-md transition-all flex flex-col justify-between overflow-hidden group">
+                <div class="bg-white rounded-3xl border border-blue-200/80 ring-1 ring-blue-500/10 shadow-sm hover:shadow-md transition-all flex flex-col justify-between overflow-hidden group">
                     
                     {{-- Top Header Card --}}
                     <div class="p-6 border-b border-slate-100">
                         <div class="flex items-start justify-between gap-3 mb-3">
                             <div class="flex items-center gap-2">
-                                <span class="px-3 py-1 rounded-xl text-xs font-extrabold {{ $isAssigned ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700' }}">
+                                <span class="px-3 py-1 rounded-xl text-xs font-extrabold bg-blue-600 text-white">
                                     Kelas {{ $class->grade }}
                                 </span>
                                 <span class="px-2.5 py-1 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
@@ -224,16 +228,10 @@
                                 </span>
                             </div>
 
-                            @if($isAssigned)
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                    Binaan Aktif
-                                </span>
-                            @else
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-500">
-                                    Tersedia
-                                </span>
-                            @endif
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                Binaan Aktif
+                            </span>
                         </div>
 
                         <h3 class="text-xl font-black text-slate-900 group-hover:text-blue-600 transition-colors">
@@ -249,7 +247,7 @@
                         <div class="grid grid-cols-2 gap-3">
                             {{-- Metric 1: Modul Guru --}}
                             <div class="bg-white p-3 rounded-2xl border border-slate-200/60 shadow-2xs">
-                                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Modul Guru</p>
+                                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Modul Anda</p>
                                 <p class="text-base font-black text-slate-800 mt-0.5">
                                     {{ $stats['published_modules'] }} <span class="text-xs font-normal text-slate-500">/ {{ $stats['total_modules'] }} Total</span>
                                 </p>
@@ -281,18 +279,12 @@
                         </div>
 
                         {{-- Progress Info --}}
-                        @if($isAssigned)
-                            <div class="flex items-center justify-between text-xs pt-1">
-                                <span class="text-slate-500 font-medium">Status Penilaian Modul:</span>
-                                <span class="font-bold text-slate-700">
-                                    {{ $stats['graded_count'] }} Selesai Dinilai
-                                </span>
-                            </div>
-                        @else
-                            <p class="text-[11px] text-slate-400 italic">
-                                Belum ada modul yang ditugaskan untuk kelas ini.
-                            </p>
-                        @endif
+                        <div class="flex items-center justify-between text-xs pt-1">
+                            <span class="text-slate-500 font-medium">Status Penilaian Modul:</span>
+                            <span class="font-bold text-slate-700">
+                                {{ $stats['graded_count'] }} Selesai Dinilai
+                            </span>
+                        </div>
                     </div>
 
                     {{-- Actions Bar --}}
@@ -305,25 +297,23 @@
                             </svg>
                         </a>
 
-                        @if($isAssigned)
-                            {{-- Quick Link: Grading Center --}}
-                            <a href="{{ route('teacher.grading.index', ['class_id' => $class->id]) }}"
-                               title="Buka Matriks Penilaian Kelas Ini"
-                               class="p-2.5 rounded-xl text-slate-500 hover:text-blue-600 hover:bg-blue-50 border border-slate-200 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
-                                </svg>
-                            </a>
+                        {{-- Quick Link: Grading Center --}}
+                        <a href="{{ route('teacher.grading.index', ['class_id' => $class->id]) }}"
+                           title="Buka Matriks Penilaian Kelas Ini"
+                           class="p-2.5 rounded-xl text-slate-500 hover:text-blue-600 hover:bg-blue-50 border border-slate-200 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+                            </svg>
+                        </a>
 
-                            {{-- Quick Link: Laporan Excel --}}
-                            <a href="{{ route('teacher.reports.index', ['class_id' => $class->id]) }}"
-                               title="Rekap Laporan Excel Kelas Ini"
-                               class="p-2.5 rounded-xl text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 border border-slate-200 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-8.625 1.125V5.625m17.25 13.875c.621 0 1.125-.504 1.125-1.125M20.625 19.5h-7.5c-.621 0-1.125-.504-1.125-1.125m8.625 1.125V5.625m-17.25 0c0-.621.504-1.125 1.125-1.125h15c.621 0 1.125.504 1.125 1.125m-17.25 0v12.75c0 .621.504 1.125 1.125 1.125h15c.621 0 1.125-.504 1.125-1.125V5.625m-17.25 0h17.25M9 4.5v15M15 4.5v15M3.75 9.75h16.5M3.75 14.25h16.5" />
-                                </svg>
-                            </a>
-                        @endif
+                        {{-- Quick Link: Laporan Excel --}}
+                        <a href="{{ route('teacher.reports.index', ['class_id' => $class->id]) }}"
+                           title="Rekap Laporan Excel Kelas Ini"
+                           class="p-2.5 rounded-xl text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 border border-slate-200 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-8.625 1.125V5.625m17.25 13.875c.621 0 1.125-.504 1.125-1.125M20.625 19.5h-7.5c-.621 0-1.125-.504-1.125-1.125m8.625 1.125V5.625m-17.25 0c0-.621.504-1.125 1.125-1.125h15c.621 0 1.125.504 1.125 1.125m-17.25 0v12.75c0 .621.504 1.125 1.125 1.125h15c.621 0 1.125-.504 1.125-1.125V5.625m-17.25 0h17.25M9 4.5v15M15 4.5v15M3.75 9.75h16.5M3.75 14.25h16.5" />
+                            </svg>
+                        </a>
                     </div>
                 </div>
             @endforeach

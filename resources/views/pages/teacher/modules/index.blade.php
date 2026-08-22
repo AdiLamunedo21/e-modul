@@ -92,6 +92,14 @@
                                         {{ $module->status === 'published' ? 'bg-emerald-500' : ($module->status === 'closed' ? 'bg-slate-400' : 'bg-amber-500') }}"></span>
                                     {{ $badge['label'] }}
                                 </span>
+                                @if($module->is_shared)
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200" title="Dibagikan di Library Modul">
+                                        <span>🌐 Di Library</span>
+                                        @if($module->clone_count > 0)
+                                            <span class="text-indigo-500">({{ $module->clone_count }}x)</span>
+                                        @endif
+                                    </span>
+                                @endif
                                 @if($class)
                                     <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
                                         Kelas {{ $class->grade }} {{ $class->major_name }}
@@ -107,6 +115,14 @@
                                class="block text-xl font-bold text-slate-900 hover:text-blue-600 transition-colors leading-snug truncate max-w-2xl">
                                 {{ $module->title }}
                             </a>
+
+                            {{-- Cloned from note if any --}}
+                            @if($module->clonedFrom)
+                                <p class="text-[11px] text-slate-400 flex items-center gap-1">
+                                    <span>🌱</span>
+                                    <span>Disalin dari karya <strong>{{ $module->clonedFrom->teacher->name ?? 'Pendidik' }}</strong></span>
+                                </p>
+                            @endif
 
                             {{-- 7 Komponen Inti --}}
                             @if(count($comps) > 0)
@@ -144,6 +160,28 @@
 
                         {{-- ── Action Buttons ── --}}
                         <div class="flex flex-wrap items-center gap-2 shrink-0">
+                            {{-- Share to Library Quick Toggle --}}
+                            <form action="{{ route('teacher.modules.toggle-share', $module) }}" method="POST" class="inline">
+                                @csrf
+                                @if($module->is_shared)
+                                    <button type="submit"
+                                            onclick="return confirm('Tarik modul ini dari Library Modul publik?')"
+                                            class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 rounded-xl transition-all"
+                                            title="Modul aktif di Library sekolah. Klik untuk menarik.">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.333A48.357 48.357 0 0012 9.75c-2.551 0-5.056.2-7.5.583V21M3 21h18M12 6.75h.008v.008H12V6.75z"/></svg>
+                                        <span>Di Library</span>
+                                    </button>
+                                @else
+                                    <button type="submit"
+                                            onclick="return confirm('Bagikan modul ini ke Library Modul agar guru lain bisa menyalinnya?')"
+                                            class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-600 bg-slate-50 border border-slate-200 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 rounded-xl transition-all"
+                                            title="Bagikan ke Library Modul">
+                                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"/></svg>
+                                        <span>Bagi ke Library</span>
+                                    </button>
+                                @endif
+                            </form>
+
                             {{-- Lihat Detail --}}
                             <a href="{{ route('teacher.modules.show', $module) }}"
                                class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-xl transition-all">
@@ -163,7 +201,7 @@
                                 @elseif($module->status === 'published')
                                     <input type="hidden" name="status" value="closed">
                                     <button type="submit" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-all">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25-2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
                                         Tutup Modul
                                     </button>
                                 @else

@@ -30,7 +30,7 @@ class TeacherClassTest extends TestCase
     public function test_classes_index_filters_work()
     {
         $teacher = Teacher::first();
-        $class = SchoolClass::first();
+        $class = $teacher ? $teacher->assignedClasses()->first() : null;
         if (!$teacher || !$class) {
             $this->markTestSkipped('Seed data required.');
         }
@@ -42,11 +42,12 @@ class TeacherClassTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee($class->full_name);
 
-        // Filter by assigned
-        $responseAssigned = $this->actingAs($teacher, 'teacher')
-            ->get(route('teacher.classes.index', ['filter' => 'assigned']));
+        // Filter by search
+        $responseSearch = $this->actingAs($teacher, 'teacher')
+            ->get(route('teacher.classes.index', ['search' => $class->major_name]));
 
-        $responseAssigned->assertStatus(200);
+        $responseSearch->assertStatus(200);
+        $responseSearch->assertSee($class->full_name);
     }
 
     public function test_teacher_can_access_class_show_detail()

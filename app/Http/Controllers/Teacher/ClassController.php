@@ -30,14 +30,19 @@ class ClassController extends Controller
 
     /**
      * Halaman Utama: Katalog & Manajemen Kelas Binaan Guru.
+     * Hanya menampilkan kelas-kelas yang menjadi target distribusi modul guru tersebut.
      */
     public function index(Request $request)
     {
         $teacher = $this->teacher();
 
-        $query = SchoolClass::with(['students', 'modules' => function ($q) use ($teacher) {
-            $q->where('teacher_id', $teacher->id)->with('studentResults');
-        }]);
+        // Query hanya kelas-kelas yang memiliki modul dari guru ini
+        $query = SchoolClass::whereHas('modules', function ($q) use ($teacher) {
+                $q->where('teacher_id', $teacher->id);
+            })
+            ->with(['students', 'modules' => function ($q) use ($teacher) {
+                $q->where('teacher_id', $teacher->id)->with('studentResults');
+            }]);
 
         // Filter Tingkat Kelas (X, XI, XII)
         if ($request->filled('grade')) {
@@ -66,11 +71,6 @@ class ClassController extends Controller
             return $class;
         });
 
-        // Filter: Hanya kelas binaan yang memiliki modul dari guru ini (jika dipilih)
-        if ($request->get('filter') === 'assigned') {
-            $classes = $classes->filter(fn ($c) => $c->stats['is_assigned'])->values();
-        }
-
         // Statistik Keseluruhan Guru
         $allTeacherModules = Module::where('teacher_id', $teacher->id)->with('studentResults')->get();
         $assignedClassIds = $allTeacherModules->pluck('class_id')->filter()->unique();
@@ -87,9 +87,10 @@ class ClassController extends Controller
             'overall_avg_score'      => $overallAvgScore,
         ];
 
-        // Data untuk dropdown filter
-        $availableGrades = SchoolClass::select('grade')->distinct()->orderBy('grade')->pluck('grade');
-        $availableMajors = SchoolClass::select('major_name')->distinct()->orderBy('major_name')->pluck('major_name');
+        // Data untuk dropdown filter (hanya dari kelas binaan guru ini)
+        $teacherClassesQuery = SchoolClass::whereHas('modules', fn ($q) => $q->where('teacher_id', $teacher->id));
+        $availableGrades = (clone $teacherClassesQuery)->select('grade')->distinct()->orderBy('grade')->pluck('grade');
+        $availableMajors = (clone $teacherClassesQuery)->select('major_name')->distinct()->orderBy('major_name')->pluck('major_name');
 
         return view('pages.teacher.classes.index', compact(
             'classes',

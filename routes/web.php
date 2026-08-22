@@ -16,6 +16,7 @@ use App\Http\Controllers\Teacher\PostTestController;
 use App\Http\Controllers\Teacher\GradingController;
 use App\Http\Controllers\Teacher\ReportController;
 use App\Http\Controllers\Teacher\ClassController;
+use App\Http\Controllers\Teacher\ModuleLibraryController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -48,12 +49,18 @@ Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(fu
     Route::get('/dashboard', fn () => view('pages.teacher.dashboard'))->name('dashboard');
 
     // Manajer Modul (CRUD)
-    Route::get('/modules',                      [ModuleManagerController::class, 'index'])->name('modules.index');
-    Route::get('/modules/create',               [ModuleManagerController::class, 'create'])->name('modules.create');
-    Route::post('/modules',                     [ModuleManagerController::class, 'store'])->name('modules.store');
-    Route::get('/modules/{module}',             [ModuleManagerController::class, 'show'])->name('modules.show');
-    Route::patch('/modules/{module}/status',    [ModuleManagerController::class, 'updateStatus'])->name('modules.status');
-    Route::delete('/modules/{module}',          [ModuleManagerController::class, 'destroy'])->name('modules.destroy');
+    Route::get('/modules',                              [ModuleManagerController::class, 'index'])->name('modules.index');
+    Route::get('/modules/create',                       [ModuleManagerController::class, 'create'])->name('modules.create');
+    Route::post('/modules',                             [ModuleManagerController::class, 'store'])->name('modules.store');
+    Route::get('/modules/{module}',                     [ModuleManagerController::class, 'show'])->name('modules.show');
+    Route::patch('/modules/{module}/status',            [ModuleManagerController::class, 'updateStatus'])->name('modules.status');
+    Route::post('/modules/{module}/toggle-share',       [ModuleLibraryController::class, 'toggleShare'])->name('modules.toggle-share');
+    Route::delete('/modules/{module}',                  [ModuleManagerController::class, 'destroy'])->name('modules.destroy');
+
+    // Library Modul (Shared Module Repository & Cloning)
+    Route::get('/library',                              [ModuleLibraryController::class, 'index'])->name('library.index');
+    Route::get('/library/{module}',                     [ModuleLibraryController::class, 'show'])->name('library.show');
+    Route::post('/library/{module}/clone',              [ModuleLibraryController::class, 'clone'])->name('library.clone');
 
     // 1. Bagian Awal: 4 Komponen (Cover, Kata Pengantar, Daftar Isi, Petunjuk Penggunaan)
     Route::get('/modules/{module}/bagian-awal',                 [BagianAwalController::class, 'edit'])->name('modules.bagian-awal.edit');

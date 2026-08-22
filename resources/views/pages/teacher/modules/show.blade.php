@@ -36,6 +36,16 @@
                     <span class="w-1.5 h-1.5 rounded-full {{ $module->status === 'published' ? 'bg-emerald-500' : ($module->status === 'closed' ? 'bg-slate-400' : 'bg-amber-500') }}"></span>
                     {{ $badge['label'] }}
                 </span>
+                @if($module->is_shared)
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wide bg-indigo-50 text-indigo-700 border border-indigo-200">
+                        <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                        🌐 Dibagikan di Library
+                    </span>
+                @else
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wide bg-slate-100 text-slate-600 border border-slate-200">
+                        🔒 Pribadi
+                    </span>
+                @endif
                 @if($module->schoolClass)
                     <span class="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
                         Kelas {{ $module->schoolClass->grade }} {{ $module->schoolClass->major_name }}
@@ -53,6 +63,27 @@
 
         {{-- Status Action Buttons --}}
         <div class="flex flex-wrap items-center gap-3 shrink-0">
+            {{-- Share to Library Toggle --}}
+            <form action="{{ route('teacher.modules.toggle-share', $module) }}" method="POST">
+                @csrf
+                @if($module->is_shared)
+                    <button type="submit"
+                            onclick="return confirm('Tarik modul ini dari Library Modul publik? (Guru lain tidak akan lagi melihat modul ini di katalog)')"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 rounded-2xl transition-all shadow-sm"
+                            title="Modul sedang dibagikan di Library sekolah">
+                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.333A48.357 48.357 0 0012 9.75c-2.551 0-5.056.2-7.5.583V21M3 21h18M12 6.75h.008v.008H12V6.75z"/></svg>
+                        <span>✓ Di Library ({{ $module->clone_count }}x Disalin)</span>
+                    </button>
+                @else
+                    <button type="submit"
+                            onclick="return confirm('Bagikan modul ini ke Library Modul sekolah agar rekan guru lain dapat melihat dan menyalin instrumen ini?')"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-700 bg-white border border-slate-200 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 rounded-2xl transition-all shadow-sm"
+                            title="Bagikan ke Library agar rekan guru bisa menyalin">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"/></svg>
+                        <span>Bagikan ke Library</span>
+                    </button>
+                @endif
+            </form>
             <a href="{{ route('teacher.grading.show', $module) }}"
                class="inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 rounded-2xl transition-all shadow-sm">
                 <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
