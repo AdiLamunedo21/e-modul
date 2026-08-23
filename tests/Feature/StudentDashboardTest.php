@@ -6,6 +6,7 @@ use App\Models\Module;
 use App\Models\SchoolClass;
 use App\Models\Student;
 use App\Models\StudentResult;
+use App\Models\Subject;
 use App\Models\Teacher;
 use Tests\TestCase;
 
@@ -32,11 +33,26 @@ class StudentDashboardTest extends TestCase
         $response->assertSee($student->name);
         $response->assertSee($student->identity_number);
         $response->assertSee('Portal Belajar Siswa', false);
-        $response->assertSee('E-Modul Pembelajaran Kelas', false);
+        $response->assertSee('E-Modul Pembelajaran', false);
         $response->assertSee('Modul Kelas', false);
         $response->assertSee('Sedang Dikerjakan', false);
         $response->assertSee('Modul Tuntas', false);
-        $response->assertSee('Struktur 5 Bagian Belajar Mandiri', false);
+        $response->assertSee('Mata Pelajaran & Guru Pengampu', false);
+    }
+
+    public function test_student_dashboard_displays_subjects_with_teachers_and_module_counts()
+    {
+        $student = Student::first();
+        if (!$student) {
+            $this->markTestSkipped('Student data not seeded.');
+        }
+
+        $response = $this->actingAs($student, 'student')
+            ->get(route('student.dashboard'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Guru Pengampu', false);
+        $response->assertSee('Modul', false);
     }
 
     public function test_student_dashboard_status_filters_work()
@@ -71,13 +87,15 @@ class StudentDashboardTest extends TestCase
     {
         $student = Student::first();
         $teacher = Teacher::first();
-        if (!$student || !$teacher) {
+        $subject = Subject::first();
+        if (!$student || !$teacher || !$subject) {
             $this->markTestSkipped('Student or teacher seed required.');
         }
 
         $module = Module::create([
             'teacher_id' => $teacher->id,
             'class_id'   => $student->class_id,
+            'subject_id' => $subject->id,
             'title'      => 'Modul Belajar Siswa ' . uniqid(),
             'status'     => 'published',
             'has_materi' => true,
@@ -88,7 +106,7 @@ class StudentDashboardTest extends TestCase
             ->get(route('student.dashboard'));
 
         $response->assertStatus(200);
-        $response->assertSee($module->title);
+        $response->assertSee($subject->name);
 
         // Cleanup
         $module->delete();

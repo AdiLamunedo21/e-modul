@@ -9,7 +9,7 @@ use App\Models\Subject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class DashboardController extends Controller
+class ModuleController extends Controller
 {
     /**
      * Helper untuk mendapatkan model Student yang sedang login.
@@ -22,18 +22,25 @@ class DashboardController extends Controller
     }
 
     /**
-     * Dashboard Portal Siswa:
-     * Menyajikan ringkasan KPI belajar real-time, katalog mata pelajaran & guru pengampu,
-     * modul kelas yang ditugaskan per mata pelajaran, serta persentase progres belajar.
+     * Tampilan Seluruh Modul Belajar Siswa (Redirect ke Dashboard Siswa).
      */
     public function index(Request $request)
+    {
+        return redirect()->route('student.dashboard');
+    }
+
+    /**
+     * Tampilan Halaman Khusus Modul per Mata Pelajaran (misal: Informatika, Elektro, dll).
+     */
+    public function bySubject(Request $request, Subject $subject)
     {
         $student = $this->student();
         $class = $student->schoolClass;
 
-        // Query modul terbit yang ditugaskan untuk kelas siswa ini
+        // Query modul terbit yang ditugaskan untuk kelas siswa ini pada mapel terpilih
         $modulesQuery = Module::query()
             ->where('class_id', $student->class_id)
+            ->where('subject_id', $subject->id)
             ->where('status', 'published')
             ->with([
                 'teacher',
@@ -47,14 +54,67 @@ class DashboardController extends Controller
             ->latest('updated_at');
 
         $allModules = $modulesQuery->get();
+        $processedModules = $this->processModules($allModules, $student);
 
-        // Olah data setiap modul untuk mendapatkan progres belajar siswa secara akurat
-        $processedModules = $allModules->map(function (Module $module) use ($student) {
+        // Guru Pengampu Mapel: ambil dari modul jika ada, atau dari relasi subject->teachers
+        $teacherNames = $processedModules->pluck('teacher_name')->unique()->filter()->values();
+        if ($teacherNames->isEmpty()) {
+            $subject->loadMissing('teachers');
+            $teacherNames = $subject->teachers->pluck('name')->unique()->values();
+        }
+        $teacherDisplay = $teacherNames->isNotEmpty() ? $teacherNames->join(', ') : 'Guru Pengampu Belum Ditugaskan';
+
+        // Filter tab berdasarkan status belajar
+        $filterStatus = $request->query('status', 'all');
+        $filteredModules = match ($filterStatus) {
+            'in_progress' => $processedModules->where('progress_status', 'in_progress'),
+            'completed'   => $processedModules->where('progress_status', 'completed'),
+            'not_started' => $processedModules->where('progress_status', 'not_started'),
+            default       => $processedModules,
+        };
+
+        // Metrik Statistik khusus mapel ini
+        $totalModulesCount = $processedModules->count();
+        $completedModulesCount = $processedModules->where('progress_status', 'completed')->count();
+        $inProgressModulesCount = $processedModules->where('progress_status', 'in_progress')->count();
+        $notStartedModulesCount = $processedModules->where('progress_status', 'not_started')->count();
+        $avgProgress = $totalModulesCount > 0 ? (int) round($processedModules->avg('progress_percent')) : 0;
+
+        $gradedScores = $processedModules->pluck('summative_score')->filter(fn($v) => !is_null($v));
+        $avgScore = $gradedScores->count() > 0 ? (int) round($gradedScores->avg()) : 0;
+
+        $stats = [
+            'total_modules'     => $totalModulesCount,
+            'completed_modules' => $completedModulesCount,
+            'in_progress'       => $inProgressModulesCount,
+            'not_started'       => $notStartedModulesCount,
+            'avg_progress'      => $avgProgress,
+            'avg_score'         => $avgScore,
+        ];
+
+        return view('pages.student.modules.subject', compact(
+            'student',
+            'class',
+            'subject',
+            'teacherDisplay',
+            'teacherNames',
+            'processedModules',
+            'filteredModules',
+            'stats',
+            'filterStatus'
+        ));
+    }
+
+    /**
+     * Helper pemrosesan kalkulasi status dan progres modul siswa.
+     */
+    private function processModules($modules, Student $student)
+    {
+        return $modules->map(function (Module $module) use ($student) {
             $result = $module->studentResults->first();
             $activeComps = $module->activeComponents();
             $totalActive = count($activeComps);
 
-            // Hitung berapa instrumen yang sudah diselesaikan siswa
             $completedTasks = 0;
             $pendingTasksList = [];
 
@@ -146,13 +206,11 @@ class DashboardController extends Controller
                 }
             }
 
-            // Kalkulasi persentase kemajuan belajar
             $progressPercent = $totalActive > 0 ? (int) round(($completedTasks / $totalActive) * 100) : 0;
             if ($progressPercent > 100) {
                 $progressPercent = 100;
             }
 
-            // Status Belajar Siswa
             $progressStatus = match (true) {
                 $progressPercent >= 100 => 'completed',
                 $progressPercent > 0    => 'in_progress',
@@ -186,110 +244,5 @@ class DashboardController extends Controller
                 'has_lkpd'          => $module->lkpd_active,
             ];
         });
-
-        // Struktur data Mata Pelajaran (Subjects) beserta informasi Guru Pengampu & Jumlah Modul
-        $allSubjectsList = Subject::with('teachers')->get();
-
-        $subjects = $allSubjectsList->map(function (Subject $subject) use ($processedModules) {
-            $subjectModules = $processedModules->where('subject_id', $subject->id)->values();
-
-            // Kumpulkan nama guru dari modul atau dari relasi Subject->teachers
-            $teacherNames = $subjectModules->pluck('teacher_name')->unique()->filter()->values();
-            if ($teacherNames->isEmpty()) {
-                $teacherNames = $subject->teachers->pluck('name')->unique()->values();
-            }
-            $teacherDisplay = $teacherNames->isNotEmpty() ? $teacherNames->join(', ') : 'Guru Pengampu';
-
-            $modulesCount = $subjectModules->count();
-            $completedCount = $subjectModules->where('progress_status', 'completed')->count();
-            $inProgressCount = $subjectModules->where('progress_status', 'in_progress')->count();
-            $notStartedCount = $subjectModules->where('progress_status', 'not_started')->count();
-            $avgProgress = $modulesCount > 0 ? (int) round($subjectModules->avg('progress_percent')) : 0;
-
-            return [
-                'id'                => $subject->id,
-                'name'              => $subject->name,
-                'code'              => $subject->code,
-                'icon'              => $subject->icon ?: '📚',
-                'color'             => $subject->color ?: 'blue',
-                'description'       => $subject->description,
-                'teacher_name'      => $teacherDisplay,
-                'teacher_count'     => $teacherNames->count(),
-                'modules_count'     => $modulesCount,
-                'completed_count'   => $completedCount,
-                'in_progress_count' => $inProgressCount,
-                'not_started_count' => $notStartedCount,
-                'avg_progress'      => $avgProgress,
-                'modules'           => $subjectModules,
-                'badge_classes'     => $subject->badgeClasses(),
-            ];
-        });
-
-        // Filter tab berdasarkan query parameter
-        $filterStatus = $request->query('status', 'all');
-        $filterSubject = $request->query('subject', 'all');
-
-        $filteredModules = $processedModules;
-
-        if ($filterSubject !== 'all') {
-            $filteredModules = $filteredModules->where('subject_id', (int) $filterSubject);
-        }
-
-        if ($filterStatus === 'in_progress') {
-            $filteredModules = $filteredModules->where('progress_status', 'in_progress');
-        } elseif ($filterStatus === 'completed') {
-            $filteredModules = $filteredModules->where('progress_status', 'completed');
-        } elseif ($filterStatus === 'not_started') {
-            $filteredModules = $filteredModules->where('progress_status', 'not_started');
-        }
-
-        // Metrik KPI Statistik Siswa
-        $totalModulesCount = $processedModules->count();
-        $completedModulesCount = $processedModules->where('progress_status', 'completed')->count();
-        $inProgressModulesCount = $processedModules->where('progress_status', 'in_progress')->count();
-        $notStartedModulesCount = $processedModules->where('progress_status', 'not_started')->count();
-
-        // Kumpulan tugas belum selesai (To-Do List 5 Teratas)
-        $allPendingTasks = $processedModules->flatMap(function ($item) {
-            return collect($item['pending_tasks'])->map(function ($task) use ($item) {
-                return array_merge($task, [
-                    'module_id'    => $item['id'],
-                    'module_title' => $item['title'],
-                    'teacher_name' => $item['teacher_name'],
-                ]);
-            });
-        })->take(5);
-
-        // Nilai rata-rata siswa
-        $gradedScores = $processedModules->pluck('summative_score')->filter(fn($v) => !is_null($v));
-        $avgScore = $gradedScores->count() > 0 ? (int) round($gradedScores->avg()) : 0;
-
-        // Rata-rata kemajuan belajar
-        $avgProgress = $totalModulesCount > 0 ? (int) round($processedModules->avg('progress_percent')) : 0;
-
-        $stats = [
-            'total_modules'       => $totalModulesCount,
-            'completed_modules'   => $completedModulesCount,
-            'in_progress'         => $inProgressModulesCount,
-            'not_started'         => $notStartedModulesCount,
-            'pending_tasks_count' => $processedModules->sum(fn($m) => count($m['pending_tasks'])),
-            'avg_score'           => $avgScore,
-            'avg_progress'        => $avgProgress,
-            'total_subjects'      => $subjects->count(),
-            'active_subjects'     => $subjects->where('modules_count', '>', 0)->count(),
-        ];
-
-        return view('pages.student.dashboard', compact(
-            'student',
-            'class',
-            'subjects',
-            'processedModules',
-            'filteredModules',
-            'stats',
-            'filterStatus',
-            'filterSubject',
-            'allPendingTasks'
-        ));
     }
 }
-

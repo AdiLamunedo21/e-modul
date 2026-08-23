@@ -42,35 +42,88 @@
         </div>
 
         {{-- ══ Navigasi Menu Siswa ══ --}}
-        <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        @php
+            $isDashboardActive = (request()->routeIs('student.dashboard') || request()->routeIs('dashboard.student')) && !request()->routeIs('student.modules.*');
+            $isModulesRoute = request()->routeIs('student.modules.*');
+            $currentSubjectParam = request()->route('subject');
+            $activeSubjectId = null;
+            if ($currentSubjectParam instanceof \App\Models\Subject) {
+                $activeSubjectId = $currentSubjectParam->id;
+            } elseif (is_numeric($currentSubjectParam)) {
+                $activeSubjectId = (int) $currentSubjectParam;
+            } elseif (isset($subject) && $subject instanceof \App\Models\Subject) {
+                $activeSubjectId = $subject->id;
+            }
+        @endphp
 
-            {{-- Portal Utama --}}
+        <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+             x-data="{ modulMenuOpen: true }">
+
+            {{-- Portal Utama: Dashboard Siswa --}}
             <a href="{{ route('student.dashboard') }}"
                class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all
-                   {{ (request()->routeIs('student.dashboard') || request()->routeIs('dashboard.student')) ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/25' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                   {{ $isDashboardActive ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/25' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
                 <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
                 </svg>
-                Dashboard Siswa
+                <span>Dashboard Siswa</span>
             </a>
 
             {{-- Grup: Pembelajaran --}}
             <p class="pt-6 pb-1 px-3 text-[11px] font-bold uppercase tracking-widest text-slate-500">Modul & Pembelajaran</p>
 
-            {{-- Modul Belajar Saya --}}
-            <a href="{{ route('student.dashboard', ['status' => 'all']) }}"
-               class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors group text-slate-400 hover:bg-slate-800 hover:text-white">
-                <div class="flex items-center gap-3">
-                    <svg class="w-5 h-5 shrink-0 text-emerald-400 group-hover:text-emerald-300 transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0118 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/>
+            {{-- Menu Utama: Modul Belajar (Parent Accordion with Subject Sub-menus) --}}
+            <div class="space-y-1">
+                <button type="button"
+                        @click="modulMenuOpen = !modulMenuOpen"
+                        class="w-full flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-colors
+                     {{ $isModulesRoute ? 'bg-slate-800 text-emerald-400' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5 shrink-0 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0118 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/>
+                        </svg>
+                        <span>Modul Belajar</span>
+                    </div>
+                    <svg class="w-4 h-4 text-slate-400 transition-transform duration-200"
+                         :class="modulMenuOpen ? 'rotate-180 text-emerald-400' : ''"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
                     </svg>
-                    <span>Modul Belajar</span>
-                </div>
-            </a>
+                </button>
 
-            {{-- Modul Sedang Dikerjakan --}}
+                {{-- Sub-menu Mata Pelajaran (Tanpa icon) --}}
+                <div x-show="modulMenuOpen"
+                     x-transition:enter="transition ease-out duration-150"
+                     x-transition:enter-start="opacity-0 -translate-y-1"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     class="pl-4 pr-1 py-1 space-y-1 border-l-2 border-slate-700/60 ml-5 my-1">
+
+                    {{-- Dynamic Sub-menus per Subject (Tanpa icon) --}}
+                    @if(isset($studentSidebarSubjects) && $studentSidebarSubjects->isNotEmpty())
+                        @foreach($studentSidebarSubjects as $sSubj)
+                            @php
+                                $isSubjActive = ($activeSubjectId === $sSubj->id);
+                            @endphp
+                            <a href="{{ route('student.modules.subject', $sSubj->id) }}"
+                               class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all group
+                                   {{ $isSubjActive ? 'bg-emerald-600 text-white font-bold shadow-md shadow-emerald-600/25' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200' }}">
+                                <span class="truncate">{{ $sSubj->name }}</span>
+                                @if(isset($sSubj->modules_count) && $sSubj->modules_count > 0)
+                                    <span class="ml-1.5 px-1.5 py-0.2 rounded text-[10px] font-bold shrink-0
+                                        {{ $isSubjActive ? 'bg-emerald-700/60 text-white' : 'bg-slate-800 text-slate-400 group-hover:text-emerald-400' }}">
+                                        {{ $sSubj->modules_count }}
+                                    </span>
+                                @endif
+                            </a>
+                        @endforeach
+                    @endif
+                </div>
+            </div>
+
+            {{-- Shortcut Filter: Sedang Dikerjakan --}}
             <a href="{{ route('student.dashboard', ['status' => 'in_progress']) }}"
-               class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors group text-slate-400 hover:bg-slate-800 hover:text-white">
+               class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors group
+                   {{ (request()->routeIs('student.dashboard') && request()->query('status') === 'in_progress') ? 'bg-slate-800 text-amber-300 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
                 <div class="flex items-center gap-3">
                     <svg class="w-5 h-5 shrink-0 text-amber-400 group-hover:text-amber-300 transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -82,9 +135,10 @@
                 </span>
             </a>
 
-            {{-- Modul Selesai --}}
+            {{-- Shortcut Filter: Riwayat Selesai --}}
             <a href="{{ route('student.dashboard', ['status' => 'completed']) }}"
-               class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors group text-slate-400 hover:bg-slate-800 hover:text-white">
+               class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors group
+                   {{ (request()->routeIs('student.dashboard') && request()->query('status') === 'completed') ? 'bg-slate-800 text-emerald-300 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
                 <div class="flex items-center gap-3">
                     <svg class="w-5 h-5 shrink-0 text-emerald-400 group-hover:text-emerald-300 transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />

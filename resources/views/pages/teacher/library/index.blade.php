@@ -97,8 +97,10 @@
     <div class="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200/80 shadow-sm relative overflow-hidden flex flex-col justify-between group hover:border-emerald-300 transition-all">
         <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Guru Kontributor</span>
-            <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg font-black border border-emerald-100 group-hover:scale-110 transition-transform">
-                👨‍🏫
+            <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 group-hover:scale-110 transition-transform">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                </svg>
             </div>
         </div>
         <div class="mt-4">
@@ -270,22 +272,16 @@
                 {{-- Card Header --}}
                 <div class="p-6">
                     <div class="flex items-start justify-between gap-3 mb-3">
-                        <div class="flex items-center gap-2.5">
-                            {{-- Teacher Avatar --}}
-                            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 text-white font-black text-xs flex items-center justify-center shadow-sm">
-                                {{ strtoupper(substr($mod->teacher->name ?? 'G', 0, 2)) }}
-                            </div>
-                            <div>
-                                <h4 class="text-xs font-bold text-slate-800 leading-tight">
-                                    {{ $mod->teacher->name ?? 'Guru Pendidik' }}
-                                    @if($isMine)
-                                        <span class="ml-1 text-[10px] px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-800 font-extrabold">Anda</span>
-                                    @endif
-                                </h4>
-                                <p class="text-[10px] text-slate-400">
-                                    Dibagikan {{ $mod->shared_at ? $mod->shared_at->diffForHumans() : $mod->created_at->diffForHumans() }}
-                                </p>
-                            </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-800 leading-tight">
+                                {{ $mod->teacher->name ?? 'Guru Pendidik' }}
+                                @if($isMine)
+                                    <span class="ml-1 text-[10px] px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-800 font-extrabold">Anda</span>
+                                @endif
+                            </h4>
+                            <p class="text-[10px] text-slate-400">
+                                Dibagikan {{ $mod->shared_at ? $mod->shared_at->diffForHumans() : $mod->created_at->diffForHumans() }}
+                            </p>
                         </div>
 
                         {{-- Target Grade, Major & Subject Badge --}}

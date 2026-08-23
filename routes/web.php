@@ -19,6 +19,7 @@ use App\Http\Controllers\Teacher\ClassController;
 use App\Http\Controllers\Teacher\DashboardController;
 use App\Http\Controllers\Teacher\ModuleLibraryController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
+use App\Http\Controllers\Student\ModuleController as StudentModuleController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -148,4 +149,7 @@ Route::middleware('auth:student')->prefix('student')->group(function () {
     Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('student.dashboard');
     // Alias untuk rute dashboard.student
     Route::get('/portal', [StudentDashboardController::class, 'index'])->name('dashboard.student');
+
+    // Modul Belajar Siswa per Mata Pelajaran
+    Route::get('/modules/subject/{subject}', [StudentModuleController::class, 'bySubject'])->name('student.modules.subject');
 });

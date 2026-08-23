@@ -58,11 +58,9 @@
 
             {{-- Profile Pill Guru --}}
             <div class="flex items-center gap-2.5 rounded-2xl sm:rounded-full border border-gray-200 bg-gray-50 p-1.5 pr-3 shadow-2xs">
-                <img
-                    class="h-8 w-8 rounded-full object-cover ring-2 ring-blue-500/20"
-                    src="https://ui-avatars.com/api/?name={{ urlencode(Auth::guard('teacher')->user()->name ?? 'Guru') }}&background=2563eb&color=fff&bold=true&size=64"
-                    alt="Avatar Guru"
-                >
+                <div class="h-8 w-8 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center ring-2 ring-blue-500/20 shrink-0">
+                    {{ strtoupper(substr(Auth::guard('teacher')->user()->name ?? 'G', 0, 2)) }}
+                </div>
                 <div class="hidden sm:flex flex-col text-left">
                     <span class="text-xs font-bold text-gray-800 leading-tight">{{ Auth::guard('teacher')->user()->name ?? 'Guru Pengajar' }}</span>
                     <span class="text-[10px] text-gray-500 font-medium">{{ Auth::guard('teacher')->user()->identity_number ?? '-' }}</span>
