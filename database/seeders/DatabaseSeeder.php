@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Admin;
 use App\Models\Module;
+use App\Models\Major;
 use App\Models\SchoolClass;
 use App\Models\Student;
 use App\Models\Subject;
@@ -24,6 +25,31 @@ class DatabaseSeeder extends Seeder
             'password' => $password,
         ]);
 
+        // 4 Jurusan / Konsentrasi Keahlian
+        $majorRpl = Major::create([
+            'name'        => 'Pengembangan Perangkat Lunak dan GIM',
+            'code'        => 'PPLG',
+            'description' => 'Konsentrasi keahlian pemrograman aplikasi web, mobile, basis data, dan rekayasa perangkat lunak.',
+        ]);
+
+        $majorTkj = Major::create([
+            'name'        => 'Teknik Jaringan Komputer dan Telekomunikasi',
+            'code'        => 'TJKT',
+            'description' => 'Konsentrasi keahlian infrastruktur jaringan komputer, sistem administrasi server, dan keamanan siber.',
+        ]);
+
+        $majorTitl = Major::create([
+            'name'        => 'Teknik Ketenagalistrikan',
+            'code'        => 'TITL',
+            'description' => 'Konsentrasi keahlian instalasi penerangan, tenaga kelistrikan, dan kontrol motor industri.',
+        ]);
+
+        $majorDkv = Major::create([
+            'name'        => 'Desain Komunikasi Visual',
+            'code'        => 'DKV',
+            'description' => 'Konsentrasi keahlian desain grafis, ilustrasi digital, animasi, dan multimedia interaktif.',
+        ]);
+
         // 4 Mata Pelajaran
         $subjectInformatika = Subject::create([
             'name'        => 'Informatika',
@@ -34,8 +60,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $subjectElektro = Subject::create([
-            'name'        => 'Teknik Elektro',
-            'code'        => 'TE',
+            'name'        => 'Teknik Elektro Dasar',
+            'code'        => 'ELK',
             'icon'        => '⚡',
             'color'       => 'amber',
             'description' => 'Mata pelajaran dasar kelistrikan, logika digital, dan sistem elektronika industri.',
@@ -57,9 +83,34 @@ class DatabaseSeeder extends Seeder
             'description' => 'Mata pelajaran literasi bahasa, teks laporan, dan komunikasi profesional.',
         ]);
 
-        // 2 Kelas
-        $class1 = SchoolClass::create(['major_name' => 'RPL', 'grade' => 'XI']);
-        $class2 = SchoolClass::create(['major_name' => 'TKJ', 'grade' => 'XII']);
+        // 4 Rombel Kelas Spesifik (Tingkat + Jurusan + Rombel)
+        $class1 = SchoolClass::create([
+            'major_id'   => $majorRpl->id,
+            'grade'      => 'XI',
+            'section'    => '1',
+            'major_name' => 'PPLG',
+        ]);
+
+        $class2 = SchoolClass::create([
+            'major_id'   => $majorTkj->id,
+            'grade'      => 'XII',
+            'section'    => '1',
+            'major_name' => 'TJKT',
+        ]);
+
+        $class3 = SchoolClass::create([
+            'major_id'   => $majorRpl->id,
+            'grade'      => 'X',
+            'section'    => '1',
+            'major_name' => 'PPLG',
+        ]);
+
+        $class4 = SchoolClass::create([
+            'major_id'   => $majorTitl->id,
+            'grade'      => 'X',
+            'section'    => '2',
+            'major_name' => 'TITL',
+        ]);
 
         // 2 Guru
         // Budi Santoso mengampu 2 Mapel: Informatika dan Teknik Elektro

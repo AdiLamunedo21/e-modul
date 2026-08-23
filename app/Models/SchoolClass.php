@@ -9,6 +9,11 @@ class SchoolClass extends Model
     protected $table = 'classes';
     protected $guarded = ['id'];
 
+    public function major()
+    {
+        return $this->belongsTo(Major::class, 'major_id');
+    }
+
     public function students()
     {
         return $this->hasMany(Student::class, 'class_id');
@@ -19,10 +24,20 @@ class SchoolClass extends Model
         return $this->hasMany(Module::class, 'class_id');
     }
 
-    /** Label nama kelas lengkap (Contoh: Kelas XI RPL) */
+    /** Label nama kelas lengkap (Contoh: Kelas X RPL 1 atau Kelas XI RPL) */
     public function getFullNameAttribute(): string
     {
-        return 'Kelas ' . $this->grade . ' ' . $this->major_name;
+        $majorStr = $this->major ? ($this->major->code ?: $this->major->name) : $this->major_name;
+        $sectionStr = $this->section ? ' ' . $this->section : '';
+        return 'Kelas ' . $this->grade . ' ' . $majorStr . $sectionStr;
+    }
+
+    /** Label rombel ringkas (Contoh: X RPL 1) */
+    public function getShortNameAttribute(): string
+    {
+        $majorStr = $this->major ? ($this->major->code ?: $this->major->name) : $this->major_name;
+        $sectionStr = $this->section ? ' ' . $this->section : '';
+        return $this->grade . ' ' . $majorStr . $sectionStr;
     }
 
     /**

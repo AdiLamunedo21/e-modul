@@ -20,6 +20,12 @@ use App\Http\Controllers\Teacher\DashboardController;
 use App\Http\Controllers\Teacher\ModuleLibraryController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
 use App\Http\Controllers\Student\ModuleController as StudentModuleController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\TeacherController as AdminTeacherController;
+use App\Http\Controllers\Admin\StudentController as AdminStudentController;
+use App\Http\Controllers\Admin\SubjectController as AdminSubjectController;
+use App\Http\Controllers\Admin\MajorController as AdminMajorController;
+use App\Http\Controllers\Admin\ClassController as AdminClassController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -41,8 +47,39 @@ Route::post('/login/student', [AuthController::class, 'studentLogin']);
 Route::post('/logout/student', [AuthController::class, 'studentLogout'])->name('logout.student');
 
 // ─── Admin Protected ───────────────────────────────────────────────────────
-Route::middleware('auth:admin')->prefix('admin')->name('dashboard.')->group(function () {
-    Route::get('/dashboard', fn () => view('pages.admin.dashboard'))->name('admin');
+Route::middleware('auth:admin')->prefix('admin')->group(function () {
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/portal', [AdminDashboardController::class, 'index'])->name('dashboard.admin');
+
+    // Master Data & Pendaftaran Guru
+    Route::get('/teachers',              [AdminTeacherController::class, 'index'])->name('admin.teachers.index');
+    Route::post('/teachers',             [AdminTeacherController::class, 'store'])->name('admin.teachers.store');
+    Route::patch('/teachers/{teacher}',   [AdminTeacherController::class, 'update'])->name('admin.teachers.update');
+    Route::delete('/teachers/{teacher}',  [AdminTeacherController::class, 'destroy'])->name('admin.teachers.destroy');
+
+    // Master Data & Pendaftaran Siswa
+    Route::get('/students',              [AdminStudentController::class, 'index'])->name('admin.students.index');
+    Route::post('/students',             [AdminStudentController::class, 'store'])->name('admin.students.store');
+    Route::patch('/students/{student}',   [AdminStudentController::class, 'update'])->name('admin.students.update');
+    Route::delete('/students/{student}',  [AdminStudentController::class, 'destroy'])->name('admin.students.destroy');
+
+    // Master Data Mata Pelajaran
+    Route::get('/subjects',              [AdminSubjectController::class, 'index'])->name('admin.subjects.index');
+    Route::post('/subjects',             [AdminSubjectController::class, 'store'])->name('admin.subjects.store');
+    Route::patch('/subjects/{subject}',   [AdminSubjectController::class, 'update'])->name('admin.subjects.update');
+    Route::delete('/subjects/{subject}',  [AdminSubjectController::class, 'destroy'])->name('admin.subjects.destroy');
+
+    // Master Data Jurusan / Konsentrasi Keahlian
+    Route::get('/majors',                [AdminMajorController::class, 'index'])->name('admin.majors.index');
+    Route::post('/majors',               [AdminMajorController::class, 'store'])->name('admin.majors.store');
+    Route::patch('/majors/{major}',       [AdminMajorController::class, 'update'])->name('admin.majors.update');
+    Route::delete('/majors/{major}',      [AdminMajorController::class, 'destroy'])->name('admin.majors.destroy');
+
+    // Master Data Rombel Kelas
+    Route::get('/classes',               [AdminClassController::class, 'index'])->name('admin.classes.index');
+    Route::post('/classes',              [AdminClassController::class, 'store'])->name('admin.classes.store');
+    Route::patch('/classes/{class}',      [AdminClassController::class, 'update'])->name('admin.classes.update');
+    Route::delete('/classes/{class}',     [AdminClassController::class, 'destroy'])->name('admin.classes.destroy');
 });
 
 // ─── Teacher Protected ─────────────────────────────────────────────────────

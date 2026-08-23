@@ -15,7 +15,7 @@
     <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
          @click="deleteModalOpen = false"></div>
 
-    <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
+    <div class="flex min-h-screen items-center justify-center p-4 sm:p-6 text-center">
         <div x-show="deleteModalOpen"
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -23,7 +23,7 @@
              x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
              x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-             class="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-slate-200/80">
+             class="relative z-10 w-full max-w-md sm:max-w-lg mx-auto transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all my-8 border border-slate-200/80">
 
             {{-- Modal Header & Danger Icon --}}
             <div class="bg-gradient-to-b from-rose-50/70 to-white px-6 pt-6 pb-4 sm:p-7">

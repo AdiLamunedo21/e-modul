@@ -121,7 +121,7 @@
                     <option value="" disabled selected>Pilih Kelas Target...</option>
                     @foreach($classes as $class)
                         <option value="{{ $class->id }}" {{ old('class_id') == $class->id ? 'selected' : '' }}>
-                            Kelas {{ $class->grade }} {{ $class->major_name }}
+                            {{ $class->full_name }}
                         </option>
                     @endforeach
                 </select>

@@ -398,18 +398,24 @@
     </div>
 
     {{-- ══ 4. MODAL POP-UP: RINCIAN NILAI AKADEMIK SISWA ══ --}}
-    <div x-show="modalOpen"
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4"
+    <div x-cloak x-show="modalOpen"
+         @keydown.escape.window="modalOpen = false"
+         class="fixed inset-0 z-50 overflow-y-auto"
+         aria-labelledby="student-modal-title" role="dialog" aria-modal="true"
          style="display: none;">
         
-        <div @click.away="modalOpen = false"
-             class="bg-white rounded-3xl max-w-3xl w-full shadow-2xl overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
+        {{-- Backdrop Blur (Strictly behind the card) --}}
+        <div x-show="modalOpen" x-transition.opacity class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity" @click="modalOpen = false" aria-hidden="true"></div>
+
+        <div class="flex min-h-screen items-center justify-center p-4 sm:p-6 text-center">
+            <div x-show="modalOpen"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 class="relative z-10 bg-white rounded-3xl max-w-2xl w-full mx-auto shadow-2xl overflow-hidden border border-slate-200 flex flex-col max-h-[90vh] text-left my-8">
             
             {{-- Modal Header --}}
             <div class="p-6 bg-slate-900 text-white flex items-center justify-between shrink-0">

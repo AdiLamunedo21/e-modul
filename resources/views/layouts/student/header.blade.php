@@ -61,15 +61,13 @@
             </div>
 
             {{-- Profile Pill Siswa --}}
-            <div class="flex items-center gap-2.5 rounded-full border border-gray-200 bg-gray-50 p-1 pr-3">
-                <img
-                    class="h-8 w-8 rounded-full object-cover ring-2 ring-emerald-500/20"
-                    src="https://ui-avatars.com/api/?name={{ urlencode(Auth::guard('student')->user()->name ?? 'Siswa') }}&background=059669&color=fff&bold=true&size=64"
-                    alt="Avatar Siswa"
-                >
+            <div class="flex items-center gap-2.5 rounded-full border border-gray-200 bg-gray-50 p-1.5 pr-3 shadow-2xs">
+                <div class="h-8 w-8 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center ring-2 ring-emerald-500/20 shrink-0">
+                    {{ strtoupper(substr(Auth::guard('student')->user()->name ?? 'S', 0, 2)) }}
+                </div>
                 <div class="hidden sm:flex flex-col text-left">
                     <span class="text-xs font-bold text-gray-800 leading-tight">{{ Auth::guard('student')->user()->name ?? 'Peserta Didik' }}</span>
-                    <span class="text-[10px] text-gray-500 font-medium">NISN: {{ Auth::guard('student')->user()->identity_number ?? '-' }}</span>
+                    <span class="text-[10px] text-emerald-600 font-semibold">{{ Auth::guard('student')->user()->schoolClass->full_name ?? ('NISN: ' . (Auth::guard('student')->user()->identity_number ?? '-')) }}</span>
                 </div>
             </div>
 
