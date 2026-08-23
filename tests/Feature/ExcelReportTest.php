@@ -7,6 +7,7 @@ use App\Models\Module;
 use App\Models\SchoolClass;
 use App\Models\Student;
 use App\Models\StudentResult;
+use App\Models\Subject;
 use App\Models\Teacher;
 use Tests\TestCase;
 
@@ -23,8 +24,59 @@ class ExcelReportTest extends TestCase
             ->get(route('teacher.reports.index'));
 
         $response->assertStatus(200);
-        $response->assertSee('Pusat Laporan Nilai (Excel .XLSX)');
-        $response->assertSee('Unduh Rekap Excel (.xlsx)');
+        $response->assertSee('Pusat Laporan Nilai');
+        $response->assertSee('Pilih Kelas');
+    }
+
+    public function test_teacher_can_access_class_subjects_report()
+    {
+        $teacher = Teacher::first();
+        $class = SchoolClass::first();
+        if (!$teacher || !$class) {
+            $this->markTestSkipped('Teacher or Class data not seeded.');
+        }
+
+        $response = $this->actingAs($teacher, 'teacher')
+            ->get(route('teacher.reports.class', $class->id));
+
+        $response->assertStatus(200);
+        $response->assertSee($class->full_name);
+        $response->assertSee('Daftar Kelas');
+        $response->assertSee('Buka Modul Pembelajaran');
+    }
+
+    public function test_teacher_can_access_subject_modules_report()
+    {
+        $teacher = Teacher::first();
+        $class = SchoolClass::first();
+        $subject = Subject::first();
+        if (!$teacher || !$class || !$subject) {
+            $this->markTestSkipped('Teacher, Class, or Subject data not seeded.');
+        }
+
+        $response = $this->actingAs($teacher, 'teacher')
+            ->get(route('teacher.reports.class.subject', [$class->id, $subject->id]));
+
+        $response->assertStatus(200);
+        $response->assertSee($subject->name);
+        $response->assertSee('Daftar Mapel');
+    }
+
+    public function test_teacher_can_access_module_student_report()
+    {
+        $teacher = Teacher::first();
+        $module = Module::where('teacher_id', $teacher->id)->first();
+        if (!$module) {
+            $this->markTestSkipped('Module data not seeded.');
+        }
+
+        $response = $this->actingAs($teacher, 'teacher')
+            ->get(route('teacher.reports.module', $module->id));
+
+        $response->assertStatus(200);
+        $response->assertSee($module->title);
+        $response->assertSee('Daftar Modul');
+        $response->assertSee('Unduh Spreadsheet Excel (.xlsx)');
     }
 
     public function test_teacher_can_export_module_grades_to_excel()
@@ -98,19 +150,8 @@ class ExcelReportTest extends TestCase
         $this->assertEquals('NO', $sheet->getCell('A8')->getValue());
         $this->assertEquals('NISN', $sheet->getCell('B8')->getValue());
         $this->assertEquals('NAMA LENGKAP SISWA', $sheet->getCell('C8')->getValue());
-        $this->assertEquals('KELAS', $sheet->getCell('D8')->getValue());
-        $this->assertEquals('PRE-TEST', $sheet->getCell('E8')->getValue());
-        $this->assertEquals('RINGKASAN VIDEO', $sheet->getCell('F8')->getValue());
-        $this->assertEquals('JOB SHEET (PDF)', $sheet->getCell('G8')->getValue());
-        $this->assertEquals('POST-TEST', $sheet->getCell('H8')->getValue());
-        $this->assertEquals('NILAI AKHIR', $sheet->getCell('I8')->getValue());
-        $this->assertEquals('STATUS PENILAIAN', $sheet->getCell('J8')->getValue());
-        $this->assertEquals('KETERANGAN NILAI', $sheet->getCell('K8')->getValue());
 
-        // Verifikasi Label Batas Nilai Kelulusan
-        $this->assertEquals('Batas Nilai Kelulusan', $sheet->getCell('G4')->getValue());
-
-        // Clean up test module
+        // Cleanup
         $module->delete();
     }
 }

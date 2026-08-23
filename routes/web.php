@@ -171,10 +171,13 @@ Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(fu
     Route::post('/grading/modules/{module}/students/{student}',             [GradingController::class, 'updateStudentGrade'])->name('grading.student.update');
     Route::post('/grading/modules/{module}/batch',                          [GradingController::class, 'batchUpdate'])->name('grading.batch.update');
 
-    // Laporan Spreadsheet / Excel (.xlsx)
-    Route::get('/reports',                                  [ReportController::class, 'index'])->name('reports.index');
-    Route::get('/reports/modules/{module}/export',          [ReportController::class, 'exportModule'])->name('reports.export.module');
-    Route::get('/modules/{module}/export-grades',           [ReportController::class, 'exportModule'])->name('modules.export.grades');
+    // Laporan Spreadsheet / Excel (.xlsx) - Alur Berjenjang (Kelas -> Mapel -> Modul -> Laporan Siswa)
+    Route::get('/reports',                                                   [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/classes/{class}',                                   [ReportController::class, 'showClassSubjects'])->name('reports.class');
+    Route::get('/reports/classes/{class}/subjects/{subject}',                [ReportController::class, 'showSubjectModules'])->name('reports.class.subject');
+    Route::get('/reports/modules/{module}',                                  [ReportController::class, 'showModuleReport'])->name('reports.module');
+    Route::get('/reports/modules/{module}/export',                           [ReportController::class, 'exportModule'])->name('reports.export.module');
+    Route::get('/modules/{module}/export-grades',                            [ReportController::class, 'exportModule'])->name('modules.export.grades');
 
     // Kelas Binaan & Direktori Siswa
     Route::get('/classes',                                                  [ClassController::class, 'index'])->name('classes.index');

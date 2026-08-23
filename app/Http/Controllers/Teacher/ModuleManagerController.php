@@ -104,10 +104,12 @@ class ModuleManagerController extends Controller
     {
         $teacher = $this->teacher();
         $teacherSubjects = $teacher->subjects()->get();
-        $allSubjects = Subject::orderBy('name')->get();
+        if ($teacherSubjects->isEmpty()) {
+            $teacherSubjects = Subject::orderBy('name')->get();
+        }
         $classes = SchoolClass::orderBy('grade')->orderBy('major_name')->get();
 
-        return view('pages.teacher.modules.create', compact('classes', 'teacherSubjects', 'allSubjects'));
+        return view('pages.teacher.modules.create', compact('classes', 'teacherSubjects'));
     }
 
     /**
