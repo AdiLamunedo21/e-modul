@@ -26,7 +26,8 @@ class AppServiceProvider extends ServiceProvider
         View::composer('layouts.student.sidebar', function ($view) {
             $student = Auth::guard('student')->user();
             if ($student && $student->class_id) {
-                $subjects = Subject::withCount(['modules' => function ($q) use ($student) {
+                $query = $student->subjects()->exists() ? $student->subjects() : Subject::query();
+                $subjects = $query->withCount(['modules' => function ($q) use ($student) {
                     $q->where('class_id', $student->class_id)->where('status', 'published');
                 }])->get();
             } else {

@@ -92,6 +92,8 @@ class StudentDashboardTest extends TestCase
             $this->markTestSkipped('Student or teacher seed required.');
         }
 
+        $student->subjects()->syncWithoutDetaching([$subject->id]);
+
         $module = Module::create([
             'teacher_id' => $teacher->id,
             'class_id'   => $student->class_id,

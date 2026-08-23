@@ -31,7 +31,9 @@ class DashboardController extends Controller
         $student = $this->student();
         $class = $student->schoolClass;
 
-        // Query modul terbit yang ditugaskan untuk kelas siswa ini
+        // Query modul terbit yang ditugaskan untuk kelas siswa ini pada mata pelajaran yang ditempuh
+        $studentSubjectIds = $student->subjects()->pluck('subjects.id')->toArray();
+
         $modulesQuery = Module::query()
             ->where('class_id', $student->class_id)
             ->where('status', 'published')
@@ -45,6 +47,10 @@ class DashboardController extends Controller
                 'embedSubmissions' => fn($q) => $q->where('student_id', $student->id),
             ])
             ->latest('updated_at');
+
+        if (!empty($studentSubjectIds)) {
+            $modulesQuery->whereIn('subject_id', $studentSubjectIds);
+        }
 
         $allModules = $modulesQuery->get();
 
@@ -187,8 +193,12 @@ class DashboardController extends Controller
             ];
         });
 
-        // Struktur data Mata Pelajaran (Subjects) beserta informasi Guru Pengampu & Jumlah Modul
-        $allSubjectsList = Subject::with('teachers')->get();
+        // Struktur data Mata Pelajaran (Subjects) yang ditempuh siswa beserta informasi Guru Pengampu & Jumlah Modul
+        if (!empty($studentSubjectIds)) {
+            $allSubjectsList = $student->subjects()->with('teachers')->get();
+        } else {
+            $allSubjectsList = Subject::with('teachers')->get();
+        }
 
         $subjects = $allSubjectsList->map(function (Subject $subject) use ($processedModules) {
             $subjectModules = $processedModules->where('subject_id', $subject->id)->values();

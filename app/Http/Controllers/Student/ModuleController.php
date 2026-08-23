@@ -37,6 +37,12 @@ class ModuleController extends Controller
         $student = $this->student();
         $class = $student->schoolClass;
 
+        // Validasi: Pastikan siswa terdaftar pada mata pelajaran ini jika sudah ada plotting
+        if ($student->subjects()->exists() && !$student->subjects->contains($subject->id)) {
+            return redirect()->route('student.dashboard')
+                ->with('error', "Anda tidak terdaftar pada mata pelajaran {$subject->name}.");
+        }
+
         // Query modul terbit yang ditugaskan untuk kelas siswa ini pada mapel terpilih
         $modulesQuery = Module::query()
             ->where('class_id', $student->class_id)

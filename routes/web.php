@@ -58,10 +58,11 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::delete('/teachers/{teacher}',  [AdminTeacherController::class, 'destroy'])->name('admin.teachers.destroy');
 
     // Master Data & Pendaftaran Siswa
-    Route::get('/students',              [AdminStudentController::class, 'index'])->name('admin.students.index');
-    Route::post('/students',             [AdminStudentController::class, 'store'])->name('admin.students.store');
-    Route::patch('/students/{student}',   [AdminStudentController::class, 'update'])->name('admin.students.update');
-    Route::delete('/students/{student}',  [AdminStudentController::class, 'destroy'])->name('admin.students.destroy');
+    Route::get('/students',               [AdminStudentController::class, 'index'])->name('admin.students.index');
+    Route::get('/students/class/{class}', [AdminStudentController::class, 'showClass'])->name('admin.students.class');
+    Route::post('/students',              [AdminStudentController::class, 'store'])->name('admin.students.store');
+    Route::patch('/students/{student}',    [AdminStudentController::class, 'update'])->name('admin.students.update');
+    Route::delete('/students/{student}',   [AdminStudentController::class, 'destroy'])->name('admin.students.destroy');
 
     // Master Data Mata Pelajaran
     Route::get('/subjects',              [AdminSubjectController::class, 'index'])->name('admin.subjects.index');

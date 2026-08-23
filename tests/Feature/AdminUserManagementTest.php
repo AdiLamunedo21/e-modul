@@ -143,10 +143,32 @@ class AdminUserManagementTest extends TestCase
         $response->assertSee('Daftarkan Siswa Baru', false);
     }
 
-    public function test_admin_can_register_new_student_with_class()
+    public function test_admin_can_view_students_in_class()
     {
         $admin = $this->getAdmin();
         $schoolClass = SchoolClass::first();
+
+        if (!$schoolClass) {
+            $schoolClass = SchoolClass::create([
+                'grade' => 'X',
+                'major_name' => 'Teknik Komputer',
+            ]);
+        }
+
+        $response = $this->actingAs($admin, 'admin')
+            ->get(route('admin.students.class', $schoolClass->id));
+
+        $response->assertStatus(200);
+        $response->assertSee($schoolClass->full_name);
+        $response->assertSee('Daftar Kelas', false);
+        $response->assertSee('Daftarkan Siswa ke Kelas Ini', false);
+    }
+
+    public function test_admin_can_register_new_student_with_class_and_subjects()
+    {
+        $admin = $this->getAdmin();
+        $schoolClass = SchoolClass::first();
+        $subject = Subject::first();
 
         if (!$schoolClass) {
             $schoolClass = SchoolClass::create([
@@ -161,12 +183,13 @@ class AdminUserManagementTest extends TestCase
             'identity_number' => $nisn,
             'class_id'        => $schoolClass->id,
             'password'        => 'password123',
+            'subject_ids'     => $subject ? [$subject->id] : [],
         ];
 
         $response = $this->actingAs($admin, 'admin')
             ->post(route('admin.students.store'), $payload);
 
-        $response->assertRedirect(route('admin.students.index'));
+        $response->assertRedirect(route('admin.students.class', $schoolClass->id));
         $response->assertSessionHas('success');
 
         $this->assertDatabaseHas('students', [
@@ -175,14 +198,21 @@ class AdminUserManagementTest extends TestCase
             'class_id'        => $schoolClass->id,
         ]);
 
+        $newStudent = Student::where('identity_number', $nisn)->first();
+        if ($subject) {
+            $this->assertTrue($newStudent->subjects->contains($subject->id));
+        }
+
         // Clean up
-        Student::where('identity_number', $nisn)->delete();
+        $newStudent->subjects()->detach();
+        $newStudent->delete();
     }
 
-    public function test_admin_can_update_student()
+    public function test_admin_can_update_student_and_subjects()
     {
         $admin = $this->getAdmin();
         $schoolClass = SchoolClass::first();
+        $subject = Subject::first();
         $nisn = 'NISN_TEST_UPD_' . rand(10000, 99999);
 
         $student = Student::create([
@@ -197,12 +227,13 @@ class AdminUserManagementTest extends TestCase
             'identity_number' => $nisn,
             'class_id'        => $schoolClass->id,
             'password'        => '',
+            'subject_ids'     => $subject ? [$subject->id] : [],
         ];
 
         $response = $this->actingAs($admin, 'admin')
             ->patch(route('admin.students.update', $student), $updatePayload);
 
-        $response->assertRedirect(route('admin.students.index'));
+        $response->assertRedirect(route('admin.students.class', $schoolClass->id));
         $response->assertSessionHas('success');
 
         $this->assertDatabaseHas('students', [
@@ -210,6 +241,12 @@ class AdminUserManagementTest extends TestCase
             'name' => 'Siswa Terupdate',
         ]);
 
+        if ($subject) {
+            $student->refresh();
+            $this->assertTrue($student->subjects->contains($subject->id));
+        }
+
+        $student->subjects()->detach();
         $student->delete();
     }
 
@@ -229,7 +266,7 @@ class AdminUserManagementTest extends TestCase
         $response = $this->actingAs($admin, 'admin')
             ->delete(route('admin.students.destroy', $student));
 
-        $response->assertRedirect(route('admin.students.index'));
+        $response->assertRedirect(route('admin.students.class', $schoolClass->id));
         $response->assertSessionHas('success');
 
         $this->assertDatabaseMissing('students', [

@@ -129,14 +129,21 @@ class DatabaseSeeder extends Seeder
         ]);
         $teacher2->subjects()->attach([$subjectMatematika->id, $subjectIndonesia->id]);
 
-        // 5 Siswa
-        Student::insert([
-            ['name' => 'Siswa Satu', 'identity_number' => 'NISN001', 'class_id' => $class1->id, 'password' => $password],
-            ['name' => 'Siswa Dua', 'identity_number' => 'NISN002', 'class_id' => $class1->id, 'password' => $password],
-            ['name' => 'Siswa Tiga', 'identity_number' => 'NISN003', 'class_id' => $class1->id, 'password' => $password],
-            ['name' => 'Siswa Empat', 'identity_number' => 'NISN004', 'class_id' => $class2->id, 'password' => $password],
-            ['name' => 'Siswa Lima', 'identity_number' => 'NISN005', 'class_id' => $class2->id, 'password' => $password],
-        ]);
+        // 5 Siswa dengan plotting mata pelajaran yang ditempuh
+        $student1 = Student::create(['name' => 'Siswa Satu', 'identity_number' => 'NISN001', 'class_id' => $class1->id, 'password' => $password]);
+        $student1->subjects()->attach([$subjectInformatika->id, $subjectElektro->id, $subjectMatematika->id, $subjectIndonesia->id]);
+
+        $student2 = Student::create(['name' => 'Siswa Dua', 'identity_number' => 'NISN002', 'class_id' => $class1->id, 'password' => $password]);
+        $student2->subjects()->attach([$subjectInformatika->id, $subjectElektro->id, $subjectMatematika->id]);
+
+        $student3 = Student::create(['name' => 'Siswa Tiga', 'identity_number' => 'NISN003', 'class_id' => $class1->id, 'password' => $password]);
+        $student3->subjects()->attach([$subjectInformatika->id, $subjectMatematika->id, $subjectIndonesia->id]);
+
+        $student4 = Student::create(['name' => 'Siswa Empat', 'identity_number' => 'NISN004', 'class_id' => $class2->id, 'password' => $password]);
+        $student4->subjects()->attach([$subjectInformatika->id, $subjectMatematika->id]);
+
+        $student5 = Student::create(['name' => 'Siswa Lima', 'identity_number' => 'NISN005', 'class_id' => $class2->id, 'password' => $password]);
+        $student5->subjects()->attach([$subjectElektro->id, $subjectIndonesia->id]);
 
         // Modul 1 (Informatika - Budi Santoso)
         $module = Module::create([

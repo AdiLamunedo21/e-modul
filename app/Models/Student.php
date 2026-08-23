@@ -15,6 +15,30 @@ class Student extends Authenticatable
         return $this->belongsTo(SchoolClass::class, 'class_id');
     }
 
+    /**
+     * Relasi mata pelajaran yang ditempuh oleh siswa ini.
+     */
+    public function subjects()
+    {
+        return $this->belongsToMany(Subject::class, 'student_subjects');
+    }
+
+    /**
+     * Mengambil daftar nama mata pelajaran yang ditempuh siswa dalam bentuk string terformat.
+     */
+    public function subjectNames(): string
+    {
+        $names = $this->subjects->pluck('name')->toArray();
+        if (empty($names)) {
+            return 'Belum Ada Mapel';
+        }
+        if (count($names) === 1) {
+            return $names[0];
+        }
+        $last = array_pop($names);
+        return implode(', ', $names) . ' & ' . $last;
+    }
+
     public function studentResults()
     {
         return $this->hasMany(StudentResult::class);

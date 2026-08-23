@@ -28,6 +28,8 @@ class StudentModuleTest extends TestCase
             $this->markTestSkipped('Student and Subject required.');
         }
 
+        $student->subjects()->syncWithoutDetaching([$subject->id]);
+
         $response = $this->actingAs($student, 'student')
             ->get(route('student.modules.subject', $subject));
 
@@ -45,6 +47,8 @@ class StudentModuleTest extends TestCase
         if (!$student || !$teacher || !$subject) {
             $this->markTestSkipped('Student, teacher, subject required.');
         }
+
+        $student->subjects()->syncWithoutDetaching([$subject->id]);
 
         $module = Module::create([
             'teacher_id' => $teacher->id,
@@ -69,5 +73,25 @@ class StudentModuleTest extends TestCase
         $resFilter->assertSee($module->title);
 
         $module->delete();
+    }
+
+    public function test_student_cannot_access_unassigned_subject_module_page()
+    {
+        $student = Student::first();
+        $subjectAssigned = Subject::first();
+        $subjectUnassigned = Subject::where('id', '!=', $subjectAssigned->id)->first();
+
+        if (!$student || !$subjectAssigned || !$subjectUnassigned) {
+            $this->markTestSkipped('Student and multiple subjects required.');
+        }
+
+        // Set student only to subjectAssigned
+        $student->subjects()->sync([$subjectAssigned->id]);
+
+        $response = $this->actingAs($student, 'student')
+            ->get(route('student.modules.subject', $subjectUnassigned));
+
+        $response->assertRedirect(route('student.dashboard'));
+        $response->assertSessionHas('error');
     }
 }
