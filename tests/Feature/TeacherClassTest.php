@@ -2,10 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Models\Major;
 use App\Models\Module;
 use App\Models\SchoolClass;
 use App\Models\Student;
 use App\Models\StudentResult;
+use App\Models\Subject;
 use App\Models\Teacher;
 use Tests\TestCase;
 
@@ -22,15 +24,14 @@ class TeacherClassTest extends TestCase
             ->get(route('teacher.classes.index'));
 
         $response->assertStatus(200);
-        $response->assertSee('Pusat Kelas Binaan', false);
-        $response->assertSee('Direktori Siswa', false);
-        $response->assertSee('Kelas Binaan');
+        $response->assertSee('Pusat Build Kelas');
+        $response->assertSee('Buat Kelas Baru');
     }
 
     public function test_classes_index_filters_work()
     {
         $teacher = Teacher::first();
-        $class = $teacher ? $teacher->assignedClasses()->first() : null;
+        $class = SchoolClass::first();
         if (!$teacher || !$class) {
             $this->markTestSkipped('Seed data required.');
         }
@@ -44,10 +45,71 @@ class TeacherClassTest extends TestCase
 
         // Filter by search
         $responseSearch = $this->actingAs($teacher, 'teacher')
-            ->get(route('teacher.classes.index', ['search' => $class->major_name]));
+            ->get(route('teacher.classes.index', ['search' => $class->section]));
 
         $responseSearch->assertStatus(200);
         $responseSearch->assertSee($class->full_name);
+    }
+
+    public function test_teacher_can_create_new_class()
+    {
+        $teacher = Teacher::first();
+        $major = Major::first();
+        if (!$teacher || !$major) {
+            $this->markTestSkipped('Seed data required.');
+        }
+
+        $section = 'R' . rand(10, 99);
+
+        $response = $this->actingAs($teacher, 'teacher')
+            ->post(route('teacher.classes.store'), [
+                'grade'    => 'X',
+                'major_id' => $major->id,
+                'section'  => $section,
+            ]);
+
+        $newClass = SchoolClass::where('section', $section)->first();
+        $this->assertNotNull($newClass);
+        $response->assertRedirect(route('teacher.classes.show', $newClass));
+
+        $this->assertDatabaseHas('classes', [
+            'id'       => $newClass->id,
+            'grade'    => 'X',
+            'major_id' => $major->id,
+            'section'  => $section,
+        ]);
+    }
+
+    public function test_teacher_can_import_modules_from_another_class()
+    {
+        $teacher = Teacher::first();
+        $sourceModule = Module::where('teacher_id', $teacher->id)->first();
+        $major = Major::first();
+
+        if (!$teacher || !$sourceModule || !$major) {
+            $this->markTestSkipped('Seed data required.');
+        }
+
+        // Buat kelas target
+        $targetClass = SchoolClass::create([
+            'grade'      => 'XI',
+            'major_id'   => $major->id,
+            'section'    => 'T' . rand(10, 99),
+            'major_name' => $major->code,
+        ]);
+
+        $response = $this->actingAs($teacher, 'teacher')
+            ->post(route('teacher.classes.import-modules', $targetClass), [
+                'module_ids' => [$sourceModule->id],
+            ]);
+
+        $response->assertRedirect(route('teacher.classes.show', ['class' => $targetClass->id, 'tab' => 'modules']));
+
+        // Verifikasi bahwa modul telah disalin ke kelas target
+        $this->assertDatabaseHas('modules', [
+            'class_id'   => $targetClass->id,
+            'teacher_id' => $teacher->id,
+        ]);
     }
 
     public function test_teacher_can_access_class_show_detail()
@@ -64,7 +126,7 @@ class TeacherClassTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee($class->full_name);
         $response->assertSee('Direktori Siswa');
-        $response->assertSee('Portofolio Modul Guru');
+        $response->assertSee('Import Modul');
     }
 
     public function test_teacher_can_fetch_student_academic_summary_json()
@@ -84,12 +146,12 @@ class TeacherClassTest extends TestCase
         $response->assertJson([
             'success' => true,
             'student' => [
-                'id' => $student->id,
-                'name' => $student->name,
+                'id'              => $student->id,
+                'name'            => $student->name,
                 'identity_number' => $student->identity_number,
             ],
             'class' => [
-                'id' => $class->id,
+                'id'        => $class->id,
                 'full_name' => $class->full_name,
             ],
         ]);
@@ -101,6 +163,63 @@ class TeacherClassTest extends TestCase
             'overall_avg',
             'kktp_status',
         ]);
+    }
+
+    public function test_teacher_can_delete_class_and_purge_alumni_and_modules()
+    {
+        $teacher = Teacher::first();
+        $major = Major::first();
+        $subject = Subject::first();
+
+        if (!$teacher || !$major || !$subject) {
+            $this->markTestSkipped('Seed data required.');
+        }
+
+        // 1. Buat kelas sementara untuk di-purge
+        $purgeClass = SchoolClass::create([
+            'grade'      => 'XII',
+            'major_id'   => $major->id,
+            'section'    => 'P' . rand(10, 99),
+            'major_name' => $major->code,
+        ]);
+
+        // 2. Buat siswa alumni di kelas ini
+        $student = Student::create([
+            'name'            => 'Alumni Siswa ' . uniqid(),
+            'identity_number' => 'NISN' . rand(100000, 999999),
+            'class_id'        => $purgeClass->id,
+            'password'        => bcrypt('password'),
+        ]);
+        $student->subjects()->attach($subject->id);
+
+        // 3. Buat modul di kelas ini
+        $module = Module::create([
+            'title'      => 'Modul Alumni ' . uniqid(),
+            'teacher_id' => $teacher->id,
+            'class_id'   => $purgeClass->id,
+            'subject_id' => $subject->id,
+            'status'     => 'published',
+        ]);
+
+        // 4. Buat student result
+        StudentResult::create([
+            'student_id'      => $student->id,
+            'module_id'       => $module->id,
+            'summative_score' => 85,
+            'grading_status'  => 'graded',
+        ]);
+
+        // 5. Eksekusi Hapus Kelas & Purge
+        $response = $this->actingAs($teacher, 'teacher')
+            ->delete(route('teacher.classes.destroy', $purgeClass));
+
+        $response->assertRedirect(route('teacher.classes.index'));
+
+        // 6. Verifikasi database bersih dari kelas, siswa, dan modul tersebut
+        $this->assertDatabaseMissing('classes', ['id' => $purgeClass->id]);
+        $this->assertDatabaseMissing('students', ['id' => $student->id]);
+        $this->assertDatabaseMissing('modules', ['id' => $module->id]);
+        $this->assertDatabaseMissing('student_results', ['student_id' => $student->id, 'module_id' => $module->id]);
     }
 
     public function test_unauthenticated_user_cannot_access_teacher_classes()

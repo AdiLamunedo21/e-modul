@@ -3,22 +3,32 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
+use App\Models\Major;
 use App\Models\Module;
 use App\Models\SchoolClass;
 use App\Models\Student;
 use App\Models\StudentResult;
+use App\Models\VideoSummary;
+use App\Models\EmbedSubmission;
+use App\Models\JobSheetSubmission;
+use App\Models\Submission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 /**
  * =============================================================================
  * CONTROLLER: ClassController
  * =============================================================================
- * MANAJEMEN KELAS BINAAN & DIREKTORI SISWA:
+ * MANAJEMEN BUILD KELAS, DIREKTORI SISWA & PURGE ALUMNI:
  * -----------------------------------------------------------------------------
- * Controller ini melayani kebutuhan guru dalam memantau kelas binaan, direktori
- * siswa per kelas, partisipasi pengerjaan modul, serta rekapitulasi progres
- * akademik dan nilai siswa di SMK Negeri 3 Yogyakarta.
+ * 1. index()                : Menampilkan Katalog Build Kelas & Modul
+ * 2. store()                : Membuat Rombel Kelas Baru
+ * 3. show()                 : Menampilkan Detail Kelas (Tab Siswa & Tab Modul)
+ * 4. importModules()        : Mengimpor/Menduplikasi Modul dari Kelas Lain
+ * 5. destroy()              : Menghapus Kelas Beserta Alumni Siswa & Modulnya
+ * 6. getStudentAcademicSummary() : Endpoint JSON Rincian Akademik Siswa
  * =============================================================================
  */
 class ClassController extends Controller
@@ -29,8 +39,7 @@ class ClassController extends Controller
     }
 
     /**
-     * Halaman Utama: Katalog & Manajemen Kelas Binaan Guru.
-     * Hanya menampilkan kelas-kelas yang menjadi target distribusi modul guru tersebut.
+     * Halaman Utama: Katalog & Manajemen Build Kelas Guru.
      */
     public function index(Request $request)
     {
@@ -38,43 +47,44 @@ class ClassController extends Controller
         $teacherSubjects = $teacher->subjects()->get();
         $selectedSubjectId = $request->filled('subject_id') ? (int) $request->subject_id : null;
 
-        // Query hanya kelas-kelas yang memiliki modul dari guru ini (bisa difilter per subject_id)
-        $query = SchoolClass::whereHas('modules', function ($q) use ($teacher, $selectedSubjectId) {
-                $q->where('teacher_id', $teacher->id);
-                if ($selectedSubjectId) {
-                    $q->where('subject_id', $selectedSubjectId);
-                }
-            })
-            ->with(['students', 'modules' => function ($q) use ($teacher, $selectedSubjectId) {
-                $q->where('teacher_id', $teacher->id)->with(['studentResults', 'subject']);
-                if ($selectedSubjectId) {
-                    $q->where('subject_id', $selectedSubjectId);
-                }
-            }]);
+        $query = SchoolClass::with(['major', 'students', 'modules' => function ($q) use ($teacher, $selectedSubjectId) {
+            $q->where('teacher_id', $teacher->id)->with(['studentResults', 'subject']);
+            if ($selectedSubjectId) {
+                $q->where('subject_id', $selectedSubjectId);
+            }
+        }])->withCount(['students']);
 
-        // Filter Tingkat Kelas (X, XI, XII)
-        if ($request->filled('grade')) {
+        // Filter Tingkat Kelas (X, XI, XII, XIII)
+        if ($request->filled('grade') && $request->grade !== 'all') {
             $query->where('grade', $request->grade);
         }
 
-        // Filter Jurusan (RPL, TKJ, dll.)
-        if ($request->filled('major')) {
-            $query->where('major_name', $request->major);
+        // Filter Jurusan
+        if ($request->filled('major_id') && $request->major_id !== 'all') {
+            $query->where('major_id', $request->major_id);
         }
 
         // Pencarian Nama Kelas atau Jurusan
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('major_name', 'like', "%{$search}%")
-                  ->orWhere('grade', 'like', "%{$search}%");
+                $q->where('grade', 'like', "%{$search}%")
+                  ->orWhere('section', 'like', "%{$search}%")
+                  ->orWhere('major_name', 'like', "%{$search}%")
+                  ->orWhereHas('major', function ($mq) use ($search) {
+                      $mq->where('name', 'like', "%{$search}%")
+                         ->orWhere('code', 'like', "%{$search}%");
+                  });
             });
         }
 
-        $classes = $query->orderBy('grade')->orderBy('major_name')->get();
+        $classes = $query->orderBy('grade')->orderBy('section')->get();
 
         // Hitung statistik per kelas untuk guru ini
         $classes->transform(function ($class) use ($teacher) {
+            $teacherModules = Module::where('teacher_id', $teacher->id)->where('class_id', $class->id)->get();
+            $class->teacher_modules_count = $teacherModules->count();
+            $class->teacher_published_count = $teacherModules->where('status', 'published')->count();
             $class->stats = $class->statsForTeacher($teacher->id);
             $class->subjects_list = $class->modules->pluck('subject')->filter()->unique('id');
             return $class;
@@ -93,44 +103,82 @@ class ClassController extends Controller
         $overallAvgScore = $gradedResults->count() > 0 ? (int) round($gradedResults->avg('summative_score')) : 0;
 
         $globalStats = [
-            'total_assigned_classes' => $assignedClassIds->count(),
-            'total_students'         => $totalStudentsInAssignedClasses,
+            'total_assigned_classes' => $classes->count(),
+            'total_students'         => $classes->sum('students_count'),
             'total_modules'          => $allTeacherModules->count(),
             'published_modules'      => $allTeacherModules->where('status', 'published')->count(),
             'overall_avg_score'      => $overallAvgScore,
         ];
 
-        // Data untuk dropdown filter (hanya dari kelas binaan guru ini)
-        $teacherClassesQuery = SchoolClass::whereHas('modules', function ($q) use ($teacher, $selectedSubjectId) {
-            $q->where('teacher_id', $teacher->id);
-            if ($selectedSubjectId) {
-                $q->where('subject_id', $selectedSubjectId);
-            }
-        });
-        $availableGrades = (clone $teacherClassesQuery)->select('grade')->distinct()->orderBy('grade')->pluck('grade');
-        $availableMajors = (clone $teacherClassesQuery)->select('major_name')->distinct()->orderBy('major_name')->pluck('major_name');
+        // Daftar modul guru yang tersedia untuk diimpor ke kelas lain
+        $myModules = Module::where('teacher_id', $teacher->id)
+            ->with(['schoolClass', 'subject'])
+            ->orderBy('title')
+            ->get();
+
+        $majors = Major::orderBy('name')->get();
+        $availableGrades = ['X', 'XI', 'XII', 'XIII'];
 
         return view('pages.teacher.classes.index', compact(
             'classes',
             'globalStats',
             'availableGrades',
-            'availableMajors',
+            'majors',
             'teacherSubjects',
-            'selectedSubjectId'
+            'selectedSubjectId',
+            'myModules'
         ));
     }
 
     /**
-     * Halaman Detail Kelas Binaan & Direktori Siswa.
+     * Membuat rombongan belajar kelas baru.
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'grade'    => ['required', 'string', Rule::in(['X', 'XI', 'XII', 'XIII'])],
+            'major_id' => ['required', 'exists:majors,id'],
+            'section'  => ['required', 'string', 'max:10'],
+        ], [
+            'grade.required'    => 'Pilih tingkat kelas.',
+            'grade.in'          => 'Tingkat kelas harus salah satu dari X, XI, XII, XIII.',
+            'major_id.required' => 'Pilih konsentrasi keahlian / jurusan.',
+            'major_id.exists'   => 'Jurusan yang dipilih tidak valid.',
+            'section.required'  => 'Nomor atau nama rombel wajib diisi.',
+        ]);
+
+        $major = Major::findOrFail($validated['major_id']);
+
+        $schoolClass = SchoolClass::create([
+            'grade'      => $validated['grade'],
+            'major_id'   => $major->id,
+            'section'    => $validated['section'],
+            'major_name' => $major->code,
+        ]);
+
+        return redirect()->route('teacher.classes.show', $schoolClass)
+            ->with('success', "Rombel {$schoolClass->full_name} berhasil dibuat! Anda dapat mulai mengimpor modul atau mendaftarkan siswa.");
+    }
+
+    /**
+     * Halaman Detail Kelas Binaan: Tab Siswa & Tab Modul Pembelajaran.
      */
     public function show(SchoolClass $class, Request $request)
     {
         $teacher = $this->teacher();
+        $class->loadMissing(['major', 'students']);
 
         // Modul guru pada kelas ini
         $teacherModules = Module::where('teacher_id', $teacher->id)
             ->where('class_id', $class->id)
-            ->with(['studentResults', 'schoolClass'])
+            ->with(['studentResults', 'subject', 'schoolClass'])
+            ->latest()
+            ->get();
+
+        // Modul guru dari kelas LAIN yang siap diimpor ke kelas ini
+        $otherClassModules = Module::where('teacher_id', $teacher->id)
+            ->where('class_id', '!=', $class->id)
+            ->with(['schoolClass', 'subject'])
             ->latest()
             ->get();
 
@@ -138,7 +186,7 @@ class ClassController extends Controller
         $classStats = $class->statsForTeacher($teacher->id);
 
         // Ambil daftar siswa di kelas ini
-        $studentsQuery = $class->students()->orderBy('name');
+        $studentsQuery = $class->students()->with('subjects')->orderBy('name');
 
         if ($request->filled('search_student')) {
             $search = $request->search_student;
@@ -187,12 +235,81 @@ class ClassController extends Controller
             return $student;
         });
 
+        $tab = $request->query('tab', 'students'); // 'students' atau 'modules'
+
         return view('pages.teacher.classes.show', compact(
             'class',
             'teacherModules',
+            'otherClassModules',
             'classStats',
-            'students'
+            'students',
+            'tab'
         ));
+    }
+
+    /**
+     * Mengimpor atau menduplikasi modul dari kelas lain ke kelas target ini.
+     */
+    public function importModules(Request $request, SchoolClass $class)
+    {
+        $teacher = $this->teacher();
+
+        $validated = $request->validate([
+            'module_ids' => ['required', 'array', 'min:1'],
+            'module_ids.*' => ['exists:modules,id'],
+        ], [
+            'module_ids.required' => 'Pilih minimal satu modul yang ingin diimpor ke kelas ini.',
+            'module_ids.min'      => 'Pilih minimal satu modul yang ingin diimpor ke kelas ini.',
+        ]);
+
+        $importedCount = 0;
+
+        DB::transaction(function () use ($validated, $class, $teacher, &$importedCount) {
+            foreach ($validated['module_ids'] as $moduleId) {
+                $sourceModule = Module::find($moduleId);
+                if ($sourceModule && ($sourceModule->teacher_id === $teacher->id || $sourceModule->is_shared)) {
+                    $sourceModule->cloneToTeacher($teacher, $class->id);
+                    $importedCount++;
+                }
+            }
+        });
+
+        return redirect()->route('teacher.classes.show', ['class' => $class->id, 'tab' => 'modules'])
+            ->with('success', "Berhasil mengimpor {$importedCount} modul pembelajaran ke dalam kelas {$class->full_name}!");
+    }
+
+    /**
+     * Menghapus kelas rombel beserta seluruh data siswa alumni dan modulnya secara bersih (Purge).
+     */
+    public function destroy(SchoolClass $class)
+    {
+        $className = $class->full_name;
+        $studentsCount = $class->students()->count();
+        $modulesCount = $class->modules()->count();
+
+        DB::transaction(function () use ($class) {
+            // 1. Hapus seluruh data siswa di kelas ini beserta relasi-relasinya
+            foreach ($class->students as $student) {
+                $student->subjects()->detach();
+                StudentResult::where('student_id', $student->id)->delete();
+                VideoSummary::where('student_id', $student->id)->delete();
+                EmbedSubmission::where('student_id', $student->id)->delete();
+                JobSheetSubmission::where('student_id', $student->id)->delete();
+                Submission::where('student_id', $student->id)->delete();
+                $student->delete();
+            }
+
+            // 2. Hapus seluruh modul di kelas ini
+            foreach ($class->modules as $module) {
+                $module->delete();
+            }
+
+            // 3. Hapus kelas itu sendiri
+            $class->delete();
+        });
+
+        return redirect()->route('teacher.classes.index')
+            ->with('success', "Kelas {$className} beserta seluruh data alumni ({$studentsCount} siswa) dan {$modulesCount} modul berhasil dihapus secara bersih dari database.");
     }
 
     /**

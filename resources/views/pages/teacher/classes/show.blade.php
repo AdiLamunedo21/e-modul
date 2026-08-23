@@ -1,58 +1,82 @@
 @extends('layouts.teacher.dashboardteacher')
 @section('title', $class->full_name . ' — Detail Kelas & Siswa')
-@section('page-title', 'Detail Kelas Binaan')
+@section('page-title', 'Detail Kelas & Siswa')
 
 @section('content')
 <div x-data="classDetailPage()" class="space-y-8 pb-12">
 
+    {{-- Flash Alert --}}
+    @if(session('success'))
+        <div class="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-800 shadow-sm animate-fade-in">
+            <svg class="w-5 h-5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span>{{ session('success') }}</span>
+        </div>
+    @endif
+
     {{-- ══ 1. HEADER & BREADCRUMB ══ --}}
-    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 p-6 sm:p-8 text-white shadow-xl">
-        <div class="absolute -top-16 -right-16 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute -bottom-16 -left-16 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-800 via-indigo-800 to-slate-900 p-6 sm:p-8 text-white shadow-xl shadow-blue-950/20 border border-blue-700/40 mb-8">
+        {{-- Glow Elements --}}
+        <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute right-1/3 -top-10 w-48 h-48 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
 
         <div class="relative z-10 space-y-4">
             {{-- Breadcrumb --}}
-            <nav class="flex items-center gap-2 text-xs font-semibold text-slate-300">
+            <nav class="flex items-center gap-2 text-xs font-semibold text-blue-200/90">
                 <a href="{{ route('teacher.dashboard') }}" class="hover:text-white transition-colors">Dashboard</a>
-                <span class="text-slate-500">/</span>
-                <a href="{{ route('teacher.classes.index') }}" class="hover:text-white transition-colors">Kelas Binaan</a>
-                <span class="text-slate-500">/</span>
-                <span class="text-blue-300 font-bold">{{ $class->full_name }}</span>
+                <span class="text-blue-300/40">/</span>
+                <a href="{{ route('teacher.classes.index') }}" class="hover:text-white transition-colors">Build Kelas</a>
+                <span class="text-blue-300/40">/</span>
+                <span class="text-white font-bold">{{ $class->full_name }}</span>
             </nav>
 
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div class="space-y-1.5">
-                    <div class="flex flex-wrap items-center gap-2">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-blue-500/20 text-blue-300 border border-blue-400/30">
-                            Kelas {{ $class->grade }}
+                <div class="space-y-2">
+                    <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-950/60 backdrop-blur-md border border-white/20 text-xs font-bold tracking-wide text-white shadow-sm flex-wrap">
+                        <span class="flex items-center gap-1.5 text-blue-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
+                            <span>Kelas {{ $class->grade }} &bull; Rombel {{ $class->section }}</span>
                         </span>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">
-                            Jurusan {{ $class->major_name }}
+                        <span class="text-white/30">•</span>
+                        <span class="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-blue-400/20 text-blue-300 border border-blue-400/40 uppercase tracking-wider">
+                            {{ $class->major ? $class->major->code : $class->major_name }}
                         </span>
-                        <span class="text-xs text-slate-300">
-                            • SMK Negeri 3 Yogyakarta
-                        </span>
+                        <span class="text-white/30">•</span>
+                        <span class="text-[11px] text-slate-300 font-medium">SMK Negeri 3 Yogyakarta</span>
                     </div>
-                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-sm">
                         {{ $class->full_name }}
                     </h1>
-                    <p class="text-slate-300 text-sm max-w-2xl">
-                        Direktori lengkap data siswa, portofolio modul pembelajaran, serta catatan performa nilai siswa untuk kelas ini.
+                    <p class="text-slate-200 text-sm max-w-2xl leading-relaxed font-normal">
+                        {{ $class->major ? $class->major->name : $class->major_name }} &bull; Kelola data siswa, portofolio modul, impor modul dari kelas lain, dan rekapitulasi nilai akademik.
                     </p>
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2.5 shrink-0">
                     <a href="{{ route('teacher.classes.index') }}"
-                       class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/15 backdrop-blur-sm transition-all">
-                        ← Kembali ke Daftar Kelas
+                       class="px-4 py-2.5 rounded-xl bg-slate-900/50 hover:bg-slate-900/80 text-white border border-white/25 hover:border-white/40 text-xs font-bold transition-all flex items-center gap-2 backdrop-blur-sm shadow-sm">
+                        ← Kembali ke Build Kelas
                     </a>
-                    <a href="{{ route('teacher.modules.create') }}"
-                       class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-lg shadow-blue-900/40 border border-blue-400/30 transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+
+                    {{-- Tombol Import Modul --}}
+                    <button @click="importModalOpen = true"
+                            type="button"
+                            class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow-lg shadow-indigo-950/40 flex items-center gap-2 border border-indigo-400/30">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                         </svg>
-                        <span>Buat Modul untuk Kelas Ini</span>
-                    </a>
+                        <span>Import Modul Lain</span>
+                    </button>
+
+                    {{-- Tombol Hapus Kelas (Purge) --}}
+                    <button @click="deleteModalOpen = true"
+                            type="button"
+                            class="px-4 py-2.5 rounded-xl bg-rose-600/80 hover:bg-rose-600 text-white text-xs font-bold transition-all shadow-lg shadow-rose-950/40 flex items-center gap-2 border border-rose-400/30">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                        </svg>
+                        <span>Hapus Kelas</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -124,9 +148,9 @@
                     <span class="text-2xl font-black {{ $classStats['avg_score'] >= 75 ? 'text-emerald-600' : ($classStats['avg_score'] > 0 ? 'text-amber-600' : 'text-slate-400') }}">
                         {{ $classStats['avg_score'] > 0 ? $classStats['avg_score'] : '-' }}
                     </span>
-                    <span class="text-xs font-semibold text-slate-500">Poin</span>
+                    <span class="text-xs font-semibold text-slate-500">/ 100 Skala</span>
                 </div>
-                <p class="text-[11px] text-amber-600 font-medium mt-0.5">Standar ketuntasan ≥ 75</p>
+                <p class="text-[11px] text-amber-600 font-medium mt-0.5">Standar ketuntasan &ge; 75</p>
             </div>
         </div>
     </div>
@@ -151,20 +175,20 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0118 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
                     </svg>
-                    <span>Portofolio Modul Guru ({{ $teacherModules->count() }})</span>
+                    <span>Modul di Kelas Ini ({{ $teacherModules->count() }})</span>
                 </button>
             </div>
 
             {{-- Quick Action Links --}}
             <div class="hidden sm:flex items-center gap-2 pb-2">
-                <a href="{{ route('teacher.grading.index', ['class_id' => $class->id]) }}"
+                <a href="{{ route('teacher.grading.index') }}"
                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-bold transition-colors border border-blue-200">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
                     </svg>
-                    <span>Matriks Penilaian</span>
+                    <span>Grading Center</span>
                 </a>
-                <a href="{{ route('teacher.reports.index', ['class_id' => $class->id]) }}"
+                <a href="{{ route('teacher.reports.class', $class->id) }}"
                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-bold transition-colors border border-emerald-200">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-8.625 1.125V5.625m17.25 13.875c.621 0 1.125-.504 1.125-1.125M20.625 19.5h-7.5c-.621 0-1.125-.504-1.125-1.125m8.625 1.125V5.625m-17.25 0c0-.621.504-1.125 1.125-1.125h15c.621 0 1.125.504 1.125 1.125m-17.25 0v12.75c0 .621.504 1.125 1.125 1.125h15c.621 0 1.125-.504 1.125-1.125V5.625m-17.25 0h17.25M9 4.5v15M15 4.5v15M3.75 9.75h16.5M3.75 14.25h16.5" />
@@ -198,7 +222,7 @@
             @if($students->isEmpty())
                 <div class="rounded-2xl bg-slate-50 p-8 text-center border border-slate-200">
                     <p class="text-sm font-bold text-slate-700">Tidak ada data siswa ditemukan.</p>
-                    <p class="text-xs text-slate-400 mt-1">Silakan sesuaikan kata kunci pencarian Anda.</p>
+                    <p class="text-xs text-slate-400 mt-1">Belum ada siswa terdaftar pada kelas ini atau hasil pencarian nihil.</p>
                 </div>
             @else
                 <div class="overflow-x-auto rounded-2xl border border-slate-200">
@@ -306,6 +330,27 @@
 
         {{-- ── TAB CONTENT 2: PORTOFOLIO MODUL GURU ──────────────────────── --}}
         <div x-show="activeTab === 'modules'" class="p-6 space-y-6">
+            <div class="flex items-center justify-between gap-4 flex-wrap pb-2 border-b border-slate-100">
+                <div>
+                    <h3 class="text-base font-black text-slate-900">Daftar Modul Pembelajaran di Kelas Ini</h3>
+                    <p class="text-xs text-slate-500">Modul yang didistribusikan untuk siswa rombel {{ $class->full_name }}</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button @click="importModalOpen = true"
+                            type="button"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                        </svg>
+                        <span>Import Modul dari Kelas Lain</span>
+                    </button>
+                    <a href="{{ route('teacher.modules.create') }}"
+                       class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm transition-all">
+                        <span>+ Buat Modul Baru</span>
+                    </a>
+                </div>
+            </div>
+
             @if($teacherModules->isEmpty())
                 <div class="rounded-2xl bg-slate-50 p-12 text-center border border-slate-200">
                     <div class="w-16 h-16 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center mx-auto mb-4">
@@ -315,21 +360,24 @@
                     </div>
                     <h3 class="text-base font-bold text-slate-800 mb-1">Belum Ada Modul untuk Kelas Ini</h3>
                     <p class="text-xs text-slate-500 max-w-sm mx-auto mb-6">
-                        Anda belum membuat atau mendistribusikan modul pembelajaran untuk {{ $class->full_name }}.
+                        Anda dapat mengimpor modul yang sudah pernah dibuat di kelas lain atau membuat modul baru dari awal.
                     </p>
-                    <a href="{{ route('teacher.modules.create') }}"
-                       class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                        </svg>
-                        <span>Buat Modul Baru</span>
-                    </a>
+                    <div class="flex items-center justify-center gap-3">
+                        <button @click="importModalOpen = true"
+                                class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition-all">
+                            <span>📥 Import dari Kelas Lain</span>
+                        </button>
+                        <a href="{{ route('teacher.modules.create') }}"
+                           class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md transition-all">
+                            <span>+ Buat Modul Baru</span>
+                        </a>
+                    </div>
                 </div>
             @else
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     @foreach($teacherModules as $mod)
                         @php
-                            $activeComps = $mod->activeGradedComponents();
+                            $activeComps = $mod->activeComponents();
                             $stats = $mod->gradingStats();
                         @endphp
                         <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
@@ -340,54 +388,52 @@
                                         {{ $mod->status === 'published' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : ($mod->status === 'draft' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-slate-100 text-slate-700') }}">
                                         {{ ucfirst($mod->status) }}
                                     </span>
-                                    <span class="text-xs text-slate-400">
-                                        Batas Nilai: <strong class="text-slate-600">{{ $mod->postTestKktp() }} Poin</strong>
-                                    </span>
+                                    @if($mod->subject)
+                                        <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold {{ $mod->subject->badgeClasses() }}">
+                                            {{ $mod->subject->name }}
+                                        </span>
+                                    @endif
                                 </div>
 
                                 <h4 class="text-base font-bold text-slate-900 leading-snug">
                                     {{ $mod->title }}
                                 </h4>
 
-                                {{-- Active Components Pills --}}
-                                <div class="flex flex-wrap items-center gap-1.5 pt-1">
-                                    @forelse($activeComps as $k => $cfg)
-                                        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                                            {{ $cfg['name'] }}
+                                {{-- Komponen Penilaian Aktif --}}
+                                <div class="flex flex-wrap gap-1 pt-1">
+                                    @foreach($activeComps as $comp)
+                                        <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-600">
+                                            {{ $comp }}
                                         </span>
-                                    @empty
-                                        <span class="text-[11px] text-slate-400 italic">Hanya Materi Teks</span>
-                                    @endforelse
+                                    @endforeach
                                 </div>
 
-                                {{-- Progress Pengumpulan --}}
-                                <div class="space-y-1.5 pt-2 border-t border-slate-100">
-                                    <div class="flex items-center justify-between text-xs">
-                                        <span class="text-slate-500">Partisipasi Siswa:</span>
-                                        <span class="font-bold text-slate-800">{{ $stats['submitted_count'] }} / {{ $stats['total_students'] }} Siswa</span>
+                                {{-- Metrik Modul --}}
+                                <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center">
+                                    <div class="p-2 rounded-xl bg-slate-50">
+                                        <p class="text-[10px] text-slate-400 font-bold uppercase">Submisi</p>
+                                        <p class="text-sm font-black text-slate-800">{{ $stats['submitted_count'] }}</p>
                                     </div>
-                                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                                        <div class="bg-blue-600 h-full rounded-full transition-all" style="width: {{ $stats['progress_pct'] }}%"></div>
+                                    <div class="p-2 rounded-xl bg-slate-50">
+                                        <p class="text-[10px] text-slate-400 font-bold uppercase">Dinilai</p>
+                                        <p class="text-sm font-black text-emerald-600">{{ $stats['graded_count'] }}</p>
+                                    </div>
+                                    <div class="p-2 rounded-xl bg-slate-50">
+                                        <p class="text-[10px] text-slate-400 font-bold uppercase">Rata-rata</p>
+                                        <p class="text-sm font-black text-blue-600">{{ $stats['avg_score'] > 0 ? $stats['avg_score'] : '-' }}</p>
                                     </div>
                                 </div>
                             </div>
 
-                            {{-- Actions --}}
-                            <div class="flex items-center gap-2 pt-4 mt-4 border-t border-slate-100">
+                            {{-- Aksi Modul --}}
+                            <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-2 mt-4">
                                 <a href="{{ route('teacher.modules.show', $mod) }}"
-                                   class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-colors">
-                                    <span>Buka Builder</span>
+                                   class="flex-1 text-center py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
+                                    Buka Builder Modul
                                 </a>
                                 <a href="{{ route('teacher.grading.show', $mod) }}"
-                                   class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold text-xs transition-colors border border-blue-200">
-                                    <span>Penilaian</span>
-                                </a>
-                                <a href="{{ route('teacher.reports.export.module', $mod) }}"
-                                   class="inline-flex items-center justify-center p-2 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold text-xs transition-colors border border-emerald-200"
-                                   title="Unduh Rekap Excel (.xlsx)">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-8.625 1.125V5.625m17.25 13.875c.621 0 1.125-.504 1.125-1.125M20.625 19.5h-7.5c-.621 0-1.125-.504-1.125-1.125m8.625 1.125V5.625m-17.25 0c0-.621.504-1.125 1.125-1.125h15c.621 0 1.125.504 1.125 1.125m-17.25 0v12.75c0 .621.504 1.125 1.125 1.125h15c.621 0 1.125-.504 1.125-1.125V5.625m-17.25 0h17.25M9 4.5v15M15 4.5v15M3.75 9.75h16.5M3.75 14.25h16.5" />
-                                    </svg>
+                                   class="flex-1 text-center py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-colors shadow-xs">
+                                    Beri Nilai
                                 </a>
                             </div>
                         </div>
@@ -397,118 +443,286 @@
         </div>
     </div>
 
-    {{-- ══ 4. MODAL POP-UP: RINCIAN NILAI AKADEMIK SISWA ══ --}}
-    <div x-cloak x-show="modalOpen"
-         @keydown.escape.window="modalOpen = false"
+    {{-- ══════════════════════════════════════════════════════════════════════════ --}}
+    {{-- MODAL 1: IMPORT MODUL DARI KELAS LAIN KE KELAS INI                           --}}
+    {{-- ══════════════════════════════════════════════════════════════════════════ --}}
+    <div x-show="importModalOpen"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
          class="fixed inset-0 z-50 overflow-y-auto"
-         aria-labelledby="student-modal-title" role="dialog" aria-modal="true"
          style="display: none;">
         
-        {{-- Backdrop Blur (Strictly behind the card) --}}
-        <div x-show="modalOpen" x-transition.opacity class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity" @click="modalOpen = false" aria-hidden="true"></div>
+        {{-- Backdrop --}}
+        <div class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs transition-opacity" @click="importModalOpen = false"></div>
 
-        <div class="flex min-h-screen items-center justify-center p-4 sm:p-6 text-center">
-            <div x-show="modalOpen"
-                 x-transition:enter="transition ease-out duration-300"
-                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                 x-transition:leave="transition ease-in duration-200"
-                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                 class="relative z-10 bg-white rounded-3xl max-w-2xl w-full mx-auto shadow-2xl overflow-hidden border border-slate-200 flex flex-col max-h-[90vh] text-left my-8">
-            
-            {{-- Modal Header --}}
-            <div class="p-6 bg-slate-900 text-white flex items-center justify-between shrink-0">
-                <div class="space-y-1">
-                    <div class="flex items-center gap-2">
-                        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-500/30 text-blue-300">
-                            Rapor Performa Siswa
-                        </span>
-                        <span class="text-xs text-slate-300" x-text="selectedStudent.class_name"></span>
+        {{-- Dialog Wrapper --}}
+        <div class="flex min-h-full items-center justify-center p-4 sm:p-6 text-center">
+            <div @click.stop
+                 class="relative w-full max-w-xl transform rounded-3xl bg-white text-left shadow-2xl transition-all border border-slate-200 overflow-hidden my-8">
+                
+                {{-- Header --}}
+                <div class="flex items-center justify-between px-6 sm:px-8 pt-6 sm:pt-7 pb-4 border-b border-slate-100 bg-slate-50/50">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-lg border border-indigo-100 shrink-0">
+                            📥
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-black text-slate-900 leading-tight">Import Modul ke {{ $class->full_name }}</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Salin instrumen e-modul dari kelas lain ke kelas ini secara mandiri</p>
+                        </div>
                     </div>
-                    <h3 class="text-xl font-extrabold text-white" x-text="selectedStudent.name"></h3>
-                    <p class="text-xs text-slate-400 font-mono" x-text="'NISN: ' + selectedStudent.identity_number"></p>
+                    <button @click="importModalOpen = false" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center text-base transition-colors shrink-0">&times;</button>
                 </div>
 
-                <button @click="modalOpen = false"
-                        class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
+                {{-- Form Body --}}
+                <form action="{{ route('teacher.classes.import-modules', $class) }}" method="POST">
+                    @csrf
+                    <div class="p-6 sm:p-8 space-y-4">
+                        @if($otherClassModules->isEmpty())
+                            <div class="p-8 text-center bg-slate-50 rounded-2xl border border-slate-200">
+                                <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                                    </svg>
+                                </div>
+                                <p class="text-xs font-bold text-slate-700">Tidak ada modul dari kelas lain.</p>
+                                <p class="text-[11px] text-slate-400 mt-1">Buat modul baru di kelas lain terlebih dahulu untuk dapat diimpor.</p>
+                            </div>
+                        @else
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                                        Pilih Modul yang Ingin Diimpor:
+                                    </label>
+                                    <span class="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200">
+                                        {{ $otherClassModules->count() }} Modul Tersedia
+                                    </span>
+                                </div>
+
+                                {{-- Scrollable box strictly limited to ~5 items (280px) --}}
+                                <div style="max-height: 280px; overflow-y: auto;" class="space-y-2 pr-1.5 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-track]:bg-slate-100">
+                                    @foreach($otherClassModules as $mod)
+                                        <label class="flex items-center gap-3 p-3 rounded-2xl border border-slate-200/90 hover:border-indigo-400 hover:bg-indigo-50/50 transition-all cursor-pointer group">
+                                            <input type="checkbox" name="module_ids[]" value="{{ $mod->id }}"
+                                                   class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 shrink-0">
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-center gap-2 flex-wrap">
+                                                    <span class="font-bold text-xs text-slate-900 group-hover:text-indigo-600 transition-colors truncate">{{ $mod->title }}</span>
+                                                    @if($mod->subject)
+                                                        <span class="px-2 py-0.2 rounded-md text-[10px] font-extrabold {{ $mod->subject->badgeClasses() }}">
+                                                            {{ $mod->subject->name }}
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                                <div class="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
+                                                    <span class="font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md text-[10px]">
+                                                        {{ $mod->schoolClass ? $mod->schoolClass->full_name : 'Modul Umum' }}
+                                                    </span>
+                                                    <span>&bull;</span>
+                                                    <span class="text-[10px]">Dibuat {{ $mod->created_at ? $mod->created_at->format('d M Y') : '-' }}</span>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- Footer --}}
+                    <div class="px-6 sm:px-8 py-4 border-t border-slate-100 bg-slate-50/80 flex items-center justify-end gap-3">
+                        <button @click="importModalOpen = false" type="button" class="px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-200/70 rounded-xl transition-colors">
+                            Batal
+                        </button>
+                        @if($otherClassModules->isNotEmpty())
+                            <button type="submit" class="px-5 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-600/25 transition-all">
+                                Import & Salin ke Kelas Ini
+                            </button>
+                        @endif
+                    </div>
+                </form>
             </div>
+        </div>
+    </div>
 
-            {{-- Modal Body --}}
-            <div class="p-6 overflow-y-auto space-y-6 flex-1">
-                {{-- Overall Score Card --}}
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    <div class="p-4 rounded-2xl bg-blue-50/70 border border-blue-100">
-                        <p class="text-xs font-bold text-blue-600 uppercase tracking-wider">Rata-rata Nilai</p>
-                        <p class="text-2xl font-black text-blue-900 mt-1" x-text="overallAvg !== null ? overallAvg + ' Poin' : '-'"></p>
+    {{-- ══════════════════════════════════════════════════════════════════════════ --}}
+    {{-- MODAL 2: HAPUS KELAS & PURGE ALUMNI/MODUL                                   --}}
+    {{-- ══════════════════════════════════════════════════════════════════════════ --}}
+    <div x-show="deleteModalOpen"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 overflow-y-auto"
+         style="display: none;">
+        
+        {{-- Backdrop --}}
+        <div class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs transition-opacity" @click="deleteModalOpen = false"></div>
+
+        {{-- Dialog Wrapper --}}
+        <div class="flex min-h-full items-center justify-center p-4 sm:p-6 text-center">
+            <div @click.stop
+                 class="relative w-full max-w-md transform rounded-3xl bg-white text-left shadow-2xl transition-all border border-red-100 overflow-hidden my-8">
+                
+                {{-- Header --}}
+                <div class="p-6 sm:p-8 space-y-4">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center font-black text-xl border border-red-100 shrink-0">
+                            ⚠️
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-black text-slate-900 leading-tight">Hapus {{ $class->full_name }}?</h3>
+                            <p class="text-xs text-red-600 font-semibold mt-0.5">Tindakan ini tidak dapat dibatalkan</p>
+                        </div>
                     </div>
 
-                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ketuntasan Nilai</p>
-                        <p class="text-base font-black mt-1.5"
-                           :class="kktpStatus === 'Tuntas' ? 'text-emerald-600' : (kktpStatus === 'Belum Tuntas (Remedial)' ? 'text-rose-600' : 'text-slate-400')"
-                           x-text="kktpStatus"></p>
-                    </div>
-
-                    <div class="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-100 col-span-2 sm:col-span-1">
-                        <p class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Modul Terdaftar</p>
-                        <p class="text-2xl font-black text-indigo-900 mt-1" x-text="modulesList.length + ' Modul'"></p>
+                    <div class="p-4 rounded-2xl bg-red-50/70 border border-red-200 text-xs text-red-900 space-y-2">
+                        <p>
+                            Anda akan menghapus rombel <strong>{{ $class->full_name }}</strong> secara permanen.
+                        </p>
+                        <p class="text-[11px] text-red-700 font-medium">
+                            Menghapus kelas ini akan secara otomatis membersihkan:
+                        </p>
+                        <ul class="list-disc list-inside space-y-1 text-[11px] text-red-800 font-medium pl-1">
+                            <li>Seluruh data siswa alumni ({{ $students->count() }} siswa)</li>
+                            <li>Seluruh rekam jejak nilai & pengumpulan tugas</li>
+                            <li>Seluruh modul pembelajaran pada kelas ini ({{ $teacherModules->count() }} modul)</li>
+                        </ul>
+                        <p class="text-[10px] text-slate-500 pt-1">
+                            Fitur ini membantu mengosongkan kapasitas database dari data angkatan alumni yang sudah tidak aktif.
+                        </p>
                     </div>
                 </div>
 
-                {{-- Table Breakdown Modul --}}
-                <div class="space-y-2">
-                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Rincian Per Modul Guru</h4>
-                    <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                {{-- Footer --}}
+                <form action="{{ route('teacher.classes.destroy', $class) }}" method="POST" class="px-6 sm:px-8 py-4 border-t border-slate-100 bg-slate-50/80 flex items-center justify-end gap-3">
+                    @csrf
+                    @method('DELETE')
+                    <button @click="deleteModalOpen = false" type="button" class="px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-200/70 rounded-xl transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-5 py-2.5 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-md shadow-red-600/25 transition-all">
+                        Ya, Hapus & Purge Bersih
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- ══════════════════════════════════════════════════════════════════════════ --}}
+    {{-- MODAL 3: RINCIAN NILAI AKADEMIK SISWA (AJAX JSON MODAL)                   --}}
+    {{-- ══════════════════════════════════════════════════════════════════════════ --}}
+    <div x-show="studentModalOpen"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 overflow-y-auto"
+         style="display: none;">
+        
+        {{-- Backdrop --}}
+        <div class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs transition-opacity" @click="studentModalOpen = false"></div>
+
+        {{-- Dialog Wrapper --}}
+        <div class="flex min-h-full items-center justify-center p-4 sm:p-6 text-center">
+            <div @click.stop
+                 class="relative w-full max-w-3xl transform rounded-3xl bg-white text-left shadow-2xl transition-all border border-slate-200 overflow-hidden my-8">
+                
+                {{-- Header Modal --}}
+                <div class="flex items-start justify-between px-6 sm:px-8 pt-6 sm:pt-7 pb-4 border-b border-slate-100 bg-slate-50/50">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-lg border border-blue-100 shrink-0">
+                            📊
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-black text-slate-900 leading-tight" x-text="selectedStudent.name || 'Memuat...'"></h3>
+                            <p class="text-xs text-slate-400 mt-0.5">
+                                NISN: <span class="font-mono text-slate-600 font-bold" x-text="selectedStudent.identity_number || '-'"></span> • <span x-text="selectedStudent.class_name || ''"></span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <button @click="studentModalOpen = false" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center text-base transition-colors shrink-0">&times;</button>
+                </div>
+
+                {{-- Loading State --}}
+                <div x-show="loadingSummary" class="p-12 text-center space-y-3">
+                    <div class="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                    <p class="text-xs text-slate-400 font-medium">Mengambil rekap nilai akademik siswa...</p>
+                </div>
+
+                {{-- Summary Content --}}
+                <div x-show="!loadingSummary" class="p-6 sm:p-8 space-y-5">
+                    {{-- Quick Aggregate Summary --}}
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-center">
+                        <div>
+                            <p class="text-[11px] font-bold text-slate-400 uppercase">Rata-rata Nilai</p>
+                            <p class="text-xl font-black mt-0.5"
+                               :class="studentOverallAvg >= 75 ? 'text-emerald-600' : (studentOverallAvg > 0 ? 'text-amber-600' : 'text-slate-400')"
+                               x-text="studentOverallAvg ? studentOverallAvg + ' Poin' : '-'"></p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-bold text-slate-400 uppercase">Status Kelulusan</p>
+                            <p class="text-xs font-bold mt-1.5 inline-flex items-center px-2.5 py-0.5 rounded-full"
+                               :class="studentKktpStatus === 'Tuntas' ? 'bg-emerald-100 text-emerald-800' : (studentKktpStatus === 'Belum Tuntas (Remedial)' ? 'bg-rose-100 text-rose-800' : 'bg-slate-200 text-slate-600')"
+                               x-text="studentKktpStatus"></p>
+                        </div>
+                        <div class="col-span-2 sm:col-span-1">
+                            <p class="text-[11px] font-bold text-slate-400 uppercase">Total Modul</p>
+                            <p class="text-xl font-black text-slate-800 mt-0.5" x-text="studentModulesSummary.length + ' Modul'"></p>
+                        </div>
+                    </div>
+
+                    {{-- Table Rincian Modul --}}
+                    <div class="overflow-x-auto max-h-72 border border-slate-200 rounded-2xl">
                         <table class="w-full text-left text-xs">
-                            <thead class="bg-slate-100 text-slate-700 font-bold uppercase tracking-wider">
+                            <thead class="bg-slate-900 text-white font-bold uppercase sticky top-0">
                                 <tr>
-                                    <th class="py-3 px-3">Judul Modul</th>
-                                    <th class="py-3 px-2 text-center">Pre-Test</th>
-                                    <th class="py-3 px-2 text-center">Video</th>
-                                    <th class="py-3 px-2 text-center">Embed</th>
-                                    <th class="py-3 px-2 text-center">Job Sheet</th>
-                                    <th class="py-3 px-2 text-center">LKPD</th>
-                                    <th class="py-3 px-2 text-center">Post-Test</th>
-                                    <th class="py-3 px-3 text-center bg-slate-200/70 font-black">Nilai Akhir</th>
-                                    <th class="py-3 px-3 text-center">Status</th>
+                                    <th class="py-2.5 px-3">Modul</th>
+                                    <th class="py-2.5 px-3 text-center">Pre-Test</th>
+                                    <th class="py-2.5 px-3 text-center">Video</th>
+                                    <th class="py-2.5 px-3 text-center">Simulasi</th>
+                                    <th class="py-2.5 px-3 text-center">Job Sheet</th>
+                                    <th class="py-2.5 px-3 text-center">LKPD</th>
+                                    <th class="py-2.5 px-3 text-center">Post-Test</th>
+                                    <th class="py-2.5 px-3 text-center">Nilai Akhir</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 bg-white">
-                                <template x-for="mod in modulesList" :key="mod.module_id">
-                                    <tr class="hover:bg-slate-50/80 transition-colors">
-                                        <td class="py-3 px-3 font-bold text-slate-900 max-w-[180px] truncate" x-text="mod.module_title"></td>
-                                        <td class="py-3 px-2 text-center" x-text="mod.pre_test_score !== null ? mod.pre_test_score : '-'"></td>
-                                        <td class="py-3 px-2 text-center" x-text="mod.video_score !== null ? mod.video_score : '-'"></td>
-                                        <td class="py-3 px-2 text-center" x-text="mod.embed_score !== null ? mod.embed_score : '-'"></td>
-                                        <td class="py-3 px-2 text-center" x-text="mod.job_sheet_score !== null ? mod.job_sheet_score : '-'"></td>
-                                        <td class="py-3 px-2 text-center" x-text="mod.lkpd_score !== null ? mod.lkpd_score : '-'"></td>
-                                        <td class="py-3 px-2 text-center" x-text="mod.post_test_score !== null ? mod.post_test_score : '-'"></td>
-                                        <td class="py-3 px-3 text-center font-black bg-blue-50/40 text-blue-900" x-text="mod.summative_score !== null ? mod.summative_score : '-'"></td>
-                                        <td class="py-3 px-3 text-center">
-                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold"
-                                                  :class="mod.grading_status === 'graded' ? 'bg-emerald-50 text-emerald-700' : (mod.grading_status === 'pending' ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-400')"
-                                                  x-text="mod.grading_status === 'graded' ? 'Selesai' : (mod.grading_status === 'pending' ? 'Menunggu' : 'Belum Submit')">
-                                            </span>
-                                        </td>
+                                <template x-for="mod in studentModulesSummary" :key="mod.module_id">
+                                    <tr class="hover:bg-slate-50">
+                                        <td class="py-2.5 px-3 font-semibold text-slate-800 max-w-[160px] truncate" x-text="mod.module_title"></td>
+                                        <td class="py-2.5 px-3 text-center" x-text="mod.pre_test_score !== null ? mod.pre_test_score : '-'"></td>
+                                        <td class="py-2.5 px-3 text-center" x-text="mod.video_score !== null ? mod.video_score : '-'"></td>
+                                        <td class="py-2.5 px-3 text-center" x-text="mod.embed_score !== null ? mod.embed_score : '-'"></td>
+                                        <td class="py-2.5 px-3 text-center" x-text="mod.job_sheet_score !== null ? mod.job_sheet_score : '-'"></td>
+                                        <td class="py-2.5 px-3 text-center" x-text="mod.lkpd_score !== null ? mod.lkpd_score : '-'"></td>
+                                        <td class="py-2.5 px-3 text-center" x-text="mod.post_test_score !== null ? mod.post_test_score : '-'"></td>
+                                        <td class="py-2.5 px-3 text-center font-bold"
+                                            :class="mod.summative_score >= 75 ? 'text-emerald-600' : (mod.summative_score !== null ? 'text-amber-600' : 'text-slate-300')"
+                                            x-text="mod.summative_score !== null ? mod.summative_score : '-'"></td>
                                     </tr>
                                 </template>
                             </tbody>
                         </table>
                     </div>
                 </div>
-            </div>
 
-            {{-- Modal Footer --}}
-            <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end shrink-0">
-                <button type="button" @click="modalOpen = false"
-                        class="px-5 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition-colors">
-                    Tutup
-                </button>
+                {{-- Footer --}}
+                <div class="px-6 sm:px-8 py-4 border-t border-slate-100 bg-slate-50/80 flex items-center justify-end">
+                    <button @click="studentModalOpen = false" type="button"
+                            class="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-colors">
+                        Tutup
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -516,42 +730,41 @@
 </div>
 
 <script>
-    function classDetailPage() {
-        return {
-            activeTab: 'students',
-            modalOpen: false,
-            loading: false,
-            selectedStudent: {},
-            modulesList: [],
-            overallAvg: null,
-            kktpStatus: '',
+function classDetailPage() {
+    return {
+        activeTab: '{{ $tab }}',
+        importModalOpen: false,
+        deleteModalOpen: false,
+        studentModalOpen: false,
+        loadingSummary: false,
+        selectedStudent: {},
+        studentModulesSummary: [],
+        studentOverallAvg: null,
+        studentKktpStatus: '',
 
-            fetchStudentSummary(studentId) {
-                this.loading = true;
-                const url = `{{ url('/teacher/classes/' . $class->id . '/students') }}/${studentId}/summary`;
+        async fetchStudentSummary(studentId) {
+            this.studentModalOpen = true;
+            this.loadingSummary = true;
+            this.selectedStudent = {};
+            this.studentModulesSummary = [];
 
-                fetch(url)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
-                            this.selectedStudent = data.student;
-                            this.modulesList = data.modules_summary;
-                            this.overallAvg = data.overall_avg;
-                            this.kktpStatus = data.kktp_status;
-                            this.modalOpen = true;
-                        } else {
-                            alert(data.message || 'Gagal memuat ringkasan performa siswa.');
-                        }
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        alert('Terjadi kesalahan saat memuat data performa siswa.');
-                    })
-                    .finally(() => {
-                        this.loading = false;
-                    });
+            try {
+                const response = await fetch(`/teacher/classes/{{ $class->id }}/students/${studentId}/summary`);
+                const data = await response.json();
+
+                if (data.success) {
+                    this.selectedStudent = data.student;
+                    this.studentModulesSummary = data.modules_summary;
+                    this.studentOverallAvg = data.overall_avg;
+                    this.studentKktpStatus = data.kktp_status;
+                }
+            } catch (e) {
+                console.error("Gagal mengambil rincian nilai siswa:", e);
+            } finally {
+                this.loadingSummary = false;
             }
         }
     }
+}
 </script>
 @endsection

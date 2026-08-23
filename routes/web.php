@@ -181,9 +181,12 @@ Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(fu
     Route::get('/reports/modules/{module}/export',                           [ReportController::class, 'exportModule'])->name('reports.export.module');
     Route::get('/modules/{module}/export-grades',                            [ReportController::class, 'exportModule'])->name('modules.export.grades');
 
-    // Kelas Binaan & Direktori Siswa
+    // Build Kelas & Direktori Siswa
     Route::get('/classes',                                                  [ClassController::class, 'index'])->name('classes.index');
+    Route::post('/classes',                                                 [ClassController::class, 'store'])->name('classes.store');
     Route::get('/classes/{class}',                                          [ClassController::class, 'show'])->name('classes.show');
+    Route::post('/classes/{class}/import-modules',                          [ClassController::class, 'importModules'])->name('classes.import-modules');
+    Route::delete('/classes/{class}',                                       [ClassController::class, 'destroy'])->name('classes.destroy');
     Route::get('/classes/{class}/students/{student}/summary',               [ClassController::class, 'getStudentAcademicSummary'])->name('classes.student.summary');
 });
 
