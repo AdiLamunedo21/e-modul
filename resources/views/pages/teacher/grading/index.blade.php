@@ -1,6 +1,6 @@
 @extends('layouts.teacher.dashboardteacher')
 
-@section('title', 'Grading Center — Pusat Penilaian Adaptif')
+@section('title', 'Pusat Penilaian Adaptif (Grading Center) — Teacher Workspace')
 @section('page-title', 'Grading Center')
 
 @section('content')
@@ -11,37 +11,34 @@
         <div class="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5">
             <a href="{{ route('teacher.dashboard') }}" class="hover:text-blue-600 transition-colors">Workspace</a>
             <span>/</span>
-            <span class="text-blue-600">Evaluasi & Penilaian</span>
+            <span class="text-blue-600">Grading Center</span>
         </div>
         <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-            <span>Grading Center</span>
-            @if($stats['pending_grading'] > 0)
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 border border-amber-300 animate-pulse">
-                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                    {{ $stats['pending_grading'] }} Tugas Menunggu
-                </span>
-            @endif
+            <span>Pusat Penilaian Adaptif</span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-blue-100 text-blue-800 border border-blue-300">
+                ● Live Evaluasi
+            </span>
         </h1>
-        <p class="mt-1.5 text-sm text-slate-500 max-w-2xl">
-            Pusat penilaian terpadu. Kolom dan instrumen penilaian beradaptasi secara dinamis menyesuaikan komponen kegiatan belajar yang Anda aktifkan pada setiap modul.
+        <p class="mt-1.5 text-sm text-slate-500 max-w-3xl leading-relaxed">
+            Pilih rombongan belajar kelas di bawah untuk melihat mata pelajaran yang Anda ampu, membuka modul pembelajaran, serta memeriksa berkas tugas dan mengisi nilai siswa secara adaptif.
         </p>
     </div>
 
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-3 shrink-0">
         <a href="{{ route('teacher.reports.index') }}"
-           class="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-slate-700 bg-white border border-slate-200/90 rounded-xl hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 shadow-sm transition-all">
+           class="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-slate-700 bg-white border border-slate-200/90 rounded-xl hover:bg-slate-50 hover:border-slate-300 shadow-sm transition-all">
             <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-8.625 1.125V5.625m17.25 13.875c.621 0 1.125-.504 1.125-1.125M20.625 19.5h-7.5c-.621 0-1.125-.504-1.125-1.125m8.625 1.125V5.625m-17.25 0c0-.621.504-1.125 1.125-1.125h15c.621 0 1.125.504 1.125 1.125m-17.25 0v12.75c0 .621.504 1.125 1.125 1.125h15c.621 0 1.125-.504 1.125-1.125V5.625m-17.25 0h17.25M9 4.5v15M15 4.5v15M3.75 9.75h16.5M3.75 14.25h16.5" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
             </svg>
-            <span>Rekap Laporan Excel (.xlsx)</span>
+            <span>Pusat Laporan Excel</span>
         </a>
     </div>
 </div>
 
-{{-- ══ Stat Cards (4 Cards Grid) ══ --}}
+{{-- ══ Stat Cards (4 Grid) ══ --}}
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
 
-    {{-- Card 1: Total Modul Ajar --}}
+    {{-- Card 1: Total Modul Pembelajaran --}}
     <div class="rounded-2xl bg-white p-5 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
         <div class="flex items-center justify-between">
             <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Modul Pembelajaran</span>
@@ -53,40 +50,38 @@
         </div>
         <div class="mt-4 flex items-baseline gap-2">
             <span class="text-3xl font-black text-slate-900">{{ $stats['total_modules'] }}</span>
-            <span class="text-xs font-semibold text-slate-500">Modul Terdaftar</span>
+            <span class="text-xs font-semibold text-slate-500">Modul Anda</span>
         </div>
         <div class="mt-3 flex items-center gap-2 text-xs text-slate-500">
             <span class="inline-flex items-center gap-1 font-semibold text-emerald-600">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> {{ $stats['published_modules'] }} Published
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> {{ $stats['published_modules'] }} Terpublikasi
             </span>
-            <span>•</span>
-            <span class="text-slate-400">{{ $stats['total_modules'] - $stats['published_modules'] }} Draft/Closed</span>
         </div>
     </div>
 
-    {{-- Card 2: Total Tugas Masuk --}}
+    {{-- Card 2: Pengumpulan Tugas --}}
     <div class="rounded-2xl bg-white p-5 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
         <div class="flex items-center justify-between">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Total Tugas Masuk</span>
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Total Pengumpulan</span>
             <div class="p-2.5 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12l-3-3m0 0l-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                 </svg>
             </div>
         </div>
         <div class="mt-4 flex items-baseline gap-2">
-            <span class="text-3xl font-black text-indigo-600">{{ $stats['total_submissions'] }}</span>
-            <span class="text-xs font-semibold text-slate-500">Pengerjaan Siswa</span>
+            <span class="text-3xl font-black text-slate-900">{{ $stats['total_submissions'] }}</span>
+            <span class="text-xs font-semibold text-slate-500">Submisi</span>
         </div>
-        <div class="mt-3 flex items-center gap-1.5 text-xs text-indigo-600 font-medium">
-            <span>Pre-test, Video, Embed, LKPD & Post-test</span>
+        <div class="mt-3 flex items-center gap-2 text-xs text-slate-500">
+            <span class="text-slate-600 font-semibold">Tugas & aktivitas masuk</span>
         </div>
     </div>
 
-    {{-- Card 3: Menunggu Penilaian Guru --}}
+    {{-- Card 3: Menunggu Penilaian --}}
     <div class="rounded-2xl bg-white p-5 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
         <div class="flex items-center justify-between">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Menunggu Penilaian</span>
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Perlu Diperiksa</span>
             <div class="p-2.5 rounded-xl bg-amber-50 text-amber-600 border border-amber-100">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -97,229 +92,166 @@
             <span class="text-3xl font-black text-amber-600">{{ $stats['pending_grading'] }}</span>
             <span class="text-xs font-semibold text-slate-500">Tugas Pending</span>
         </div>
-        <div class="mt-3 flex items-center gap-1.5 text-xs text-amber-700 font-semibold">
-            @if($stats['pending_grading'] > 0)
-                <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
-                <span>Perlu diperiksa guru</span>
-            @else
-                <span class="text-emerald-600">✓ Semua tugas tuntas dinilai</span>
-            @endif
+        <div class="mt-3 flex items-center gap-2 text-xs text-slate-500">
+            <span class="text-amber-700 font-medium">Memerlukan input skor</span>
         </div>
     </div>
 
-    {{-- Card 4: Selesai Dinilai & Rata-rata --}}
+    {{-- Card 4: Tuntas Dinilai --}}
     <div class="rounded-2xl bg-white p-5 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
         <div class="flex items-center justify-between">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Rata-rata Nilai Kelas</span>
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Tuntas Dinilai</span>
             <div class="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             </div>
         </div>
         <div class="mt-4 flex items-baseline gap-2">
-            <span class="text-3xl font-black text-emerald-600">{{ $stats['average_score'] }}</span>
-            <span class="text-xs font-semibold text-slate-500">Poin Sumatif</span>
+            <span class="text-3xl font-black text-emerald-600">{{ $stats['completed_grading'] }}</span>
+            <span class="text-xs font-semibold text-slate-500">Siswa Selesai</span>
         </div>
-        <div class="mt-3 flex items-center gap-1.5 text-xs text-slate-500">
-            <span class="font-bold text-slate-700">{{ $stats['completed_grading'] }}</span>
-            <span>siswa telah dinilai tuntas</span>
+        <div class="mt-3 flex items-center gap-2 text-xs text-slate-500">
+            <span class="text-slate-600 font-semibold">Rata-rata: {{ $stats['average_score'] }}/100</span>
         </div>
     </div>
+
 </div>
 
-{{-- ══ Toolbar & Filter ══ --}}
-<div class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-sm mb-6 space-y-4">
-    {{-- Subject Quick Switcher Tabs (jika guru punya mapel) --}}
-    @if($teacherSubjects->isNotEmpty())
-        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-slate-100">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mr-2 shrink-0">Mapel:</span>
-            <a href="{{ route('teacher.grading.index', array_filter(['class_id' => request('class_id'), 'status' => request('status'), 'search' => request('search')])) }}"
-               class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap
-                   {{ !$selectedSubjectId ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30' : 'bg-slate-50 text-slate-600 hover:bg-slate-100' }}">
-                Semua Mapel
-            </a>
-            @foreach($teacherSubjects as $ts)
-                <a href="{{ route('teacher.grading.index', array_filter(['subject_id' => $ts->id, 'class_id' => request('class_id'), 'status' => request('status'), 'search' => request('search')])) }}"
-                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap
-                       {{ $selectedSubjectId === $ts->id ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30' : 'bg-slate-50 text-slate-600 hover:bg-slate-100' }}">
-                    <span>{{ $ts->icon }}</span>
-                    <span>{{ $ts->name }}</span>
-                </a>
-            @endforeach
-        </div>
-    @endif
-
-    <form method="GET" action="{{ route('teacher.grading.index') }}" class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-        @if(request('subject_id'))
-            <input type="hidden" name="subject_id" value="{{ request('subject_id') }}">
-        @endif
-
-        {{-- Search Input --}}
-        <div class="relative flex-1 min-w-[240px] flex items-center">
-            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+{{-- ══ Filter & Search Bar ══ --}}
+<div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 sm:p-6 mb-8">
+    <form method="GET" action="{{ route('teacher.grading.index') }}" class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        
+        {{-- Search Bar --}}
+        <div class="relative flex-1 max-w-md">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
                 </svg>
             </div>
-            <input type="text" name="search" value="{{ request('search') }}"
-                   placeholder="Cari judul modul..."
-                   class="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+            <input type="text"
+                   name="search"
+                   value="{{ $search }}"
+                   placeholder="Cari rombel kelas (misal: X TE 2, RPL, PPLG)..."
+                   class="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
         </div>
 
-        {{-- Dropdowns & Filter Buttons --}}
-        <div class="flex flex-wrap items-center gap-3">
-            {{-- Filter Mata Pelajaran Dropdown --}}
-            <select name="subject_id" onchange="this.form.submit()"
-                    class="px-3.5 py-2.5 text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
-                <option value="">Semua Mata Pelajaran</option>
-                @foreach($teacherSubjects as $ts)
-                    <option value="{{ $ts->id }}" {{ request('subject_id') == $ts->id ? 'selected' : '' }}>
-                        {{ $ts->icon }} {{ $ts->name }}
+        {{-- Filter Tingkat & Jurusan --}}
+        <div class="flex items-center gap-3 flex-wrap">
+            <select name="grade"
+                    onchange="this.form.submit()"
+                    class="text-xs rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-slate-700 focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
+                <option value="all">-- Semua Tingkat Kelas --</option>
+                <option value="X" {{ $grade === 'X' ? 'selected' : '' }}>Tingkat X (Sepuluh)</option>
+                <option value="XI" {{ $grade === 'XI' ? 'selected' : '' }}>Tingkat XI (Sebelas)</option>
+                <option value="XII" {{ $grade === 'XII' ? 'selected' : '' }}>Tingkat XII (Dua Belas)</option>
+                <option value="XIII" {{ $grade === 'XIII' ? 'selected' : '' }}>Tingkat XIII (4 Tahun)</option>
+            </select>
+
+            <select name="major_id"
+                    onchange="this.form.submit()"
+                    class="text-xs rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-slate-700 focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
+                <option value="all">-- Semua Jurusan --</option>
+                @foreach($majors as $m)
+                    <option value="{{ $m->id }}" {{ (string)($majorId ?? '') === (string)$m->id ? 'selected' : '' }}>
+                        {{ $m->code }} - {{ $m->name }}
                     </option>
                 @endforeach
             </select>
 
-            {{-- Filter Kelas --}}
-            <select name="class_id" onchange="this.form.submit()"
-                    class="px-3.5 py-2.5 text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
-                <option value="">Semua Kelas Target</option>
-                @foreach($classes as $c)
-                    <option value="{{ $c->id }}" {{ request('class_id') == $c->id ? 'selected' : '' }}>
-                        {{ $c->full_name }}
-                    </option>
-                @endforeach
-            </select>
+            <button type="submit"
+                    class="px-4 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-colors">
+                Filter
+            </button>
 
-            {{-- Filter Status --}}
-            <select name="status" onchange="this.form.submit()"
-                    class="px-3.5 py-2.5 text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
-                <option value="">Semua Status Modul</option>
-                <option value="published" {{ request('status') === 'published' ? 'selected' : '' }}>Published (Aktif)</option>
-                <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Draft</option>
-                <option value="closed" {{ request('status') === 'closed' ? 'selected' : '' }}>Closed (Selesai)</option>
-            </select>
-
-            @if(request()->hasAny(['search', 'class_id', 'status', 'subject_id']))
+            @if($search || ($grade && $grade !== 'all') || ($majorId && $majorId !== 'all'))
                 <a href="{{ route('teacher.grading.index') }}"
-                   class="px-3 py-2.5 text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl transition-colors">
-                    ✕ Reset Filter
+                   class="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-semibold transition-colors">
+                    Reset
                 </a>
             @endif
         </div>
     </form>
 </div>
 
-{{-- ══ Daftar Modul untuk Penilaian (Grid Cards) ══ --}}
-@if($modules->isEmpty())
-    <div class="bg-white rounded-3xl border border-slate-200/80 p-12 text-center shadow-sm">
-        <div class="w-16 h-16 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center mx-auto mb-4 text-3xl">
-            📚
-        </div>
-        <h3 class="text-base font-bold text-slate-800 mb-1">Tidak Ada Modul Ditemukan</h3>
-        <p class="text-xs text-slate-500 max-w-sm mx-auto mb-6">
-            Belum ada modul yang cocok dengan kriteria pencarian atau filter yang Anda pilih.
-        </p>
-        <a href="{{ route('teacher.modules.create') }}"
-           class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md shadow-blue-600/20 transition-all">
-            + Buat Modul Baru
-        </a>
-    </div>
-@else
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        @foreach($modules as $module)
-            @php
-                $mStats = $module->gradingStats();
-                $statusInfo = $module->statusLabel();
-                $activeComps = $module->activeGradedComponents();
-                $subject = $module->subject;
-            @endphp
-            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm hover:shadow-md hover:border-blue-200 transition-all flex flex-col justify-between group">
-                
-                {{-- Top Bar: Status & Kelas --}}
-                <div>
-                    <div class="flex items-center justify-between gap-2 mb-3">
-                        <div class="flex items-center gap-1.5 flex-wrap">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase border {{ $statusInfo['color'] }}">
-                                {{ $statusInfo['label'] }}
-                            </span>
-                            @if($subject)
-                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold {{ $subject->badgeClasses() }}">
-                                    <span>{{ $subject->icon }}</span>
-                                    <span>{{ $subject->name }}</span>
-                                </span>
-                            @endif
-                        </div>
-                        <span class="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full shrink-0">
-                            {{ $module->schoolClass ? $module->schoolClass->full_name : 'Semua Kelas' }}
+{{-- ══ Grid Direktori Kelas (Tahap 1) ══ --}}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+    @forelse($classesList as $cls)
+        <div class="group relative rounded-3xl bg-white border border-slate-200/80 hover:border-blue-300 transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md">
+            
+            {{-- Top Accent Line --}}
+            <div class="h-1.5 w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-sky-500"></div>
+
+            <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+                {{-- Badges: Grade & Section --}}
+                <div class="flex items-center justify-between gap-2">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-extrabold bg-blue-50 text-blue-700 border border-blue-200 uppercase tracking-wider">
+                        Tingkat {{ $cls->grade }}
+                    </span>
+
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                        Rombel {{ $cls->section }}
+                    </span>
+                </div>
+
+                {{-- Class Full Name & Major Description --}}
+                <div class="space-y-1">
+                    <h3 class="text-lg font-black text-slate-900 group-hover:text-blue-600 transition-colors leading-snug">
+                        {{ $cls->full_name }}
+                    </h3>
+                    <p class="text-xs text-slate-500 font-medium">
+                        {{ $cls->major ? $cls->major->name : $cls->major_name }}
+                    </p>
+                </div>
+
+                {{-- Stats Summary --}}
+                <div class="pt-3 border-t border-slate-100 space-y-2">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-slate-500 font-medium">Siswa Terdaftar:</span>
+                        <span class="font-bold text-slate-900 px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-100">
+                            {{ $cls->students_count }} Siswa
                         </span>
                     </div>
-
-                    {{-- Judul Modul --}}
-                    <h2 class="text-base font-bold text-slate-900 line-clamp-2 group-hover:text-blue-600 transition-colors leading-snug mb-3">
-                        {{ $module->title }}
-                    </h2>
-
-                    {{-- Komponen Aktif yang Dinilai --}}
-                    <div class="mb-5">
-                        <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
-                            Instrumen Penilaian Aktif ({{ count($activeComps) }}):
-                        </p>
-                        @if(count($activeComps) === 0)
-                            <span class="text-xs text-slate-400 italic">Tidak ada komponen evaluasi diaktifkan</span>
-                        @else
-                            <div class="flex flex-wrap gap-1.5">
-                                @foreach($activeComps as $cKey => $cData)
-                                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md border {{ $cData['badge'] }}">
-                                        <span>{{ $cData['icon'] }}</span>
-                                        <span>{{ $cData['name'] }}</span>
-                                    </span>
-                                @endforeach
-                            </div>
-                        @endif
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-slate-500 font-medium">Modul Pembelajaran:</span>
+                        <span class="font-bold text-slate-700">
+                            {{ $cls->teacher_modules_count }} Modul
+                        </span>
                     </div>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-slate-500 font-medium">Mata Pelajaran:</span>
+                        <span class="font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">
+                            {{ $cls->teacher_subjects_count }} Mapel
+                        </span>
+                    </div>
+                    @if($cls->pending_grading_count > 0)
+                        <div class="flex items-center justify-between text-xs pt-1">
+                            <span class="text-amber-600 font-bold">Perlu Diperiksa:</span>
+                            <span class="font-black text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                                {{ $cls->pending_grading_count }} Tugas
+                            </span>
+                        </div>
+                    @endif
                 </div>
-
-                {{-- Bottom Area: Progres Penilaian & Action --}}
-                <div class="pt-4 border-t border-slate-100 space-y-4">
-                    
-                    {{-- Progress Bar --}}
-                    <div>
-                        <div class="flex items-center justify-between text-xs mb-1.5">
-                            <span class="font-bold text-slate-700">Progres Penilaian</span>
-                            <span class="font-extrabold text-blue-600">{{ $mStats['graded_count'] }} / {{ $mStats['total_students'] }} Siswa ({{ $mStats['progress_pct'] }}%)</span>
-                        </div>
-                        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 h-2 rounded-full transition-all duration-500"
-                                 style="width: {{ $mStats['progress_pct'] }}%;"></div>
-                        </div>
-                    </div>
-
-                    {{-- Task Counters --}}
-                    <div class="grid grid-cols-2 gap-2 text-center">
-                        <div class="p-2.5 rounded-xl bg-amber-50/80 border border-amber-100">
-                            <span class="block text-lg font-black text-amber-700">{{ $mStats['pending_count'] }}</span>
-                            <span class="text-[10px] font-bold uppercase text-amber-800/80">Pending Grade</span>
-                        </div>
-                        <div class="p-2.5 rounded-xl bg-emerald-50/80 border border-emerald-100">
-                            <span class="block text-lg font-black text-emerald-700">{{ $mStats['avg_score'] }}</span>
-                            <span class="text-[10px] font-bold uppercase text-emerald-800/80">Rata-rata Nilai</span>
-                        </div>
-                    </div>
-
-                    {{-- CTA Button --}}
-                    <a href="{{ route('teacher.grading.show', $module) }}"
-                       class="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-600/20 hover:shadow-blue-600/30 transition-all">
-                        <span>Buka Matriks Penilaian</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                        </svg>
-                    </a>
-                </div>
-
             </div>
-        @endforeach
-    </div>
-@endif
+
+            {{-- Action Button Footer --}}
+            <div class="p-4 pt-0">
+                <a href="{{ route('teacher.grading.class', $cls->id) }}"
+                   class="w-full py-2.5 px-4 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2 transition-all shadow-sm shadow-blue-600/25 group-hover:shadow-md">
+                    <span>Pilih Kelas & Lihat Mapel</span>
+                    <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    @empty
+        <div class="col-span-full py-12 text-center bg-white rounded-3xl border border-slate-200">
+            <p class="text-sm font-bold text-slate-700">Tidak ada rombel kelas yang cocok dengan filter.</p>
+            <p class="text-xs text-slate-400 mt-1">Coba sesuaikan kata kunci pencarian atau reset filter.</p>
+        </div>
+    @endforelse
+</div>
 
 @endsection

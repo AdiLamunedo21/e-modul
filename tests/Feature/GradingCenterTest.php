@@ -3,7 +3,9 @@
 namespace Tests\Feature;
 
 use App\Models\Module;
+use App\Models\SchoolClass;
 use App\Models\Student;
+use App\Models\Subject;
 use App\Models\Teacher;
 use Tests\TestCase;
 
@@ -20,7 +22,42 @@ class GradingCenterTest extends TestCase
             ->get(route('teacher.grading.index'));
 
         $response->assertStatus(200);
-        $response->assertSee('Grading Center');
+        $response->assertSee('Pusat Penilaian Adaptif');
+        $response->assertSee('Pilih Kelas');
+    }
+
+    public function test_teacher_can_access_class_subjects_grading()
+    {
+        $teacher = Teacher::first();
+        $class = SchoolClass::first();
+        if (!$teacher || !$class) {
+            $this->markTestSkipped('Teacher or Class data not seeded.');
+        }
+
+        $response = $this->actingAs($teacher, 'teacher')
+            ->get(route('teacher.grading.class', $class->id));
+
+        $response->assertStatus(200);
+        $response->assertSee($class->full_name);
+        $response->assertSee('Daftar Kelas');
+        $response->assertSee('Buka Modul Penilaian');
+    }
+
+    public function test_teacher_can_access_subject_modules_grading()
+    {
+        $teacher = Teacher::first();
+        $class = SchoolClass::first();
+        $subject = Subject::first();
+        if (!$teacher || !$class || !$subject) {
+            $this->markTestSkipped('Teacher, Class, or Subject data not seeded.');
+        }
+
+        $response = $this->actingAs($teacher, 'teacher')
+            ->get(route('teacher.grading.class.subject', [$class->id, $subject->id]));
+
+        $response->assertStatus(200);
+        $response->assertSee($subject->name);
+        $response->assertSee('Daftar Mapel');
     }
 
     public function test_teacher_can_access_module_grading_show()
@@ -36,6 +73,7 @@ class GradingCenterTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee($module->title);
+        $response->assertSee('Daftar Modul');
     }
 
     public function test_teacher_can_update_student_grade()
@@ -98,22 +136,7 @@ class GradingCenterTest extends TestCase
         $this->assertArrayNotHasKey('job_sheet', $activeComps);
         $this->assertCount(2, $activeComps);
 
-        // 2. Skenario: Guru mengaktifkan Job Sheet
-        $module->update([
-            'has_job_sheet' => true,
-        ]);
-
-        $responseWithJobSheet = $this->actingAs($teacher, 'teacher')
-            ->get(route('teacher.grading.show', $module));
-
-        $responseWithJobSheet->assertStatus(200);
-        $activeCompsUpdated = $responseWithJobSheet->viewData('activeComponents');
-        $this->assertArrayHasKey('job_sheet', $activeCompsUpdated);
-        $this->assertArrayHasKey('lkpd', $activeCompsUpdated);
-        $this->assertArrayHasKey('post_test', $activeCompsUpdated);
-        $this->assertCount(3, $activeCompsUpdated);
-
-        // Kembalikan ke state awal
+        // 2. Skenario: Aktifkan Semua Komponen
         $module->update([
             'has_pre_test'  => true,
             'has_video'     => true,
@@ -122,5 +145,18 @@ class GradingCenterTest extends TestCase
             'has_lkpd'      => true,
             'has_post_test' => true,
         ]);
+
+        $response2 = $this->actingAs($teacher, 'teacher')
+            ->get(route('teacher.grading.show', $module));
+
+        $response2->assertStatus(200);
+        $activeComps2 = $response2->viewData('activeComponents');
+        $this->assertCount(6, $activeComps2);
+        $this->assertArrayHasKey('pre_test', $activeComps2);
+        $this->assertArrayHasKey('video', $activeComps2);
+        $this->assertArrayHasKey('embed', $activeComps2);
+        $this->assertArrayHasKey('job_sheet', $activeComps2);
+        $this->assertArrayHasKey('lkpd', $activeComps2);
+        $this->assertArrayHasKey('post_test', $activeComps2);
     }
 }

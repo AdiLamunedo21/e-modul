@@ -164,8 +164,10 @@ Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(fu
     Route::patch('/modules/{module}/daftar-pustaka',         [DaftarPustakaController::class, 'update'])->name('modules.daftar-pustaka.update');
     Route::post('/modules/{module}/daftar-pustaka/toggle',   [DaftarPustakaController::class, 'toggle'])->name('modules.daftar-pustaka.toggle');
 
-    // Grading Center (Pusat Penilaian Adaptif)
+    // Grading Center (Pusat Penilaian Adaptif) - Alur Berjenjang (Kelas -> Mapel -> Modul -> Tabel Penilaian)
     Route::get('/grading',                                                  [GradingController::class, 'index'])->name('grading.index');
+    Route::get('/grading/classes/{class}',                                  [GradingController::class, 'showClassSubjects'])->name('grading.class');
+    Route::get('/grading/classes/{class}/subjects/{subject}',               [GradingController::class, 'showSubjectModules'])->name('grading.class.subject');
     Route::get('/grading/modules/{module}',                                 [GradingController::class, 'show'])->name('grading.show');
     Route::get('/grading/modules/{module}/students/{student}',              [GradingController::class, 'getStudentDetail'])->name('grading.student.detail');
     Route::post('/grading/modules/{module}/students/{student}',             [GradingController::class, 'updateStudentGrade'])->name('grading.student.update');

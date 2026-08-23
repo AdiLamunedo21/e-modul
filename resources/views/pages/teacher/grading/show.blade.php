@@ -12,8 +12,16 @@
             <a href="{{ route('teacher.dashboard') }}" class="hover:text-blue-600 transition-colors">Workspace</a>
             <span>/</span>
             <a href="{{ route('teacher.grading.index') }}" class="hover:text-blue-600 transition-colors">Grading Center</a>
+            @if($module->schoolClass)
+                <span>/</span>
+                <a href="{{ route('teacher.grading.class', $module->class_id) }}" class="hover:text-blue-600 transition-colors">{{ $module->schoolClass->full_name }}</a>
+            @endif
+            @if($module->subject)
+                <span>/</span>
+                <a href="{{ route('teacher.grading.class.subject', [$module->class_id, $module->subject_id]) }}" class="hover:text-blue-600 transition-colors">{{ $module->subject->name }}</a>
+            @endif
             <span>/</span>
-            <span class="text-blue-600">Matriks Penilaian</span>
+            <span class="text-blue-600 truncate max-w-xs">{{ $module->title }}</span>
         </div>
         <div class="flex flex-wrap items-center gap-3">
             <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
@@ -30,9 +38,9 @@
     </div>
 
     <div class="flex items-center gap-3">
-        <a href="{{ route('teacher.grading.index') }}"
+        <a href="{{ route('teacher.grading.class.subject', [$module->class_id, $module->subject_id]) }}"
            class="px-4 py-2.5 text-xs font-bold text-slate-700 bg-white border border-slate-200/90 rounded-xl hover:bg-slate-50 transition-all inline-flex items-center gap-1.5 shadow-sm">
-            <span>←</span> Kembali ke Antrean
+            <span>←</span> Daftar Modul
         </a>
         <a href="{{ route('teacher.reports.export.module', $module) }}"
            class="px-4 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 rounded-xl transition-all inline-flex items-center gap-2 shadow-md shadow-emerald-600/20">

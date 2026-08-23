@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
+use App\Models\Major;
 use App\Models\Module;
+use App\Models\SchoolClass;
 use App\Models\Student;
 use App\Models\StudentResult;
+use App\Models\Subject;
 use App\Models\VideoSummary;
 use App\Models\EmbedSubmission;
 use App\Models\JobSheetSubmission;
@@ -19,86 +22,232 @@ use Illuminate\Support\Facades\Storage;
  * =============================================================================
  * CONTROLLER: GradingController
  * =============================================================================
- * PUSAT PENILAIAN ADAPTIF (GRADING CENTER):
+ * PUSAT PENILAIAN ADAPTIF (GRADING CENTER) BERJENJANG:
  * -----------------------------------------------------------------------------
- * Controller ini mengelola penilaian gabungan otomatis dan manual untuk seluruh
- * komponen evaluasi yang diaktifkan guru pada modul:
- * - Pre-test (Otomatis)          -> Bagian 4. Evaluasi & Latihan
- * - Resume Video (Manual)        -> Bagian 3. Kegiatan Belajar
- * - Screenshot Embed (Manual)    -> Bagian 4. Evaluasi & Latihan
- * - Berkas Job Sheet PDF (Manual)-> Bagian 3. Kegiatan Belajar
- * - Berkas Tugas LKPD (Manual)   -> Bagian 4. Evaluasi & Latihan
- * - Post-test (Otomatis)         -> Bagian 5. Bagian Akhir
- * 
- * Matriks penilaian di frontend dan ekspor nilai secara otomatis beradaptasi
- * hanya merender kolom komponen yang aktif pada modul (`Module::activeGradedComponents()`).
+ * 1. index()                : Menampilkan Direktori Nama Kelas Binaan Guru
+ * 2. showClassSubjects()    : Menampilkan Daftar Mata Pelajaran di Kelas Terpilih
+ * 3. showSubjectModules()   : Menampilkan Daftar Modul Pembelajaran per Mapel & Kelas
+ * 4. show()                 : Menampilkan Tabel Matriks Pengisian Nilai Siswa
+ * 5. getStudentDetail()     : Endpoint JSON untuk Memuat Detail Tugas Siswa ke Modal
+ * 6. updateStudentGrade()   : Menyimpan Nilai Manual Satu Siswa
+ * 7. batchUpdate()          : Menyimpan Nilai Massal (Batch Grade) Langsung dari Tabel
  * =============================================================================
  */
 class GradingController extends Controller
 {
+    private function teacher()
+    {
+        return Auth::guard('teacher')->user();
+    }
+
     /**
-     * Menampilkan daftar modul untuk pusat penilaian (Grading Center Overview).
+     * TAHAP 1: Direktori Nama Kelas pada Pusat Penilaian (Grading Center Hub).
      */
     public function index(Request $request)
     {
-        $teacher = Auth::guard('teacher')->user();
-        $teacherSubjects = $teacher->subjects()->get();
+        $teacher = $this->teacher();
+        $search = $request->query('search');
+        $grade = $request->query('grade');
+        $majorId = $request->query('major_id');
 
-        $query = Module::where('teacher_id', $teacher->id)
-            ->with(['schoolClass.students', 'studentResults', 'subject']);
+        $query = SchoolClass::with(['major'])->withCount(['students']);
 
-        // Filter Mata Pelajaran
-        $selectedSubjectId = $request->filled('subject_id') ? (int) $request->subject_id : null;
-        if ($selectedSubjectId) {
-            $query->where('subject_id', $selectedSubjectId);
-        }
-
-        // Filter status modul jika ada
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        // Filter kelas jika ada
-        if ($request->filled('class_id')) {
-            $query->where('class_id', $request->class_id);
-        }
-
-        // Filter pencarian judul
-        if ($request->filled('search')) {
-            $search = $request->search;
+        if ($search) {
             $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%");
+                $q->where('grade', 'like', "%{$search}%")
+                  ->orWhere('section', 'like', "%{$search}%")
+                  ->orWhere('major_name', 'like', "%{$search}%")
+                  ->orWhereHas('major', function ($mq) use ($search) {
+                      $mq->where('name', 'like', "%{$search}%")
+                         ->orWhere('code', 'like', "%{$search}%");
+                  });
             });
         }
 
-        $modules = $query->latest()->get();
-
-        // Hitung statistik global penilaian guru (berdasarkan subject_id jika difilter)
-        $baseStatQuery = Module::where('teacher_id', $teacher->id);
-        if ($selectedSubjectId) {
-            $baseStatQuery->where('subject_id', $selectedSubjectId);
+        if ($grade && $grade !== 'all') {
+            $query->where('grade', $grade);
         }
-        $allTeacherModules = $baseStatQuery->with('studentResults')->get();
+
+        if ($majorId && $majorId !== 'all') {
+            $query->where('major_id', $majorId);
+        }
+
+        $classesList = $query->orderBy('grade')->orderBy('section')->get();
+
+        // Hitung metrik penilaian spesifik untuk guru yang login pada setiap kelas
+        $classesList->transform(function (SchoolClass $cls) use ($teacher) {
+            $teacherModules = Module::where('teacher_id', $teacher->id)->where('class_id', $cls->id)->get();
+            $cls->teacher_modules_count = $teacherModules->count();
+            $cls->teacher_published_count = $teacherModules->where('status', 'published')->count();
+            
+            $mapelIds = $teacherModules->pluck('subject_id')->unique()->filter();
+            if ($mapelIds->isEmpty() && $teacher->subjects()->exists()) {
+                $cls->teacher_subjects_count = $teacher->subjects()->count();
+            } else {
+                $cls->teacher_subjects_count = $mapelIds->count();
+            }
+
+            $moduleIds = $teacherModules->pluck('id')->toArray();
+            $results = StudentResult::whereIn('module_id', $moduleIds)->get();
+
+            $cls->pending_grading_count = $results->where('grading_status', 'pending')->count();
+            $cls->completed_grading_count = $results->where('grading_status', 'graded')->count();
+            $cls->avg_score = $cls->completed_grading_count > 0 ? (int) round($results->where('grading_status', 'graded')->avg('summative_score')) : 0;
+
+            return $cls;
+        });
+
+        // Global stats guru
+        $allTeacherModules = Module::where('teacher_id', $teacher->id)->with('studentResults')->get();
         $allResults = $allTeacherModules->pluck('studentResults')->flatten();
+        $gradedResults = $allResults->where('grading_status', 'graded');
 
         $stats = [
             'total_modules'     => $allTeacherModules->count(),
             'published_modules' => $allTeacherModules->where('status', 'published')->count(),
             'total_submissions' => $allResults->count(),
             'pending_grading'   => $allResults->where('grading_status', 'pending')->count(),
-            'completed_grading' => $allResults->where('grading_status', 'graded')->count(),
-            'average_score'     => $allResults->where('grading_status', 'graded')->count() > 0
-                ? (int) round($allResults->where('grading_status', 'graded')->avg('summative_score'))
-                : 0,
+            'completed_grading' => $gradedResults->count(),
+            'average_score'     => $gradedResults->count() > 0 ? (int) round($gradedResults->avg('summative_score')) : 0,
+            'total_classes'     => $classesList->count(),
         ];
 
-        $classes = $teacher->modules()->with('schoolClass')->get()->pluck('schoolClass')->filter()->unique('id');
+        $majors = Major::orderBy('name')->get();
 
-        return view('pages.teacher.grading.index', compact('modules', 'stats', 'classes', 'teacherSubjects', 'selectedSubjectId'));
+        return view('pages.teacher.grading.index', compact(
+            'classesList',
+            'stats',
+            'majors',
+            'search',
+            'grade',
+            'majorId'
+        ));
     }
 
     /**
-     * Menampilkan tabel matriks penilaian adaptif untuk modul tertentu.
+     * TAHAP 2: Menampilkan daftar Mata Pelajaran yang diajar guru di kelas tertentu.
+     */
+    public function showClassSubjects(Request $request, SchoolClass $class)
+    {
+        $teacher = $this->teacher();
+        $class->loadMissing(['major', 'students']);
+
+        $teacherSubjectIds = $teacher->subjects()->pluck('subjects.id')->toArray();
+        $moduleSubjectIds = Module::where('teacher_id', $teacher->id)
+            ->where('class_id', $class->id)
+            ->pluck('subject_id')
+            ->unique()
+            ->filter()
+            ->toArray();
+
+        $mergedIds = array_unique(array_merge($teacherSubjectIds, $moduleSubjectIds));
+
+        if (!empty($mergedIds)) {
+            $subjects = Subject::whereIn('id', $mergedIds)->orderBy('name')->get();
+        } else {
+            $subjects = Subject::orderBy('name')->get();
+        }
+
+        // Kalkulasi per mapel di kelas ini
+        $subjects->transform(function (Subject $sub) use ($teacher, $class) {
+            $modules = Module::where('teacher_id', $teacher->id)
+                ->where('class_id', $class->id)
+                ->where('subject_id', $sub->id)
+                ->with('studentResults')
+                ->get();
+
+            $results = $modules->pluck('studentResults')->flatten();
+            $graded = $results->where('grading_status', 'graded');
+
+            $sub->class_modules_count = $modules->count();
+            $sub->class_published_count = $modules->where('status', 'published')->count();
+            $sub->class_submissions_count = $results->count();
+            $sub->class_pending_count = $results->where('grading_status', 'pending')->count();
+            $sub->class_graded_count = $graded->count();
+            $sub->class_avg_score = $graded->count() > 0 ? (int) round($graded->avg('summative_score')) : 0;
+
+            return $sub;
+        });
+
+        $classModules = Module::where('teacher_id', $teacher->id)->where('class_id', $class->id)->with('studentResults')->get();
+        $classResults = $classModules->pluck('studentResults')->flatten();
+        $classGraded = $classResults->where('grading_status', 'graded');
+
+        $classStats = [
+            'total_students'  => $class->students()->count(),
+            'total_modules'   => $classModules->count(),
+            'published_count' => $classModules->where('status', 'published')->count(),
+            'pending_count'   => $classResults->where('grading_status', 'pending')->count(),
+            'total_graded'    => $classGraded->count(),
+            'avg_score'       => $classGraded->count() > 0 ? (int) round($classGraded->avg('summative_score')) : 0,
+        ];
+
+        return view('pages.teacher.grading.class_subjects', compact(
+            'class',
+            'subjects',
+            'classStats'
+        ));
+    }
+
+    /**
+     * TAHAP 3: Menampilkan daftar Modul Pembelajaran pada mata pelajaran dan kelas terpilih.
+     */
+    public function showSubjectModules(Request $request, SchoolClass $class, Subject $subject)
+    {
+        $teacher = $this->teacher();
+        $class->loadMissing('major');
+
+        $query = Module::where('teacher_id', $teacher->id)
+            ->where('class_id', $class->id)
+            ->where('subject_id', $subject->id)
+            ->with(['studentResults', 'schoolClass', 'subject'])
+            ->latest();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('title', 'like', "%{$search}%");
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $modules = $query->get();
+
+        $totalClassStudents = $class->students()->count();
+
+        // Hitung statistik per modul
+        $modules->transform(function (Module $m) use ($totalClassStudents) {
+            $results = $m->studentResults;
+            $graded = $results->where('grading_status', 'graded');
+
+            $m->total_students = $totalClassStudents;
+            $m->submissions_count = $results->count();
+            $m->pending_count = $results->where('grading_status', 'pending')->count();
+            $m->graded_count = $graded->count();
+            $m->avg_score = $graded->count() > 0 ? (int) round($graded->avg('summative_score')) : 0;
+
+            return $m;
+        });
+
+        $subjectStats = [
+            'total_modules'     => $modules->count(),
+            'published_modules' => $modules->where('status', 'published')->count(),
+            'total_submissions' => $modules->sum('submissions_count'),
+            'total_pending'     => $modules->sum('pending_count'),
+            'total_graded'      => $modules->sum('graded_count'),
+        ];
+
+        return view('pages.teacher.grading.subject_modules', compact(
+            'class',
+            'subject',
+            'modules',
+            'subjectStats'
+        ));
+    }
+
+    /**
+     * TAHAP 4: Menampilkan tabel matriks pengisian nilai adaptif untuk modul tertentu.
      */
     public function show(Module $module, Request $request)
     {
@@ -106,6 +255,7 @@ class GradingController extends Controller
 
         $module->load([
             'schoolClass.students',
+            'subject',
             'studentResults',
             'videoSummaries',
             'embedSubmissions',
