@@ -4,9 +4,20 @@
 
 ### 1.1 Latar Belakang Proyek
 
-Aplikasi ini merupakan platform _Content Management System_ (CMS) E-Modul interaktif berbasis web yang dirancang secara esensial untuk mendukung ekosistem pendidikan vokasi di **SMK Negeri 3 Yogyakarta**. karena di smk Penggunaan instrumen dan media pembelajaran saat ini masih terpisah-pisah. Sebagai contoh, guru menggunakan formulir daring pihak ketiga seperti Google Form untuk pre-test, mendistribusikan Lembar Kerja Peserta Didik (LKPD) berformat Word melalui sebuah tautan, lalu menginstruksikan pengumpulan tugas menggunakan tautan yang berbeda lagi. Hal ini menyulitkan siswa karena kerumitan mengakses berbagai tautan tersebut justru menyita banyak waktu efektif pembelajaran.
-Selain itu, materi yang dipaparkan tidak tersimpan secara terpusat sehingga tidak dapat dipelajari ulang. Padahal, alokasi waktu mata Pelajaran informatika di sana kadang dalam satu hari di lakukan 8 jam pembelajaran dan materi hanya selama 2 minggu (14 hari). Akibatnya, siswa sangat rentan melupakan konsep yang telah dipelajari pada minggu sebelumnya. Fragmentasi platform ini pada akhirnya menyita waktu manajemen kelas dan menyulitkan pendidik dalam memantau rekam jejak pemahaman kognitif siswa secara utuh, karena proses penilaian mengharuskan guru untuk terus berpindah antaraplikasi.
-tujuan dari website ini adalah untuk memudahkan guru dalam mengelola materi dan penilaian serta memudahkan siswa dalam mengakses materi dan penilaian . dikembangkan dengan menggunakan Laravel 11 dengan sistem manajemen akses multi-peran (Admin, Guru, dan Siswa). 
+Aplikasi ini merupakan platform _Content Management System_ (CMS) E-Modul berbasis web yang dirancang secara esensial untuk mendukung dan mengoptimalkan ekosistem pendidikan vokasi di **SMK Negeri 3 Yogyakarta**.
+
+Pengembangan platform ini dilatarbelakangi oleh beberapa kondisi nyata dalam proses belajar mengajar di sekolah:
+
+1. **Fragmentasi Instrumen & Media Pembelajaran:**  
+   Penggunaan instrumen dan media pembelajaran saat ini masih terpisah-pisah di berbagai platform pihak ketiga. Sebagai contoh, guru menggunakan formulir daring (seperti Google Forms) untuk pelaksanaan _pre-test_, membagikan Lembar Kerja Peserta Didik (LKPD) berformat dokumen Word melalui tautan unduhan terpisah, serta menginstruksikan pengumpulan tugas melalui tautan lain. Kerumitan berpindah-pindah tautan ini menyita banyak waktu efektif pembelajaran dan membingungkan siswa.
+
+2. **Karakteristik Pembelajaran Sistem Blok & Ketiadaan Repositori Terpusat:**  
+   Materi yang disampaikan di kelas sering kali tidak terdokumentasi dan tersimpan secara terpusat, sehingga menyulitkan siswa untuk melakukan pembelajaran mandiri atau mengulang materi (_review_). Kondisi ini menjadi semakin kritis mengingat alokasi waktu mata pelajaran tertentu (seperti Informatika) menerapkan sistem pembelajaran blok intensif—mencapai 8 jam pelajaran dalam satu hari dan diselesaikan dalam rentang waktu singkat (2 minggu / 14 hari). Akibatnya, siswa sangat rentan melupakan konsep dan keterampilan praktis yang telah dipelajari pada minggu sebelumnya jika tidak memiliki akses modul yang terstruktur dan berkelanjutan.
+
+3. **Beban Administrasi Guru dalam Monitoring & Evaluasi:**  
+   Fragmentasi platform menyita waktu manajemen kelas dan menyulitkan pendidik dalam memantau rekam jejak kognitif maupun progres belajar siswa secara utuh. Proses rekapitulasi nilai menjadi tidak efisien karena guru harus membuka dan menggabungkan data dari berbagai aplikasi yang berbeda.
+
+Berdasarkan permasalahan tersebut, platform E-Modul ini dibangun menggunakan kerangka kerja **Laravel 11** dengan sistem kontrol akses multi-peran (**Admin**, **Guru**, dan **Siswa**). Platform ini hadir sebagai solusi satu pintu (_one-stop solution_) yang mempermudah guru dalam menyusun materi terstruktur serta mengelola penilaian secara komprehensif, sekaligus memberikan pengalaman belajar yang terarah, interaktif, dan mudah diakses kapan saja oleh siswa.
 
 ### 1.2 Pernyataan Masalah (Problem Statement)
 
