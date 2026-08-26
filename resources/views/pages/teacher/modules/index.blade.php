@@ -116,25 +116,33 @@
             <input type="hidden" name="subject_id" value="{{ $selectedSubjectId }}">
         @endif
         <div class="relative flex-1">
+            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
+            </div>
             <input type="text"
                    name="search"
                    value="{{ request('search') }}"
                    placeholder="Cari judul modul, rombel kelas, atau nama mata pelajaran..."
-                   class="w-full pl-11 pr-11 py-3 text-xs sm:text-sm bg-white border border-slate-200 rounded-2xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 shadow-sm transition-all">
-            <svg class="w-5 h-5 absolute left-3.5 top-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
+                   class="w-full pl-10 pr-10 py-3 text-xs sm:text-sm bg-white border border-slate-200 rounded-2xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 shadow-sm transition-all placeholder:text-slate-400">
             @if(request('search'))
-                <a href="{{ route('teacher.modules.index', array_filter(['status' => request('status'), 'subject_id' => $selectedSubjectId])) }}"
-                   class="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100 transition"
-                   title="Hapus pencarian">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </a>
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <a href="{{ route('teacher.modules.index', array_filter(['status' => request('status'), 'subject_id' => $selectedSubjectId])) }}"
+                       class="text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100 transition"
+                       title="Hapus pencarian">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </a>
+                </div>
             @endif
         </div>
         <button type="submit"
                 class="inline-flex items-center gap-2 px-5 sm:px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-600/20 transition-all shrink-0">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
+            </svg>
             <span>Cari Modul</span>
         </button>
     </form>
