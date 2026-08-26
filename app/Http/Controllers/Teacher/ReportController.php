@@ -67,16 +67,22 @@ class ReportController extends Controller
 
         $classesList = $query->orderBy('grade')->orderBy('section')->get();
 
-        // Hitung metrik spesifik untuk guru yang login pada setiap kelas
-        $classesList->transform(function (SchoolClass $cls) use ($teacher) {
-            $teacherModules = Module::where('teacher_id', $teacher->id)->where('class_id', $cls->id)->get();
+        // Load semua modul guru ini beserta studentResults sekaligus (1 query)
+        $allTeacherModules = Module::where('teacher_id', $teacher->id)->with('studentResults')->get();
+        $modulesByClass = $allTeacherModules->groupBy('class_id');
+        $hasSubjects = $teacher->subjects()->exists();
+        $teacherSubjectsCount = $hasSubjects ? $teacher->subjects()->count() : 0;
+
+        // Hitung metrik spesifik untuk guru yang login pada setiap kelas secara in-memory
+        $classesList->transform(function (SchoolClass $cls) use ($modulesByClass, $hasSubjects, $teacherSubjectsCount) {
+            $teacherModules = $modulesByClass->get($cls->id, collect());
             $cls->teacher_modules_count = $teacherModules->count();
             $cls->teacher_published_count = $teacherModules->where('status', 'published')->count();
             
             // Hitung berapa mapel yang diajar guru di kelas ini
             $mapelIds = $teacherModules->pluck('subject_id')->unique()->filter();
-            if ($mapelIds->isEmpty() && $teacher->subjects()->exists()) {
-                $cls->teacher_subjects_count = $teacher->subjects()->count();
+            if ($mapelIds->isEmpty() && $hasSubjects) {
+                $cls->teacher_subjects_count = $teacherSubjectsCount;
             } else {
                 $cls->teacher_subjects_count = $mapelIds->count();
             }
@@ -85,8 +91,7 @@ class ReportController extends Controller
         });
 
         // Global stats guru
-        $allTeacherModules = Module::where('teacher_id', $teacher->id)->with('studentResults')->get();
-        $allResults = $allTeacherModules->pluck('studentResults')->flatten();
+        $allResults = $allTeacherModules->pluck('studentResults')->flatten()->filter();
         $gradedResults = $allResults->where('grading_status', 'graded');
 
         $stats = [

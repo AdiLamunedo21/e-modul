@@ -57,12 +57,21 @@ class SchoolClass extends Model
      */
     public function statsForTeacher(int $teacherId): array
     {
-        $teacherModules = $this->teacherModules($teacherId)->with('studentResults')->get();
+        // Gunakan relasi modules yang sudah di-eager load jika ada untuk mencegah query N+1
+        if ($this->relationLoaded('modules')) {
+            $teacherModules = $this->modules->where('teacher_id', $teacherId);
+        } else {
+            $teacherModules = $this->teacherModules($teacherId)->with('studentResults')->get();
+        }
+
         $totalModules = $teacherModules->count();
         $publishedModules = $teacherModules->where('status', 'published')->count();
-        $totalStudents = $this->students()->count();
+        
+        $totalStudents = $this->relationLoaded('students')
+            ? $this->students->count()
+            : ($this->students_count ?? $this->students()->count());
 
-        $allResults = $teacherModules->pluck('studentResults')->flatten();
+        $allResults = $teacherModules->pluck('studentResults')->flatten()->filter();
         $gradedResults = $allResults->where('grading_status', 'graded');
         $avgScore = $gradedResults->count() > 0 ? (int) round($gradedResults->avg('summative_score')) : 0;
 

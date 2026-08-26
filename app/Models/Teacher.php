@@ -46,7 +46,7 @@ class Teacher extends Authenticatable
      */
     public function assignedClasses(?int $subjectId = null)
     {
-        $query = $this->modules()->with('schoolClass');
+        $query = $this->modules()->with(['schoolClass.major', 'schoolClass.students', 'schoolClass.modules.studentResults']);
         if ($subjectId) {
             $query->where('subject_id', $subjectId);
         }

@@ -72,7 +72,7 @@ class AdminCurriculumManagementTest extends TestCase
     public function test_admin_can_update_subject()
     {
         $admin = $this->getAdmin();
-        $code = 'SUBJ_UPD_' . rand(100, 999);
+        $code = 'SU_' . substr(uniqid(), -6);
 
         $subject = Subject::create([
             'name'  => 'Mapel Lama',

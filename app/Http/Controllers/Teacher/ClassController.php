@@ -80,13 +80,13 @@ class ClassController extends Controller
 
         $classes = $query->orderBy('grade')->orderBy('section')->get();
 
-        // Hitung statistik per kelas untuk guru ini
+        // Hitung statistik per kelas untuk guru ini secara in-memory tanpa query N+1
         $classes->transform(function ($class) use ($teacher) {
-            $teacherModules = Module::where('teacher_id', $teacher->id)->where('class_id', $class->id)->get();
+            $teacherModules = $class->modules;
             $class->teacher_modules_count = $teacherModules->count();
             $class->teacher_published_count = $teacherModules->where('status', 'published')->count();
             $class->stats = $class->statsForTeacher($teacher->id);
-            $class->subjects_list = $class->modules->pluck('subject')->filter()->unique('id');
+            $class->subjects_list = $teacherModules->pluck('subject')->filter()->unique('id');
             return $class;
         });
 

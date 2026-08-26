@@ -45,7 +45,7 @@ class DashboardController extends Controller
 
         // 1. Query seluruh modul milik guru
         $allTeacherModules = Module::where('teacher_id', $teacherId)
-            ->with(['schoolClass.students', 'studentResults.student', 'clonedFrom', 'subject'])
+            ->with(['schoolClass.students', 'schoolClass.major', 'studentResults.student', 'clonedFrom', 'subject'])
             ->latest()
             ->get();
 
@@ -57,7 +57,7 @@ class DashboardController extends Controller
         $sharedCount       = $allTeacherModules->where('is_shared', true)->count();
 
         // Kelas Binaan & Siswa
-        $assignedClasses = $teacher->assignedClasses();
+        $assignedClasses = $allTeacherModules->pluck('schoolClass')->filter()->unique('id');
         $totalStudentsCount = $assignedClasses->sum(function ($c) {
             return $c->students ? $c->students->count() : 0;
         });
@@ -232,17 +232,24 @@ class DashboardController extends Controller
         $totalPendingCount = max($pendingResultsCount, $pendingQueue->count());
 
         // 5. Ringkasan Kelas Binaan
-        $classesSummary = $assignedClasses->map(function ($cls) use ($teacherId) {
-            $classStats = $cls->statsForTeacher($teacherId);
+        $classesSummary = $assignedClasses->map(function ($cls) use ($allTeacherModules) {
+            $classModules = $allTeacherModules->where('class_id', $cls->id);
+            $totalModules = $classModules->count();
+            $publishedModules = $classModules->where('status', 'published')->count();
+            $allResults = $classModules->pluck('studentResults')->flatten()->filter();
+            $gradedResults = $allResults->where('grading_status', 'graded');
+            $avgScore = $gradedResults->count() > 0 ? (int) round($gradedResults->avg('summative_score')) : 0;
+            $totalStudents = $cls->students ? $cls->students->count() : 0;
+
             return [
                 'id'                => $cls->id,
                 'full_name'         => $cls->full_name,
                 'grade'             => $cls->grade,
                 'major_name'        => $cls->major_name,
-                'total_students'    => $classStats['total_students'],
-                'total_modules'     => $classStats['total_modules'],
-                'published_modules' => $classStats['published_modules'],
-                'avg_score'         => $classStats['avg_score'],
+                'total_students'    => $totalStudents,
+                'total_modules'     => $totalModules,
+                'published_modules' => $publishedModules,
+                'avg_score'         => $avgScore,
             ];
         });
 

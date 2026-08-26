@@ -74,21 +74,26 @@ class GradingController extends Controller
 
         $classesList = $query->orderBy('grade')->orderBy('section')->get();
 
-        // Hitung metrik penilaian spesifik untuk guru yang login pada setiap kelas
-        $classesList->transform(function (SchoolClass $cls) use ($teacher) {
-            $teacherModules = Module::where('teacher_id', $teacher->id)->where('class_id', $cls->id)->get();
+        // Load seluruh modul guru beserta studentResults dalam satu query tunggal
+        $allTeacherModules = Module::where('teacher_id', $teacher->id)->with('studentResults')->get();
+        $modulesByClass = $allTeacherModules->groupBy('class_id');
+        $hasSubjects = $teacher->subjects()->exists();
+        $teacherSubjectsCount = $hasSubjects ? $teacher->subjects()->count() : 0;
+
+        // Hitung metrik penilaian spesifik untuk guru yang login pada setiap kelas secara in-memory
+        $classesList->transform(function (SchoolClass $cls) use ($modulesByClass, $hasSubjects, $teacherSubjectsCount) {
+            $teacherModules = $modulesByClass->get($cls->id, collect());
             $cls->teacher_modules_count = $teacherModules->count();
             $cls->teacher_published_count = $teacherModules->where('status', 'published')->count();
             
             $mapelIds = $teacherModules->pluck('subject_id')->unique()->filter();
-            if ($mapelIds->isEmpty() && $teacher->subjects()->exists()) {
-                $cls->teacher_subjects_count = $teacher->subjects()->count();
+            if ($mapelIds->isEmpty() && $hasSubjects) {
+                $cls->teacher_subjects_count = $teacherSubjectsCount;
             } else {
                 $cls->teacher_subjects_count = $mapelIds->count();
             }
 
-            $moduleIds = $teacherModules->pluck('id')->toArray();
-            $results = StudentResult::whereIn('module_id', $moduleIds)->get();
+            $results = $teacherModules->pluck('studentResults')->flatten()->filter();
 
             $cls->pending_grading_count = $results->where('grading_status', 'pending')->count();
             $cls->completed_grading_count = $results->where('grading_status', 'graded')->count();
@@ -98,8 +103,7 @@ class GradingController extends Controller
         });
 
         // Global stats guru
-        $allTeacherModules = Module::where('teacher_id', $teacher->id)->with('studentResults')->get();
-        $allResults = $allTeacherModules->pluck('studentResults')->flatten();
+        $allResults = $allTeacherModules->pluck('studentResults')->flatten()->filter();
         $gradedResults = $allResults->where('grading_status', 'graded');
 
         $stats = [
