@@ -77,4 +77,39 @@ class TeacherDashboardTest extends TestCase
         $response->assertSee('Rata-rata Skor Sumatif', false);
         $response->assertSee('Arsitektur E-Modul 5 Bagian Pedagogis', false);
     }
+
+    public function test_teacher_can_search_modules_by_keyword()
+    {
+        $teacher = Teacher::first();
+        $class = SchoolClass::first();
+        $subject = \App\Models\Subject::first();
+
+        if (!$teacher || !$class || !$subject) {
+            $this->markTestSkipped('Teacher, class, and subject required.');
+        }
+
+        $uniqueTitle = 'Modul Algoritma Khusus ' . uniqid();
+        $module = Module::create([
+            'teacher_id' => $teacher->id,
+            'class_id'   => $class->id,
+            'subject_id' => $subject->id,
+            'title'      => $uniqueTitle,
+            'status'     => 'published',
+        ]);
+
+        // 1. Search matching keyword
+        $resMatch = $this->actingAs($teacher, 'teacher')
+            ->get(route('teacher.modules.index', ['search' => 'Algoritma Khusus']));
+        $resMatch->assertStatus(200);
+        $resMatch->assertSee($uniqueTitle);
+
+        // 2. Search non-matching keyword
+        $resNoMatch = $this->actingAs($teacher, 'teacher')
+            ->get(route('teacher.modules.index', ['search' => 'KeywordTidakMungkinAdaXYZ123']));
+        $resNoMatch->assertStatus(200);
+        $resNoMatch->assertDontSee($uniqueTitle);
+        $resNoMatch->assertSee('Modul Tidak Ditemukan', false);
+
+        $module->delete();
+    }
 }

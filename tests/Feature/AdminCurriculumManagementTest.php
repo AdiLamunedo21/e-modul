@@ -47,7 +47,7 @@ class AdminCurriculumManagementTest extends TestCase
     public function test_admin_can_create_subject()
     {
         $admin = $this->getAdmin();
-        $code = 'SUBJ_' . rand(100, 999);
+        $code = 'SUBJ_' . substr(uniqid(), -6);
 
         $payload = [
             'name'        => 'Pemrograman Web Lanjut',
@@ -102,7 +102,7 @@ class AdminCurriculumManagementTest extends TestCase
     public function test_admin_can_delete_subject()
     {
         $admin = $this->getAdmin();
-        $code = 'SUBJ_DEL_' . rand(100, 999);
+        $code = 'SUBJ_DEL_' . substr(uniqid(), -6);
 
         $subject = Subject::create([
             'name'  => 'Mapel Hapus',
@@ -137,7 +137,7 @@ class AdminCurriculumManagementTest extends TestCase
     public function test_admin_can_create_major()
     {
         $admin = $this->getAdmin();
-        $code = 'MAJ_' . rand(100, 999);
+        $code = 'MAJ_' . substr(uniqid(), -6);
 
         $payload = [
             'name'        => 'Teknik Mekatronika Industri',
@@ -160,7 +160,7 @@ class AdminCurriculumManagementTest extends TestCase
     public function test_admin_can_update_major()
     {
         $admin = $this->getAdmin();
-        $code = 'MAJ_UPD_' . rand(100, 999);
+        $code = 'MAJ_UPD_' . substr(uniqid(), -6);
 
         $major = Major::create([
             'name' => 'Jurusan Lama',
@@ -188,7 +188,7 @@ class AdminCurriculumManagementTest extends TestCase
     public function test_admin_can_delete_major()
     {
         $admin = $this->getAdmin();
-        $code = 'MAJ_DEL_' . rand(100, 999);
+        $code = 'MAJ_DEL_' . substr(uniqid(), -6);
 
         $major = Major::create([
             'name' => 'Jurusan Hapus',

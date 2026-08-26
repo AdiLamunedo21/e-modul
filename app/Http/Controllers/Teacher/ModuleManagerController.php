@@ -65,6 +65,27 @@ class ModuleManagerController extends Controller
             $query->where('status', $request->status);
         }
 
+        // Filter berdasarkan kata kunci pencarian (search)
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhereHas('schoolClass', function ($qc) use ($search) {
+                      $qc->where('major_name', 'like', "%{$search}%")
+                         ->orWhere('grade', 'like', "%{$search}%")
+                         ->orWhere('section', 'like', "%{$search}%")
+                         ->orWhereHas('major', function ($qm) use ($search) {
+                             $qm->where('name', 'like', "%{$search}%")
+                                ->orWhere('code', 'like', "%{$search}%");
+                         });
+                  })
+                  ->orWhereHas('subject', function ($qs) use ($search) {
+                      $qs->where('name', 'like', "%{$search}%")
+                         ->orWhere('code', 'like', "%{$search}%");
+                  });
+            });
+        }
+
         $modules = $query->paginate(10)->withQueryString();
 
         // Hitung statistik modul global & per subjek untuk guru ini
