@@ -198,4 +198,14 @@ Route::middleware('auth:student')->prefix('student')->group(function () {
 
     // Modul Belajar Siswa per Mata Pelajaran
     Route::get('/modules/subject/{subject}', [StudentModuleController::class, 'bySubject'])->name('student.modules.subject');
+
+    // Antarmuka Interaktif Mulai Belajar E-Modul 5 Bagian
+    Route::get('/modules/{module}',                         [StudentModuleController::class, 'show'])->name('student.modules.show');
+    Route::post('/modules/{module}/pre-test',               [StudentModuleController::class, 'submitPreTest'])->name('student.modules.pre-test.submit');
+    Route::post('/modules/{module}/video',                  [StudentModuleController::class, 'submitVideoSummary'])->name('student.modules.video.submit');
+    Route::post('/modules/{module}/embed',                  [StudentModuleController::class, 'submitEmbed'])->name('student.modules.embed.submit');
+    Route::post('/modules/{module}/job-sheet',              [StudentModuleController::class, 'submitJobSheet'])->name('student.modules.job-sheet.submit');
+    Route::post('/modules/{module}/lkpd',                   [StudentModuleController::class, 'submitLkpd'])->name('student.modules.lkpd.submit');
+    Route::post('/modules/{module}/post-test',              [StudentModuleController::class, 'submitPostTest'])->name('student.modules.post-test.submit');
+    Route::delete('/modules/{module}/submissions/{type}',   [StudentModuleController::class, 'cancelSubmission'])->name('student.modules.submission.cancel');
 });

@@ -260,7 +260,7 @@
 
                         {{-- Action Button --}}
                         <div class="shrink-0">
-                            <a href="{{ route('teacher.modules.materi.preview', $item['id']) }}"
+                            <a href="{{ route('student.modules.show', $item['id']) }}"
                                class="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 text-xs sm:text-sm font-bold rounded-xl shadow-sm transition-all
                                 {{ $item['progress_status'] === 'completed'
                                     ? 'text-slate-700 bg-white border border-slate-300 hover:bg-slate-50'
