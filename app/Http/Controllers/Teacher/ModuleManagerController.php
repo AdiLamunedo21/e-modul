@@ -151,7 +151,43 @@ class ModuleManagerController extends Controller
     {
         $this->authorizeModule($module);
         $module->load(['schoolClass', 'subject']);
-        return view('pages.teacher.modules.show', compact('module'));
+
+        $teacher = $this->teacher();
+        $teacherSubjects = $teacher->subjects()->get();
+        if ($teacherSubjects->isEmpty()) {
+            $teacherSubjects = Subject::orderBy('name')->get();
+        }
+        $classes = SchoolClass::orderBy('grade')->orderBy('major_name')->get();
+
+        return view('pages.teacher.modules.show', compact('module', 'teacherSubjects', 'classes'));
+    }
+
+    /**
+     * Memperbarui informasi nama dan identitas umum modul (Judul, Mapel, Kelas).
+     */
+    public function update(Request $request, Module $module)
+    {
+        $this->authorizeModule($module);
+
+        $validated = $request->validate([
+            'title'      => ['required', 'string', 'max:255'],
+            'class_id'   => ['required', 'exists:classes,id'],
+            'subject_id' => ['required', 'exists:subjects,id'],
+        ], [
+            'title.required'      => 'Judul E-Modul wajib diisi.',
+            'class_id.required'   => 'Pilih target kelas / jurusan.',
+            'subject_id.required' => 'Pilih mata pelajaran pengampu.',
+            'subject_id.exists'   => 'Mata pelajaran yang dipilih tidak valid.',
+        ]);
+
+        $module->update([
+            'title'      => $validated['title'],
+            'class_id'   => $validated['class_id'],
+            'subject_id' => $validated['subject_id'],
+        ]);
+
+        return redirect()->route('teacher.modules.show', $module)
+            ->with('success', 'Nama dan identitas modul berhasil diperbarui!');
     }
 
     /**

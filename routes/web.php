@@ -94,6 +94,7 @@ Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(fu
     Route::get('/modules/create',                       [ModuleManagerController::class, 'create'])->name('modules.create');
     Route::post('/modules',                             [ModuleManagerController::class, 'store'])->name('modules.store');
     Route::get('/modules/{module}',                     [ModuleManagerController::class, 'show'])->name('modules.show');
+    Route::patch('/modules/{module}',                   [ModuleManagerController::class, 'update'])->name('modules.update');
     Route::patch('/modules/{module}/status',            [ModuleManagerController::class, 'updateStatus'])->name('modules.status');
     Route::post('/modules/{module}/toggle-share',       [ModuleLibraryController::class, 'toggleShare'])->name('modules.toggle-share');
     Route::delete('/modules/{module}',                  [ModuleManagerController::class, 'destroy'])->name('modules.destroy');

@@ -327,7 +327,7 @@
                 <input type="text"
                        name="title"
                        id="clone_title"
-                       value="{{ $module->title }} (Salinan)"
+                       value="{{ $module->title }}"
                        required
                        class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-semibold text-slate-800 transition-all">
             </div>

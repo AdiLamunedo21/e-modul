@@ -831,7 +831,7 @@ class Module extends Model
      */
     public function cloneToTeacher(Teacher $targetTeacher, int $targetClassId, ?string $newTitle = null): self
     {
-        $newTitle = $newTitle ?: $this->title . ' (Salinan)';
+        $newTitle = $newTitle ?: $this->title;
 
         // 1. Duplikasi record utama modul
         $cloned = self::create([

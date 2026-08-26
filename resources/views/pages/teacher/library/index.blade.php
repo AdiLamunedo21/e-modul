@@ -511,7 +511,7 @@
         form.action = "{{ url('/teacher/library') }}/" + moduleId + "/clone";
 
         document.getElementById('modalSourceModuleTitle').textContent = moduleTitle + ' (Oleh: ' + authorName + ')';
-        document.getElementById('clone_title').value = moduleTitle + ' (Salinan)';
+        document.getElementById('clone_title').value = moduleTitle;
 
         document.getElementById('cloneModal').classList.remove('hidden');
     }

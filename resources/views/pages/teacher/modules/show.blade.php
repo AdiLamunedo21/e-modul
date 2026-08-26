@@ -5,7 +5,7 @@
 
 @section('content')
 
-<div x-data="{ deleteModalOpen: false, deleteUrl: '', deleteTitle: '' }">
+<div x-data="{ deleteModalOpen: false, deleteUrl: '', deleteTitle: '', editModalOpen: false }">
 
 {{-- ══ Breadcrumb ══ --}}
 <nav class="flex items-center gap-2 text-sm text-slate-500 mb-6">
@@ -63,7 +63,17 @@
                     Dibuat {{ $module->created_at->format('d M Y') }} &bull; Terakhir diperbarui {{ $module->updated_at->diffForHumans() }}
                 </span>
             </div>
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-snug tracking-tight">{{ $module->title }}</h1>
+            <div class="flex items-center gap-3">
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-snug tracking-tight">{{ $module->title }}</h1>
+                <button type="button"
+                        @click="editModalOpen = true"
+                        class="p-2 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all border border-transparent hover:border-blue-200"
+                        title="Ubah Nama & Identitas Modul">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/>
+                    </svg>
+                </button>
+            </div>
             <p class="text-xs sm:text-sm text-slate-500">
                 Struktur Kurikulum E-Modul Modular — Bagian 1 & 2 sejajar, Bagian 3 & 4 sejajar, serta Bagian 5 & Pusat Penilaian sejajar di bawahnya.
             </p>
@@ -71,6 +81,16 @@
 
         {{-- Status Action Buttons --}}
         <div class="flex flex-wrap items-center gap-3 shrink-0">
+            {{-- Edit Module Identity Button --}}
+            <button type="button"
+                    @click="editModalOpen = true"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-700 bg-white border border-slate-200 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 rounded-2xl transition-all shadow-sm"
+                    title="Ubah Nama & Identitas Modul">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/>
+                </svg>
+                <span>Edit Nama Modul</span>
+            </button>
             {{-- Share to Library Toggle --}}
             <form action="{{ route('teacher.modules.toggle-share', $module) }}" method="POST">
                 @csrf
@@ -636,6 +656,91 @@
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
         Kembali ke Manajer Modul
     </a>
+</div>
+
+{{-- ══ Modal Edit Nama & Identitas Modul ══ --}}
+<div x-show="editModalOpen"
+     x-cloak
+     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in">
+    <div @click.away="editModalOpen = false"
+         class="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-lg w-full p-6 sm:p-7 relative">
+        
+        <div class="flex items-center justify-between mb-5 pb-4 border-b border-slate-100">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg font-bold">
+                    ✏️
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">Ubah Nama & Identitas Modul</h3>
+                    <p class="text-xs text-slate-500">Perbarui judul, mata pelajaran, atau kelas sasaran</p>
+                </div>
+            </div>
+            <button type="button" @click="editModalOpen = false" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-xl hover:bg-slate-100 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <form action="{{ route('teacher.modules.update', $module) }}" method="POST" class="space-y-4">
+            @csrf
+            @method('PATCH')
+
+            <div>
+                <label for="module_title" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Judul E-Modul <span class="text-red-500">*</span>
+                </label>
+                <input type="text"
+                       name="title"
+                       id="module_title"
+                       value="{{ old('title', $module->title) }}"
+                       required
+                       class="w-full px-4 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-semibold text-slate-800 transition-all">
+            </div>
+
+            <div>
+                <label for="module_subject_id" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Mata Pelajaran <span class="text-red-500">*</span>
+                </label>
+                <select name="subject_id"
+                        id="module_subject_id"
+                        required
+                        class="w-full px-4 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-semibold text-slate-800 transition-all cursor-pointer">
+                    @foreach($teacherSubjects ?? [] as $sub)
+                        <option value="{{ $sub->id }}" {{ $sub->id == old('subject_id', $module->subject_id) ? 'selected' : '' }}>
+                            {{ $sub->name }} ({{ $sub->code }})
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label for="module_class_id" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Target Kelas / Rombel <span class="text-red-500">*</span>
+                </label>
+                <select name="class_id"
+                        id="module_class_id"
+                        required
+                        class="w-full px-4 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-semibold text-slate-800 transition-all cursor-pointer">
+                    @foreach($classes ?? [] as $cls)
+                        <option value="{{ $cls->id }}" {{ $cls->id == old('class_id', $module->class_id) ? 'selected' : '' }}>
+                            Kelas {{ $cls->grade }} - {{ $cls->major_name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="pt-4 flex items-center justify-end gap-3 border-t border-slate-100 mt-6">
+                <button type="button" @click="editModalOpen = false"
+                        class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50 transition-all">
+                    Batal
+                </button>
+                <button type="submit"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-lg shadow-blue-600/25 transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                    <span>Simpan Perubahan</span>
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 {{-- Include Delete Confirmation Modal --}}

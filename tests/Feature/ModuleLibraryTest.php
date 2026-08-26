@@ -8,6 +8,7 @@ use App\Models\PostTestQuestion;
 use App\Models\PreTest;
 use App\Models\PreTestQuestion;
 use App\Models\SchoolClass;
+use App\Models\Subject;
 use App\Models\Teacher;
 use Tests\TestCase;
 
@@ -282,6 +283,86 @@ class ModuleLibraryTest extends TestCase
         $sourceModule->refresh();
         $this->assertEquals('Modul Master Jaringan Komputer ' . substr($sourceModule->title, 31), $sourceModule->title);
         $this->assertEquals('Topologi Jaringan Star & Mesh', $sourceModule->materi_data['notepad_content']);
+    }
+
+    public function test_cloned_module_without_custom_title_preserves_original_title_without_salinan_suffix()
+    {
+        $teachers = Teacher::all();
+        $classes  = SchoolClass::all();
+        $subject  = Subject::first();
+
+        if ($teachers->count() < 2 || $classes->count() < 2 || !$subject) {
+            $this->markTestSkipped('Minimum 2 teachers, 2 classes, and 1 subject required.');
+        }
+
+        $author = $teachers[0];
+        $cloner = $teachers[1];
+        $sourceClass = $classes[0];
+        $targetClass = $classes[1];
+
+        $sourceModule = Module::create([
+            'teacher_id' => $author->id,
+            'class_id'   => $sourceClass->id,
+            'subject_id' => $subject->id,
+            'title'      => 'Modul Desain Grafis Mandiri ' . uniqid(),
+            'status'     => 'published',
+            'is_shared'  => true,
+            'shared_at'  => now(),
+        ]);
+
+        // Cloner menyalin modul tanpa mengisi custom title (default)
+        $response = $this->actingAs($cloner, 'teacher')
+            ->post(route('teacher.library.clone', $sourceModule), [
+                'class_id' => $targetClass->id,
+                'title'    => '',
+            ]);
+
+        $clonedModule = Module::where('teacher_id', $cloner->id)
+            ->where('cloned_from_id', $sourceModule->id)
+            ->first();
+
+        $this->assertNotNull($clonedModule);
+        $this->assertEquals($sourceModule->title, $clonedModule->title);
+        $this->assertStringNotContainsString('(Salinan)', $clonedModule->title);
+
+        $sourceModule->delete();
+        $clonedModule->delete();
+    }
+
+    public function test_teacher_can_update_module_title_and_metadata()
+    {
+        $teacher = Teacher::first();
+        $classes = SchoolClass::take(2)->get();
+        $subject = Subject::first();
+
+        if (!$teacher || $classes->count() < 2 || !$subject) {
+            $this->markTestSkipped('Teacher, classes, and subject required.');
+        }
+
+        $module = Module::create([
+            'teacher_id' => $teacher->id,
+            'class_id'   => $classes[0]->id,
+            'subject_id' => $subject->id,
+            'title'      => 'Judul Awal Modul ' . uniqid(),
+            'status'     => 'draft',
+        ]);
+
+        $newTitle = 'Judul Baru yang Diperbarui ' . uniqid();
+        $response = $this->actingAs($teacher, 'teacher')
+            ->patch(route('teacher.modules.update', $module), [
+                'title'      => $newTitle,
+                'subject_id' => $subject->id,
+                'class_id'   => $classes[1]->id,
+            ]);
+
+        $response->assertRedirect(route('teacher.modules.show', $module));
+        $response->assertSessionHas('success');
+
+        $module->refresh();
+        $this->assertEquals($newTitle, $module->title);
+        $this->assertEquals($classes[1]->id, $module->class_id);
+
+        $module->delete();
     }
 
     public function test_unauthenticated_user_cannot_access_library()
