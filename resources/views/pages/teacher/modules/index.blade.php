@@ -77,65 +77,65 @@
     </div>
 @endif
 
-{{-- ══ Toolbar: Filter Tabs & Pencarian Modul ══ --}}
-<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-    {{-- Filter Tabs --}}
-    <div class="flex items-center gap-1 bg-white border border-slate-200 p-1 rounded-2xl shadow-sm overflow-x-auto self-start md:self-auto">
+{{-- ══ Filter Tabs Status ══ --}}
+<div class="flex items-center gap-1 bg-white border border-slate-200 p-1 rounded-2xl shadow-sm mb-4 overflow-x-auto self-start">
+    @php
+        $activeStatus = request('status', '');
+        $tabs = [
+            ''          => "Semua ({$counts['all']})",
+            'published' => "Terbit ({$counts['published']})",
+            'draft'     => "Draf ({$counts['draft']})",
+            'closed'    => "Ditutup ({$counts['closed']})",
+        ];
+    @endphp
+    @foreach ($tabs as $value => $label)
         @php
-            $activeStatus = request('status', '');
-            $tabs = [
-                ''          => "Semua ({$counts['all']})",
-                'published' => "Terbit ({$counts['published']})",
-                'draft'     => "Draf ({$counts['draft']})",
-                'closed'    => "Ditutup ({$counts['closed']})",
-            ];
+            $params = array_filter([
+                'status'     => $value,
+                'subject_id' => $selectedSubjectId,
+                'search'     => request('search'),
+            ]);
         @endphp
-        @foreach ($tabs as $value => $label)
-            @php
-                $params = array_filter([
-                    'status'     => $value,
-                    'subject_id' => $selectedSubjectId,
-                    'search'     => request('search'),
-                ]);
-            @endphp
-            <a href="{{ route('teacher.modules.index', $params) }}"
-               class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap
-                   {{ $activeStatus === $value
-                       ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30'
-                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-                {{ $label }}
-            </a>
-        @endforeach
-    </div>
+        <a href="{{ route('teacher.modules.index', $params) }}"
+           class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap
+               {{ $activeStatus === $value
+                   ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30'
+                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
+            {{ $label }}
+        </a>
+    @endforeach
+</div>
 
-    {{-- Form Pencarian Modul --}}
-    <form method="GET" action="{{ route('teacher.modules.index') }}" class="flex items-center gap-2 w-full md:w-80">
+{{-- ══ Form Pencarian E-Modul (Di Bawah Filter Tabs) ══ --}}
+<div class="mb-6">
+    <form method="GET" action="{{ route('teacher.modules.index') }}" class="flex items-center gap-3">
         @if(request('status'))
             <input type="hidden" name="status" value="{{ request('status') }}">
         @endif
         @if($selectedSubjectId)
             <input type="hidden" name="subject_id" value="{{ $selectedSubjectId }}">
         @endif
-        <div class="relative w-full">
+        <div class="relative flex-1">
             <input type="text"
                    name="search"
                    value="{{ request('search') }}"
-                   placeholder="Cari modul, kelas, mapel..."
-                   class="w-full pl-10 pr-10 py-2.5 text-xs bg-white border border-slate-200 rounded-2xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 shadow-sm transition-all">
-            <svg class="w-4 h-4 absolute left-3.5 top-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   placeholder="Cari judul modul, rombel kelas, atau nama mata pelajaran..."
+                   class="w-full pl-11 pr-11 py-3 text-xs sm:text-sm bg-white border border-slate-200 rounded-2xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 shadow-sm transition-all">
+            <svg class="w-5 h-5 absolute left-3.5 top-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
             @if(request('search'))
                 <a href="{{ route('teacher.modules.index', array_filter(['status' => request('status'), 'subject_id' => $selectedSubjectId])) }}"
-                   class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-100"
+                   class="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100 transition"
                    title="Hapus pencarian">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </a>
             @endif
         </div>
         <button type="submit"
-                class="px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-blue-600 text-white font-bold text-xs shadow-sm transition-all shrink-0">
-            Cari
+                class="inline-flex items-center gap-2 px-5 sm:px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-600/20 transition-all shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <span>Cari Modul</span>
         </button>
     </form>
 </div>
