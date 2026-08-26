@@ -1,4 +1,4 @@
-# PRD — Project Requirements Document (Versi Standar 5 Bagian Umum E-Modul & Sistem Akademik Terintegrasi)
+# PRD — Project Requirements Document “Pengembangan CMS E-Modul Berbasis Web dengan Laravel 11 untuk Pengelolaan Materi dan Evaluasi Pembelajaran di SMK Negeri 3 Yogyakarta” 
 
 ## 1. **Overview (Tinjauan Umum)**
 
