@@ -346,7 +346,7 @@
                     </button>
                     <a href="{{ route('teacher.modules.create') }}"
                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm transition-all">
-                        <span>+ Buat Modul Baru</span>
+                        <span>Buat Modul Baru</span>
                     </a>
                 </div>
             </div>
@@ -369,7 +369,7 @@
                         </button>
                         <a href="{{ route('teacher.modules.create') }}"
                            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md transition-all">
-                            <span>+ Buat Modul Baru</span>
+                            <span>Buat Modul Baru</span>
                         </a>
                     </div>
                 </div>

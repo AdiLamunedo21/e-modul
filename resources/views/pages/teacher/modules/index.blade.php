@@ -177,7 +177,7 @@
             @endif
             <a href="{{ route('teacher.modules.create') }}"
                class="inline-flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow transition-all">
-                + Buat Modul Pertama
+                Buat Modul Pertama
             </a>
         </div>
     </div>

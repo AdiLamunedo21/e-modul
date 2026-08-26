@@ -60,7 +60,7 @@
             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
-            <span>+ Buat Modul Baru</span>
+            <span>Buat Modul Baru</span>
         </a>
     </div>
 </div>
@@ -409,7 +409,7 @@
                 </p>
                 <div class="flex items-center justify-center gap-3">
                     <a href="{{ route('teacher.modules.create') }}" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm transition-all">
-                        <span>+ Buat Modul Baru</span>
+                        <span>Buat Modul Baru</span>
                     </a>
                     <a href="{{ route('teacher.library.index') }}" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-all">
                         <span>Jelajahi Library Modul</span>
