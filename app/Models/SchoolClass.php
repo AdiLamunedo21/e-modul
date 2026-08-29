@@ -3,11 +3,46 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class SchoolClass extends Model
 {
     protected $table = 'classes';
     protected $guarded = ['id'];
+
+    /**
+     * Boot model events untuk otomatisasi kode kelas.
+     */
+    protected static function booted()
+    {
+        static::creating(function ($schoolClass) {
+            if (empty($schoolClass->code)) {
+                $schoolClass->code = self::generateUniqueCode();
+            }
+        });
+    }
+
+    /**
+     * Menghasilkan kode kelas acak unik (6 karakter alfanumerik huruf kapital).
+     */
+    public static function generateUniqueCode(): string
+    {
+        do {
+            $code = strtoupper(Str::random(6));
+        } while (self::where('code', $code)->exists());
+
+        return $code;
+    }
+
+    /**
+     * Memperbarui / mengacak ulang kode kelas.
+     */
+    public function regenerateCode(): string
+    {
+        $newCode = self::generateUniqueCode();
+        $this->update(['code' => $newCode]);
+        return $newCode;
+    }
 
     public function major()
     {
@@ -16,7 +51,7 @@ class SchoolClass extends Model
 
     public function students()
     {
-        return $this->hasMany(Student::class, 'class_id');
+        return $this->belongsToMany(Student::class, 'class_student', 'class_id', 'student_id')->withTimestamps();
     }
 
     public function modules()

@@ -138,7 +138,7 @@ class StudentController extends Controller
         $validated = $request->validate([
             'name'            => ['required', 'string', 'max:255'],
             'identity_number' => ['required', 'string', 'max:100', 'unique:students,identity_number'],
-            'class_id'        => ['required', 'exists:classes,id'],
+            'class_id'        => ['nullable', 'exists:classes,id'],
             'password'        => ['required', 'string', 'min:6'],
             'subject_ids'     => ['nullable', 'array'],
             'subject_ids.*'   => ['exists:subjects,id'],
@@ -146,7 +146,6 @@ class StudentController extends Controller
             'name.required'            => 'Nama lengkap siswa wajib diisi.',
             'identity_number.required' => 'NISN / No. Induk Siswa wajib diisi.',
             'identity_number.unique'   => 'NISN / Identitas ini sudah terdaftar untuk siswa lain.',
-            'class_id.required'        => 'Rombel Kelas wajib dipilih.',
             'class_id.exists'          => 'Kelas yang dipilih tidak valid.',
             'password.required'        => 'Password akun siswa wajib diisi.',
             'password.min'             => 'Password minimal terdiri dari 6 karakter.',
@@ -155,7 +154,7 @@ class StudentController extends Controller
         $student = Student::create([
             'name'            => $validated['name'],
             'identity_number' => $validated['identity_number'],
-            'class_id'        => $validated['class_id'],
+            'class_id'        => $validated['class_id'] ?? null,
             'password'        => Hash::make($validated['password']),
         ]);
 
@@ -163,8 +162,13 @@ class StudentController extends Controller
             $student->subjects()->sync($validated['subject_ids']);
         }
 
-        return redirect()->route('admin.students.class', $student->class_id)
-            ->with('success', "Akun siswa {$student->name} (NISN: {$student->identity_number}) berhasil didaftarkan ke {$student->schoolClass?->full_name}.");
+        if ($student->class_id) {
+            return redirect()->route('admin.students.class', $student->class_id)
+                ->with('success', "Akun siswa {$student->name} (NISN: {$student->identity_number}) berhasil didaftarkan ke {$student->schoolClass?->full_name}.");
+        }
+
+        return redirect()->route('admin.students.index')
+            ->with('success', "Akun siswa {$student->name} (NISN: {$student->identity_number}) berhasil didaftarkan.");
     }
 
     /**
@@ -180,7 +184,7 @@ class StudentController extends Controller
                 'max:100',
                 Rule::unique('students', 'identity_number')->ignore($student->id),
             ],
-            'class_id'        => ['required', 'exists:classes,id'],
+            'class_id'        => ['nullable', 'exists:classes,id'],
             'password'        => ['nullable', 'string', 'min:6'],
             'subject_ids'     => ['nullable', 'array'],
             'subject_ids.*'   => ['exists:subjects,id'],
@@ -188,13 +192,13 @@ class StudentController extends Controller
             'name.required'            => 'Nama lengkap siswa wajib diisi.',
             'identity_number.required' => 'NISN / Identitas wajib diisi.',
             'identity_number.unique'   => 'NISN / Identitas ini sudah terdaftar untuk siswa lain.',
-            'class_id.required'        => 'Rombel Kelas wajib dipilih.',
+            'class_id.exists'          => 'Kelas yang dipilih tidak valid.',
             'password.min'             => 'Password baru minimal terdiri dari 6 karakter.',
         ]);
 
         $student->name = $validated['name'];
         $student->identity_number = $validated['identity_number'];
-        $student->class_id = $validated['class_id'];
+        $student->class_id = $validated['class_id'] ?? null;
 
         if (!empty($validated['password'])) {
             $student->password = Hash::make($validated['password']);

@@ -521,15 +521,70 @@ class Module extends Model
         return $this->materi_data['judul_materi'] ?? 'Materi Pembelajaran';
     }
 
-    /** Mendapatkan judul video YouTube */
+    /**
+     * Mendapatkan daftar video YouTube yang dinormalisasi (array of videos).
+     */
+    public function videosList(): array
+    {
+        $videoData = is_array($this->video_data) ? $this->video_data : [];
+        $videos = $videoData['videos'] ?? [];
+
+        if (empty($videos)) {
+            // Backward compatibility untuk struktur video tunggal lama
+            $rawUrl = $videoData['youtube_url'] ?? '';
+            $rawId = $videoData['youtube_id'] ?? null;
+            if (!empty($rawUrl) || !empty($rawId)) {
+                $videos = [
+                    [
+                        'title'       => $videoData['video_title'] ?? ($videoData['judul_video'] ?? 'Video Pembelajaran: ' . $this->title),
+                        'url'         => $rawUrl,
+                        'id'          => $rawId,
+                        'duration'    => (int) ($videoData['estimated_duration'] ?? ($videoData['estimasi_waktu'] ?? 15)),
+                        'description' => $videoData['deskripsi_video'] ?? '',
+                    ]
+                ];
+            }
+        }
+
+        return collect($videos)->map(function ($v, $index) {
+            $title = !empty($v['title']) ? $v['title'] : 'Video Pembelajaran ' . ($index + 1);
+            $url = $v['url'] ?? '';
+            $id = $v['id'] ?? null;
+            $embedUrl = $id ? "https://www.youtube-nocookie.com/embed/{$id}?rel=0" : null;
+
+            return [
+                'title'       => $title,
+                'url'         => $url,
+                'id'          => $id,
+                'embed_url'   => $embedUrl,
+                'description' => $v['description'] ?? '',
+            ];
+        })->values()->toArray();
+    }
+
+    /** Mendapatkan total jumlah video yang disematkan */
+    public function totalVideosCount(): int
+    {
+        return count($this->videosList());
+    }
+
+    /** Mendapatkan judul video YouTube (atau judul video pertama) */
     public function videoTitle(): string
     {
+        $videos = $this->videosList();
+        if (!empty($videos) && !empty($videos[0]['title'])) {
+            return $videos[0]['title'];
+        }
         return $this->video_data['video_title'] ?? 'Video Pembelajaran: ' . $this->title;
     }
 
     /** Mendapatkan YouTube ID */
     public function youtubeId(): ?string
     {
+        $videos = $this->videosList();
+        if (!empty($videos) && !empty($videos[0]['id'])) {
+            return $videos[0]['id'];
+        }
         return $this->video_data['youtube_id'] ?? null;
     }
 

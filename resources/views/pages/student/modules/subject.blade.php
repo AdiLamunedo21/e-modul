@@ -39,7 +39,7 @@
                     </span>
                 @endif
                 <span class="text-white/30 hidden sm:inline">•</span>
-                <span class="text-blue-100/80 hidden sm:inline text-xs font-medium">{{ $class->full_name ?? 'Kelas Siswa' }}</span>
+                <span class="text-blue-100/80 hidden sm:inline text-xs font-medium">SMKN 3 Yogyakarta</span>
             </div>
 
             {{-- Subject Title --}}

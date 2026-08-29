@@ -33,8 +33,18 @@
                     Masuk ke E-Modul
                 </button>
             </form>
-            <div class="mt-6 text-center">
-                <a href="{{ url('/') }}" class="text-sm text-slate-500 hover:text-blue-600 transition">← Kembali ke Beranda</a>
+
+            <div class="mt-5 text-center">
+                <p class="text-xs text-slate-500">
+                    Belum memiliki akun siswa?
+                    <a href="{{ route('register.student') }}" class="font-bold text-blue-600 hover:text-blue-700 hover:underline">
+                        Daftar Akun Baru
+                    </a>
+                </p>
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-slate-100 text-center">
+                <a href="{{ url('/') }}" class="text-xs font-medium text-slate-400 hover:text-blue-600 transition">← Kembali ke Beranda</a>
             </div>
         </div>
     </div>

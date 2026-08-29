@@ -157,7 +157,18 @@ class ClassController extends Controller
         ]);
 
         return redirect()->route('teacher.classes.show', $schoolClass)
-            ->with('success', "Rombel {$schoolClass->full_name} berhasil dibuat! Anda dapat mulai mengimpor modul atau mendaftarkan siswa.");
+            ->with('success', "Rombel {$schoolClass->full_name} berhasil dibuat dengan Kode Kelas: {$schoolClass->code}! Bagikan kode ini kepada siswa agar mereka dapat langsung bergabung.");
+    }
+
+    /**
+     * Memperbarui / mengacak ulang kode kelas.
+     */
+    public function regenerateCode(SchoolClass $class)
+    {
+        $newCode = $class->regenerateCode();
+
+        return redirect()->back()
+            ->with('success', "Kode kelas {$class->full_name} berhasil diperbarui menjadi: {$newCode}.");
     }
 
     /**
@@ -279,7 +290,7 @@ class ClassController extends Controller
     }
 
     /**
-     * Menghapus kelas rombel beserta seluruh data siswa alumni dan modulnya secara bersih (Purge).
+     * Menghapus kelas rombel dan modulnya, serta melepaskan siswa (unassign) tanpa menghapus akun siswa.
      */
     public function destroy(SchoolClass $class)
     {
@@ -288,16 +299,9 @@ class ClassController extends Controller
         $modulesCount = $class->modules()->count();
 
         DB::transaction(function () use ($class) {
-            // 1. Hapus seluruh data siswa di kelas ini beserta relasi-relasinya
-            foreach ($class->students as $student) {
-                $student->subjects()->detach();
-                StudentResult::where('student_id', $student->id)->delete();
-                VideoSummary::where('student_id', $student->id)->delete();
-                EmbedSubmission::where('student_id', $student->id)->delete();
-                JobSheetSubmission::where('student_id', $student->id)->delete();
-                Submission::where('student_id', $student->id)->delete();
-                $student->delete();
-            }
+            // 1. Lepaskan seluruh siswa dari kelas ini (akun siswa tetap utuh, NISN & nama aman)
+            Student::where('class_id', $class->id)->update(['class_id' => null]);
+            $class->students()->detach();
 
             // 2. Hapus seluruh modul di kelas ini
             foreach ($class->modules as $module) {
@@ -309,7 +313,7 @@ class ClassController extends Controller
         });
 
         return redirect()->route('teacher.classes.index')
-            ->with('success', "Kelas {$className} beserta seluruh data alumni ({$studentsCount} siswa) dan {$modulesCount} modul berhasil dihapus secara bersih dari database.");
+            ->with('success', "Kelas {$className} beserta {$modulesCount} modul berhasil dihapus. {$studentsCount} siswa terdaftar telah dilepaskan dari kelas ini dan akun mereka tetap aman untuk bergabung ke kelas lain.");
     }
 
     /**
@@ -319,8 +323,9 @@ class ClassController extends Controller
     {
         $teacher = $this->teacher();
 
-        // Validasi siswa milik kelas ini
-        if ($student->class_id !== $class->id) {
+        // Validasi siswa terdaftar di kelas ini
+        $isEnrolled = $class->students()->where('students.id', $student->id)->exists() || $student->class_id === $class->id;
+        if (!$isEnrolled) {
             return response()->json(['success' => false, 'message' => 'Siswa tidak terdaftar di kelas ini.'], 404);
         }
 

@@ -9,23 +9,27 @@ Aplikasi ini merupakan platform _Content Management System_ (CMS) E-Modul berbas
 Pengembangan platform ini dilatarbelakangi oleh beberapa kondisi nyata dalam proses belajar mengajar di sekolah:
 
 1. **Fragmentasi Instrumen & Media Pembelajaran:**  
-   Penggunaan instrumen dan media pembelajaran saat ini masih terpisah-pisah di berbagai platform pihak ketiga. Sebagai contoh, guru menggunakan formulir daring (seperti Google Forms) untuk pelaksanaan _pre-test_, membagikan Lembar Kerja Peserta Didik (LKPD) berformat dokumen Word melalui tautan unduhan terpisah, serta menginstruksikan pengumpulan tugas melalui tautan lain. Kerumitan berpindah-pindah tautan ini menyita banyak waktu efektif pembelajaran dan membingungkan siswa.
+   Penggunaan instrumen dan media pembelajaran sebelumnya masih terpisah-pisah di berbagai platform pihak ketiga. Sebagai contoh, guru menggunakan formulir daring (seperti Google Forms) untuk pelaksanaan _pre-test_, membagikan Lembar Kerja Peserta Didik (LKPD) berformat dokumen Word melalui tautan unduhan terpisah, serta menginstruksikan pengumpulan tugas melalui platform lain. Kerumitan berpindah-pindah tautan ini menyita banyak waktu efektif pembelajaran dan membingungkan siswa.
 
 2. **Karakteristik Pembelajaran Sistem Blok & Ketiadaan Repositori Terpusat:**  
-   Materi yang disampaikan di kelas sering kali tidak terdokumentasi dan tersimpan secara terpusat, sehingga menyulitkan siswa untuk melakukan pembelajaran mandiri atau mengulang materi (_review_). Kondisi ini menjadi semakin kritis mengingat alokasi waktu mata pelajaran tertentu (seperti Informatika) menerapkan sistem pembelajaran blok intensif—mencapai 8 jam pelajaran dalam satu hari dan diselesaikan dalam rentang waktu singkat (2 minggu / 14 hari). Akibatnya, siswa sangat rentan melupakan konsep dan keterampilan praktis yang telah dipelajari pada minggu sebelumnya jika tidak memiliki akses modul yang terstruktur dan berkelanjutan.
+   Materi yang disampaikan di kelas sering kali tidak terdokumentasi dan tersimpan secara terpusat, sehingga menyulitkan siswa untuk melakukan pembelajaran mandiri atau mengulang materi (_review_). Kondisi ini menjadi semakin kritis mengingat alokasi waktu mata pelajaran tertentu (seperti Informatika atau Kejuruan Teknik) menerapkan sistem pembelajaran blok intensif—mencapai 8 jam pelajaran dalam satu hari dan diselesaikan dalam rentang waktu singkat (2 minggu / 14 hari). Siswa sangat rentan melupakan konsep dan keterampilan praktis yang telah dipelajari jika tidak memiliki akses modul digital yang terstruktur dan dapat diakses setiap saat.
 
 3. **Beban Administrasi Guru dalam Monitoring & Evaluasi:**  
    Fragmentasi platform menyita waktu manajemen kelas dan menyulitkan pendidik dalam memantau rekam jejak kognitif maupun progres belajar siswa secara utuh. Proses rekapitulasi nilai menjadi tidak efisien karena guru harus membuka dan menggabungkan data dari berbagai aplikasi yang berbeda.
 
 Berdasarkan permasalahan tersebut, platform E-Modul ini dibangun menggunakan kerangka kerja **Laravel 11** dengan sistem kontrol akses multi-peran (**Admin**, **Guru**, dan **Siswa**). Platform ini hadir sebagai solusi satu pintu (_one-stop solution_) yang mempermudah guru dalam menyusun materi terstruktur serta mengelola penilaian secara komprehensif, sekaligus memberikan pengalaman belajar yang terarah, interaktif, dan mudah diakses kapan saja oleh siswa.
 
+---
+
 ### 1.2 Pernyataan Masalah (Problem Statement)
 
 Pengembangan platform ini diinisiasi untuk memecahkan masalah utama (_pain points_) yang dialami oleh pemangku kepentingan di sekolah:
 
-- **Kendala Guru:** Pengelolaan materi dan penilaian saat ini terpencar. Guru sering kali merasa dibatasi oleh _template_ modul digital yang kaku. Selain itu, seorang guru kejuruan sering kali mengampu lebih dari satu mata pelajaran sekaligus (misal: Informatika dan Teknik Elektro). Dibutuhkan sebuah sistem _builder_ yang modular, terstruktur sesuai 5 Bagian Umum E-Modul, dan mendukung *Subject Switcher* terintegrasi.
-- **Kendala Siswa:** Siswa sering mengalami disorientasi jika materi disajikan dalam satu halaman panjang tak berujung (_scroll_ panjang) atau jika dashboard dipenuhi modul mata pelajaran yang tidak mereka tempuh. Siswa membutuhkan modul digital yang terbagi ke dalam tahapan sistematis (Bagian Awal, Pendahuluan, Kegiatan Belajar, Evaluasi & Latihan, hingga Bagian Akhir), tampilan modul yang disaring khusus berdasarkan mata pelajaran yang mereka ambil, serta transparansi penilaian hasil belajar.
+- **Kendala Guru:** Pengelolaan materi dan penilaian saat ini terpencar. Guru sering kali merasa dibatasi oleh _template_ modul digital yang kaku. Selain itu, seorang guru kejuruan sering kali mengampu lebih dari satu mata pelajaran sekaligus (misal: Informatika dan Teknik Elektro). Dibutuhkan sebuah sistem _builder_ yang modular, terstruktur sesuai 5 Bagian Utama E-Modul, mendukung integrasi multimedia multi-video YouTube, dan dilengkapi *Subject Switcher* terintegrasi.
+- **Kendala Siswa:** Siswa sering mengalami disorientasi jika materi disajikan dalam satu halaman panjang tak berujung (_scroll_ panjang) atau jika dashboard dipenuhi modul mata pelajaran yang tidak mereka tempuh. Siswa membutuhkan modul digital yang terbagi ke dalam tahapan sistematis (Bagian Awal, Pendahuluan, Kegiatan Belajar, Evaluasi & Latihan, hingga Bagian Akhir), pencarian & filter instan modul yang efisien di dashboard, tampilan modul yang disaring khusus berdasarkan mata pelajaran yang mereka ambil, pemutar video interaktif dengan daftar putar, serta transparansi penilaian hasil belajar.
 - **Kendala Manajemen Sekolah (Admin & Kurikulum):** Pihak kurikulum memerlukan panel administrasi terpadu untuk mengelola Master Data Pengguna (Guru & Siswa), Master Kurikulum (Mata Pelajaran & Jurusan/Konsentrasi Keahlian), pembagian Rombongan Belajar (Rombel Kelas), penentuan mata pelajaran yang wajib ditempuh siswa, serta supervisi mutu materi modul dari seluruh guru.
+
+---
 
 ### 1.3 Tujuan Utama (Objectives)
 
@@ -33,35 +37,37 @@ Tujuan dari proyek ini adalah membangun portal E-Modul terpusat berbasis **Larav
 
 Sistem ini ditargetkan untuk:
 
-1. Memberikan fasilitas _E-Module Builder_ bagi guru untuk merakit materi secara terstruktur menjadi **5 Bagian Umum Standar E-Modul (15 Komponen Fleksibel)**:
+1. Memberikan fasilitas _E-Module Builder_ bagi guru untuk merakit materi secara terstruktur menjadi **5 Bagian Utama Standar E-Modul (15 Komponen Fleksibel)**:
    - **1. Bagian Awal (4 Komponen):** Halaman sampul (_cover_), kata pengantar, daftar isi, serta petunjuk penggunaan e-modul bagi siswa dan guru (dikelola mandiri via `BagianAwalController`).
    - **2. Pendahuluan (4 Komponen):** Rumusan tujuan pembelajaran & capaian, peta konsep alur materi, glosarium istilah (dikelola via `PendahuluanController`), serta soal latihan diagnostik / Pre-test (`has_pre_test` dikelola via `PreTestController`).
-   - **3. Kegiatan Belajar / Isi Materi (2 Komponen):** Uraian materi pembelajaran berbasis teks & slide PPT (`has_materi`), serta multimedia video pembelajaran YouTube & resume (`has_video`).
+   - **3. Kegiatan Belajar / Isi Materi (2 Komponen):** Uraian materi pembelajaran berbasis teks & slide PPT (`has_materi`), serta integrasi multimedia **Multi-Video YouTube & Keterangan Video dengan Satu Ringkasan Terpadu** (`has_video` dikelola via `VideoController`).
    - **4. Evaluasi & Latihan (3 Komponen):** Game edukasi interaktif & media embed simulator (`has_embed`), lembar kerja praktik / _Job Sheet_ PDF (`has_job_sheet`), serta tugas lembar kerja peserta didik & umpan balik / LKPD (`has_lkpd`).
    - **5. Bagian Akhir (2 Komponen):** Tes akhir modul / Post-test (`has_post_test`), dan daftar pustaka kepustakaan & rujukan (dikelola mandiri via `DaftarPustakaController`).
 2. Menyediakan **Panel Administrasi Master Data Terpadu** bagi Admin untuk mengelola data akun guru, akun siswa per rombel kelas, master mata pelajaran, master jurusan / konsentrasi keahlian, dan rombongan belajar kelas.
 3. Mengimplementasikan **Antarmuka Master Data Siswa Berjenjang (Two-Tier Architecture)**: Halaman utama menampilkan direktori kartu rombel kelas (seperti *Kelas X TE 2*, *Kelas X PPLG 1*), diikuti dengan halaman khusus daftar siswa per kelas terpilih untuk mempermudah administrasi.
 4. Menerapkan **Ploting Mata Pelajaran Siswa saat Registrasi**: Admin dapat menentukan mata pelajaran apa saja yang harus ditempuh oleh setiap siswa.
-5. Menyediakan **Personalisasi Dashboard Siswa & Proteksi Akses**: Dashboard dan sidebar navigasi siswa hanya menampilkan kartu mata pelajaran dan modul yang didaftarkan untuk siswa tersebut, serta mencegah siswa mengakses modul di luar mata pelajarannya.
-6. Menyediakan **Library Modul (Repositori Kolaboratif Antar-Guru)** untuk saling berbagi pemikiran dan instrumen pembelajaran digital, di mana guru dapat membagikan modul karyanya, meninjau kurikulum modul guru lain, dan melakukan penyalinan mendalam (*deep clone*) ke *workspace* pribadi.
-7. Memfasilitasi guru dengan **Grading Center Adaptif** dan **Ekspor Spreadsheet Excel (.xlsx)** yang dinamis menyesuaikan komponen aktif pada modul.
-8. Mengintegrasikan **Manajemen Multi-Tanggung Jawab Guru**, memungkinkan seorang guru mengampu 2 atau lebih mata pelajaran dengan *Subject Switcher* pada seluruh menu guru.
+5. Menyediakan **Personalisasi Dashboard Siswa dengan Live Filter & Search Toolbar**: Dashboard siswa dilengkapi pencarian instan (Live Search), chip filter tingkat kelas, filter status penyelesaian (*To-Do / Completed*), kartu KPI progres belajar, dan navigasi modular per mata pelajaran yang ditempuh.
+6. Menyediakan **Integrasi Multi-Video YouTube & Satu Ringkasan Terpadu**: Guru dapat menambahkan banyak video YouTube lengkap dengan judul, tautan URL, keterangan video khusus, dan tombol hapus individual. Siswa menyimak seluruh video melalui pemutar daftar putar (*playlist switcher*) interaktif dan menyusun **1 (satu) resume intisari terpadu**.
+7. Menyediakan **Library Modul (Repositori Kolaboratif Antar-Guru)** untuk saling berbagi dan menduplikasi (*deep clone*) instrumen pembelajaran digital.
+8. Memfasilitasi guru dengan **Grading Center Adaptif** dan **Ekspor Spreadsheet Excel (.xlsx)** yang dinamis menyesuaikan komponen aktif pada modul.
+9. Mengintegrasikan **Manajemen Multi-Tanggung Jawab Guru**, memungkinkan seorang guru mengampu 2 atau lebih mata pelajaran dengan *Subject Switcher* pada seluruh menu guru.
+
+---
 
 ### 1.4 Ruang Lingkup Proyek (Scope of Work)
 
 Untuk fase rilis operasional, ruang lingkup aplikasi mencakup:
 
-- Pengembangan antarmuka untuk 3 peran: Admin (Supervisi & Master Data), Guru (Pendidik & Kreator Modul), dan Siswa (Peserta Didik).
-- Master Data Akademik: Manajemen Guru (Multi-Mapel), Siswa (Berbasis Rombel Kelas & Mapel), Mata Pelajaran, Jurusan/Konsentrasi Keahlian, dan Rombel Kelas.
-- Antarmuka berjenjang pada Master Data Siswa (Direktori Rombel Kelas $\rightarrow$ Detail Siswa per Kelas).
-- Personalisasi Portal Siswa: Filter modul dan sidebar berdasarkan mata pelajaran yang ditempuh siswa serta validasi hak akses per mapel.
-- Pembuatan **Dynamic E-Module Builder** dengan arsitektur 5 Bagian Umum E-Modul (15 komponen terisolasi).
-- Sistem sakelar instan (Toggle Switch) yang memungkinkan guru mengaktifkan/menonaktifkan komponen di setiap bagian.
-- Sistem **Library Modul & Repositori Kolaboratif** (berbagi izin modul, katalog publik sekolah, pratinjau kurikulum, dan kloning instrumen pembelajaran).
-- Sistem penyaringan dinamis (*Subject Switcher & Filters*) pada Manajer Modul, Grading Center, Laporan Nilai, dan Kelas Binaan.
-- Sistem navigasi siswa berbasis _Pagination_ dengan aturan restriktif.
-- Penilaian hibrida otomatis (Pre-test & Post-test) dan manual (Video, Praktik Interaktif Embed, Job Sheet, dan LKPD).
-- Pembangkit laporan spreadsheet Excel (.xlsx) dengan struktur kolom dinamis.
+- **Multi-Guard Access:** Admin (Supervisi & Master Data), Guru (Pendidik & Kreator Modul), dan Siswa (Peserta Didik).
+- **Master Data Akademik:** Manajemen Guru (Multi-Mapel), Siswa (Berbasis Rombel Kelas & Mapel), Mata Pelajaran, Jurusan/Konsentrasi Keahlian, dan Rombel Kelas.
+- **Antarmuka Berjenjang Siswa:** Direktori Rombel Kelas $\rightarrow$ Detail Siswa per Kelas.
+- **Personalisasi Portal Siswa:** Live filter & search toolbar, filter kartu mata pelajaran, sidebar dinamis via View Composer, dan proteksi hak akses per mapel.
+- **Dynamic E-Module Builder (5 Bagian & 15 Komponen):** Pengelolaan konten independen dengan sistem sakelar instan (AJAX Toggle Switch).
+- **Fitur Multimedia Multi-Video & Keterangan:** Penambahan multi-video YouTube, keterangan video per item, tombol hapus dinamis, live embed preview, dan 1 kolom pengumpulan resume terpadu bagi siswa.
+- **Library Modul Bersama:** Repositori kurikulum terbuka antar-guru dan fasilitas *deep cloning* modul.
+- **Navigasi Siswa Bertahap (Stepper 5 Bagian):** Akses materi terstruktur dengan tombol navigasi bertahap.
+- **Penilaian Hibrida & Grading Center:** Penilaian otomatis (Pre-test & Post-test) dan manual (Resume Video, Praktik Embed, Job Sheet, dan LKPD).
+- **Ekspor Nilai Adaptif (.xlsx):** Pembangkit laporan spreadsheet Excel dinamis sesuai komponen aktif pada modul.
 
 ---
 
@@ -80,15 +86,20 @@ Sistem memisahkan wewenang dan tampilan antarmuka secara ketat berdasarkan tiga 
   - Meninjau kelayakan konten modul (_Preview Mode_) dan memantau analitik sekolah.
 - **Guru (Pendidik/Kreator Modul):**
   - Mengelola portofolio modul dengan *Subject Switcher*.
-  - Merakit konten pada 5 Bagian Umum E-Modul (15 komponen terisolasi).
+  - Merakit konten pada 5 Bagian Utama E-Modul (15 komponen terisolasi).
+  - Menambahkan banyak video YouTube dengan keterangan khusus per video serta mengatur panduan ringkasan satu pintu.
   - Mengaktifkan/menonaktifkan komponen evaluasi via sakelar AJAX.
   - Melakukan simulasi pratinjau siswa dan membagikan modul ke Library Bersama.
   - Melakukan penilaian manual di Grading Center dan mengekspor rekapitulasi nilai ke Excel (.xlsx).
 - **Siswa (Peserta Didik):**
-  - Mengakses Dashboard belajar yang dipersonalisasi sesuai mata pelajaran yang ditempuh.
-  - Membaca E-Modul secara bertahap per halaman (5 bagian).
-  - Mengerjakan pre-test/post-test, mengunggah ringkasan video, screenshot praktik embed, serta file PDF Job Sheet & LKPD.
+  - Mengakses Dashboard belajar yang dipersonalisasi dengan Live Search & Multi-Grade Filter Toolbar.
+  - Membuka katalog kelas dan modul berdasarkan mata pelajaran yang ditempuh.
+  - Membaca E-Modul secara bertahap per bagian (5 Bagian).
+  - Menonton video melalui playlist switcher, membaca keterangan video guru, dan mengumpulkan 1 ringkasan resume terpadu.
+  - Mengerjakan pre-test/post-test, mengunggah screenshot praktik embed, serta file PDF Job Sheet & LKPD.
   - Melacak progres belajar dan transparansi perolehan nilai.
+
+---
 
 ### 2.2 Arsitektur Antarmuka Master Data Siswa (Two-Tier Interface)
 
@@ -96,50 +107,68 @@ Untuk menjaga kerapian data pada skala sekolah kejuruan dengan puluhan rombongan
 - **Tingkat 1 (Direktori Rombel Kelas — `/admin/students`):** Menampilkan grid kartu informatif seluruh rombongan belajar kelas (contoh: *Kelas X TE 2*, *Kelas X PPLG 1*), metrik jumlah siswa per kelas, filter tingkat (X, XI, XII, XIII), filter jurusan, dan modal pendaftaran siswa baru secara global.
 - **Tingkat 2 (Daftar Siswa Kelas — `/admin/students/class/{class}`):** Halaman khusus yang menampilkan tabel daftar siswa di kelas tersebut, status mata pelajaran yang diambil, tombol kembali (`← Daftar Kelas`), tombol "Daftarkan Siswa ke Kelas Ini", filter pencarian siswa, serta aksi edit & hapus siswa.
 
+---
+
 ### 2.3 Personalisasi Portal Belajar Siswa
 
+- **Live Search & Multi-Grade Filter Toolbar:** Siswa dapat mencari modul secara instan berdasarkan judul materi atau nama guru/mata pelajaran, memilih filter chip tingkat kelas (Semua Tingkat, X, XI, XII, XIII), serta menyaring status pengerjaan (*To-Do / Completed*) secara *real-time* berbasis Alpine.js tanpa reload halaman.
 - **Filtering Berdasarkan Mata Pelajaran yang Ditempuh:** Siswa hanya melihat kartu mata pelajaran dan modul kelas yang sesuai dengan mata pelajaran yang ditentukan oleh Admin saat registrasi/edit siswa (`student_subjects`).
-- **Sidebar Navigasi Siswa:** Menu navigasi "Modul Belajar" pada sidebar siswa secara dinamis memuat daftar mata pelajaran yang diambil siswa melalui View Composer `AppServiceProvider`.
+- **Sidebar Navigasi Siswa Dinamis:** Menu navigasi "Modul Belajar" pada sidebar siswa secara dinamis memuat daftar mata pelajaran yang diambil siswa melalui View Composer `AppServiceProvider`.
 - **Proteksi Hak Akses Halaman Modul:** Jika siswa mencoba membuka modul dari mata pelajaran yang tidak ia tempuh (`/student/modules/subject/{subject}`), controller secara otomatis menolak akses dan mengembalikan siswa ke dashboard dengan pesan notifikasi.
 
-### 2.4 Struktur 5 Bagian Umum E-Modul (Modular & Paginated System)
+---
+
+### 2.4 Struktur 5 Bagian Utama E-Modul (Modular & Paginated System)
 
 Materi E-Modul dikelompokkan ke dalam **5 Bagian Utama**:
 
 ```
-┌──────────────────────────────────────────────────────────────────────────────────────────┐
-│                                STRUKTUR 5 BAGIAN E-MODUL                                 │
-├───────────────────────────────┬──────────────────────────────────────────────────────────┤
-│ 1. Bagian Awal                │ • Halaman Sampul (Cover)                                 │
-│    (4 Komponen Pengantar)     │ • Kata Pengantar                                         │
-│                               │ • Daftar Isi                                             │
-│                               │ • Petunjuk Penggunaan bagi Siswa & Guru                  │
-├───────────────────────────────┼──────────────────────────────────────────────────────────┤
-│ 2. Pendahuluan                │ • Tujuan Pembelajaran & Rumusan Capaian                  │
-│    (4 Komponen Orientasi)     │ • Peta Konsep (Diagram Alur Materi)                      │
-│                               │ • Glosarium (Kata Kunci & Istilah Penting)               │
-│                               │ • Soal Latihan Diagnostik / Pre-test (has_pre_test)      │
-├───────────────────────────────┼──────────────────────────────────────────────────────────┤
-│ 3. Kegiatan Belajar           │ • Uraian Materi Pembelajaran & Slide PPT (has_materi)    │
-│    (2 Komponen Isi Materi)    │ • Multimedia Video YouTube & Resume (has_video)          │
-├───────────────────────────────┼──────────────────────────────────────────────────────────┤
-│ 4. Evaluasi & Latihan         │ • Game Edukasi Interaktif & Embed Simulator (has_embed)  │
-│    (3 Komponen Praktik/Tugas) │ • Lembar Kerja Praktik / Job Sheet PDF (has_job_sheet)   │
-│                               │ • Tugas LKPD & Umpan Balik / Feedback (has_lkpd)         │
-├───────────────────────────────┼──────────────────────────────────────────────────────────┤
-│ 5. Bagian Akhir               │ • Tes Akhir Modul / Post-test (has_post_test)            │
-│    (2 Komponen Penutup)       │ • Daftar Pustaka & Referensi Kepustakaan                 │
-└───────────────────────────────┴──────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                       STRUKTUR 5 BAGIAN E-MODUL                                       │
+├───────────────────────────────┬───────────────────────────────────────────────────────────────────────┤
+│ 1. Bagian Awal                │ • Halaman Sampul (Cover)                                              │
+│    (4 Komponen Pengantar)     │ • Kata Pengantar                                                      │
+│                               │ • Daftar Isi                                                          │
+│                               │ • Petunjuk Penggunaan bagi Siswa & Guru                               │
+├───────────────────────────────┼───────────────────────────────────────────────────────────────────────┤
+│ 2. Pendahuluan                │ • Tujuan Pembelajaran & Rumusan Capaian                               │
+│    (4 Komponen Orientasi)     │ • Peta Konsep (Diagram Alur Materi)                                   │
+│                               │ • Glosarium (Kata Kunci & Istilah Penting)                            │
+│                               │ • Soal Latihan Diagnostik / Pre-test (has_pre_test)                   │
+├───────────────────────────────┼───────────────────────────────────────────────────────────────────────┤
+│ 3. Kegiatan Belajar           │ • Uraian Materi Pembelajaran & Slide PPT (has_materi)                 │
+│    (2 Komponen Isi Materi)    │ • Multi-Video YouTube + Keterangan & 1 Resume Terpadu (has_video)      │
+├───────────────────────────────┼───────────────────────────────────────────────────────────────────────┤
+│ 4. Evaluasi & Latihan         │ • Game Edukasi Interaktif & Embed Simulator (has_embed)               │
+│    (3 Komponen Praktik/Tugas) │ • Lembar Kerja Praktik / Job Sheet PDF (has_job_sheet)                │
+│                               │ • Tugas LKPD & Umpan Balik / Feedback (has_lkpd)                      │
+├───────────────────────────────┼───────────────────────────────────────────────────────────────────────┤
+│ 5. Bagian Akhir               │ • Tes Akhir Modul / Post-test (has_post_test)                         │
+│    (2 Komponen Penutup)       │ • Daftar Pustaka & Referensi Kepustakaan                              │
+└───────────────────────────────┴───────────────────────────────────────────────────────────────────────┘
 ```
 
-### 2.5 Dinamika Sakelar Toggle (15 Komponen Fleksibel)
+---
 
-Guru diberikan kebebasan mutlak (_Toggle System_) untuk menghidupkan atau mematikan komponen di seluruh 5 bagian modul. Siswa hanya akan melihat halaman/tahapan yang diaktifkan oleh guru, dengan aturan navigasi yang mengikat.
+### 2.5 Fitur Multi-Video YouTube & Keterangan Video (Bagian 3.2)
+
+1. **Multi-Video Card Repeater:**
+   - Guru dapat menambahkan lebih dari satu video pembelajaran YouTube dalam satu modul.
+   - Setiap kartu video dilengkapi input **Judul Video**, input **Tautan / URL YouTube**, dan input **Keterangan / Catatan Video (Opsional)**.
+   - Dilengkapi tombol **"Hapus Video"** pada setiap kartu video untuk menghapus video tertentu dari daftar.
+   - Live Embed Player secara otomatis mendeteksi URL YouTube dan menampilkan pemutar video secara langsung pada editor guru.
+2. **Satu Ringkasan (Resume) Terpadu Siswa:**
+   - Meskipun terdapat banyak video YouTube dalam satu modul, form ringkasan siswa **tetap 1 (satu)** untuk merangkum seluruh video tersebut.
+   - Di sisi siswa, antarmuka Bagian 3.2 menyediakan **Playlist Tab Switcher** interaktif untuk berpindah video secara instan tanpa reload halaman, serta menampilkan keterangan video guru secara dinamis.
+   - Batasan minimal karakter (*min summary characters*) dapat dikonfigurasi guru untuk menjamin kedalaman rangkuman siswa.
+   - Siswa dapat membatalkan dan mengedit resume selama status penilaian masih *pending*.
+
+---
 
 ### 2.6 Sistem Penilaian Adaptif & Laporan Excel (.XLSX)
 
-- **Penilaian Adaptif:** Mesin penilaian (_Grading System_) beradaptasi secara dinamis dengan komponen evaluasi yang diaktifkan guru (Pre-test, Video, Embed, Job Sheet, LKPD, Post-test).
-- **Kebijakan Unggah Ulang (Re-submission):** Siswa diizinkan membatalkan dan mengunggah ulang tugas selama status penilaian masih `pending`. Jika sudah `graded`, form terkunci otomatis.
+- **Penilaian Adaptif:** Mesin penilaian (_Grading System_) beradaptasi secara dinamis dengan komponen evaluasi yang diaktifkan guru (Pre-test, Video Summary, Embed, Job Sheet, LKPD, Post-test).
+- **Kebijakan Unggah Ulang (Re-submission):** Siswa diizinkan membatalkan dan mengunggah ulang tugas selama status penilaian masih `pending`. Jika sudah dinilai (`graded`), form terkunci otomatis.
 - **Ekspor Spreadsheet Excel (.xlsx):** Sistem mengagregasi seluruh komponen nilai aktif beserta data siswa ke dalam format `.xlsx` yang kolomnya menyesuaikan komponen modul secara dinamis.
 
 ---
@@ -160,23 +189,28 @@ Pusat kendali operasional sekolah:
 - **Master Data Rombel Kelas (`/admin/classes`):** Manajemen kelas berdasarkan tingkat dan jurusan dengan format penamaan otomatis (`Kelas X TE 2`).
 - **Standardized Modals:** Seluruh modal formulir terstandarisasi (`max-w-md` untuk create/edit, `max-w-sm` untuk konfirmasi hapus).
 
+---
+
 ### 3.2 Dashboard & Workspace Guru (Teacher Portal)
 
 - **Manajer Modul (`/teacher/modules`):** Menampilkan daftar modul dengan *Subject Switcher*, badge mapel, dan progress pengumpulan tugas siswa.
 - **Form Pembuatan Modul Baru:** Pilihan mata pelajaran (dengan penanda mapel yang diampu), judul modul, dan target rombel kelas.
 - **E-Module Detail & Builder (5 Bagian):** Antarmuka terstruktur 5 Bagian Utama E-Modul dengan progress kesiapan komponen dan sakelar AJAX.
-- **Dedicated Modular Component Editors:** Editor mandiri untuk Bagian Awal, Pendahuluan, Pre-test, Materi & PPT, Video YouTube, Embed Praktik, Job Sheet PDF, Tugas LKPD, Post-test, dan Daftar Pustaka.
+- **Dedicated Modular Component Editors:** Editor mandiri untuk Bagian Awal, Pendahuluan, Pre-test, Materi & PPT, Video YouTube (Multi-Video), Embed Praktik, Job Sheet PDF, Tugas LKPD, Post-test, dan Daftar Pustaka.
 - **Grading Center (`/teacher/grading`):** Panel penilaian tugas siswa dengan filter mata pelajaran dan matriks nilai adaptif.
 - **Library Modul (`/teacher/library`):** Repositori publik antar-guru untuk berbagi dan menduplikasi (*deep clone*) modul pembelajaran.
 - **Laporan Nilai (`/teacher/reports`):** Rekapitulasi nilai dan ekspor spreadsheet Excel (.xlsx).
 - **Direktori Kelas Binaan (`/teacher/classes`):** Pemantauan rombel kelas yang menerima modul guru bersangkutan.
 
+---
+
 ### 3.3 Dashboard & Portal Belajar Siswa (Student Portal)
 
-- **Personalisasi Dashboard (`/student/dashboard`):** Menampilkan ringkasan KPI belajar, kartu mata pelajaran yang ditempuh, serta modul yang ditugaskan per mata pelajaran.
+- **Personalisasi Dashboard (`/student/dashboard`):** Menampilkan ringkasan KPI belajar, Live Search & Filter Toolbar, kartu mata pelajaran yang ditempuh, serta modul yang ditugaskan per mata pelajaran.
 - **Navigasi Sidebar Dinamis:** Daftar sub-menu mata pelajaran disaring hanya untuk mata pelajaran yang diambil siswa.
 - **Halaman Modul per Mapel (`/student/modules/subject/{subject}`):** Katalog modul khusus untuk mata pelajaran terpilih lengkap dengan filter status (*To-Do / Completed*).
-- **Antarmuka Belajar Bertahap (Paginated & Restriktif):** Alur pengerjaan berurutan melewati 5 bagian modul dengan tombol navigasi terkunci sebelum aktivitas tuntas.
+- **Direktori Modul Kelas (`/student/classes/{class}` & `/student/classes/{class}/subjects/{subject}/modules`):** Akses hierarkis materi modul kelas yang terdaftar.
+- **Antarmuka Belajar Bertahap (Paginated & Restriktif):** Alur pengerjaan berurutan melewati 5 bagian modul dengan pemutar multi-video YouTube, keterangan video, dan pengumpulan resume terpadu.
 
 ---
 
@@ -206,23 +240,25 @@ graph TD
     C --> D[Buat Modul: Pilih Mapel & Target Kelas]
     D --> E[Module Builder: 5 Bagian & 15 Komponen]
     E --> F[Toggle Komponen & Isi Editor Mandiri]
-    E --> G[Publikasikan Modul / Bagikan ke Library]
-    B --> H[Grading Center: Nilai Tugas Siswa]
-    B --> I[Ekspor Laporan Nilai Excel .xlsx]
+    F --> G[Multi-Video YouTube: Tambah Video, Keterangan & Live Preview]
+    E --> H[Publikasikan Modul / Bagikan ke Library]
+    B --> I[Grading Center: Nilai Tugas Siswa]
+    B --> J[Ekspor Laporan Nilai Excel .xlsx]
 ```
 
 ### 4.3 Alur Siswa (Belajar Bertahap per Mapel)
 
 ```mermaid
 graph TD
-    A[Siswa Login] --> B[Dashboard Siswa: Khusus Mapel Ditempuh]
+    A[Siswa Login] --> B[Dashboard Siswa: Live Search & Filter]
     B --> C[Buka Modul dari Mapel yang Diambil]
     C --> D[1. Bagian Awal: Cover, Pengantar, Petunjuk]
     D --> E[2. Pendahuluan: Capaian & Pre-test]
-    E --> F[3. Kegiatan Belajar: Materi PPT & Video YouTube]
-    F --> G[4. Evaluasi & Latihan: Embed, Job Sheet & LKPD]
-    G --> H[5. Bagian Akhir: Post-test & Daftar Pustaka]
-    H --> I[Selesai: Rekap Nilai Transparan di Dashboard]
+    E --> F[3. Kegiatan Belajar: Materi PPT & Multi-Video YouTube + Keterangan]
+    F --> G[Kirim 1 Ringkasan Resume Terpadu]
+    G --> H[4. Evaluasi & Latihan: Embed, Job Sheet & LKPD]
+    H --> I[5. Bagian Akhir: Post-test & Daftar Pustaka]
+    I --> J[Selesai: Rekap Nilai Transparan di Dashboard]
 ```
 
 ---
@@ -263,6 +299,7 @@ Sistem menerapkan **Multi-Guard Authentication**:
   - Relasi `hasMany(SchoolClass::class, 'major_id')`.
 - **Model `Module`**:
   - Relasi `belongsTo(Teacher::class)`, `belongsTo(Subject::class)`, `belongsTo(SchoolClass::class, 'class_id')`.
+  - Helper Multi-Video: `videosList()`, `totalVideosCount()`, `videoTitle()`, `youtubeId()`, `youtubeEmbedUrl()`.
   - Helper 5 Bagian: `moduleSectionsSummary()`, `bagianAwalComponents()`, `pendahuluanComponents()`, `kegiatanBelajarComponents()`, `evaluasiLatihanComponents()`, `bagianAkhirComponents()`.
 
 ---
@@ -330,6 +367,7 @@ erDiagram
         bigint class_id FK
         string title
         text informasi_umum_data "JSON: Bagian Awal & Pendahuluan & Daftar Pustaka"
+        text video_data "JSON: Multi-Video, Keterangan & Pengaturan Ringkasan"
         boolean has_pre_test
         boolean has_materi
         boolean has_video
@@ -367,30 +405,36 @@ erDiagram
     MODULES ||--o{ STUDENT_RESULTS : "dievaluasi"
 ```
 
-### 6.2 Data Dictionary (Kamus Data Tabel Utama)
+### 6.2 Data Dictionary Struktur Data Video (`video_data` JSON)
 
-**1. Tabel `ADMINS`, `TEACHERS`, `STUDENTS`**
-- `ADMINS`: `id`, `name`, `identity_number` (NIP), `password`.
-- `TEACHERS`: `id`, `name`, `identity_number` (NUPTK/NIP), `password`.
-- `STUDENTS`: `id`, `name`, `identity_number` (NISN), `class_id` (FK `classes`), `password`.
-
-**2. Tabel `MAJORS` & `CLASSES`**
-- `MAJORS`: `id`, `name`, `code`, `description`.
-- `CLASSES`: `id`, `major_id` (FK `majors`), `grade` (`X`, `XI`, `XII`, `XIII`), `section` (`1`, `2`, `3`), `major_name`.
-
-**3. Tabel `SUBJECTS`, `TEACHER_SUBJECTS`, & `STUDENT_SUBJECTS`**
-- `SUBJECTS`: `id`, `name`, `code`, `icon`, `color`, `description`.
-- `TEACHER_SUBJECTS`: `id`, `teacher_id` (FK `teachers`), `subject_id` (FK `subjects`).
-- `STUDENT_SUBJECTS`: `id`, `student_id` (FK `students`), `subject_id` (FK `subjects`).
-
-**4. Tabel `MODULES` & Instrumen Evaluasi**
-- `MODULES`: `id`, `teacher_id`, `subject_id`, `class_id`, `title`, `informasi_umum_data`, `has_pre_test`, `has_materi`, `has_video`, `has_embed`, `has_job_sheet`, `has_lkpd`, `has_post_test`, `status`, `is_shared`.
-- `PRE_TESTS` & `POST_TESTS`: Konfigurasi kuis, durasi, KKTP, acak soal.
-- `PRE_TEST_QUESTIONS` & `POST_TEST_QUESTIONS`: Butir soal pilihan ganda (A s/d E).
-- `JOB_SHEETS` & `JOB_SHEET_SUBMISSIONS`: File PDF panduan & berkas tugas siswa.
-- `LKPDS` & `SUBMISSIONS`: File PDF instrumen LKPD & berkas tugas siswa.
-- `VIDEO_SUMMARIES` & `EMBED_SUBMISSIONS`: Ringkasan video YouTube & screenshot praktik simulator embed.
-- `STUDENT_RESULTS`: Agregasi nilai adaptif per instrumen (`pending` / `graded`).
+```json
+{
+  "video_title": "Video Pembelajaran: Topik Modul",
+  "videos": [
+    {
+      "title": "Video 1: Pengenalan Konsep & Teori Dasar",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "id": "dQw4w9WgXcQ",
+      "description": "Keterangan petunjuk khusus menyimak materi video pertama."
+    },
+    {
+      "title": "Video 2: Prosedur Praktik & Langkah Kerja Mandiri",
+      "url": "https://www.youtube.com/watch?v=HXV3zeQKqGY",
+      "id": "HXV3zeQKqGY",
+      "description": "Perhatikan keselamatan kerja dan tahapan instalasi."
+    }
+  ],
+  "instructions": "Simak seluruh video pembelajaran di atas dan susun 1 ringkasan terpadu.",
+  "guiding_questions": [
+    "Apa konsep utama yang dijelaskan dalam video?",
+    "Sebutkan tahapan prosedur kerja krusial!"
+  ],
+  "min_summary_chars": 100,
+  "min_summary_words": 20,
+  "youtube_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+  "youtube_id": "dQw4w9WgXcQ"
+}
+```
 
 ---
 
@@ -404,7 +448,7 @@ erDiagram
 ### 7.2 Frontend & UI
 - **Templating:** Blade Templating Engine.
 - **Styling:** Tailwind CSS dengan estetika visual modern, micro-animation, palet warna berharmonisasi, dan *responsive layout*.
-- **Interaktivitas:** Alpine.js untuk manajemen state modal dialog & form dinamis, serta AJAX handler untuk toggle switch builder.
+- **Interaktivitas:** Alpine.js untuk manajemen state modal dialog, live search, playlist video switcher, dan form dinamis, serta AJAX handler untuk toggle switch builder.
 - **Asset Bundler:** Vite 7.
 
 ### 7.3 Penyimpanan Berkas & Pelaporan
@@ -432,14 +476,14 @@ e-modul/
 │   │   │   │   ├── MajorController.php         # Master Data Jurusan / Konsentrasi Keahlian
 │   │   │   │   └── ClassController.php         # Master Data Rombel Kelas
 │   │   │   ├── Student/                        # Student Portal Controllers
-│   │   │   │   ├── DashboardController.php     # Dashboard Siswa (Personalized Subject & Modules)
+│   │   │   │   ├── DashboardController.php     # Dashboard Siswa (Personalized Subject, Live Search & Filter)
 │   │   │   │   └── ModuleController.php        # Halaman Modul per Mapel & Pembelajaran 5 Bagian
 │   │   │   └── Teacher/                        # Dedicated Workspace & Modular Component Editors
 │   │   │       ├── BagianAwalController.php    # Editor Bagian 1 (Cover, Kata Pengantar, Daftar Isi, Petunjuk)
 │   │   │       ├── PendahuluanController.php   # Editor Bagian 2 (Tujuan Pembelajaran, Peta Konsep, Glosarium)
 │   │   │       ├── PreTestController.php       # Editor Pre-test (Kuis Diagnostik & Builder Soal)
 │   │   │       ├── MateriController.php        # Editor Materi Pembelajaran & Upload PPT
-│   │   │       ├── VideoController.php         # Editor Video YouTube & Pengaturan Resume
+│   │   │       ├── VideoController.php         # Editor Multi-Video YouTube, Keterangan & Pengaturan Resume
 │   │   │       ├── EmbedController.php         # Editor Simulator Embed & Praktik Interaktif
 │   │   │       ├── JobSheetController.php      # Editor Lembar Kerja Praktik (Job Sheet PDF)
 │   │   │       ├── LkpdController.php          # Editor Lembar Kerja Peserta Didik (LKPD PDF)
@@ -460,7 +504,7 @@ e-modul/
 │   │   ├── Subject.php                         # Model entitas Master Mata Pelajaran (Mapel)
 │   │   ├── Major.php                           # Model entitas Jurusan / Konsentrasi Keahlian
 │   │   ├── SchoolClass.php                     # Model entitas Rombel Kelas & Relasi Major
-│   │   ├── Module.php                          # Model E-Modul Sentral & Helper 5 Bagian
+│   │   ├── Module.php                          # Model E-Modul Sentral, Helper 5 Bagian & Multi-Video List
 │   │   ├── PreTest.php                         # Model konfigurasi Pre-test
 │   │   ├── PreTestQuestion.php                 # Model butir soal Pre-test
 │   │   ├── PostTest.php                        # Model konfigurasi Post-test
@@ -470,7 +514,7 @@ e-modul/
 │   │   ├── Lkpd.php                            # Model instrumen LKPD
 │   │   ├── Submission.php                      # Model tugas pengumpulan LKPD siswa
 │   │   ├── EmbedSubmission.php                 # Model bukti tangkapan layar praktik embed
-│   │   ├── VideoSummary.php                    # Model teks ringkasan video pembelajaran
+│   │   ├── VideoSummary.php                    # Model teks satu ringkasan resume terpadu video
 │   │   └── StudentResult.php                   # Model agregasi nilai adaptif per siswa
 │   └── Providers/
 │       └── AppServiceProvider.php              # View Composer untuk filter dinamis sidebar siswa
@@ -496,17 +540,22 @@ e-modul/
 │   │       │   ├── majors/index.blade.php      # Master data jurusan / keahlian
 │   │       │   └── classes/index.blade.php     # Master data rombel kelas
 │   │       ├── student/
-│   │       │   ├── dashboard.blade.php         # Portal belajar siswa (filter mapel terdaftar)
+│   │       │   ├── dashboard.blade.php         # Portal belajar siswa (Live Search & Multi-Grade Toolbar)
+│   │       │   ├── classes/
+│   │       │   │   ├── show.blade.php          # Direktori mapel kelas siswa
+│   │       │   │   └── subject_modules.blade.php # Daftar modul mapel kelas siswa
 │   │       │   └── modules/
 │   │       │       ├── index.blade.php         # Katalog modul siswa
 │   │       │       ├── subject.blade.php       # Modul belajar per mata pelajaran
-│   │       │       └── show.blade.php          # Pembelajaran interaktif 5 bagian
+│   │       │       └── show.blade.php          # Pembelajaran interaktif 5 bagian (Multi-Video Playlist)
 │   │       └── teacher/
 │   │           ├── dashboard.blade.php         # Dashboard Workspace Guru
 │   │           ├── library/                    # Katalog perpustakaan modul bersama
 │   │           ├── classes/                    # Manajemen kelas & siswa binaan
 │   │           ├── grading/                    # Pusat penilaian Grading Center
 │   │           ├── modules/                    # Manajer & Builder modul pembelajaran 5 bagian
+│   │           │   ├── video.blade.php         # Editor Multi-Video YouTube, Keterangan & Resume
+│   │           │   └── preview-video.blade.php # Simulasi Playlist Multi-Video & Resume Siswa
 │   │           └── reports/                    # Laporan & ekspor spreadsheet Excel (.xlsx)
 ├── routes/
 │   ├── web.php                                 # Rute aplikasi lengkap (Admin, Guru, Siswa)
@@ -514,8 +563,11 @@ e-modul/
 ├── tests/
 │   └── Feature/
 │       ├── AdminUserManagementTest.php         # Pengujian CRUD guru, siswa, rombel, mapel
-│       ├── StudentDashboardTest.php            # Pengujian dashboard & filter mapel siswa
+│       ├── StudentDashboardTest.php            # Pengujian dashboard, live filter, search & status
 │       ├── StudentModuleTest.php               # Pengujian akses modul & proteksi mapel
+│       ├── StudentInteractiveLearningTest.php  # Pengujian pembelajaran interaktif & submit tugas
+│       ├── TeacherVideoManagementTest.php      # Pengujian Multi-Video, Keterangan & Satu Resume
+│       ├── TeacherClassTest.php                # Pengujian manajemen kelas & siswa binaan guru
 │       ├── BagianAwalTest.php                  # Pengujian editor Bagian Awal
 │       ├── PendahuluanTest.php                 # Pengujian editor Pendahuluan
 │       ├── DaftarPustakaTest.php               # Pengujian editor Daftar Pustaka

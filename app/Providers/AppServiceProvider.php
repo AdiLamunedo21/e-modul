@@ -25,11 +25,16 @@ class AppServiceProvider extends ServiceProvider
         // View Composer untuk Sidebar Siswa: Membagikan daftar Mata Pelajaran & Jumlah Modul
         View::composer('layouts.student.sidebar', function ($view) {
             $student = Auth::guard('student')->user();
-            if ($student && $student->class_id) {
-                $query = $student->subjects()->exists() ? $student->subjects() : Subject::query();
-                $subjects = $query->withCount(['modules' => function ($q) use ($student) {
-                    $q->where('class_id', $student->class_id)->where('status', 'published');
-                }])->get();
+            if ($student) {
+                $joinedClassIds = $student->joinedClassIds();
+                if (!empty($joinedClassIds)) {
+                    $query = $student->subjects()->exists() ? $student->subjects() : Subject::query();
+                    $subjects = $query->withCount(['modules' => function ($q) use ($joinedClassIds) {
+                        $q->whereIn('class_id', $joinedClassIds)->where('status', 'published');
+                    }])->get();
+                } else {
+                    $subjects = Subject::all();
+                }
             } else {
                 $subjects = Subject::all();
             }

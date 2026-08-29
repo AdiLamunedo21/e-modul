@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\Module;
+use App\Models\SchoolClass;
 use App\Models\Student;
 use App\Models\Subject;
 use Illuminate\Http\Request;
@@ -24,35 +25,56 @@ class DashboardController extends Controller
     /**
      * Dashboard Portal Siswa:
      * Menyajikan ringkasan KPI belajar real-time, katalog mata pelajaran & guru pengampu,
-     * modul kelas yang ditugaskan per mata pelajaran, serta persentase progres belajar.
+     * modul kelas yang ditugaskan per mata pelajaran, serta persentase progres belajar
+     * dari seluruh rombel kelas yang diikuti oleh siswa.
      */
     public function index(Request $request)
     {
         $student = $this->student();
-        $class = $student->schoolClass;
 
-        // Query modul terbit yang ditugaskan untuk kelas siswa ini pada mata pelajaran yang ditempuh
-        $studentSubjectIds = $student->subjects()->pluck('subjects.id')->toArray();
+        // Ambil seluruh rombel kelas yang diikuti siswa
+        $joinedClasses = $student->classes()->with('major')->get();
 
-        $modulesQuery = Module::query()
-            ->where('class_id', $student->class_id)
-            ->where('status', 'published')
-            ->with([
-                'teacher',
-                'subject',
-                'jobSheets.submissions' => fn($q) => $q->where('student_id', $student->id),
-                'lkpds.submissions' => fn($q) => $q->where('student_id', $student->id),
-                'studentResults' => fn($q) => $q->where('student_id', $student->id),
-                'videoSummaries' => fn($q) => $q->where('student_id', $student->id),
-                'embedSubmissions' => fn($q) => $q->where('student_id', $student->id),
-            ])
-            ->latest('updated_at');
-
-        if (!empty($studentSubjectIds)) {
-            $modulesQuery->whereIn('subject_id', $studentSubjectIds);
+        // Fallback backward compatibility jika siswa memiliki class_id lama tetapi belum di-pivot
+        if ($joinedClasses->isEmpty() && $student->class_id) {
+            $fallbackClass = SchoolClass::find($student->class_id);
+            if ($fallbackClass) {
+                $student->classes()->syncWithoutDetaching([$fallbackClass->id]);
+                $joinedClasses = $student->classes()->with('major')->get();
+            }
         }
 
-        $allModules = $modulesQuery->get();
+        $joinedClassIds = $joinedClasses->pluck('id')->toArray();
+        $filterClassId = $request->query('class_id', 'all');
+        $class = $joinedClasses->first();
+
+        // Query modul terbit yang ditugaskan untuk seluruh kelas yang diikuti siswa secara efisien
+        $studentSubjectIds = $student->subjects()->pluck('subjects.id')->toArray();
+
+        if (!empty($joinedClassIds)) {
+            $modulesQuery = Module::query()
+                ->whereIn('class_id', $joinedClassIds)
+                ->where('status', 'published')
+                ->with([
+                    'teacher',
+                    'subject',
+                    'schoolClass.major',
+                    'jobSheets.submissions' => fn($q) => $q->where('student_id', $student->id),
+                    'lkpds.submissions' => fn($q) => $q->where('student_id', $student->id),
+                    'studentResults' => fn($q) => $q->where('student_id', $student->id),
+                    'videoSummaries' => fn($q) => $q->where('student_id', $student->id),
+                    'embedSubmissions' => fn($q) => $q->where('student_id', $student->id),
+                ])
+                ->latest('updated_at');
+
+            if (!empty($studentSubjectIds)) {
+                $modulesQuery->whereIn('subject_id', $studentSubjectIds);
+            }
+
+            $allModules = $modulesQuery->get();
+        } else {
+            $allModules = collect();
+        }
 
         // Olah data setiap modul untuk mendapatkan progres belajar siswa secara akurat
         $processedModules = $allModules->map(function (Module $module) use ($student) {
@@ -169,6 +191,8 @@ class DashboardController extends Controller
                 'id'                => $module->id,
                 'title'             => $module->title,
                 'description'       => $module->description,
+                'class_id'          => $module->class_id,
+                'class_name'        => $module->schoolClass?->full_name ?? 'Rombel Kelas',
                 'subject_id'        => $module->subject_id,
                 'subject'           => $module->subject,
                 'subject_name'      => $module->subject?->name ?? 'Mata Pelajaran',
@@ -287,19 +311,411 @@ class DashboardController extends Controller
             'avg_progress'        => $avgProgress,
             'total_subjects'      => $subjects->count(),
             'active_subjects'     => $subjects->where('modules_count', '>', 0)->count(),
+            'total_joined_classes'=> $joinedClasses->count(),
         ];
+
+        // Kelompokkan Modul Belajar Berdasarkan Rombel Kelas yang Diikuti Siswa
+        $classesWithModules = $joinedClasses->map(function (SchoolClass $cls) use ($processedModules, $filterStatus, $filterSubject) {
+            $classModules = $processedModules->where('class_id', $cls->id)->values();
+
+            $filteredClassModules = $classModules;
+            if ($filterSubject !== 'all') {
+                $filteredClassModules = $filteredClassModules->where('subject_id', (int) $filterSubject)->values();
+            }
+            if ($filterStatus === 'in_progress') {
+                $filteredClassModules = $filteredClassModules->where('progress_status', 'in_progress')->values();
+            } elseif ($filterStatus === 'completed') {
+                $filteredClassModules = $filteredClassModules->where('progress_status', 'completed')->values();
+            } elseif ($filterStatus === 'not_started') {
+                $filteredClassModules = $filteredClassModules->where('progress_status', 'not_started')->values();
+            }
+
+            $modulesCount = $classModules->count();
+            $completedCount = $classModules->where('progress_status', 'completed')->count();
+            $inProgressCount = $classModules->where('progress_status', 'in_progress')->count();
+            $notStartedCount = $classModules->where('progress_status', 'not_started')->count();
+            $avgProgress = $modulesCount > 0 ? (int) round($classModules->avg('progress_percent')) : 0;
+            $teacherNames = $classModules->pluck('teacher_name')->unique()->filter()->values();
+
+            return [
+                'id'                     => $cls->id,
+                'full_name'              => $cls->full_name,
+                'short_name'             => $cls->short_name,
+                'grade'                  => $cls->grade,
+                'code'                   => $cls->code,
+                'major_name'             => $cls->major?->name ?? $cls->major_name,
+                'major_code'             => $cls->major?->code ?? $cls->major_name,
+                'modules_count'          => $modulesCount,
+                'completed_count'        => $completedCount,
+                'in_progress_count'      => $inProgressCount,
+                'not_started_count'      => $notStartedCount,
+                'avg_progress'           => $avgProgress,
+                'teachers'               => $teacherNames,
+                'teacher_display'        => $teacherNames->isNotEmpty() ? $teacherNames->join(', ') : 'Guru Pengampu',
+                'modules'                => $classModules,
+                'filtered_modules'       => $filteredClassModules,
+                'filtered_modules_count' => $filteredClassModules->count(),
+            ];
+        });
+
+        $displayedClasses = $classesWithModules;
+
+        // Ekstrak daftar tingkat/jenjang kelas yang diikuti siswa untuk chip filter cepat
+        $availableGrades = $joinedClasses->pluck('grade')->unique()->filter()->values()->toArray();
+
+        // Banner selamat datang hanya aktif selama 10 menit pertama sejak siswa terdaftar
+        $isNewlyRegistered = $student->created_at ? $student->created_at->gte(now()->subMinutes(10)) : false;
 
         return view('pages.student.dashboard', compact(
             'student',
             'class',
+            'joinedClasses',
+            'classesWithModules',
+            'displayedClasses',
+            'availableGrades',
+            'filterClassId',
             'subjects',
             'processedModules',
             'filteredModules',
             'stats',
             'filterStatus',
             'filterSubject',
-            'allPendingTasks'
+            'allPendingTasks',
+            'isNewlyRegistered'
         ));
     }
-}
 
+    /**
+     * Memproses permintaan siswa untuk bergabung ke kelas tertentu menggunakan Kode Kelas.
+     */
+    public function joinClass(Request $request)
+    {
+        $validated = $request->validate([
+            'class_code' => ['required', 'string', 'max:20'],
+        ], [
+            'class_code.required' => 'Masukkan kode kelas yang diberikan oleh guru Anda.',
+        ]);
+
+        $code = strtoupper(trim($validated['class_code']));
+        $schoolClass = SchoolClass::where('code', $code)->first();
+
+        if (!$schoolClass) {
+            return back()->withErrors([
+                'class_code' => "Kode kelas '{$code}' tidak ditemukan. Pastikan kode yang Anda masukkan sudah benar.",
+            ])->withInput();
+        }
+
+        $student = $this->student();
+        $student->joinClass($schoolClass);
+
+        return redirect()->route('student.dashboard')
+            ->with('success', "Selamat! Anda berhasil bergabung ke {$schoolClass->full_name}. Seluruh modul pembelajaran kelas ini telah ditambahkan ke dashboard Anda.");
+    }
+
+    /**
+     * Memproses permintaan siswa untuk keluar dari rombel kelas tertentu.
+     * Menghapus seluruh data nilai, progres belajar, dan submission siswa pada modul-modul di kelas tersebut,
+     * tanpa menghapus data kelas dari database maupun dashboard guru.
+     */
+    public function leaveClass(Request $request, SchoolClass $class)
+    {
+        $student = $this->student();
+
+        // Validasi apakah siswa memang terdaftar di kelas ini
+        if (!in_array($class->id, $student->joinedClassIds())) {
+            return redirect()->route('student.dashboard')
+                ->with('error', 'Anda tidak terdaftar pada rombel kelas ini.');
+        }
+
+        $className = $class->full_name;
+
+        // Jalankan proses keluar kelas dan penghapusan data nilai/submission siswa pada kelas ini
+        $student->leaveClass($class);
+
+        return redirect()->route('student.dashboard')
+            ->with('success', "Anda telah berhasil keluar dari rombel {$className}. Seluruh progres dan nilai Anda pada kelas tersebut telah dibersihkan.");
+    }
+
+    /**
+     * Halaman Rombel Kelas Siswa:
+     * Menyajikan daftar Mata Pelajaran yang diajarkan pada kelas ini
+     * (tanpa menampilkan modul secara langsung).
+     */
+    public function showClass(Request $request, SchoolClass $class)
+    {
+        $student = $this->student();
+
+        // Validasi apakah siswa telah bergabung ke kelas ini
+        if (!in_array($class->id, $student->joinedClassIds())) {
+            abort(403, 'Anda belum terdaftar pada rombel kelas ini. Silakan masukkan kode kelas pada dashboard untuk bergabung.');
+        }
+
+        $class->load('major');
+
+        // Query modul terbit di kelas ini untuk menghitung statistik per mapel
+        $allModules = Module::query()
+            ->where('class_id', $class->id)
+            ->where('status', 'published')
+            ->with([
+                'teacher',
+                'subject',
+                'jobSheets.submissions' => fn($q) => $q->where('student_id', $student->id),
+                'lkpds.submissions'     => fn($q) => $q->where('student_id', $student->id),
+                'studentResults'        => fn($q) => $q->where('student_id', $student->id),
+                'videoSummaries'        => fn($q) => $q->where('student_id', $student->id),
+                'embedSubmissions'      => fn($q) => $q->where('student_id', $student->id),
+            ])
+            ->get();
+
+        // Olah data modul
+        $processedModules = $this->processStudentModules($allModules, $student);
+
+        // Ambil daftar mata pelajaran terkait kelas ini
+        $subjectIds = $processedModules->pluck('subject_id')->unique()->filter()->values()->toArray();
+        if (empty($subjectIds)) {
+            $classSubjectsList = Subject::with('teachers')->get();
+        } else {
+            $classSubjectsList = Subject::whereIn('id', $subjectIds)->with('teachers')->get();
+        }
+
+        // Susun data Mapel
+        $subjectsWithSummary = $classSubjectsList->map(function (Subject $subj) use ($processedModules) {
+            $subjModules = $processedModules->where('subject_id', $subj->id)->values();
+
+            $teacherNames = $subjModules->pluck('teacher_name')->unique()->filter()->values();
+            if ($teacherNames->isEmpty()) {
+                $teacherNames = $subj->teachers->pluck('name')->unique()->values();
+            }
+
+            $modulesCount = $subjModules->count();
+            $completedCount = $subjModules->where('progress_status', 'completed')->count();
+            $inProgressCount = $subjModules->where('progress_status', 'in_progress')->count();
+            $notStartedCount = $subjModules->where('progress_status', 'not_started')->count();
+            $avgProgress = $modulesCount > 0 ? (int) round($subjModules->avg('progress_percent')) : 0;
+
+            return [
+                'id'                => $subj->id,
+                'name'              => $subj->name,
+                'code'              => $subj->code,
+                'icon'              => $subj->icon ?: '📚',
+                'color'             => $subj->color ?: 'blue',
+                'description'       => $subj->description,
+                'teacher_display'   => $teacherNames->isNotEmpty() ? $teacherNames->join(', ') : 'Guru Pengampu',
+                'modules_count'     => $modulesCount,
+                'completed_count'   => $completedCount,
+                'in_progress_count' => $inProgressCount,
+                'not_started_count' => $notStartedCount,
+                'avg_progress'      => $avgProgress,
+            ];
+        });
+
+        // Statistik Keseluruhan Kelas
+        $totalModules = $processedModules->count();
+        $completedModules = $processedModules->where('progress_status', 'completed')->count();
+        $classAvgProgress = $totalModules > 0 ? (int) round($processedModules->avg('progress_percent')) : 0;
+
+        $classStats = [
+            'total_subjects'    => $subjectsWithSummary->count(),
+            'active_subjects'   => $subjectsWithSummary->where('modules_count', '>', 0)->count(),
+            'total_modules'     => $totalModules,
+            'completed_modules' => $completedModules,
+            'avg_progress'      => $classAvgProgress,
+        ];
+
+        return view('pages.student.classes.show', compact(
+            'student',
+            'class',
+            'subjectsWithSummary',
+            'classStats'
+        ));
+    }
+
+    /**
+     * Halaman Modul Pembelajaran per Mata Pelajaran pada Rombel Kelas Tertentu:
+     * Menyajikan daftar E-Modul yang dibuat oleh guru pengampu untuk mapel tersebut.
+     */
+    public function showClassSubjectModules(Request $request, SchoolClass $class, Subject $subject)
+    {
+        $student = $this->student();
+
+        // Validasi apakah siswa telah bergabung ke kelas ini
+        if (!in_array($class->id, $student->joinedClassIds())) {
+            abort(403, 'Anda belum terdaftar pada rombel kelas ini.');
+        }
+
+        $class->load('major');
+
+        // Query modul terbit khusus untuk kelas dan mapel ini
+        $modulesQuery = Module::query()
+            ->where('class_id', $class->id)
+            ->where('subject_id', $subject->id)
+            ->where('status', 'published')
+            ->with([
+                'teacher',
+                'subject',
+                'jobSheets.submissions' => fn($q) => $q->where('student_id', $student->id),
+                'lkpds.submissions'     => fn($q) => $q->where('student_id', $student->id),
+                'studentResults'        => fn($q) => $q->where('student_id', $student->id),
+                'videoSummaries'        => fn($q) => $q->where('student_id', $student->id),
+                'embedSubmissions'      => fn($q) => $q->where('student_id', $student->id),
+            ])
+            ->latest('updated_at');
+
+        $allModules = $modulesQuery->get();
+        $processedModules = $this->processStudentModules($allModules, $student);
+
+        // Filter status belajar
+        $filterStatus = $request->query('status', 'all');
+        $filteredModules = match ($filterStatus) {
+            'in_progress' => $processedModules->where('progress_status', 'in_progress')->values(),
+            'completed'   => $processedModules->where('progress_status', 'completed')->values(),
+            'not_started' => $processedModules->where('progress_status', 'not_started')->values(),
+            default       => $processedModules->values(),
+        };
+
+        // Guru Pengampu
+        $teacherNames = $processedModules->pluck('teacher_name')->unique()->filter()->values();
+        if ($teacherNames->isEmpty()) {
+            $subject->loadMissing('teachers');
+            $teacherNames = $subject->teachers->pluck('name')->unique()->values();
+        }
+        $teacherDisplay = $teacherNames->isNotEmpty() ? $teacherNames->join(', ') : 'Guru Pengampu';
+
+        // Statistik Mapel di Kelas Ini
+        $totalModulesCount = $processedModules->count();
+        $completedModulesCount = $processedModules->where('progress_status', 'completed')->count();
+        $inProgressModulesCount = $processedModules->where('progress_status', 'in_progress')->count();
+        $notStartedModulesCount = $processedModules->where('progress_status', 'not_started')->count();
+        $avgProgress = $totalModulesCount > 0 ? (int) round($processedModules->avg('progress_percent')) : 0;
+
+        $stats = [
+            'total_modules'     => $totalModulesCount,
+            'completed_modules' => $completedModulesCount,
+            'in_progress'       => $inProgressModulesCount,
+            'not_started'       => $notStartedModulesCount,
+            'avg_progress'      => $avgProgress,
+        ];
+
+        return view('pages.student.classes.subject_modules', compact(
+            'student',
+            'class',
+            'subject',
+            'teacherDisplay',
+            'teacherNames',
+            'processedModules',
+            'filteredModules',
+            'stats',
+            'filterStatus'
+        ));
+    }
+
+    /**
+     * Helper pemrosesan kalkulasi progres modul belajar siswa.
+     */
+    private function processStudentModules($allModules, Student $student)
+    {
+        return $allModules->map(function (Module $module) use ($student) {
+            $result = $module->studentResults->first();
+            $activeComps = $module->activeComponents();
+            $totalActive = count($activeComps);
+
+            $completedTasks = 0;
+            $pendingTasksList = [];
+
+            // 1. Pre-Test
+            if ($module->pre_test_active) {
+                if ($result && !is_null($result->pre_test_score)) {
+                    $completedTasks++;
+                } else {
+                    $pendingTasksList[] = ['type' => 'pre_test', 'label' => 'Pre-Test'];
+                }
+            }
+
+            // 2. Ringkasan Video
+            if ($module->video_active) {
+                $hasVideo = $module->videoSummaries->isNotEmpty();
+                if ($hasVideo) {
+                    $completedTasks++;
+                } else {
+                    $pendingTasksList[] = ['type' => 'video', 'label' => 'Ringkasan Video'];
+                }
+            }
+
+            // 3. Praktik Embed
+            if ($module->embed_active) {
+                $hasEmbed = $module->embedSubmissions->isNotEmpty();
+                if ($hasEmbed) {
+                    $completedTasks++;
+                } else {
+                    $pendingTasksList[] = ['type' => 'embed', 'label' => 'Praktik Embed'];
+                }
+            }
+
+            // 4. Job Sheet
+            if ($module->job_sheet_active) {
+                $jsSubmissions = $module->jobSheets->flatMap->submissions;
+                if ($jsSubmissions->isNotEmpty()) {
+                    $completedTasks++;
+                } else {
+                    $pendingTasksList[] = ['type' => 'job_sheet', 'label' => 'Pengumpulan Job Sheet'];
+                }
+            }
+
+            // 5. LKPD
+            if ($module->lkpd_active) {
+                $lkpdSubmissions = $module->lkpds->flatMap->submissions;
+                if ($lkpdSubmissions->isNotEmpty()) {
+                    $completedTasks++;
+                } else {
+                    $pendingTasksList[] = ['type' => 'lkpd', 'label' => 'Pengumpulan LKPD'];
+                }
+            }
+
+            // 6. Post-Test
+            if ($module->post_test_active) {
+                if ($result && !is_null($result->post_test_score)) {
+                    $completedTasks++;
+                } else {
+                    $pendingTasksList[] = ['type' => 'post_test', 'label' => 'Post-Test'];
+                }
+            }
+
+            $progressPercent = $totalActive > 0 ? (int) round(($completedTasks / $totalActive) * 100) : 100;
+            if ($progressPercent >= 100) {
+                $progressStatus = 'completed';
+            } elseif ($progressPercent > 0) {
+                $progressStatus = 'in_progress';
+            } else {
+                $progressStatus = 'not_started';
+            }
+
+            return [
+                'id'                => $module->id,
+                'title'             => $module->title,
+                'description'       => $module->description,
+                'class_id'          => $module->class_id,
+                'subject_id'        => $module->subject_id,
+                'subject'           => $module->subject,
+                'subject_name'      => $module->subject?->name ?? 'Mata Pelajaran',
+                'teacher_name'      => $module->teacher->name ?? 'Guru Pengampu',
+                'updated_at'        => $module->updated_at,
+                'active_components' => $activeComps,
+                'total_components'  => $totalActive,
+                'completed_tasks'   => $completedTasks,
+                'progress_percent'  => $progressPercent,
+                'progress_status'   => $progressStatus,
+                'pending_tasks'     => $pendingTasksList,
+                'student_result'    => $result,
+                'summative_score'   => $result?->summative_score,
+                'grading_status'    => $result?->grading_status,
+                'has_pre_test'      => $module->pre_test_active,
+                'has_post_test'     => $module->post_test_active,
+                'has_materi'        => $module->materi_active,
+                'has_video'         => $module->video_active,
+                'has_embed'         => $module->embed_active,
+                'has_job_sheet'     => $module->job_sheet_active,
+                'has_lkpd'          => $module->lkpd_active,
+            ];
+        });
+    }
+}

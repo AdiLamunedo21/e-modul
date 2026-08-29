@@ -59,7 +59,7 @@ class TeacherClassTest extends TestCase
             $this->markTestSkipped('Seed data required.');
         }
 
-        $section = 'R' . rand(10, 99);
+        $section = 'R' . rand(10000, 99999);
 
         $response = $this->actingAs($teacher, 'teacher')
             ->post(route('teacher.classes.store'), [
@@ -68,7 +68,7 @@ class TeacherClassTest extends TestCase
                 'section'  => $section,
             ]);
 
-        $newClass = SchoolClass::where('section', $section)->first();
+        $newClass = SchoolClass::where('section', $section)->latest('id')->first();
         $this->assertNotNull($newClass);
         $response->assertRedirect(route('teacher.classes.show', $newClass));
 
@@ -165,7 +165,7 @@ class TeacherClassTest extends TestCase
         ]);
     }
 
-    public function test_teacher_can_delete_class_and_purge_alumni_and_modules()
+    public function test_teacher_can_delete_class_and_preserve_student_accounts()
     {
         $teacher = Teacher::first();
         $major = Major::first();
@@ -175,51 +175,48 @@ class TeacherClassTest extends TestCase
             $this->markTestSkipped('Seed data required.');
         }
 
-        // 1. Buat kelas sementara untuk di-purge
-        $purgeClass = SchoolClass::create([
+        // 1. Buat kelas sementara untuk dihapus
+        $deleteClass = SchoolClass::create([
             'grade'      => 'XII',
             'major_id'   => $major->id,
             'section'    => 'P' . rand(10, 99),
             'major_name' => $major->code,
         ]);
 
-        // 2. Buat siswa alumni di kelas ini
+        // 2. Buat siswa terdaftar di kelas ini
         $student = Student::create([
-            'name'            => 'Alumni Siswa ' . uniqid(),
+            'name'            => 'Siswa Tetap Aman ' . uniqid(),
             'identity_number' => 'NISN' . rand(100000, 999999),
-            'class_id'        => $purgeClass->id,
+            'class_id'        => $deleteClass->id,
             'password'        => bcrypt('password'),
         ]);
         $student->subjects()->attach($subject->id);
 
         // 3. Buat modul di kelas ini
         $module = Module::create([
-            'title'      => 'Modul Alumni ' . uniqid(),
+            'title'      => 'Modul Kelas Hapus ' . uniqid(),
             'teacher_id' => $teacher->id,
-            'class_id'   => $purgeClass->id,
+            'class_id'   => $deleteClass->id,
             'subject_id' => $subject->id,
             'status'     => 'published',
         ]);
 
-        // 4. Buat student result
-        StudentResult::create([
-            'student_id'      => $student->id,
-            'module_id'       => $module->id,
-            'summative_score' => 85,
-            'grading_status'  => 'graded',
-        ]);
-
-        // 5. Eksekusi Hapus Kelas & Purge
+        // 4. Eksekusi Hapus Kelas
         $response = $this->actingAs($teacher, 'teacher')
-            ->delete(route('teacher.classes.destroy', $purgeClass));
+            ->delete(route('teacher.classes.destroy', $deleteClass));
 
         $response->assertRedirect(route('teacher.classes.index'));
+        $response->assertSessionHas('success');
 
-        // 6. Verifikasi database bersih dari kelas, siswa, dan modul tersebut
-        $this->assertDatabaseMissing('classes', ['id' => $purgeClass->id]);
-        $this->assertDatabaseMissing('students', ['id' => $student->id]);
+        // 5. Verifikasi bahwa kelas & modul terhapus, tetapi akun siswa TETAP ADA dan class_id menjadi null
+        $this->assertDatabaseMissing('classes', ['id' => $deleteClass->id]);
         $this->assertDatabaseMissing('modules', ['id' => $module->id]);
-        $this->assertDatabaseMissing('student_results', ['student_id' => $student->id, 'module_id' => $module->id]);
+        
+        $this->assertDatabaseHas('students', [
+            'id'       => $student->id,
+            'class_id' => null,
+            'name'     => $student->name,
+        ]);
     }
 
     public function test_unauthenticated_user_cannot_access_teacher_classes()

@@ -23,7 +23,7 @@
     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
     <a href="{{ route('teacher.modules.show', $module) }}" class="hover:text-blue-600 transition-colors truncate max-w-[12rem]">{{ $module->title }}</a>
     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
-    <span class="font-semibold text-slate-800">Komponen Inti: Video & Ringkasan</span>
+    <span class="font-semibold text-slate-800">Komponen Inti: Multi-Video & Ringkasan</span>
 </nav>
 
 {{-- Flash Messages --}}
@@ -61,19 +61,19 @@
     <div class="absolute right-1/3 -top-10 w-48 h-48 bg-rose-500/10 rounded-full blur-2xl pointer-events-none"></div>
     <div class="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         <div class="space-y-3">
-            <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-950/60 backdrop-blur-md border border-white/20 text-xs font-bold tracking-wide text-white shadow-sm">
+            <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-950/60 backdrop-blur-md border border-white/20 text-xs font-bold tracking-wide text-white shadow-sm flex-wrap">
                 <span class="flex items-center gap-1.5 text-red-200">
                     <span>🎬</span>
                     <span>Komponen Inti — Komponen 3</span>
                 </span>
                 <span class="text-white/30">•</span>
                 <span class="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-400/20 text-amber-300 border border-amber-400/40 uppercase tracking-wider">
-                    Opsional (Toggle)
+                    Multi-Video YouTube
                 </span>
             </div>
             <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-sm">Integrasi Video & Ringkasan YouTube</h1>
             <p class="text-slate-200 text-sm leading-relaxed max-w-2xl font-normal">
-                Sematkan video pembelajaran interaktif dari YouTube. Siswa diwajibkan menyimak materi dan menuliskan intisari ringkasan sebelum dapat melangkah ke halaman selanjutnya.
+                Sematkan satu atau beberapa video pembelajaran interaktif dari YouTube. Siswa dapat menyimak seluruh video dan menuliskan <strong>satu intisari ringkasan terpadu</strong> sebelum beralih ke tahapan berikutnya.
             </p>
         </div>
 
@@ -95,22 +95,22 @@
     @csrf
     @method('PATCH')
 
-    {{-- ══ Main Layout Grid (Standard 4 Columns) ══ --}}
+    {{-- ══ Main Layout Grid ══ --}}
     <div class="grid grid-cols-1 xl:grid-cols-4 gap-8 items-start">
 
-        {{-- ── LEFT 3 COLUMNS: Main Form ───────────────────────────────────────── --}}
+        {{-- ── LEFT 3 COLUMNS: Main Form ── --}}
         <div class="xl:col-span-3 space-y-6">
 
-            {{-- 1. Sakelar Utama & Identitas Video --}}
+            {{-- 1. Sakelar Utama --}}
             <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div class="flex items-start gap-3">
                         <div class="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center text-lg shrink-0">
                             ⚙️
                         </div>
                         <div>
                             <h2 class="text-base font-bold text-slate-900">Aktivasi Komponen Video & Ringkasan YouTube</h2>
-                            <p class="text-xs text-slate-500">Jika diaktifkan, halaman pemutar video dan form ringkasan wajib akan disajikan pada Komponen Inti bagi siswa.</p>
+                            <p class="text-xs text-slate-500">Jika diaktifkan, pemutar video dan form ringkasan wajib akan disajikan pada Komponen Inti bagi siswa.</p>
                         </div>
                     </div>
 
@@ -132,138 +132,183 @@
                         </span>
                     </label>
                 </div>
-
-                {{-- Fields Identitas --}}
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 pt-6">
-                    <div class="sm:col-span-2">
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                            Judul Video Pembelajaran <span class="text-rose-500">*</span>
-                        </label>
-                        <input type="text"
-                               name="video_title"
-                               id="video_title"
-                               value="{{ old('video_title', $data['video_title'] ?? 'Video Pembelajaran: ' . $module->title) }}"
-                               placeholder="Contoh: Video Tutorial: Instalasi & Konfigurasi Basis Data MySQL"
-                               class="w-full rounded-xl border @error('video_title') border-rose-300 bg-rose-50/50 @else border-slate-300 bg-slate-50 @enderror px-4 py-2.5 text-sm text-slate-900 focus:border-red-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all">
-                        @error('video_title')
-                            <p class="text-xs text-rose-600 mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                            Estimasi Durasi Menonton
-                        </label>
-                        <div class="flex rounded-xl border border-slate-300 bg-slate-50 overflow-hidden focus-within:border-red-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-red-500/20 transition-all shadow-sm">
-                            <input type="number"
-                                   name="estimated_duration"
-                                   id="estimated_duration"
-                                   min="1"
-                                   max="240"
-                                   value="{{ old('estimated_duration', $data['estimated_duration'] ?? 15) }}"
-                                   class="w-full bg-transparent px-4 py-2.5 text-sm text-slate-900 focus:outline-none">
-                            <span class="inline-flex items-center px-3.5 bg-slate-100 text-xs font-bold text-slate-500 border-l border-slate-200 select-none shrink-0">
-                                Menit
-                            </span>
-                        </div>
-                        <p class="text-[11px] text-slate-400 mt-1">Perkiraan durasi menonton & mencatat.</p>
-                    </div>
-                </div>
             </div>
 
-            {{-- 2. Tautan & Pemutar Video YouTube (Live Embed Player) --}}
-            <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm space-y-5">
+            {{-- 2. DAFTAR VIDEO YOUTUBE (MULTI-VIDEO BUILDER) --}}
+            <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm space-y-6">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center text-lg shrink-0">
                             🎬
                         </div>
                         <div>
-                            <h2 class="text-base font-bold text-slate-900">Tautan & Media Video YouTube</h2>
-                            <p class="text-xs text-slate-500">Mendukung tautan standar, <i>short link</i> (youtu.be), YouTube Shorts, maupun ID video langsung.</p>
+                            <h2 class="text-base font-bold text-slate-900">Daftar Video Pembelajaran YouTube</h2>
+                            <p class="text-xs text-slate-500">Tambahkan satu atau beberapa video YouTube. Anda dapat menambah atau menghapus video sesuai kebutuhan materi.</p>
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-2">
-                        <span id="youtube-status-badge" class="px-3 py-1 text-xs font-bold rounded-full border bg-slate-100 text-slate-600 border-slate-200">
-                            Belum Ada Tautan
-                        </span>
-                        <a id="btn-open-youtube"
-                           href="#"
-                           target="_blank"
-                           class="hidden px-3 py-1 text-xs font-bold text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-colors">
-                            Buka di YouTube ↗
-                        </a>
-                    </div>
+                    <button type="button"
+                            id="btn-add-video"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow-md shadow-red-600/25 transition-all self-start sm:self-auto shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                        <span>+ Tambah Video Baru</span>
+                    </button>
                 </div>
 
-                {{-- Input Tautan YouTube --}}
-                <div class="space-y-2">
-                    <label for="youtube_url" class="block text-xs font-bold text-slate-700">
-                        URL / Tautan Video YouTube <span class="text-rose-500">*</span>
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                            <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
-                            </svg>
-                        </div>
-                        <input type="text"
-                               name="youtube_url"
-                               id="youtube_url"
-                               value="{{ old('youtube_url', $data['youtube_url'] ?? '') }}"
-                               placeholder="Contoh: https://www.youtube.com/watch?v=dQw4w9WgXcQ atau https://youtu.be/..."
-                               class="w-full pl-11 pr-24 py-3 rounded-xl border @error('youtube_url') border-rose-300 bg-rose-50/50 @else border-slate-300 bg-slate-50 @enderror text-sm font-mono text-slate-900 focus:border-red-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all">
-                        <button type="button"
-                                id="btn-check-url"
-                                class="absolute right-2 top-2 px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-lg transition-colors">
-                            Muat
-                        </button>
-                    </div>
-                    @error('youtube_url')
-                        <p class="text-xs text-rose-600 mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
+                {{-- Container Kartu Video Dinamis --}}
+                <div id="videos-container" class="space-y-6">
+                    @php
+                        $videosList = old('videos', $data['videos'] ?? []);
+                        if (empty($videosList)) {
+                            $videosList = [
+                                [
+                                    'title'       => 'Video Pembelajaran 1: ' . $module->title,
+                                    'url'         => $data['youtube_url'] ?? '',
+                                    'duration'    => 15,
+                                    'id'          => $data['youtube_id'] ?? '',
+                                ]
+                            ];
+                        }
+                    @endphp
 
-                {{-- Live Preview Embed Player Box --}}
-                <div class="space-y-2">
-                    <label class="block text-xs font-bold text-slate-700 flex items-center justify-between">
-                        <span>Pratinjau Pemutar Video (Live Embed 16:9)</span>
-                        <span class="text-[11px] font-normal text-slate-400">Tampilan persis seperti yang akan ditonton siswa</span>
-                    </label>
-                    <div id="player-container" class="relative w-full aspect-video bg-slate-950 rounded-2xl overflow-hidden border border-slate-300 shadow-inner flex flex-col items-center justify-center text-center p-6 text-slate-400">
-                        {{-- Iframe placeholder saat kosong/invalid --}}
-                        <div id="player-placeholder" class="flex flex-col items-center justify-center space-y-3">
-                            <div class="w-16 h-16 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-red-500 shadow-lg">
-                                <svg class="w-8 h-8 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    @foreach($videosList as $vIndex => $vItem)
+                        @php
+                            $vUrl = $vItem['url'] ?? '';
+                            $vTitle = $vItem['title'] ?? ('Video Pembelajaran ' . ($vIndex + 1));
+                            $vDescription = $vItem['description'] ?? ($vItem['keterangan'] ?? '');
+                            $vDuration = $vItem['duration'] ?? 15;
+                            $vId = $vItem['id'] ?? \App\Http\Controllers\Teacher\VideoController::extractYoutubeId($vUrl);
+                        @endphp
+
+                        <div class="video-card bg-slate-50/70 border border-slate-200/90 rounded-2xl p-5 space-y-4 fade-in-item transition-all hover:border-red-300"
+                             data-index="{{ $vIndex }}">
+                            
+                            {{-- Header Kartu Video: Badge & Tombol Hapus --}}
+                            <div class="flex items-center justify-between gap-3 pb-3 border-b border-slate-200/80">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="video-number-badge px-3 py-1 text-xs font-black rounded-lg bg-red-600 text-white shadow-xs">
+                                        Video #<span class="num-text">{{ $vIndex + 1 }}</span>
+                                    </span>
+                                    <span class="video-status-badge px-2.5 py-0.5 text-[11px] font-bold rounded-md border {{ !empty($vId) ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-slate-200 text-slate-600 border-slate-300' }}">
+                                        {{ !empty($vId) ? '✓ Valid (ID: ' . $vId . ')' : 'Belum Ada Tautan' }}
+                                    </span>
+                                    <a href="{{ !empty($vId) ? 'https://www.youtube.com/watch?v=' . $vId : '#' }}"
+                                       target="_blank"
+                                       class="video-external-btn {{ empty($vId) ? 'hidden' : '' }} text-[11px] font-bold text-red-600 hover:text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded-md transition-colors">
+                                        Buka di YouTube ↗
+                                    </a>
+                                </div>
+
+                                <button type="button"
+                                        onclick="removeVideoCard(this)"
+                                        title="Hapus video ini dari daftar"
+                                        class="btn-delete-video inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-rose-600 hover:text-rose-700 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 transition-colors shadow-2xs">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                                    <span>Hapus Video</span>
+                                </button>
                             </div>
+
+                            {{-- Input Field: Judul Video --}}
                             <div>
-                                <p class="text-sm font-semibold text-slate-300">Belum ada video yang dimuat</p>
-                                <p class="text-xs text-slate-500 max-w-sm mt-0.5">Ketikkan atau tempel URL YouTube di atas untuk melihat tampilan video siswa</p>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Judul Video <span class="text-rose-500">*</span>
+                                </label>
+                                <input type="text"
+                                       name="videos[{{ $vIndex }}][title]"
+                                       value="{{ $vTitle }}"
+                                       required
+                                       placeholder="Contoh: Video 1: Pengenalan Komponen & Teori Dasar"
+                                       class="video-title-input w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs sm:text-sm text-slate-900 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all">
                             </div>
-                        </div>
 
-                        {{-- Iframe sesungguhnya --}}
-                        <iframe id="youtube-iframe"
-                                src=""
-                                class="w-full h-full absolute inset-0 hidden"
-                                frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                allowfullscreen></iframe>
-                    </div>
+                            {{-- Input URL YouTube --}}
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-bold text-slate-700">
+                                    URL / Tautan Video YouTube <span class="text-rose-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                        <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
+                                        </svg>
+                                    </div>
+                                    <input type="text"
+                                           name="videos[{{ $vIndex }}][url]"
+                                           value="{{ $vUrl }}"
+                                           placeholder="Contoh: https://www.youtube.com/watch?v=... atau https://youtu.be/..."
+                                           oninput="handleVideoUrlChange(this)"
+                                           class="video-url-input w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-mono text-slate-900 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all">
+                                </div>
+                            </div>
+
+                            {{-- Input Keterangan / Catatan Video --}}
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-bold text-slate-700">
+                                    Keterangan / Catatan Video <span class="text-slate-400 font-normal">(Opsional)</span>
+                                </label>
+                                <textarea name="videos[{{ $vIndex }}][description]"
+                                          rows="2"
+                                          placeholder="Tuliskan keterangan singkat, petunjuk menyimak, atau poin penting khusus untuk video ini..."
+                                          class="video-description-input w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs text-slate-900 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all leading-relaxed">{{ $vDescription }}</textarea>
+                            </div>
+
+                            {{-- Live Preview Embed Player --}}
+                            <div class="pt-1">
+                                <div class="player-box relative w-full aspect-video bg-slate-950 rounded-2xl overflow-hidden border border-slate-300 shadow-inner flex flex-col items-center justify-center text-center p-4 text-slate-400">
+                                    <div class="player-placeholder {{ !empty($vId) ? 'hidden' : '' }} flex flex-col items-center justify-center space-y-2">
+                                        <div class="w-12 h-12 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-red-500 shadow-md">
+                                            <svg class="w-6 h-6 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-semibold text-slate-300">Belum ada video yang dimuat</p>
+                                            <p class="text-[11px] text-slate-500">Tempel URL YouTube di atas untuk melihat tampilan video</p>
+                                        </div>
+                                    </div>
+
+                                    <iframe src="{{ !empty($vId) ? 'https://www.youtube-nocookie.com/embed/' . $vId . '?rel=0' : '' }}"
+                                            class="player-iframe w-full h-full absolute inset-0 {{ empty($vId) ? 'hidden' : '' }}"
+                                            frameborder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                            allowfullscreen></iframe>
+                                </div>
+                            </div>
+
+                        </div>
+                    @endforeach
+                </div>
+
+                {{-- Tombol Tambah Video Bawah --}}
+                <div class="pt-2">
+                    <button type="button"
+                            onclick="addNewVideoCard()"
+                            class="w-full py-3 px-4 rounded-2xl border-2 border-dashed border-red-300 hover:border-red-500 bg-red-50/40 hover:bg-red-50 text-red-700 text-xs font-extrabold transition-all flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                        <span>+ Tambah Video Pembelajaran YouTube Lainnya</span>
+                    </button>
                 </div>
             </div>
 
-            {{-- 3. Petunjuk Pengerjaan & Batasan Minimal Ringkasan --}}
+            {{-- 3. PETUNJUK PENGERJAAN & SATU RINGKASAN TERPADU --}}
             <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm space-y-5">
                 <div class="flex items-center gap-3 pb-4 border-b border-slate-100">
                     <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-lg shrink-0">
                         📝
                     </div>
                     <div>
-                        <h2 class="text-base font-bold text-slate-900">Petunjuk Pengerjaan & Batasan Ringkasan Siswa</h2>
-                        <p class="text-xs text-slate-500">Instruksi penulisan intisari dan syarat minimal panjang teks pengerjaan siswa.</p>
+                        <h2 class="text-base font-bold text-slate-900">Petunjuk Pengerjaan & Form Ringkasan Siswa</h2>
+                        <p class="text-xs text-slate-500">Siswa akan menyimak seluruh video di atas, kemudian menyusun <strong>1 (satu) ringkasan intisari terpadu</strong>.</p>
                     </div>
+                </div>
+
+                {{-- Banner Edukasi Single Summary --}}
+                <div class="p-4 rounded-2xl bg-amber-50/80 border border-amber-200 text-amber-900 text-xs space-y-1">
+                    <p class="font-bold flex items-center gap-1.5 text-amber-800">
+                        <span>💡</span>
+                        <span>Satu Ringkasan untuk Seluruh Video:</span>
+                    </p>
+                    <p class="text-[11px] text-amber-700 leading-relaxed">
+                        Meskipun Anda menambahkan banyak video, siswa hanya perlu mengisi 1 kolom resume yang merangkum keseluruhan poin penting dari semua video pembelajaran yang Anda sematkan.
+                    </p>
                 </div>
 
                 {{-- Instruksi Ringkasan --}}
@@ -274,7 +319,7 @@
                     <textarea name="instructions"
                               id="instructions"
                               rows="4"
-                              placeholder="Tuliskan arahan bagi siswa terkait apa yang perlu mereka catat dan perhatikan selama menonton..."
+                              placeholder="Tuliskan arahan bagi siswa terkait apa yang perlu mereka catat dan perhatikan selama menonton seluruh video..."
                               class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 focus:border-amber-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition-all leading-relaxed">{{ old('instructions', $data['instructions'] ?? '') }}</textarea>
                 </div>
 
@@ -320,7 +365,7 @@
                 </div>
             </div>
 
-            {{-- 4. Poin Panduan / Pertanyaan Pemantik Ringkasan (Guiding Questions Builder) --}}
+            {{-- 4. Poin Panduan / Pertanyaan Pemantik Ringkasan --}}
             <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
                     <div class="flex items-center gap-3">
@@ -337,7 +382,7 @@
                             id="btn-add-question"
                             class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200/60 rounded-xl transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                        Tambah Poin
+                        <span>Tambah Poin</span>
                     </button>
                 </div>
 
@@ -346,7 +391,7 @@
                         $questions = old('guiding_questions', $data['guiding_questions'] ?? []);
                         if (empty($questions)) {
                             $questions = [
-                                'Apa konsep atau topik utama yang dijelaskan dalam video ini?',
+                                'Apa konsep atau topik utama yang dijelaskan dalam video-video ini?',
                                 'Sebutkan langkah kerja atau poin krusial yang harus diperhatikan!',
                                 'Bagaimana penerapan konsep tersebut dalam praktik kejuruan Anda?',
                             ];
@@ -374,40 +419,14 @@
                 </div>
             </div>
 
-            {{-- 5. Rubrik Penilaian di Grading Center & Alur Navigasi (Sesuai PRD) --}}
-            <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 rounded-2xl p-6 text-white shadow-md border border-slate-800 space-y-4">
-                <div class="flex items-center gap-2.5 text-amber-400 text-xs font-bold uppercase tracking-wider">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                    Pedoman Penilaian & Alur Navigasi Siswa (PRD Section 2.4, 3.2, 4.2)
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1 text-xs">
-                    <div class="bg-slate-800/80 rounded-xl p-4 border border-slate-700/60 space-y-1.5">
-                        <p class="font-bold text-emerald-400 flex items-center gap-1.5">
-                            <span>🔒</span> Navigasi Mengikat di Sisi Siswa
-                        </p>
-                        <p class="text-slate-300 leading-relaxed text-[11px]">
-                            Tombol <b>"Halaman Selanjutnya"</b> terkunci otomatis sampai siswa mengetikkan teks ringkasan sesuai batas minimal kata/karakter yang Anda tetapkan.
-                        </p>
-                    </div>
-                    <div class="bg-slate-800/80 rounded-xl p-4 border border-slate-700/60 space-y-1.5">
-                        <p class="font-bold text-emerald-400 flex items-center gap-1.5">
-                            <span>⭐</span> Penilaian di Grading Center & Rekap Excel
-                        </p>
-                        <p class="text-slate-300 leading-relaxed text-[11px]">
-                            Hasil ketikan ringkasan tersimpan ke tabel <code class="text-amber-300">video_summaries</code>. Guru memberikan skor manual (0-100) yang otomatis masuk ke rekap nilai akhir.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
         </div>
 
-        {{-- ── RIGHT 1 COLUMN: Sidebar Status & Actions ────────────────────────── --}}
+        {{-- ── RIGHT 1 COLUMN: Sidebar Status & Actions ── --}}
         <div class="xl:col-span-1 space-y-6 sticky top-6">
 
             {{-- Card Ringkasan Modul & Status --}}
             <div class="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm space-y-4">
-                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Ringkasan Modul</h3>
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Ringkasan Video</h3>
                 
                 <div class="space-y-2">
                     <h4 class="text-sm font-bold text-slate-900 leading-snug">{{ $module->title }}</h4>
@@ -420,16 +439,15 @@
 
                 <div class="border-t border-slate-100 pt-3 space-y-2.5 text-xs text-slate-600">
                     <div class="flex items-center justify-between">
-                        <span>Status Modul:</span>
-                        @php $badge = $module->statusLabel(); @endphp
-                        <span class="font-bold px-2 py-0.5 rounded-full text-[10px] border {{ $badge['color'] }}">
-                            {{ $badge['label'] }}
-                        </span>
-                    </div>
-                    <div class="flex items-center justify-between">
                         <span>Status Komponen:</span>
                         <span id="side-status-indicator" class="font-bold {{ $module->has_video ? 'text-emerald-600' : 'text-slate-400' }}">
                             {{ $module->has_video ? '✓ Aktif' : '○ Non-Aktif' }}
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span>Total Video:</span>
+                        <span id="side-videos-count" class="font-bold text-red-600">
+                            {{ count($videosList) }} Video
                         </span>
                     </div>
                     <div class="flex items-center justify-between">
@@ -441,7 +459,7 @@
                 </div>
             </div>
 
-            {{-- Card Tombol Aksi & Template --}}
+            {{-- Card Tombol Aksi --}}
             <div class="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm space-y-3">
                 <button type="submit"
                         class="w-full py-3 px-4 rounded-xl text-xs font-extrabold text-white bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 shadow-lg shadow-red-600/25 transition-all flex items-center justify-center gap-2">
@@ -458,9 +476,9 @@
 
                 <div class="pt-2 border-t border-slate-100">
                     <button type="button"
-                            onclick="loadSampleVideoContent()"
+                            onclick="loadSampleMultiVideoContent()"
                             class="w-full py-2 px-3 text-[11px] font-bold text-blue-600 hover:text-blue-700 bg-blue-50/70 hover:bg-blue-50 rounded-xl transition-colors flex items-center justify-center gap-1.5">
-                        <span>⚡ Muat Template Video & Panduan</span>
+                        <span>⚡ Muat Template Multi-Video</span>
                     </button>
                 </div>
             </div>
@@ -478,7 +496,7 @@
                         <span class="text-[10px] font-bold {{ $module->has_materi ? 'text-emerald-600' : 'text-slate-400' }}">{{ $module->has_materi ? 'ON' : 'OFF' }}</span>
                     </a>
                     <div class="flex items-center justify-between p-2 rounded-lg bg-red-50 text-red-700 font-bold border border-red-200/60">
-                        <span>3. Video YouTube</span>
+                        <span>3. Multi-Video YouTube</span>
                         <span class="text-[10px] uppercase">Sedang Diedit</span>
                     </div>
                 </div>
@@ -564,59 +582,237 @@
         return null;
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const urlInput = document.getElementById('youtube_url');
-        const checkBtn = document.getElementById('btn-check-url');
-        const iframe = document.getElementById('youtube-iframe');
-        const placeholder = document.getElementById('player-placeholder');
-        const badge = document.getElementById('youtube-status-badge');
-        const openYtBtn = document.getElementById('btn-open-youtube');
+    // Handler ketika URL video berubah
+    function handleVideoUrlChange(inputElem) {
+        const card = inputElem.closest('.video-card');
+        if (!card) return;
 
-        function updatePlayerPreview() {
-            const url = urlInput.value;
-            const id = extractYouTubeId(url);
+        const url = inputElem.value.trim();
+        const id = extractYouTubeId(url);
+        const iframe = card.querySelector('.player-iframe');
+        const placeholder = card.querySelector('.player-placeholder');
+        const badge = card.querySelector('.video-status-badge');
+        const externalBtn = card.querySelector('.video-external-btn');
 
-            if (id) {
+        if (id) {
+            if (iframe) {
                 iframe.src = `https://www.youtube-nocookie.com/embed/${id}?rel=0`;
                 iframe.classList.remove('hidden');
-                placeholder.classList.add('hidden');
+            }
+            if (placeholder) placeholder.classList.add('hidden');
 
-                badge.className = 'px-3 py-1 text-xs font-bold rounded-full border bg-emerald-100 text-emerald-800 border-emerald-300';
-                badge.textContent = `✓ ID: ${id} (Valid)`;
+            if (badge) {
+                badge.className = 'video-status-badge px-2.5 py-0.5 text-[11px] font-bold rounded-md border bg-emerald-100 text-emerald-800 border-emerald-300';
+                badge.textContent = `✓ Valid (ID: ${id})`;
+            }
 
-                if (openYtBtn) {
-                    openYtBtn.href = `https://www.youtube.com/watch?v=${id}`;
-                    openYtBtn.classList.remove('hidden');
-                }
-            } else {
+            if (externalBtn) {
+                externalBtn.href = `https://www.youtube.com/watch?v=${id}`;
+                externalBtn.classList.remove('hidden');
+            }
+        } else {
+            if (iframe) {
                 iframe.src = '';
                 iframe.classList.add('hidden');
-                placeholder.classList.remove('hidden');
+            }
+            if (placeholder) placeholder.classList.remove('hidden');
 
-                if (url && url.trim().length > 0) {
-                    badge.className = 'px-3 py-1 text-xs font-bold rounded-full border bg-rose-100 text-rose-800 border-rose-300';
-                    badge.textContent = '❌ Format URL Tidak Dikenali';
+            if (badge) {
+                if (url.length > 0) {
+                    badge.className = 'video-status-badge px-2.5 py-0.5 text-[11px] font-bold rounded-md border bg-rose-100 text-rose-800 border-rose-300';
+                    badge.textContent = '❌ Format URL Tidak Valid';
                 } else {
-                    badge.className = 'px-3 py-1 text-xs font-bold rounded-full border bg-slate-100 text-slate-600 border-slate-200';
+                    badge.className = 'video-status-badge px-2.5 py-0.5 text-[11px] font-bold rounded-md border bg-slate-200 text-slate-600 border-slate-300';
                     badge.textContent = 'Belum Ada Tautan';
                 }
+            }
 
-                if (openYtBtn) {
-                    openYtBtn.classList.add('hidden');
-                }
+            if (externalBtn) {
+                externalBtn.classList.add('hidden');
             }
         }
+    }
 
-        urlInput.addEventListener('input', updatePlayerPreview);
-        urlInput.addEventListener('change', updatePlayerPreview);
-        if (checkBtn) checkBtn.addEventListener('click', updatePlayerPreview);
+    // Reindex video cards (numbers and input array names)
+    function reindexVideos() {
+        const container = document.getElementById('videos-container');
+        const cards = container.querySelectorAll('.video-card');
+        const sideCount = document.getElementById('side-videos-count');
 
-        // Initial preview load
-        updatePlayerPreview();
+        cards.forEach((card, idx) => {
+            card.setAttribute('data-index', idx);
+            const numText = card.querySelector('.num-text');
+            if (numText) numText.textContent = idx + 1;
+
+            // Update input names
+            const titleInput = card.querySelector('.video-title-input');
+            if (titleInput) titleInput.setAttribute('name', `videos[${idx}][title]`);
+
+            const urlInput = card.querySelector('.video-url-input');
+            if (urlInput) urlInput.setAttribute('name', `videos[${idx}][url]`);
+
+            const descInput = card.querySelector('.video-description-input');
+            if (descInput) descInput.setAttribute('name', `videos[${idx}][description]`);
+        });
+
+        if (sideCount) {
+            sideCount.textContent = `${cards.length} Video`;
+        }
+    }
+
+    // Hapus Kartu Video
+    window.removeVideoCard = function(btn) {
+        const container = document.getElementById('videos-container');
+        const cards = container.querySelectorAll('.video-card');
+
+        if (cards.length <= 1) {
+            if (confirm('Ini adalah video satu-satunya. Apakah Anda ingin mengosongkan tautannya?')) {
+                const firstCard = cards[0];
+                const urlInput = firstCard.querySelector('.video-url-input');
+                const titleInput = firstCard.querySelector('.video-title-input');
+                const descInput = firstCard.querySelector('.video-description-input');
+                if (urlInput) {
+                    urlInput.value = '';
+                    handleVideoUrlChange(urlInput);
+                }
+                if (titleInput) titleInput.value = '';
+                if (descInput) descInput.value = '';
+            }
+            return;
+        }
+
+        if (confirm('Apakah Anda yakin ingin menghapus video ini dari daftar?')) {
+            const card = btn.closest('.video-card');
+            if (card) {
+                card.remove();
+                reindexVideos();
+            }
+        }
+    };
+
+    // Tambah Kartu Video Baru
+    window.addNewVideoCard = function(initialData = null) {
+        const container = document.getElementById('videos-container');
+        const cards = container.querySelectorAll('.video-card');
+        const nextIndex = cards.length;
+        const defaultTitle = initialData?.title || `Video Pembelajaran ${nextIndex + 1}`;
+        const defaultUrl = initialData?.url || '';
+        const defaultDesc = initialData?.description || initialData?.keterangan || '';
+
+        const newCard = document.createElement('div');
+        newCard.className = 'video-card bg-slate-50/70 border border-slate-200/90 rounded-2xl p-5 space-y-4 fade-in-item transition-all hover:border-red-300';
+        newCard.setAttribute('data-index', nextIndex);
+
+        newCard.innerHTML = `
+            <div class="flex items-center justify-between gap-3 pb-3 border-b border-slate-200/80">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="video-number-badge px-3 py-1 text-xs font-black rounded-lg bg-red-600 text-white shadow-xs">
+                        Video #<span class="num-text">${nextIndex + 1}</span>
+                    </span>
+                    <span class="video-status-badge px-2.5 py-0.5 text-[11px] font-bold rounded-md border bg-slate-200 text-slate-600 border-slate-300">
+                        Belum Ada Tautan
+                    </span>
+                    <a href="#"
+                       target="_blank"
+                       class="video-external-btn hidden text-[11px] font-bold text-red-600 hover:text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded-md transition-colors">
+                        Buka di YouTube ↗
+                    </a>
+                </div>
+
+                <button type="button"
+                        onclick="removeVideoCard(this)"
+                        title="Hapus video ini dari daftar"
+                        class="btn-delete-video inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-rose-600 hover:text-rose-700 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 transition-colors shadow-2xs">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                    <span>Hapus Video</span>
+                </button>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                    Judul Video <span class="text-rose-500">*</span>
+                </label>
+                <input type="text"
+                       name="videos[${nextIndex}][title]"
+                       value="${defaultTitle}"
+                       required
+                       placeholder="Contoh: Video 2: Prosedur Praktik & Penerapan"
+                       class="video-title-input w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs sm:text-sm text-slate-900 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all">
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-slate-700">
+                    URL / Tautan Video YouTube <span class="text-rose-500">*</span>
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
+                        </svg>
+                    </div>
+                    <input type="text"
+                           name="videos[${nextIndex}][url]"
+                           value="${defaultUrl}"
+                           placeholder="Contoh: https://www.youtube.com/watch?v=... atau https://youtu.be/..."
+                           oninput="handleVideoUrlChange(this)"
+                           class="video-url-input w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-mono text-slate-900 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all">
+                </div>
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-slate-700">
+                    Keterangan / Catatan Video <span class="text-slate-400 font-normal">(Opsional)</span>
+                </label>
+                <textarea name="videos[${nextIndex}][description]"
+                          rows="2"
+                          placeholder="Tuliskan keterangan singkat, petunjuk menyimak, atau poin penting khusus untuk video ini..."
+                          class="video-description-input w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs text-slate-900 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all leading-relaxed">${defaultDesc}</textarea>
+            </div>
+
+            <div class="pt-1">
+                <div class="player-box relative w-full aspect-video bg-slate-950 rounded-2xl overflow-hidden border border-slate-300 shadow-inner flex flex-col items-center justify-center text-center p-4 text-slate-400">
+                    <div class="player-placeholder flex flex-col items-center justify-center space-y-2">
+                        <div class="w-12 h-12 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-red-500 shadow-md">
+                            <svg class="w-6 h-6 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-slate-300">Belum ada video yang dimuat</p>
+                            <p class="text-[11px] text-slate-500">Tempel URL YouTube di atas untuk melihat tampilan video</p>
+                        </div>
+                    </div>
+
+                    <iframe src=""
+                            class="player-iframe w-full h-full absolute inset-0 hidden"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowfullscreen></iframe>
+                </div>
+            </div>
+        `;
+
+        container.appendChild(newCard);
+        reindexVideos();
+
+        if (defaultUrl) {
+            const urlInput = newCard.querySelector('.video-url-input');
+            if (urlInput) handleVideoUrlChange(urlInput);
+        }
+
+        newCard.querySelector('.video-title-input').focus();
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Init add video button in header
+        const btnAdd = document.getElementById('btn-add-video');
+        if (btnAdd) {
+            btnAdd.addEventListener('click', function() {
+                addNewVideoCard();
+            });
+        }
 
         // Guiding Questions List management
         const questionsList = document.getElementById('guiding-questions-list');
-        const addBtn = document.getElementById('btn-add-question');
+        const addQBtn = document.getElementById('btn-add-question');
         const sidePointsCount = document.getElementById('side-points-count');
 
         function reindexQuestions() {
@@ -644,8 +840,8 @@
             }
         };
 
-        if (addBtn) {
-            addBtn.addEventListener('click', function() {
+        if (addQBtn) {
+            addQBtn.addEventListener('click', function() {
                 const row = document.createElement('div');
                 row.className = 'question-row flex items-center gap-2 group fade-in-item';
                 row.innerHTML = `
@@ -670,33 +866,44 @@
             });
         }
 
-        // Fast Template Loader
-        window.loadSampleVideoContent = function() {
-            const titleInput = document.getElementById('video_title');
-            const urlInput = document.getElementById('youtube_url');
-            const durInput = document.getElementById('estimated_duration');
-            const instInput = document.getElementById('instructions');
-            const minCharsInput = document.getElementById('min_summary_chars');
-            const minWordsInput = document.getElementById('min_summary_words');
+        // Fast Template Loader for Multi-Video
+        window.loadSampleMultiVideoContent = function() {
             const toggleInput = document.getElementById('has_video_toggle');
-
-            if (titleInput) titleInput.value = "Video Pembelajaran: Pengenalan Konsep & Perancangan Basis Data";
-            if (urlInput) urlInput.value = "https://www.youtube.com/watch?v=HXV3zeQKqGY";
-            if (durInput) durInput.value = "20";
-            if (instInput) instInput.value = "Simak video tutorial di samping dari awal hingga akhir. Catat konsep utama normalisasi data, pembuatan tabel, dan hubungan antar-entitas (Entity Relationship). Tuliskan ringkasan pemahaman Anda secara terstruktur pada kolom yang disediakan.";
-            if (minCharsInput) minCharsInput.value = "100";
-            if (minWordsInput) minWordsInput.value = "20";
-
             if (toggleInput && !toggleInput.checked) {
                 toggleInput.checked = true;
                 toggleVideoStatus(true);
             }
 
+            const container = document.getElementById('videos-container');
+            container.innerHTML = '';
+
+            const sampleVideos = [
+                {
+                    title: "Video 1: Pengenalan Konsep & Teori Dasar",
+                    url: "https://www.youtube.com/watch?v=HXV3zeQKqGY",
+                    description: "Penjelasan dasar mengenai konsep arsitektur rangkaian dan komponen pendukung."
+                },
+                {
+                    title: "Video 2: Prosedur Praktik & Langkah Kerja Mandiri",
+                    url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                    description: "Demonstrasi langkah perakitan, uji coba modul, dan standar operasional keselamatan kerja."
+                }
+            ];
+
+            sampleVideos.forEach(v => {
+                addNewVideoCard(v);
+            });
+
+            const instInput = document.getElementById('instructions');
+            if (instInput) {
+                instInput.value = "Simak seluruh rangkaian video tutorial di atas secara seksama. Catat konsep utama, langkah-langkah kerja, dan keselamatan kerja yang dijelaskan. Tuliskan 1 (satu) ringkasan intisari materi terpadu yang merangkum pemahaman Anda dari kedua video tersebut pada kolom yang disediakan.";
+            }
+
             // Questions template
             const sampleQuestions = [
-                "Jelaskan pengertian basis data relasional menurut penjelasan dalam video!",
-                "Sebutkan 3 tahapan utama dalam merancang tabel dan relasi Primary Key - Foreign Key!",
-                "Apa keuntungan menerapkan prinsip normalisasi database pada sistem informasi sekolah?",
+                "Jelaskan pengertian dan konsep utama yang dipaparkan pada Video 1!",
+                "Sebutkan tahapan prosedur kerja dan hal penting yang harus diperhatikan pada Video 2!",
+                "Bagaimana sintesis dan penerapan materi dari seluruh video dalam praktik kejuruan Anda?",
             ];
 
             questionsList.innerHTML = '';
@@ -723,8 +930,8 @@
             });
 
             reindexQuestions();
-            updatePlayerPreview();
         };
     });
 </script>
 @endpush
+

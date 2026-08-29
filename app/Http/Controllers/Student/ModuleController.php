@@ -41,8 +41,9 @@ class ModuleController extends Controller
         // 1. Pastikan modul berstatus published
         abort_if($module->status !== 'published', 404, 'Modul ini belum dipublikasikan oleh guru.');
 
-        // 2. Pastikan modul ditugaskan untuk rombel kelas siswa
-        abort_if($module->class_id !== $student->class_id, 403, 'Modul ini tidak ditugaskan untuk kelas Anda.');
+        // 2. Pastikan modul ditugaskan untuk salah satu rombel kelas yang diikuti siswa
+        $joinedClassIds = $student->joinedClassIds();
+        abort_unless(in_array($module->class_id, $joinedClassIds), 403, 'Modul ini tidak ditugaskan untuk kelas yang Anda ikuti.');
 
         // 3. Pastikan siswa terdaftar pada mapel modul jika ada plotting
         if ($student->subjects()->exists() && !$student->subjects->contains($module->subject_id)) {
@@ -65,6 +66,7 @@ class ModuleController extends Controller
     {
         $student = $this->student();
         $class = $student->schoolClass;
+        $joinedClassIds = $student->joinedClassIds();
 
         // Validasi: Pastikan siswa terdaftar pada mata pelajaran ini jika sudah ada plotting
         if ($student->subjects()->exists() && !$student->subjects->contains($subject->id)) {
@@ -72,9 +74,9 @@ class ModuleController extends Controller
                 ->with('error', "Anda tidak terdaftar pada mata pelajaran {$subject->name}.");
         }
 
-        // Query modul terbit yang ditugaskan untuk kelas siswa ini pada mapel terpilih
+        // Query modul terbit yang ditugaskan untuk seluruh kelas yang diikuti siswa pada mapel terpilih
         $modulesQuery = Module::query()
-            ->where('class_id', $student->class_id)
+            ->whereIn('class_id', $joinedClassIds)
             ->where('subject_id', $subject->id)
             ->where('status', 'published')
             ->with([
@@ -185,6 +187,7 @@ class ModuleController extends Controller
         $informasiUmum = $module->informasi_umum_data ?? [];
         $materiData = $module->materi_data ?? [];
         $videoData = $module->video_data ?? [];
+        $videosList = $module->videosList();
         $embedData = $module->embed_data ?? [];
         $jobSheetData = $module->job_sheet_data ?? [];
         $lkpdData = $module->lkpd_data ?? [];
@@ -232,6 +235,7 @@ class ModuleController extends Controller
             'informasiUmum',
             'materiData',
             'videoData',
+            'videosList',
             'embedData',
             'jobSheetData',
             'lkpdData',

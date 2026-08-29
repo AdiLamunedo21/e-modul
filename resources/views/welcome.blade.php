@@ -150,8 +150,11 @@
                     </div>
                     <h3 class="font-heading text-2xl font-bold text-slate-900 mb-2">Portal Siswa</h3>
                     <p class="text-slate-500 mb-8 min-h-[48px]">Akses materi, kerjakan tugas, dan pantau progres belajarmu.</p>
-                    <a href="{{ route('login.student') }}" class="block w-full rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700 transition-colors">
+                    <a href="{{ route('login.student') }}" class="block w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700 transition-colors mb-2.5">
                         Masuk sebagai Siswa
+                    </a>
+                    <a href="{{ route('register.student') }}" class="block w-full rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200/80 px-4 py-2 text-xs font-bold text-blue-700 transition-colors">
+                        Daftar Akun Baru
                     </a>
                 </div>
 

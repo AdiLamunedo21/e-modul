@@ -29,15 +29,10 @@ class StudentDashboardTest extends TestCase
             ->get(route('student.dashboard'));
 
         $response->assertStatus(200);
-        $response->assertSee('Selamat Datang', false);
         $response->assertSee($student->name);
         $response->assertSee($student->identity_number);
-        $response->assertSee('Portal Belajar Siswa', false);
-        $response->assertSee('E-Modul Pembelajaran', false);
-        $response->assertSee('Modul Kelas', false);
-        $response->assertSee('Sedang Dikerjakan', false);
-        $response->assertSee('Modul Tuntas', false);
-        $response->assertSee('Mata Pelajaran & Guru Pengampu', false);
+        $response->assertSee('Kelas yang Anda Ikuti', false);
+        $response->assertSee('Rombel Diikuti', false);
     }
 
     public function test_student_dashboard_displays_subjects_with_teachers_and_module_counts()
@@ -51,7 +46,7 @@ class StudentDashboardTest extends TestCase
             ->get(route('student.dashboard'));
 
         $response->assertStatus(200);
-        $response->assertSee('Guru Pengampu', false);
+        $response->assertSee('Guru', false);
         $response->assertSee('Modul', false);
     }
 
@@ -112,6 +107,127 @@ class StudentDashboardTest extends TestCase
 
         // Cleanup
         $module->delete();
+    }
+
+    public function test_welcome_banner_only_displays_within_first_10_minutes_of_registration()
+    {
+        $student = Student::first();
+        if (!$student) {
+            $this->markTestSkipped('Student data not seeded.');
+        }
+
+        // 1. Siswa baru terdaftar (misal 2 menit lalu) -> Banner HARUS muncul
+        $student->created_at = now()->subMinutes(2);
+        $student->save();
+
+        $responseNew = $this->actingAs($student, 'student')
+            ->get(route('student.dashboard'));
+
+        $responseNew->assertStatus(200);
+        $responseNew->assertSee('Selamat Datang, ' . $student->name, false);
+
+        // 2. Siswa lama terdaftar (misal 15 menit lalu) -> Banner TIDAK boleh muncul
+        $student->created_at = now()->subMinutes(15);
+        $student->save();
+
+        $responseOld = $this->actingAs($student, 'student')
+            ->get(route('student.dashboard'));
+
+        $responseOld->assertStatus(200);
+        $responseOld->assertDontSee('Selamat Datang, ' . $student->name, false);
+    }
+
+    public function test_student_can_open_class_detail_page_and_see_subjects_only()
+    {
+        $student = Student::first();
+        $class = SchoolClass::first();
+        $teacher = Teacher::first();
+        $subject = Subject::first();
+        if (!$student || !$class || !$teacher || !$subject) {
+            $this->markTestSkipped('Seed data required.');
+        }
+
+        $student->joinClass($class);
+
+        $module = Module::create([
+            'teacher_id' => $teacher->id,
+            'class_id'   => $class->id,
+            'subject_id' => $subject->id,
+            'title'      => 'Modul Khusus Kelas ' . uniqid(),
+            'status'     => 'published',
+            'has_materi' => true,
+        ]);
+
+        $response = $this->actingAs($student, 'student')
+            ->get(route('student.classes.show', $class->id));
+
+        $response->assertStatus(200);
+        $response->assertSee($class->full_name);
+        $response->assertSee($class->code);
+        $response->assertSee($subject->name);
+        $response->assertSee('Daftar Mata Pelajaran', false);
+
+        $module->delete();
+    }
+
+    public function test_student_can_open_class_subject_modules_page_and_see_modules()
+    {
+        $student = Student::first();
+        $class = SchoolClass::first();
+        $teacher = Teacher::first();
+        $subject = Subject::first();
+        if (!$student || !$class || !$teacher || !$subject) {
+            $this->markTestSkipped('Seed data required.');
+        }
+
+        $student->joinClass($class);
+
+        $module = Module::create([
+            'teacher_id' => $teacher->id,
+            'class_id'   => $class->id,
+            'subject_id' => $subject->id,
+            'title'      => 'Modul Khusus Mapel ' . uniqid(),
+            'status'     => 'published',
+            'has_materi' => true,
+        ]);
+
+        $response = $this->actingAs($student, 'student')
+            ->get(route('student.classes.subject', ['class' => $class->id, 'subject' => $subject->id]));
+
+        $response->assertStatus(200);
+        $response->assertSee($class->full_name);
+        $response->assertSee($subject->name);
+        $response->assertSee($module->title);
+
+        $module->delete();
+    }
+
+    public function test_student_cannot_access_unjoined_class_detail_page()
+    {
+        $student = Student::first();
+        if (!$student) {
+            $this->markTestSkipped('Student data not seeded.');
+        }
+
+        $unjoinedClass = SchoolClass::create([
+            'grade'      => 'XII',
+            'major_id'   => 1,
+            'major_name' => 'Teknik',
+            'section'    => 'UNJ_' . rand(1000, 9999),
+            'code'       => 'UNJ' . rand(100, 999),
+        ]);
+
+        $response = $this->actingAs($student, 'student')
+            ->get(route('student.classes.show', $unjoinedClass->id));
+
+        $response->assertStatus(403);
+
+        $responseSubj = $this->actingAs($student, 'student')
+            ->get(route('student.classes.subject', ['class' => $unjoinedClass->id, 'subject' => 1]));
+
+        $responseSubj->assertStatus(403);
+
+        $unjoinedClass->delete();
     }
 
     public function test_student_logout_works()

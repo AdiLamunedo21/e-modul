@@ -65,12 +65,50 @@
                 {{-- ── Left Side: Video Player & Info (7 cols) ── --}}
                 <div class="lg:col-span-7 space-y-6">
 
+                    @php
+                        $videosList = $data['videos'] ?? $module->videosList();
+                        if (empty($videosList)) {
+                            $rawId = $data['youtube_id'] ?? null;
+                            if ($rawId) {
+                                $videosList = [
+                                    [
+                                        'title' => $data['video_title'] ?? 'Video Pembelajaran: ' . $module->title,
+                                        'id' => $rawId,
+                                    ]
+                                ];
+                            }
+                        }
+                        $firstVideo = $videosList[0] ?? null;
+                    @endphp
+
                     {{-- Card Player --}}
                     <div class="bg-white rounded-3xl shadow-sm border border-slate-200/80 overflow-hidden">
+
+                        {{-- Playlist Switcher jika terdapat lebih dari 1 video --}}
+                        @if(count($videosList) > 1)
+                            <div class="bg-slate-900 px-4 py-3 border-b border-slate-800 flex items-center justify-between gap-3 overflow-x-auto">
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <span class="text-xs font-bold text-red-400">Daftar Putar ({{ count($videosList) }} Video):</span>
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    @foreach($videosList as $pIdx => $v)
+                                        <button type="button"
+                                                onclick="switchPreviewVideo({{ $pIdx }}, '{{ $v['id'] ?? '' }}', '{{ addslashes($v['title'] ?? '') }}', '{{ addslashes(str_replace(["\r", "\n"], ' ', $v['description'] ?? '')) }}')"
+                                                class="preview-playlist-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 {{ $loop->first ? 'bg-red-600 text-white shadow-md' : 'bg-slate-800 text-slate-300 hover:bg-slate-700' }}"
+                                                data-index="{{ $pIdx }}">
+                                            <span>▶</span>
+                                            <span>Video {{ $pIdx + 1 }}</span>
+                                        </button>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
                         {{-- Video Embed --}}
                         <div class="relative w-full aspect-video bg-black flex items-center justify-center">
-                            @if(!empty($data['youtube_id']))
-                                <iframe src="https://www.youtube-nocookie.com/embed/{{ $data['youtube_id'] }}?rel=0"
+                            @if(!empty($firstVideo['id']))
+                                <iframe id="active-preview-iframe"
+                                        src="https://www.youtube-nocookie.com/embed/{{ $firstVideo['id'] }}?rel=0"
                                         class="w-full h-full absolute inset-0"
                                         frameborder="0"
                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -88,14 +126,18 @@
                         <div class="p-6 space-y-4">
                             <div class="flex flex-wrap items-center justify-between gap-2">
                                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-red-100 text-red-700">
-                                    ⏱️ Durasi Menonton: {{ $data['estimated_duration'] ?? 15 }} Menit
+                                    🎬 Multimedia: {{ count($videosList) }} Video Pembelajaran
                                 </span>
                                 <span class="text-xs text-slate-400">Disematkan oleh Guru</span>
                             </div>
 
-                            <h2 class="text-xl font-extrabold text-slate-900 leading-snug">
-                                {{ $data['video_title'] ?? 'Video Pembelajaran' }}
+                            <h2 id="active-video-title" class="text-xl font-extrabold text-slate-900 leading-snug">
+                                {{ $firstVideo['title'] ?? ($data['video_title'] ?? 'Video Pembelajaran') }}
                             </h2>
+
+                            <p id="active-video-desc" class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-200/60 {{ empty($firstVideo['description']) ? 'hidden' : '' }}">
+                                {{ $firstVideo['description'] ?? '' }}
+                            </p>
 
                             @if(!empty($data['instructions']))
                                 <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200/70 text-xs text-slate-700 leading-relaxed">
@@ -222,6 +264,38 @@
     </div>
 
     <script>
+        function switchPreviewVideo(index, videoId, title, desc = '') {
+            const iframe = document.getElementById('active-preview-iframe');
+            const titleElem = document.getElementById('active-video-title');
+            const descElem = document.getElementById('active-video-desc');
+            const buttons = document.querySelectorAll('.preview-playlist-btn');
+
+            if (iframe && videoId) {
+                iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?rel=0`;
+            }
+            if (titleElem && title) {
+                titleElem.textContent = title;
+            }
+            if (descElem) {
+                if (desc && desc.trim().length > 0) {
+                    descElem.textContent = desc;
+                    descElem.classList.remove('hidden');
+                } else {
+                    descElem.textContent = '';
+                    descElem.classList.add('hidden');
+                }
+            }
+
+            buttons.forEach(btn => {
+                const btnIdx = parseInt(btn.getAttribute('data-index'), 10);
+                if (btnIdx === index) {
+                    btn.className = 'preview-playlist-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 bg-red-600 text-white shadow-md';
+                } else {
+                    btn.className = 'preview-playlist-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 bg-slate-800 text-slate-300 hover:bg-slate-700';
+                }
+            });
+        }
+
         const minChars = {{ (int) ($data['min_summary_chars'] ?? 100) }};
         const minWords = {{ (int) ($data['min_summary_words'] ?? 20) }};
 

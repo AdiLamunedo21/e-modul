@@ -42,9 +42,11 @@ Route::post('/login/teacher', [AuthController::class, 'teacherLogin']);
 Route::post('/logout/teacher', [AuthController::class, 'teacherLogout'])->name('logout.teacher');
 
 // ─── Student Auth ──────────────────────────────────────────────────────────
-Route::get('/login/student',  [AuthController::class, 'showStudentLogin'])->name('login.student');
-Route::post('/login/student', [AuthController::class, 'studentLogin']);
-Route::post('/logout/student', [AuthController::class, 'studentLogout'])->name('logout.student');
+Route::get('/login/student',     [AuthController::class, 'showStudentLogin'])->name('login.student');
+Route::post('/login/student',    [AuthController::class, 'studentLogin']);
+Route::get('/register/student',  [AuthController::class, 'showStudentRegister'])->name('register.student');
+Route::post('/register/student', [AuthController::class, 'studentRegister']);
+Route::post('/logout/student',   [AuthController::class, 'studentLogout'])->name('logout.student');
 
 // ─── Admin Protected ───────────────────────────────────────────────────────
 Route::middleware('auth:admin')->prefix('admin')->group(function () {
@@ -186,6 +188,7 @@ Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(fu
     Route::get('/classes',                                                  [ClassController::class, 'index'])->name('classes.index');
     Route::post('/classes',                                                 [ClassController::class, 'store'])->name('classes.store');
     Route::get('/classes/{class}',                                          [ClassController::class, 'show'])->name('classes.show');
+    Route::post('/classes/{class}/regenerate-code',                          [ClassController::class, 'regenerateCode'])->name('classes.regenerate-code');
     Route::post('/classes/{class}/import-modules',                          [ClassController::class, 'importModules'])->name('classes.import-modules');
     Route::delete('/classes/{class}',                                       [ClassController::class, 'destroy'])->name('classes.destroy');
     Route::get('/classes/{class}/students/{student}/summary',               [ClassController::class, 'getStudentAcademicSummary'])->name('classes.student.summary');
@@ -197,7 +200,19 @@ Route::middleware('auth:student')->prefix('student')->group(function () {
     // Alias untuk rute dashboard.student
     Route::get('/portal', [StudentDashboardController::class, 'index'])->name('dashboard.student');
 
-    // Modul Belajar Siswa per Mata Pelajaran
+    // Gabung Kelas lewat Kode Kelas
+    Route::post('/join-class', [StudentDashboardController::class, 'joinClass'])->name('student.join-class');
+
+    // Detail Rombel Kelas Siswa (Menampilkan Daftar Mata Pelajaran di Kelas Ini)
+    Route::get('/classes/{class}', [StudentDashboardController::class, 'showClass'])->name('student.classes.show');
+
+    // Siswa Keluar dari Rombel Kelas (Menghapus data nilai modul di kelas tersebut)
+    Route::post('/classes/{class}/leave', [StudentDashboardController::class, 'leaveClass'])->name('student.classes.leave');
+
+    // Modul Pembelajaran per Mata Pelajaran di Kelas Ini
+    Route::get('/classes/{class}/subjects/{subject}', [StudentDashboardController::class, 'showClassSubjectModules'])->name('student.classes.subject');
+
+    // Modul Belajar Siswa per Mata Pelajaran (Umum/Global)
     Route::get('/modules/subject/{subject}', [StudentModuleController::class, 'bySubject'])->name('student.modules.subject');
 
     // Antarmuka Interaktif Mulai Belajar E-Modul 5 Bagian

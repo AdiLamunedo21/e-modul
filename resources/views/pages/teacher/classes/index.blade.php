@@ -70,7 +70,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
-                    <span>+ Buat Kelas Baru</span>
+                    <span>Buat Kelas Baru</span>
                 </button>
             </div>
         </div>
@@ -217,7 +217,7 @@
             </p>
             <button @click="createClassModalOpen = true"
                     class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow transition-all">
-                + Buat Kelas Baru
+                Buat Kelas Baru
             </button>
         </div>
     @else
@@ -268,6 +268,35 @@
                         <p class="text-xs text-slate-500 font-medium mt-0.5">
                             {{ $class->major ? $class->major->name : $class->major_name }} • {{ $class->students_count }} Siswa Terdaftar
                         </p>
+
+                        {{-- ══ KODE KELAS GURU & FITUR SHARE SISWA ══ --}}
+                        <div class="mt-4 p-3 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50/70 border border-blue-200/80 flex items-center justify-between gap-3 shadow-2xs">
+                            <div class="min-w-0">
+                                <p class="text-[10px] font-extrabold uppercase tracking-wider text-blue-600">Kode Gabung Kelas</p>
+                                <div class="flex items-center gap-1.5 mt-0.5">
+                                    <span class="font-mono text-base font-black text-slate-900 tracking-wider select-all">{{ $class->code }}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5 shrink-0" x-data="{ copied: false, shared: false }">
+                                <button type="button"
+                                        @click="navigator.clipboard.writeText('{{ $class->code }}'); copied = true; setTimeout(() => copied = false, 2000)"
+                                        :class="copied ? 'bg-emerald-600 text-white' : 'bg-white text-blue-700 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-2xs'"
+                                        class="px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
+                                        title="Salin Kode Kelas">
+                                    <svg x-show="!copied" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184"/></svg>
+                                    <svg x-show="copied" x-cloak class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                                    <span x-text="copied ? 'Disalin!' : 'Salin'"></span>
+                                </button>
+                                <button type="button"
+                                        @click="navigator.clipboard.writeText('Silakan bergabung ke kelas {{ addslashes($class->full_name) }} di E-Modul SMKN 3 Yogyakarta menggunakan Kode Kelas: {{ $class->code }} (Link: {{ url('/register/student') }}?code={{ $class->code }})'); shared = true; setTimeout(() => shared = false, 2000)"
+                                        :class="shared ? 'bg-emerald-600 text-white' : 'bg-white text-indigo-700 hover:bg-indigo-600 hover:text-white border border-indigo-200 shadow-2xs'"
+                                        class="p-1.5 rounded-xl text-xs font-bold transition-all"
+                                        title="Bagikan Teks Undangan Siswa">
+                                    <svg x-show="!shared" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"/></svg>
+                                    <svg x-show="shared" x-cloak class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Data Metrics 2x2 Grid --}}
@@ -407,6 +436,14 @@
                             <input type="text" name="section" required placeholder="Contoh: 1, 2, atau A, B"
                                    class="w-full text-xs sm:text-sm rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                             <p class="text-[11px] text-slate-400 mt-1.5">Misal: Diisi <strong>2</strong> untuk menghasilkan nama kelas <em>Kelas X TE 2</em></p>
+                        </div>
+
+                        {{-- Info Kode Kelas Otomatis --}}
+                        <div class="p-3 rounded-2xl bg-indigo-50/70 border border-indigo-200/80 text-xs text-indigo-900 flex items-start gap-2.5">
+                            <span class="text-base shrink-0">✨</span>
+                            <p class="text-[11px] leading-relaxed text-indigo-950 font-medium">
+                                <strong>Kode Kelas Unik</strong> akan otomatis digenerate oleh sistem setelah kelas disimpan. Anda dapat langsung membagikan kode tersebut kepada siswa untuk bergabung.
+                            </p>
                         </div>
                     </div>
 
@@ -558,26 +595,23 @@
                             ⚠️
                         </div>
                         <div>
-                            <h3 class="text-lg font-black text-slate-900 leading-tight">Hapus Kelas & Purge Data?</h3>
-                            <p class="text-xs text-red-600 font-semibold mt-0.5">Tindakan ini tidak dapat dibatalkan</p>
+                            <h3 class="text-lg font-black text-slate-900 leading-tight">Hapus Rombel Kelas?</h3>
+                            <p class="text-xs text-red-600 font-semibold mt-0.5">Modul akan dihapus dan siswa dilepaskan</p>
                         </div>
                     </div>
 
                     <div class="p-4 rounded-2xl bg-red-50/70 border border-red-200 text-xs text-red-900 space-y-2">
                         <p>
-                            Anda akan menghapus <strong x-text="targetClassName"></strong> secara permanen.
+                            Anda akan menghapus rombel <strong x-text="targetClassName"></strong>.
                         </p>
                         <p class="text-[11px] text-red-700 font-medium">
-                            Menghapus kelas ini akan secara otomatis membersihkan:
+                            Ketentuan penghapusan kelas ini:
                         </p>
                         <ul class="list-disc list-inside space-y-1 text-[11px] text-red-800 font-medium pl-1">
-                            <li>Seluruh data siswa alumni (<span x-text="targetStudentsCount"></span> siswa)</li>
-                            <li>Seluruh rekam jejak nilai & pengumpulan tugas</li>
-                            <li>Seluruh modul pembelajaran pada kelas ini (<span x-text="targetModulesCount"></span> modul)</li>
+                            <li>Seluruh modul pembelajaran pada kelas ini (<span x-text="targetModulesCount"></span> modul) akan dihapus.</li>
+                            <li>Siswa terdaftar (<span x-text="targetStudentsCount"></span> siswa) akan <strong>dilepaskan status kelasnya</strong>.</li>
+                            <li><strong>Akun siswa TIDAK DIHAPUS</strong> (NISN, nama, dan akses login siswa tetap aman untuk bergabung ke kelas lain).</li>
                         </ul>
-                        <p class="text-[10px] text-slate-500 pt-1">
-                            Fitur ini membantu mengosongkan kapasitas database dari data angkatan alumni yang sudah tidak aktif.
-                        </p>
                     </div>
                 </div>
 
@@ -589,7 +623,7 @@
                         Batal
                     </button>
                     <button type="submit" class="px-5 py-2.5 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-md shadow-red-600/25 transition-all">
-                        Ya, Hapus & Purge Bersih
+                        Ya, Hapus Kelas
                     </button>
                 </form>
             </div>

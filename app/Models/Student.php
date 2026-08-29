@@ -10,9 +10,118 @@ class Student extends Authenticatable
 
     protected $hidden = ['password', 'remember_token'];
 
+    /**
+     * Relasi banyak kelas yang diikuti oleh siswa (Many-to-Many).
+     */
+    public function classes()
+    {
+        return $this->belongsToMany(SchoolClass::class, 'class_student', 'student_id', 'class_id')->withTimestamps();
+    }
+
+    /**
+     * Alias relasi classes.
+     */
+    public function schoolClasses()
+    {
+        return $this->classes();
+    }
+
+    /**
+     * Relasi kelas aktif / fallback terakhir siswa.
+     */
     public function schoolClass()
     {
         return $this->belongsTo(SchoolClass::class, 'class_id');
+    }
+
+    /**
+     * Mengambil seluruh array ID kelas yang diikuti oleh siswa ini.
+     *
+     * @return int[]
+     */
+    public function joinedClassIds(): array
+    {
+        $ids = $this->classes()->pluck('classes.id')->map(fn($id) => (int)$id)->toArray();
+        if (empty($ids) && $this->class_id) {
+            $ids = [(int) $this->class_id];
+        }
+        return array_values(array_unique(array_filter($ids)));
+    }
+
+    /**
+     * Menggabungkan siswa ke rombel kelas tertentu dan otomatis menyinkronkan mata pelajaran.
+     */
+    public function joinClass(SchoolClass $schoolClass): void
+    {
+        // 1. Daftarkan siswa ke rombel kelas di tabel pivot class_student (banyak kelas)
+        $this->classes()->syncWithoutDetaching([$schoolClass->id]);
+
+        // 2. Simpan juga ke kolom class_id sebagai penanda kelas aktif terakhir
+        $this->update(['class_id' => $schoolClass->id]);
+
+        // 3. Cari seluruh mata pelajaran yang ada di modul-modul kelas ini
+        $subjectIds = $schoolClass->modules()
+            ->whereNotNull('subject_id')
+            ->pluck('subject_id')
+            ->unique()
+            ->toArray();
+
+        if (!empty($subjectIds)) {
+            $this->subjects()->syncWithoutDetaching($subjectIds);
+        }
+    }
+
+    /**
+     * Mengeluarkan siswa dari rombel kelas tertentu.
+     * Menghapus seluruh data nilai, progres, dan submission siswa khusus untuk modul-modul di kelas ini.
+     * Catatan: Kelas dan modul di database serta dashboard guru tetap aman dan tidak terhapus.
+     */
+    public function leaveClass(SchoolClass $schoolClass): void
+    {
+        // 1. Dapatkan seluruh ID modul di kelas ini
+        $moduleIds = $schoolClass->modules()->pluck('id')->toArray();
+
+        if (!empty($moduleIds)) {
+            // Hapus hasil belajar & nilai siswa pada modul-modul kelas ini
+            StudentResult::where('student_id', $this->id)
+                ->whereIn('module_id', $moduleIds)
+                ->delete();
+
+            // Hapus ringkasan video siswa
+            VideoSummary::where('student_id', $this->id)
+                ->whereIn('module_id', $moduleIds)
+                ->delete();
+
+            // Hapus screenshot praktik embed siswa
+            EmbedSubmission::where('student_id', $this->id)
+                ->whereIn('module_id', $moduleIds)
+                ->delete();
+
+            // Hapus submission Job Sheet siswa
+            $jobSheetIds = JobSheet::whereIn('module_id', $moduleIds)->pluck('id')->toArray();
+            if (!empty($jobSheetIds)) {
+                JobSheetSubmission::where('student_id', $this->id)
+                    ->whereIn('job_sheet_id', $jobSheetIds)
+                    ->delete();
+            }
+
+            // Hapus submission LKPD siswa
+            $lkpdIds = Lkpd::whereIn('module_id', $moduleIds)->pluck('id')->toArray();
+            if (!empty($lkpdIds)) {
+                Submission::where('student_id', $this->id)
+                    ->whereIn('lkpd_id', $lkpdIds)
+                    ->delete();
+            }
+        }
+
+        // 2. Lepas relasi kelas dari tabel pivot class_student
+        $this->classes()->detach($schoolClass->id);
+
+        // 3. Jika class_id aktif sama dengan kelas ini, alihkan ke kelas lain yang masih diikuti atau null
+        if ($this->class_id == $schoolClass->id) {
+            $nextClass = $this->classes()->first();
+            $this->update(['class_id' => $nextClass?->id]);
+        }
     }
 
     /**

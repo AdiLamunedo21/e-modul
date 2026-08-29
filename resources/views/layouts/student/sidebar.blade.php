@@ -69,6 +69,21 @@
                 <span>Dashboard Siswa</span>
             </a>
 
+            {{-- Tombol Tambah / Gabung Kelas Baru --}}
+            <button type="button"
+                    @click="joinModalOpen = true"
+                    class="w-full flex items-center justify-between rounded-xl px-3.5 py-2 text-xs font-bold text-emerald-400 bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-500/30 transition-all group shadow-2xs">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-5 h-5 rounded-md bg-emerald-500/20 flex items-center justify-center text-emerald-300 font-black text-xs group-hover:scale-110 transition-transform">
+                        +
+                    </span>
+                    <span>Tambah Kelas Baru</span>
+                </div>
+                <span class="text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-md border border-emerald-400/30">
+                    Kode
+                </span>
+            </button>
+
             {{-- Grup: Pembelajaran --}}
             <p class="pt-6 pb-1 px-3 text-[11px] font-bold uppercase tracking-widest text-slate-500">Modul & Pembelajaran</p>
 

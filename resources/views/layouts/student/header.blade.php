@@ -35,16 +35,11 @@
                 <span class="hidden sm:inline-block text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 font-semibold px-2.5 py-0.5 rounded-full">
                     SMKN 3 Yogyakarta
                 </span>
-                @if(Auth::guard('student')->user()?->schoolClass)
-                    <span class="hidden md:inline-block text-xs text-slate-600 bg-slate-100 border border-slate-200 font-bold px-2 py-0.5 rounded-md">
-                        {{ Auth::guard('student')->user()->schoolClass->full_name }}
-                    </span>
-                @endif
             </div>
         </div>
 
-        {{-- Kanan: Status Siswa + Profile + Logout --}}
-        <div class="flex items-center gap-3">
+        {{-- Kanan: Search + Tambah Kelas + Profile + Logout --}}
+        <div class="flex items-center gap-2.5 sm:gap-3">
 
             {{-- Search Bar (Desktop) --}}
             <div class="hidden md:block relative">
@@ -55,24 +50,36 @@
                 </div>
                 <input
                     type="text"
-                    class="w-56 rounded-xl border border-gray-200 bg-gray-50 py-1.5 pl-9 pr-3 text-xs text-gray-700 placeholder-gray-400 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all"
+                    class="w-52 lg:w-60 rounded-xl border border-gray-200 bg-gray-50 py-1.5 pl-9 pr-3 text-xs text-gray-700 placeholder-gray-400 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all"
                     placeholder="Cari modul belajar..."
                 >
             </div>
 
+            {{-- Tombol Tambah Kelas Baru di Header --}}
+            <button type="button"
+                    @click="joinModalOpen = true"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-xs shadow-emerald-600/25 shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                <span class="hidden sm:inline">Tambah Kelas</span>
+            </button>
+
             {{-- Profile Pill Siswa --}}
-            <div class="flex items-center gap-2.5 rounded-full border border-gray-200 bg-gray-50 p-1.5 pr-3 shadow-2xs">
+            <div class="flex items-center gap-2.5 rounded-2xl sm:rounded-full border border-gray-200 bg-gray-50 p-1.5 pr-3 shadow-2xs shrink-0">
                 <div class="h-8 w-8 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center ring-2 ring-emerald-500/20 shrink-0">
                     {{ strtoupper(substr(Auth::guard('student')->user()->name ?? 'S', 0, 2)) }}
                 </div>
                 <div class="hidden sm:flex flex-col text-left">
                     <span class="text-xs font-bold text-gray-800 leading-tight">{{ Auth::guard('student')->user()->name ?? 'Peserta Didik' }}</span>
-                    <span class="text-[10px] text-emerald-600 font-semibold">{{ Auth::guard('student')->user()->schoolClass->full_name ?? ('NISN: ' . (Auth::guard('student')->user()->identity_number ?? '-')) }}</span>
+                    <span class="text-[10px] text-emerald-600 font-semibold">
+                        NISN: {{ Auth::guard('student')->user()->identity_number ?? '-' }}
+                    </span>
                 </div>
             </div>
 
             {{-- Logout Button --}}
-            <form action="{{ route('logout.student') }}" method="POST" class="inline">
+            <form action="{{ route('logout.student') }}" method="POST" class="inline shrink-0">
                 @csrf
                 <button
                     type="submit"

@@ -77,14 +77,28 @@ class VideoController extends Controller
 
         $videoData = is_array($module->video_data) ? $module->video_data : [];
 
+        // Ambil daftar video yang sudah dinormalisasi dari helper model
+        $videosList = $module->videosList();
+
+        // Jika belum ada video sama sekali, sediakan 1 template video awal
+        if (empty($videosList)) {
+            $videosList = [
+                [
+                    'title'       => 'Video Pembelajaran 1: ' . $module->title,
+                    'url'         => '',
+                    'id'          => '',
+                    'description' => '',
+                    'embed_url'   => null,
+                ]
+            ];
+        }
+
         $data = array_merge([
             'video_title'        => 'Video Pembelajaran: ' . $module->title,
-            'youtube_url'        => '',
-            'youtube_id'         => '',
-            'estimated_duration' => 15,
-            'instructions'       => 'Simak video pembelajaran di bawah ini secara seksama. Catat poin-poin penting dan tuliskan ringkasan pemahaman Anda pada kolom yang disediakan sebelum beralih ke tahapan berikutnya.',
+            'videos'             => $videosList,
+            'instructions'       => 'Simak seluruh video pembelajaran di bawah ini secara seksama. Catat poin-poin penting dan tuliskan satu ringkasan pemahaman terpadu Anda pada kolom yang disediakan sebelum beralih ke tahapan berikutnya.',
             'guiding_questions'  => [
-                'Apa konsep atau topik utama yang dijelaskan dalam video ini?',
+                'Apa konsep atau topik utama yang dijelaskan dalam video-video ini?',
                 'Sebutkan langkah kerja atau poin krusial yang harus diperhatikan!',
                 'Bagaimana penerapan konsep tersebut dalam praktik kejuruan Anda?',
             ],
@@ -92,9 +106,8 @@ class VideoController extends Controller
             'min_summary_words'  => 20,
         ], $videoData);
 
-        if (empty($data['youtube_id']) && !empty($data['youtube_url'])) {
-            $data['youtube_id'] = self::extractYoutubeId($data['youtube_url']);
-        }
+        // Pastikan array videos selalu terisi
+        $data['videos'] = $videosList;
 
         return view('pages.teacher.modules.video', compact('module', 'data'));
     }
@@ -108,56 +121,97 @@ class VideoController extends Controller
         $module->load('schoolClass');
 
         $videoData = is_array($module->video_data) ? $module->video_data : [];
+        $videosList = $module->videosList();
 
         $data = array_merge([
             'video_title'        => 'Video Pembelajaran: ' . $module->title,
-            'youtube_url'        => '',
-            'youtube_id'         => '',
-            'estimated_duration' => 15,
-            'instructions'       => 'Simak video pembelajaran di bawah ini secara seksama. Catat poin-poin penting dan tuliskan ringkasan pemahaman Anda pada kolom yang disediakan.',
+            'videos'             => $videosList,
+            'instructions'       => 'Simak seluruh video pembelajaran di bawah ini secara seksama. Catat poin-poin penting dan tuliskan ringkasan pemahaman Anda pada kolom yang disediakan.',
             'guiding_questions'  => [],
             'min_summary_chars'  => 100,
             'min_summary_words'  => 20,
         ], $videoData);
 
-        if (empty($data['youtube_id']) && !empty($data['youtube_url'])) {
-            $data['youtube_id'] = self::extractYoutubeId($data['youtube_url']);
-        }
+        $data['videos'] = $videosList;
 
         return view('pages.teacher.modules.preview-video', compact('module', 'data'));
     }
 
     /**
-     * Simpan Pengaturan Video YouTube & Panduan Ringkasan.
+     * Simpan Pengaturan Multi-Video YouTube & Panduan Ringkasan.
      */
     public function update(Request $request, Module $module)
     {
         $this->authorize($module);
 
         $hasVideo = $request->boolean('has_video');
-        $rawUrl = $request->input('youtube_url');
-        $youtubeId = self::extractYoutubeId($rawUrl);
+
+        // Terima daftar video dari form array 'videos'
+        $rawVideos = $request->input('videos', []);
+
+        // Fallback jika dikirim via input single youtube_url lama
+        if (empty($rawVideos) && $request->filled('youtube_url')) {
+            $rawVideos = [
+                [
+                    'title' => $request->input('video_title', 'Video Pembelajaran: ' . $module->title),
+                    'url'   => $request->input('youtube_url'),
+                ]
+            ];
+        }
 
         $rules = [
-            'video_title'         => [$hasVideo ? 'required' : 'nullable', 'string', 'max:255'],
-            'youtube_url'         => [$hasVideo ? 'required' : 'nullable', 'string', 'max:500'],
-            'estimated_duration'  => ['nullable', 'integer', 'min:1', 'max:240'],
+            'video_title'         => ['nullable', 'string', 'max:255'],
             'instructions'        => ['nullable', 'string'],
             'guiding_questions'   => ['nullable', 'array'],
             'guiding_questions.*' => ['nullable', 'string', 'max:255'],
             'min_summary_chars'   => ['nullable', 'integer', 'min:10', 'max:2000'],
             'min_summary_words'   => ['nullable', 'integer', 'min:5', 'max:500'],
+            'videos'              => [$hasVideo ? 'required' : 'nullable', 'array', $hasVideo ? 'min:1' : 'nullable'],
+            'videos.*.title'      => [$hasVideo ? 'required' : 'nullable', 'string', 'max:255'],
+            'videos.*.url'        => [$hasVideo ? 'required' : 'nullable', 'string', 'max:500'],
+            'videos.*.description'=> ['nullable', 'string', 'max:2000'],
         ];
 
         $request->validate($rules, [
-            'video_title.required' => 'Judul video pembelajaran wajib diisi jika fitur Video diaktifkan.',
-            'youtube_url.required' => 'Tautan / URL YouTube wajib diisi jika fitur Video diaktifkan.',
+            'videos.required'         => 'Tambahkan minimal 1 video pembelajaran YouTube jika fitur Video diaktifkan.',
+            'videos.min'              => 'Tambahkan minimal 1 video pembelajaran YouTube jika fitur Video diaktifkan.',
+            'videos.*.title.required' => 'Judul setiap video wajib diisi.',
+            'videos.*.url.required'   => 'Tautan / URL YouTube untuk setiap video wajib diisi.',
         ]);
 
-        if ($hasVideo && empty($youtubeId)) {
-            return back()
-                ->withInput()
-                ->withErrors(['youtube_url' => 'Format URL YouTube tidak valid. Pastikan URL berasal dari YouTube (contoh: https://www.youtube.com/watch?v=... atau https://youtu.be/...)']);
+        $processedVideos = [];
+        $invalidUrlErrors = [];
+
+        foreach ($rawVideos as $idx => $v) {
+            $url = trim($v['url'] ?? '');
+            $title = trim($v['title'] ?? '');
+            $desc = trim($v['description'] ?? ($v['keterangan'] ?? ''));
+
+            if (empty($url) && empty($title)) {
+                continue;
+            }
+
+            $youtubeId = self::extractYoutubeId($url);
+
+            if ($hasVideo && empty($youtubeId)) {
+                $videoNum = $idx + 1;
+                $invalidUrlErrors["videos.{$idx}.url"] = "Tautan YouTube pada Video #{$videoNum} tidak valid. Pastikan format URL benar (contoh: https://www.youtube.com/watch?v=... atau https://youtu.be/...).";
+            }
+
+            $processedVideos[] = [
+                'title'       => $title ?: ('Video Pembelajaran ' . (count($processedVideos) + 1)),
+                'url'         => $url,
+                'id'          => $youtubeId,
+                'description' => $desc,
+            ];
+        }
+
+        if ($hasVideo && !empty($invalidUrlErrors)) {
+            return back()->withInput()->withErrors($invalidUrlErrors);
+        }
+
+        if ($hasVideo && empty($processedVideos)) {
+            return back()->withInput()->withErrors(['videos' => 'Tambahkan minimal 1 video pembelajaran YouTube yang valid.']);
         }
 
         // Filter pertanyaan panduan
@@ -167,11 +221,14 @@ class VideoController extends Controller
             ->values()
             ->toArray();
 
+        $firstVideo = $processedVideos[0] ?? null;
+
         $payload = [
             'video_title'        => $request->input('video_title', 'Video Pembelajaran: ' . $module->title),
-            'youtube_url'        => $rawUrl,
-            'youtube_id'         => $youtubeId,
-            'estimated_duration' => (int) $request->input('estimated_duration', 15),
+            'videos'             => $processedVideos,
+            // Fallback backward compatibility fields
+            'youtube_url'        => $firstVideo['url'] ?? '',
+            'youtube_id'         => $firstVideo['id'] ?? null,
             'instructions'       => $request->input('instructions', ''),
             'guiding_questions'  => $guidingQuestions,
             'min_summary_chars'  => (int) $request->input('min_summary_chars', 100),
@@ -183,7 +240,7 @@ class VideoController extends Controller
             'video_data' => $payload,
         ]);
 
-        $statusText = $hasVideo ? 'diaktifkan & disimpan' : 'disimpan (status Non-Aktif)';
+        $statusText = $hasVideo ? 'diaktifkan & disimpan (' . count($processedVideos) . ' video)' : 'disimpan (status Non-Aktif)';
         return redirect()
             ->route('teacher.modules.show', $module)
             ->with('success', "Komponen Video & Ringkasan YouTube berhasil {$statusText}! ✅");

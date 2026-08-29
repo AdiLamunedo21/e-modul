@@ -594,48 +594,122 @@
 
         {{-- 3.2 Multimedia Video YouTube & Form Resume --}}
         @if($module->has_video)
+            @php
+                $vList = !empty($videosList) ? $videosList : $module->videosList();
+                $minCharsRequired = (int)($videoData['min_summary_chars'] ?? 20);
+                $minWordsRequired = (int)($videoData['min_summary_words'] ?? 5);
+            @endphp
+
             <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm overflow-hidden" id="section-video">
-                <div class="bg-gradient-to-r from-slate-900 to-indigo-950 text-white p-6 sm:p-7 flex items-center justify-between gap-4">
+                {{-- Header Multimedia --}}
+                <div class="bg-gradient-to-r from-slate-900 to-indigo-950 text-white p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div class="flex items-center gap-3">
                         <span class="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center text-lg font-bold shadow-sm">▶️</span>
                         <div>
-                            <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-300">Multimedia Pembelajaran</span>
-                            <h3 class="text-lg font-bold">{{ $videoData['judul_video'] ?? 'Video Pembelajaran YouTube' }}</h3>
+                            <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-300">Multimedia Pembelajaran ({{ count($vList) }} Video)</span>
+                            <h3 class="text-lg font-bold">{{ $videoData['video_title'] ?? ($videoData['judul_video'] ?? 'Video Pembelajaran YouTube') }}</h3>
                         </div>
                     </div>
-                    @if($videoSummary)
-                        <span class="px-3 py-1 rounded-full text-xs font-bold {{ $videoSummary->manual_score !== null ? 'bg-emerald-500 text-white' : 'bg-amber-400 text-amber-950' }}">
-                            {{ $videoSummary->manual_score !== null ? 'Nilai: ' . $videoSummary->manual_score : 'Resume Dikirim (Pending)' }}
-                        </span>
-                    @endif
+                    <div class="flex items-center gap-2 flex-wrap">
+                        @if($videoSummary)
+                            <span class="px-3 py-1 rounded-full text-xs font-bold {{ $videoSummary->manual_score !== null ? 'bg-emerald-500 text-white' : 'bg-amber-400 text-amber-950' }}">
+                                {{ $videoSummary->manual_score !== null ? 'Nilai: ' . $videoSummary->manual_score : 'Resume Dikirim (Pending)' }}
+                            </span>
+                        @endif
+                    </div>
                 </div>
 
                 <div class="p-6 sm:p-8 space-y-6">
-                    {{-- Iframe Video Player --}}
-                    @if(!empty($videoData['youtube_id']))
-                        <div class="aspect-video w-full rounded-2xl overflow-hidden shadow-lg border border-slate-200 bg-black">
-                            <iframe class="w-full h-full"
-                                    src="https://www.youtube-nocookie.com/embed/{{ $videoData['youtube_id'] }}?rel=0"
-                                    title="YouTube video player"
-                                    frameborder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowfullscreen></iframe>
+
+                    {{-- Multi-Video Player & Playlist Switcher --}}
+                    @if(!empty($vList))
+                        <div x-data="{ activeVid: 0, vids: {{ json_encode($vList) }} }" class="space-y-4">
+                            
+                            {{-- Playlist Tabs jika terdapat lebih dari 1 video --}}
+                            <template x-if="vids.length > 1">
+                                <div class="bg-slate-900 rounded-2xl p-2.5 flex items-center gap-2 overflow-x-auto border border-slate-800 shadow-inner">
+                                    <span class="text-xs font-bold text-red-400 px-2 shrink-0">Daftar Video:</span>
+                                    <template x-for="(v, vIdx) in vids" :key="vIdx">
+                                        <button type="button"
+                                                @click="activeVid = vIdx"
+                                                :class="activeVid === vIdx ? 'bg-red-600 text-white shadow-md' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'"
+                                                class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0">
+                                            <span>▶</span>
+                                            <span x-text="'Video ' + (vIdx + 1)"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                            </template>
+
+                            {{-- Active Video Player --}}
+                            <div class="aspect-video w-full rounded-2xl overflow-hidden shadow-lg border border-slate-200 bg-black relative">
+                                <template x-for="(v, vIdx) in vids" :key="vIdx">
+                                    <iframe x-show="activeVid === vIdx"
+                                            class="w-full h-full absolute inset-0"
+                                            :src="v.embed_url"
+                                            :title="v.title"
+                                            frameborder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowfullscreen></iframe>
+                                </template>
+                            </div>
+
+                            {{-- Active Video Info & Keterangan --}}
+                            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5">
+                                <div>
+                                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-red-600"
+                                          x-text="'Sedang Diputar: Video ' + (activeVid + 1) + ' dari ' + vids.length"></span>
+                                    <h4 class="text-sm sm:text-base font-bold text-slate-900" x-text="vids[activeVid]?.title || 'Video Pembelajaran'"></h4>
+                                </div>
+                                <template x-if="vids[activeVid]?.description && vids[activeVid]?.description.trim().length > 0">
+                                    <div class="text-xs text-slate-600 leading-relaxed bg-white p-3.5 rounded-xl border border-slate-200/70 whitespace-pre-line shadow-2xs">
+                                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Keterangan Video:</div>
+                                        <p x-text="vids[activeVid]?.description"></p>
+                                    </div>
+                                </template>
+                            </div>
                         </div>
                     @endif
 
-                    @if(!empty($videoData['deskripsi_video']))
-                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-200/60">
-                            {{ $videoData['deskripsi_video'] }}
-                        </p>
+                    {{-- Petunjuk Belajar & Poin Panduan (Jika ada) --}}
+                    @if(!empty($videoData['instructions']))
+                        <div class="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4 text-xs text-amber-950 space-y-1">
+                            <h5 class="font-bold flex items-center gap-1.5 text-amber-900">
+                                <span>📌</span>
+                                <span>Petunjuk Belajar:</span>
+                            </h5>
+                            <p class="leading-relaxed whitespace-pre-line text-amber-900/90">{{ $videoData['instructions'] }}</p>
+                        </div>
                     @endif
 
-                    {{-- Form / Tampilan Resume Siswa --}}
+                    @if(!empty($videoData['guiding_questions']) && count($videoData['guiding_questions']) > 0)
+                        <div class="bg-blue-50/70 border border-blue-200/80 rounded-2xl p-4 space-y-2">
+                            <h5 class="text-xs font-bold text-blue-900 flex items-center gap-1.5">
+                                <span>💡</span>
+                                <span>Poin Fokus / Panduan Intisari:</span>
+                            </h5>
+                            <ul class="space-y-1.5 text-xs text-blue-950">
+                                @foreach($videoData['guiding_questions'] as $q)
+                                    <li class="flex items-start gap-2">
+                                        <span class="w-4 h-4 rounded-full bg-blue-600 text-white font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">{{ $loop->iteration }}</span>
+                                        <span class="leading-relaxed">{{ $q }}</span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    {{-- Form / Tampilan Satu Ringkasan Terpadu Siswa --}}
                     <div class="pt-4 border-t border-slate-100">
                         <div class="flex items-center justify-between mb-3">
-                            <h4 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-                                <span>📝</span>
-                                <span>Ringkasan / Resume Video Siswa</span>
-                            </h4>
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                    <span>📝</span>
+                                    <span>Ringkasan / Resume Video Siswa</span>
+                                </h4>
+                                <p class="text-xs text-slate-500 mt-0.5">Tuliskan 1 (satu) resume intisari pemahaman yang merangkum seluruh video di atas.</p>
+                            </div>
+
                             @if($videoSummary && $videoSummary->manual_score === null)
                                 <form action="{{ route('student.modules.submission.cancel', ['module' => $module->id, 'type' => 'video']) }}" method="POST">
                                     @csrf
@@ -664,22 +738,22 @@
                             </div>
                         @else
                             <form action="{{ route('student.modules.video.submit', $module) }}" method="POST" class="space-y-3"
-                                  x-data="{ summaryText: '', get charCount() { return this.summaryText.length; } }">
+                                  x-data="{ summaryText: '', get charCount() { return this.summaryText.length; }, minChars: {{ $minCharsRequired }} }">
                                 @csrf
                                 <textarea name="summary_text"
                                           x-model="summaryText"
                                           rows="5"
                                           required
-                                          placeholder="Tuliskan poin-poin penting, intisari materi, dan pemahaman yang Anda dapatkan dari video di atas (minimal 20 karakter)..."
+                                          placeholder="Tuliskan poin-poin penting, intisari materi, dan pemahaman yang Anda peroleh setelah menyimak seluruh video di atas (minimal {{ $minCharsRequired }} karakter)..."
                                           class="w-full p-4 text-xs sm:text-sm bg-slate-50 border border-slate-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition outline-none"></textarea>
 
                                 <div class="flex items-center justify-between text-xs text-slate-500">
-                                    <span :class="charCount < 20 ? 'text-amber-600 font-bold' : 'text-emerald-600 font-bold'">
-                                        Karakter: <span x-text="charCount"></span> (Min. 20)
+                                    <span :class="charCount < minChars ? 'text-amber-600 font-bold' : 'text-emerald-600 font-bold'">
+                                        Karakter: <span x-text="charCount"></span> (Min. <span x-text="minChars"></span>)
                                     </span>
                                     <button type="submit"
-                                            :disabled="charCount < 20"
-                                            :class="charCount < 20 ? 'opacity-50 cursor-not-allowed bg-slate-400' : 'bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-600/20'"
+                                            :disabled="charCount < minChars"
+                                            :class="charCount < minChars ? 'opacity-50 cursor-not-allowed bg-slate-400' : 'bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-600/20'"
                                             class="px-6 py-2.5 rounded-xl text-white font-bold text-xs transition">
                                         Simpan & Kirim Resume Video
                                     </button>
