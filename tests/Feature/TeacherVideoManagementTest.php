@@ -219,7 +219,7 @@ class TeacherVideoManagementTest extends TestCase
                 'summary_text' => 'Ini adalah satu ringkasan terpadu yang merangkum keseluruhan pemahaman dari video 1 dan video 2.',
             ]);
 
-        $submitResponse->assertRedirect(route('student.modules.show', ['module' => $module->id, 'section' => 3]));
+        $submitResponse->assertRedirect(route('student.modules.show', ['module' => $module->id, 'page' => 'video']));
         $this->assertDatabaseHas('video_summaries', [
             'module_id'  => $module->id,
             'student_id' => $student->id,

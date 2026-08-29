@@ -199,7 +199,7 @@ class StudentInteractiveLearningTest extends TestCase
                 ],
             ]);
 
-        $response->assertRedirect(route('student.modules.show', ['module' => $module->id, 'section' => 2]));
+        $response->assertRedirect(route('student.modules.show', ['module' => $module->id, 'page' => 'pre_test']));
         $response->assertSessionHas('success');
 
         $result = StudentResult::where('module_id', $module->id)->where('student_id', $student->id)->first();
@@ -240,7 +240,7 @@ class StudentInteractiveLearningTest extends TestCase
                 'summary_text' => 'Ini adalah ringkasan materi video pembelajaran web yang cukup panjang lebih dari 20 karakter.',
             ]);
 
-        $response->assertRedirect(route('student.modules.show', ['module' => $module->id, 'section' => 3]));
+        $response->assertRedirect(route('student.modules.show', ['module' => $module->id, 'page' => 'video']));
         $this->assertDatabaseHas('video_summaries', [
             'module_id'  => $module->id,
             'student_id' => $student->id,
@@ -305,7 +305,7 @@ class StudentInteractiveLearningTest extends TestCase
             ->post(route('student.modules.embed.submit', $module), [
                 'screenshot' => $imageFile,
             ]);
-        $resEmbed->assertRedirect(route('student.modules.show', ['module' => $module->id, 'section' => 4]));
+        $resEmbed->assertRedirect(route('student.modules.show', ['module' => $module->id, 'page' => 'embed']));
         $this->assertDatabaseHas('embed_submissions', [
             'module_id'  => $module->id,
             'student_id' => $student->id,
@@ -317,7 +317,7 @@ class StudentInteractiveLearningTest extends TestCase
             ->post(route('student.modules.job-sheet.submit', $module), [
                 'job_sheet_file' => $pdfJobSheet,
             ]);
-        $resJs->assertRedirect(route('student.modules.show', ['module' => $module->id, 'section' => 4]));
+        $resJs->assertRedirect(route('student.modules.show', ['module' => $module->id, 'page' => 'job_sheet']));
         $this->assertDatabaseHas('job_sheet_submissions', [
             'job_sheet_id' => $jobSheet->id,
             'student_id'   => $student->id,
@@ -329,7 +329,7 @@ class StudentInteractiveLearningTest extends TestCase
             ->post(route('student.modules.lkpd.submit', $module), [
                 'lkpd_file' => $pdfLkpd,
             ]);
-        $resLkpd->assertRedirect(route('student.modules.show', ['module' => $module->id, 'section' => 4]));
+        $resLkpd->assertRedirect(route('student.modules.show', ['module' => $module->id, 'page' => 'lkpd']));
         $this->assertDatabaseHas('submissions', [
             'lkpd_id'    => $lkpd->id,
             'student_id' => $student->id,
@@ -340,8 +340,7 @@ class StudentInteractiveLearningTest extends TestCase
             ->post(route('student.modules.post-test.submit', $module), [
                 'answers' => [$postQ->id => 'A'],
             ]);
-        $resPost->assertRedirect(route('student.modules.show', ['module' => $module->id, 'section' => 5]));
-
+        $resPost->assertRedirect(route('student.modules.show', ['module' => $module->id, 'page' => 'post_test']));
         $result = StudentResult::where('module_id', $module->id)->where('student_id', $student->id)->first();
         $this->assertNotNull($result);
         $this->assertEquals(100, $result->post_test_score);

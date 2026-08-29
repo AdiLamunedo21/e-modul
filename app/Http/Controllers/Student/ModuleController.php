@@ -343,7 +343,7 @@ class ModuleController extends Controller
         }
         $result->save();
 
-        return redirect()->route('student.modules.show', ['module' => $module->id, 'section' => 2])
+        return redirect()->route('student.modules.show', ['module' => $module->id, 'page' => 'pre_test'])
             ->with('success', "Kuis Pre-test berhasil diselesaikan! Skor Anda: {$finalScore}/100 ({$correctCount} dari {$totalQuestions} soal benar).");
     }
 
@@ -366,7 +366,7 @@ class ModuleController extends Controller
 
         $existing = VideoSummary::where('module_id', $module->id)->where('student_id', $student->id)->first();
         if ($existing && $existing->manual_score !== null) {
-            return redirect()->route('student.modules.show', ['module' => $module->id, 'section' => 3])
+            return redirect()->route('student.modules.show', ['module' => $module->id, 'page' => 'video'])
                 ->with('error', 'Tugas ringkasan video telah dinilai oleh guru dan tidak dapat diubah lagi.');
         }
 
@@ -377,7 +377,7 @@ class ModuleController extends Controller
 
         $this->ensureStudentResultExists($module, $student);
 
-        return redirect()->route('student.modules.show', ['module' => $module->id, 'section' => 3])
+        return redirect()->route('student.modules.show', ['module' => $module->id, 'page' => 'video'])
             ->with('success', 'Ringkasan materi video YouTube berhasil disimpan!');
     }
 
@@ -402,7 +402,7 @@ class ModuleController extends Controller
 
         $existing = EmbedSubmission::where('module_id', $module->id)->where('student_id', $student->id)->first();
         if ($existing && $existing->manual_score !== null) {
-            return redirect()->route('student.modules.show', ['module' => $module->id, 'section' => 4])
+            return redirect()->route('student.modules.show', ['module' => $module->id, 'page' => 'embed'])
                 ->with('error', 'Tugas praktik simulator telah dinilai oleh guru dan tidak dapat diubah lagi.');
         }
 
@@ -420,7 +420,7 @@ class ModuleController extends Controller
 
         $this->ensureStudentResultExists($module, $student);
 
-        return redirect()->route('student.modules.show', ['module' => $module->id, 'section' => 4])
+        return redirect()->route('student.modules.show', ['module' => $module->id, 'page' => 'embed'])
             ->with('success', 'Bukti tangkapan layar (screenshot) praktik simulator berhasil diunggah!');
     }
 
@@ -446,7 +446,7 @@ class ModuleController extends Controller
 
         $existing = JobSheetSubmission::where('job_sheet_id', $jobSheet->id)->where('student_id', $student->id)->first();
         if ($existing && $existing->manual_score !== null) {
-            return redirect()->route('student.modules.show', ['module' => $module->id, 'section' => 4])
+            return redirect()->route('student.modules.show', ['module' => $module->id, 'page' => 'job_sheet'])
                 ->with('error', 'Laporan Job Sheet telah dinilai oleh guru dan tidak dapat diubah lagi.');
         }
 
@@ -463,7 +463,7 @@ class ModuleController extends Controller
 
         $this->ensureStudentResultExists($module, $student);
 
-        return redirect()->route('student.modules.show', ['module' => $module->id, 'section' => 4])
+        return redirect()->route('student.modules.show', ['module' => $module->id, 'page' => 'job_sheet'])
             ->with('success', 'Berkas laporan praktikum Job Sheet PDF berhasil dikirim!');
     }
 
@@ -489,7 +489,7 @@ class ModuleController extends Controller
 
         $existing = Submission::where('lkpd_id', $lkpd->id)->where('student_id', $student->id)->first();
         if ($existing && $existing->manual_score !== null) {
-            return redirect()->route('student.modules.show', ['module' => $module->id, 'section' => 4])
+            return redirect()->route('student.modules.show', ['module' => $module->id, 'page' => 'lkpd'])
                 ->with('error', 'Tugas LKPD telah dinilai oleh guru dan tidak dapat diubah lagi.');
         }
 
@@ -506,7 +506,7 @@ class ModuleController extends Controller
 
         $this->ensureStudentResultExists($module, $student);
 
-        return redirect()->route('student.modules.show', ['module' => $module->id, 'section' => 4])
+        return redirect()->route('student.modules.show', ['module' => $module->id, 'page' => 'lkpd'])
             ->with('success', 'Dokumen tugas LKPD PDF berhasil dikirim!');
     }
 
@@ -559,7 +559,7 @@ class ModuleController extends Controller
         }
         $result->save();
 
-        return redirect()->route('student.modules.show', ['module' => $module->id, 'section' => 5])
+        return redirect()->route('student.modules.show', ['module' => $module->id, 'page' => 'post_test'])
             ->with('success', "Evaluasi Post-test berhasil diselesaikan! Skor akhir Anda: {$finalScore}/100 ({$correctCount} dari {$totalQuestions} soal benar).");
     }
 
