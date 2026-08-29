@@ -1198,12 +1198,12 @@
         {{-- ─────────────────────────────────────────────────────────────────── --}}
         {{-- ── RIGHT COLUMN: WORKSPACE AKTIVITAS PEMBELAJARAN (8 Cols) ──────── --}}
         {{-- ─────────────────────────────────────────────────────────────────── --}}
-        <div class="lg:col-span-8 space-y-6">
+        <div class="lg:col-span-8 space-y-6 lg:px-8 w-full">
 
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             {{-- 1. KATA PENGANTAR ═════════════════════════════════════════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
-            <div x-show="activePage === 'kata_pengantar'" x-cloak class="w-full space-y-6">
+            <div x-show="activePage === 'kata_pengantar'" x-cloak class="w-full space-y-6 text-left">
                 <div class="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 shadow-sm">
                     <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-100">
                         <div class="flex items-center gap-3">
@@ -1259,7 +1259,7 @@
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             {{-- 2. PETUNJUK PENGGUNAAN ════════════════════════════════════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
-            <div x-show="activePage === 'petunjuk_penggunaan'" x-cloak class="w-full space-y-6">
+            <div x-show="activePage === 'petunjuk_penggunaan'" x-cloak class="w-full space-y-6 text-left">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {{-- Petunjuk Siswa --}}
                     <div class="rounded-3xl bg-white border border-teal-200/80 p-6 sm:p-7 shadow-sm space-y-4">
@@ -1333,7 +1333,7 @@
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             {{-- 3. TUJUAN PEMBELAJARAN ════════════════════════════════════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
-            <div x-show="activePage === 'tujuan_pembelajaran'" x-cloak class="w-full space-y-6">
+            <div x-show="activePage === 'tujuan_pembelajaran'" x-cloak class="w-full space-y-6 text-left">
                 <div class="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 shadow-sm space-y-6">
                     <div class="flex items-center justify-between pb-4 border-b border-slate-100">
                         <div class="flex items-center gap-3">
@@ -1398,7 +1398,7 @@
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             {{-- 4. PETA KONSEP ════════════════════════════════════════════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
-            <div x-show="activePage === 'peta_konsep'" x-cloak class="w-full space-y-6">
+            <div x-show="activePage === 'peta_konsep'" x-cloak class="w-full space-y-6 text-left">
                 <div class="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 shadow-sm space-y-6">
                     <div class="flex items-center justify-between pb-4 border-b border-slate-100">
                         <div class="flex items-center gap-3">
@@ -1452,7 +1452,7 @@
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             {{-- 5. GLOSARIUM ══════════════════════════════════════════════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
-            <div x-show="activePage === 'glosarium'" x-cloak class="w-full space-y-6">
+            <div x-show="activePage === 'glosarium'" x-cloak class="w-full space-y-6 text-left">
                 <div class="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 shadow-sm space-y-6">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
                         <div class="flex items-center gap-3">
@@ -1522,7 +1522,7 @@
             {{-- 6. PRE-TEST (SOAL LATIHAN DIAGNOSTIK) ═════════════════════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             @if($module->has_pre_test && $module->preTest)
-            <div x-show="activePage === 'pre_test'" x-cloak class="w-full space-y-6">
+            <div x-show="activePage === 'pre_test'" x-cloak class="w-full space-y-6 text-left">
                 <div class="rounded-3xl bg-white border border-teal-200/90 shadow-sm overflow-hidden" id="section-pre-test">
                     <div class="p-6 sm:p-7 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div class="flex items-center gap-3.5">
@@ -1618,7 +1618,7 @@
             {{-- 7. URAIAN MATERI PEMBELAJARAN & PPT ═══════════════════════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             @if($module->has_materi)
-            <div x-show="activePage === 'materi'" x-cloak class="w-full space-y-6">
+            <div x-show="activePage === 'materi'" x-cloak class="w-full space-y-6 text-left">
                 <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm overflow-hidden">
                     <div class="p-6 sm:p-8 border-b border-slate-100 bg-gradient-to-r from-blue-50/70 to-slate-50">
                         <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
@@ -1699,7 +1699,7 @@
                 $vList = !empty($videosList) ? $videosList : $module->videosList();
                 $minCharsRequired = (int)($videoData['min_summary_chars'] ?? 20);
             @endphp
-            <div x-show="activePage === 'video'" x-cloak class="w-full space-y-6">
+            <div x-show="activePage === 'video'" x-cloak class="w-full space-y-6 text-left">
                 <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm overflow-hidden" id="section-video">
                     {{-- Header Multimedia --}}
                     <div class="p-6 sm:p-7 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -1861,7 +1861,7 @@
             {{-- 9. SIMULATOR EMBED / MEDIA INTERAKTIF ═════════════════════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             @if($module->has_embed)
-            <div x-show="activePage === 'embed'" x-cloak class="w-full space-y-6">
+            <div x-show="activePage === 'embed'" x-cloak class="w-full space-y-6 text-left">
                 <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm overflow-hidden" id="section-embed">
                     <div class="p-6 sm:p-7 border-b border-slate-100 flex items-center justify-between gap-4">
                         <div class="flex items-center gap-3">
@@ -1991,7 +1991,7 @@
             {{-- 10. LEMBAR KERJA PRAKTIK (JOB SHEET PDF) ══════════════════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             @if($module->has_job_sheet)
-            <div x-show="activePage === 'job_sheet'" x-cloak class="w-full space-y-6">
+            <div x-show="activePage === 'job_sheet'" x-cloak class="w-full space-y-6 text-left">
                 <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm overflow-hidden" id="section-jobsheet">
                     <div class="p-6 sm:p-7 border-b border-slate-100 flex items-center justify-between gap-4">
                         <div class="flex items-center gap-3">
@@ -2106,7 +2106,7 @@
             {{-- 11. TUGAS LKPD ════════════════════════════════════════════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             @if($module->has_lkpd)
-            <div x-show="activePage === 'lkpd'" x-cloak class="w-full space-y-6">
+            <div x-show="activePage === 'lkpd'" x-cloak class="w-full space-y-6 text-left">
                 <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm overflow-hidden" id="section-lkpd">
                     <div class="p-6 sm:p-7 border-b border-slate-100 flex items-center justify-between gap-4">
                         <div class="flex items-center gap-3">
@@ -2221,7 +2221,7 @@
             {{-- 12. POST-TEST (EVALUASI AKHIR MODUL) ══════════════════════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             @if($module->has_post_test && $module->postTest)
-            <div x-show="activePage === 'post_test'" x-cloak class="w-full space-y-6">
+            <div x-show="activePage === 'post_test'" x-cloak class="w-full space-y-6 text-left">
                 <div class="rounded-3xl bg-white border border-rose-200/90 shadow-sm overflow-hidden" id="section-post-test">
                     <div class="p-6 sm:p-7 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div class="flex items-center gap-3.5">
@@ -2322,7 +2322,7 @@
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             {{-- 13. DAFTAR PUSTAKA ════════════════════════════════════════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
-            <div x-show="activePage === 'daftar_pustaka'" x-cloak class="w-full space-y-6">
+            <div x-show="activePage === 'daftar_pustaka'" x-cloak class="w-full space-y-6 text-left">
                 <div class="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 shadow-sm space-y-6">
                     <div class="flex items-center justify-between pb-4 border-b border-slate-100">
                         <div class="flex items-center gap-3">
@@ -2397,7 +2397,7 @@
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             {{-- 14. REKAPITULASI NILAI BELAJAR SISWA ══════════════════════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
-            <div x-show="activePage === 'rekap_nilai'" x-cloak class="w-full space-y-6">
+            <div x-show="activePage === 'rekap_nilai'" x-cloak class="w-full space-y-6 text-left">
                 <div class="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 shadow-sm space-y-6">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
                         <div class="flex items-center gap-3">
@@ -2540,7 +2540,7 @@
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             {{-- ═══ 3. BOTTOM SEQUENTIAL NAVIGATION BAR (NEXT / PREV) ════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
-            <div class="w-full rounded-3xl bg-white border border-slate-200/90 p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="w-full rounded-3xl bg-white border border-slate-200/90 p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 text-left">
                 {{-- Tombol Sebelumnya --}}
                 <div class="flex flex-wrap items-center gap-2">
                     <template x-if="prevPage">
