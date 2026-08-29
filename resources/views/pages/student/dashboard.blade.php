@@ -169,8 +169,8 @@
                         </p>
                     </div>
 
-                    {{-- Identitas Akun Siswa & Tombol Tambah Kelas --}}
-                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+                    {{-- Identitas Akun Siswa --}}
+                    <div class="flex items-center shrink-0">
                         <div class="bg-slate-950/50 border border-white/20 p-4 rounded-2xl backdrop-blur-md shadow-sm">
                             <div class="flex items-center gap-3">
                                 <div class="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-300 text-2xl shrink-0 font-black">
@@ -186,17 +186,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        {{-- Tombol Tambah / Gabung Kelas Baru --}}
-                        <button @click="joinModalOpen = true"
-                                type="button"
-                                title="Tambah atau Bergabung ke Rombel Kelas Baru dengan Kode"
-                                class="px-4 py-3.5 sm:py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold transition-all shadow-lg shadow-emerald-950/30 flex items-center justify-center gap-2 border border-emerald-400/30 group shrink-0">
-                            <svg class="w-4 h-4 text-white group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                            </svg>
-                            <span>Tambah Kelas</span>
-                        </button>
                     </div>
                 </div>
             </div>

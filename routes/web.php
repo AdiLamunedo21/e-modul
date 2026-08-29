@@ -217,6 +217,7 @@ Route::middleware('auth:student')->prefix('student')->group(function () {
 
     // Antarmuka Interaktif Mulai Belajar E-Modul 5 Bagian
     Route::get('/modules/{module}',                         [StudentModuleController::class, 'show'])->name('student.modules.show');
+    Route::post('/modules/{module}/mark-read',              [StudentModuleController::class, 'markRead'])->name('student.modules.mark-read');
     Route::post('/modules/{module}/pre-test',               [StudentModuleController::class, 'submitPreTest'])->name('student.modules.pre-test.submit');
     Route::post('/modules/{module}/video',                  [StudentModuleController::class, 'submitVideoSummary'])->name('student.modules.video.submit');
     Route::post('/modules/{module}/embed',                  [StudentModuleController::class, 'submitEmbed'])->name('student.modules.embed.submit');

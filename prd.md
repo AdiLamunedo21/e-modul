@@ -203,7 +203,7 @@ Pusat kendali operasional sekolah:
 - **Navigasi Sidebar Dinamis:** Daftar sub-menu mata pelajaran disaring hanya untuk mata pelajaran yang diambil siswa.
 - **Halaman Modul per Mapel (`/student/modules/subject/{subject}`):** Katalog modul khusus untuk mata pelajaran terpilih lengkap dengan filter status (*To-Do / Completed*).
 - **Direktori Modul Kelas (`/student/classes/{class}` & `/student/classes/{class}/subjects/{subject}/modules`):** Akses hierarkis materi modul kelas yang terdaftar.
-- **Antarmuka Belajar Interaktif Berstruktur Accordion (LMS Modern Learning Path):** Dilengkapi panel silabus interaktif berbasis Accordion 5 Bagian di sebelah kiri dan lembar kerja aktivitas mandiri (*dedicated component view*) di sebelah kanan. Siswa fokus menyelesaikan setiap komponen secara terisolasi (Pre-test terpisah, Uraian Materi & PPT terpisah, Video & Resume terpisah, Praktik Embed terpisah, Job Sheet terpisah, Tugas LKPD terpisah, Post-test terpisah, dan Rekapitulasi Nilai terpisah) dengan tombol navigasi bertahap (*Next/Previous*).
+- **Antarmuka Belajar Interaktif Sekuensial Berstruktur Accordion (LMS Step-by-Step Learning Path):** Dilengkapi panel silabus interaktif berbasis Accordion 5 Bagian di sebelah kiri dan lembar kerja aktivitas mandiri (*dedicated component view*) di sebelah kanan. Alur belajar bersifat sekuensial terproteksi (*progressive locked steps*) di mana siswa wajib memulai dari Bagian Awal (Kata Pengantar) dan menekan tombol *"Tandai Selesai Dibaca & Lanjut"* untuk membuka langkah berikutnya. Komponen yang telah selesai ditandai dengan badge icon centang hijau (`✓ Selesai Dibaca` / `✓ Nilai / Terkirim`), sementara langkah berikutnya yang belum dapat diakses berstatus terkunci (`🔒 Terkunci`).
 
 ---
 

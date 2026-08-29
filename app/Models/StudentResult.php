@@ -16,7 +16,26 @@ class StudentResult extends Model
         'lkpd_score'       => 'integer',
         'post_test_score'  => 'integer',
         'summative_score'  => 'integer',
+        'read_components'  => 'array',
     ];
+
+    /** Memeriksa apakah komponen sudah dibaca oleh siswa */
+    public function isComponentRead(string $component): bool
+    {
+        $reads = $this->read_components ?? [];
+        return in_array($component, $reads, true);
+    }
+
+    /** Menandai komponen sebagai sudah dibaca */
+    public function markComponentRead(string $component): void
+    {
+        $reads = $this->read_components ?? [];
+        if (!in_array($component, $reads, true)) {
+            $reads[] = $component;
+            $this->read_components = $reads;
+            $this->save();
+        }
+    }
 
     public function student()
     {

@@ -562,7 +562,14 @@ class DashboardController extends Controller
             ->latest('updated_at');
 
         $allModules = $modulesQuery->get();
-        $processedModules = $this->processStudentModules($allModules, $student);
+        // Urutkan modul berdasarkan waktu pembuatan/terbitan terbaru
+        $processedModules = $this->processStudentModules($allModules, $student)->sortByDesc('created_at')->values();
+
+        // Cari modul yang paling baru dibuka / sedang diakses oleh siswa
+        $recentlyOpenedModule = $processedModules
+            ->filter(fn($m) => !empty($m['last_accessed_at']) || $m['progress_percent'] > 0)
+            ->sortByDesc(fn($m) => $m['last_accessed_at'] ?? $m['updated_at'])
+            ->first();
 
         // Filter status belajar
         $filterStatus = $request->query('status', 'all');
@@ -604,6 +611,7 @@ class DashboardController extends Controller
             'teacherNames',
             'processedModules',
             'filteredModules',
+            'recentlyOpenedModule',
             'stats',
             'filterStatus'
         ));
@@ -698,7 +706,10 @@ class DashboardController extends Controller
                 'subject'           => $module->subject,
                 'subject_name'      => $module->subject?->name ?? 'Mata Pelajaran',
                 'teacher_name'      => $module->teacher->name ?? 'Guru Pengampu',
+                'created_at'        => $module->created_at,
                 'updated_at'        => $module->updated_at,
+                'last_accessed_at'  => $result?->updated_at,
+                'is_new'            => $module->created_at && $module->created_at->diffInDays(now()) <= 7,
                 'active_components' => $activeComps,
                 'total_components'  => $totalActive,
                 'completed_tasks'   => $completedTasks,

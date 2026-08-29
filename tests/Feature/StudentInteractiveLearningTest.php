@@ -348,4 +348,48 @@ class StudentInteractiveLearningTest extends TestCase
 
         $module->delete();
     }
+
+    public function test_student_can_mark_component_read_and_unlock_sequential_steps()
+    {
+        $student = Student::first();
+        $teacher = Teacher::first();
+        $subject = Subject::first();
+
+        if (!$student || !$teacher || !$subject) {
+            $this->markTestSkipped('Student, teacher, subject required.');
+        }
+
+        $student->subjects()->syncWithoutDetaching([$subject->id]);
+
+        $module = Module::create([
+            'teacher_id' => $teacher->id,
+            'class_id'   => $student->class_id,
+            'subject_id' => $subject->id,
+            'title'      => 'Modul Sekuensial ' . uniqid(),
+            'status'     => 'published',
+            'has_materi' => true,
+            'informasi_umum_data' => [
+                'toggles' => [
+                    'kata_pengantar' => true,
+                    'petunjuk_penggunaan' => true,
+                ],
+                'kata_pengantar' => 'Kata Pengantar Modul.',
+            ],
+        ]);
+
+        $resAjax = $this->actingAs($student, 'student')
+            ->postJson(route('student.modules.mark-read', $module), [
+                'component' => 'kata_pengantar',
+            ]);
+
+        $resAjax->assertStatus(200);
+        $resAjax->assertJsonFragment(['success' => true]);
+
+        $result = StudentResult::where('module_id', $module->id)->where('student_id', $student->id)->first();
+        $this->assertNotNull($result);
+        $this->assertTrue($result->isComponentRead('kata_pengantar'));
+
+        $module->delete();
+    }
 }
+

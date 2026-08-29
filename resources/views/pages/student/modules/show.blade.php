@@ -35,78 +35,79 @@
 @section('content')
 
 @php
-    // Definisikan seluruh halaman aktivitas yang aktif secara dinamis
+    $readList = (array) ($readComponents ?? []);
+
+    // Definisikan seluruh halaman aktivitas yang aktif secara berurutan
     $pagesList = [];
 
     // Bagian 1: Bagian Awal
     if ($module->isInfoComponentActive('kata_pengantar')) {
-        $pagesList[] = ['id' => 'kata_pengantar', 'sec' => 1, 'sec_name' => '1. Bagian Awal', 'title' => 'Kata Pengantar', 'icon' => '✏️', 'badge' => 'Pengantar', 'desc' => 'Prakata dan sambutan guru pengampu', 'status' => 'done'];
+        $pagesList[] = ['id' => 'kata_pengantar', 'type' => 'read', 'sec' => 1, 'sec_name' => '1. Bagian Awal', 'title' => 'Kata Pengantar', 'icon' => '✏️', 'badge' => 'Pengantar', 'desc' => 'Prakata dan sambutan motivasi guru pengampu'];
     }
     if ($module->isInfoComponentActive('petunjuk_penggunaan')) {
-        $pagesList[] = ['id' => 'petunjuk_penggunaan', 'sec' => 1, 'sec_name' => '1. Bagian Awal', 'title' => 'Petunjuk Penggunaan', 'icon' => '💡', 'badge' => 'Panduan', 'desc' => 'Panduan belajar siswa & arahan guru', 'status' => 'done'];
+        $pagesList[] = ['id' => 'petunjuk_penggunaan', 'type' => 'read', 'sec' => 1, 'sec_name' => '1. Bagian Awal', 'title' => 'Petunjuk Penggunaan', 'icon' => '💡', 'badge' => 'Panduan', 'desc' => 'Panduan langkah belajar mandiri peserta didik'];
     }
 
     // Bagian 2: Pendahuluan
     if ($module->isInfoComponentActive('tujuan_pembelajaran')) {
-        $pagesList[] = ['id' => 'tujuan_pembelajaran', 'sec' => 2, 'sec_name' => '2. Pendahuluan', 'title' => 'Tujuan & Capaian', 'icon' => '🎯', 'badge' => 'Capaian', 'desc' => 'Target kompetensi pembelajaran (CP & TP)', 'status' => 'done'];
+        $pagesList[] = ['id' => 'tujuan_pembelajaran', 'type' => 'read', 'sec' => 2, 'sec_name' => '2. Pendahuluan', 'title' => 'Tujuan & Capaian', 'icon' => '🎯', 'badge' => 'Capaian', 'desc' => 'Target kompetensi pembelajaran (CP & TP)'];
     }
     if ($module->isInfoComponentActive('peta_konsep') && (!empty($informasiUmum['peta_konsep']['peta_konsep_image_path']) || !empty($informasiUmum['peta_konsep']['peta_konsep_text']))) {
-        $pagesList[] = ['id' => 'peta_konsep', 'sec' => 2, 'sec_name' => '2. Pendahuluan', 'title' => 'Peta Konsep Materi', 'icon' => '🗺️', 'badge' => 'Alur Materi', 'desc' => 'Diagram hierarki konsep materi kejuruan', 'status' => 'done'];
+        $pagesList[] = ['id' => 'peta_konsep', 'type' => 'read', 'sec' => 2, 'sec_name' => '2. Pendahuluan', 'title' => 'Peta Konsep Materi', 'icon' => '🗺️', 'badge' => 'Alur Materi', 'desc' => 'Diagram hierarki konsep materi kejuruan'];
     }
     if ($module->isInfoComponentActive('glosarium') && !empty($informasiUmum['glosarium']['glosarium'])) {
-        $pagesList[] = ['id' => 'glosarium', 'sec' => 2, 'sec_name' => '2. Pendahuluan', 'title' => 'Glosarium Istilah', 'icon' => '📖', 'badge' => 'Kamus', 'desc' => 'Kamus istilah teknis & konsep penting', 'status' => 'done'];
+        $pagesList[] = ['id' => 'glosarium', 'type' => 'read', 'sec' => 2, 'sec_name' => '2. Pendahuluan', 'title' => 'Glosarium Istilah', 'icon' => '📖', 'badge' => 'Kamus', 'desc' => 'Kamus istilah teknis & konsep penting'];
     }
     if ($module->has_pre_test && $module->preTest) {
-        $preStatus = ($studentResult && $studentResult->pre_test_score !== null) ? 'completed' : 'todo';
-        $pagesList[] = ['id' => 'pre_test', 'sec' => 2, 'sec_name' => '2. Pendahuluan', 'title' => 'Pre-test (Diagnostik)', 'icon' => '⚡', 'badge' => 'Kuis Awal', 'desc' => 'Tes diagnostik awal kemampuan siswa', 'status' => $preStatus];
+        $pagesList[] = ['id' => 'pre_test', 'type' => 'quiz', 'sec' => 2, 'sec_name' => '2. Pendahuluan', 'title' => 'Pre-test (Diagnostik)', 'icon' => '⚡', 'badge' => 'Kuis Awal', 'desc' => 'Tes diagnostik awal kemampuan siswa'];
     }
 
     // Bagian 3: Kegiatan Belajar
     if ($module->has_materi) {
-        $pagesList[] = ['id' => 'materi', 'sec' => 3, 'sec_name' => '3. Kegiatan Belajar', 'title' => 'Uraian Materi & PPT', 'icon' => '📖', 'badge' => 'Materi Inti', 'desc' => 'Uraian teori mendalam & slide presentasi', 'status' => 'done'];
+        $pagesList[] = ['id' => 'materi', 'type' => 'read', 'sec' => 3, 'sec_name' => '3. Kegiatan Belajar', 'title' => 'Uraian Materi & PPT', 'icon' => '📖', 'badge' => 'Materi Inti', 'desc' => 'Uraian teori mendalam & slide presentasi'];
     }
     if ($module->has_video) {
-        $vidStatus = $videoSummary ? ($videoSummary->manual_score !== null ? 'completed' : 'pending') : 'todo';
-        $pagesList[] = ['id' => 'video', 'sec' => 3, 'sec_name' => '3. Kegiatan Belajar', 'title' => 'Video & Resume YouTube', 'icon' => '▶️', 'badge' => 'Multimedia', 'desc' => 'Video interaktif & penulisan resume intisari', 'status' => $vidStatus];
+        $pagesList[] = ['id' => 'video', 'type' => 'submission', 'sec' => 3, 'sec_name' => '3. Kegiatan Belajar', 'title' => 'Video & Resume YouTube', 'icon' => '▶️', 'badge' => 'Multimedia', 'desc' => 'Video interaktif & penulisan resume intisari'];
     }
 
     // Bagian 4: Evaluasi & Praktik
     if ($module->has_embed) {
-        $embStatus = $embedSubmission ? ($embedSubmission->manual_score !== null ? 'completed' : 'pending') : 'todo';
-        $pagesList[] = ['id' => 'embed', 'sec' => 4, 'sec_name' => '4. Evaluasi & Praktik', 'title' => 'Simulator Embed Interaktif', 'icon' => '🎮', 'badge' => 'Praktik', 'desc' => 'Eksplorasi simulator & upload screenshot', 'status' => $embStatus];
+        $pagesList[] = ['id' => 'embed', 'type' => 'submission', 'sec' => 4, 'sec_name' => '4. Evaluasi & Praktik', 'title' => 'Simulator Embed Interaktif', 'icon' => '🎮', 'badge' => 'Praktik', 'desc' => 'Eksplorasi simulator & upload screenshot'];
     }
     if ($module->has_job_sheet) {
-        $jsStatus = $jobSheetSubmission ? ($jobSheetSubmission->manual_score !== null ? 'completed' : 'pending') : 'todo';
-        $pagesList[] = ['id' => 'job_sheet', 'sec' => 4, 'sec_name' => '4. Evaluasi & Praktik', 'title' => 'Job Sheet Praktikum', 'icon' => '📑', 'badge' => 'Laboratorium', 'desc' => 'Panduan instruksi kerja & laporan PDF', 'status' => $jsStatus];
+        $pagesList[] = ['id' => 'job_sheet', 'type' => 'submission', 'sec' => 4, 'sec_name' => '4. Evaluasi & Praktik', 'title' => 'Job Sheet Praktikum', 'icon' => '📑', 'badge' => 'Laboratorium', 'desc' => 'Panduan instruksi kerja & laporan PDF'];
     }
     if ($module->has_lkpd) {
-        $lkpdStatus = $lkpdSubmission ? ($lkpdSubmission->manual_score !== null ? 'completed' : 'pending') : 'todo';
-        $pagesList[] = ['id' => 'lkpd', 'sec' => 4, 'sec_name' => '4. Evaluasi & Praktik', 'title' => 'Tugas LKPD Siswa', 'icon' => '📋', 'badge' => 'Penugasan', 'desc' => 'Lembar kerja peserta didik berbasis proyek', 'status' => $lkpdStatus];
+        $pagesList[] = ['id' => 'lkpd', 'type' => 'submission', 'sec' => 4, 'sec_name' => '4. Evaluasi & Praktik', 'title' => 'Tugas LKPD Siswa', 'icon' => '📋', 'badge' => 'Penugasan', 'desc' => 'Lembar kerja peserta didik berbasis proyek'];
     }
 
     // Bagian 5: Bagian Akhir
     if ($module->has_post_test && $module->postTest) {
-        $postStatus = ($studentResult && $studentResult->post_test_score !== null) ? 'completed' : 'todo';
-        $pagesList[] = ['id' => 'post_test', 'sec' => 5, 'sec_name' => '5. Bagian Akhir', 'title' => 'Post-test (Evaluasi Akhir)', 'icon' => '🏆', 'badge' => 'Uji Akhir', 'desc' => 'Evaluasi ketuntasan belajar akhir modul', 'status' => $postStatus];
+        $pagesList[] = ['id' => 'post_test', 'type' => 'quiz', 'sec' => 5, 'sec_name' => '5. Bagian Akhir', 'title' => 'Post-test (Evaluasi Akhir)', 'icon' => '🏆', 'badge' => 'Uji Akhir', 'desc' => 'Evaluasi ketuntasan belajar akhir modul'];
     }
     if ($module->isInfoComponentActive('daftar_pustaka') && !empty($informasiUmum['daftar_pustaka']['daftar_pustaka'])) {
-        $pagesList[] = ['id' => 'daftar_pustaka', 'sec' => 5, 'sec_name' => '5. Bagian Akhir', 'title' => 'Daftar Pustaka', 'icon' => '📚', 'badge' => 'Rujukan', 'desc' => 'Daftar referensi buku dan sumber materi', 'status' => 'done'];
+        $pagesList[] = ['id' => 'daftar_pustaka', 'type' => 'read', 'sec' => 5, 'sec_name' => '5. Bagian Akhir', 'title' => 'Daftar Pustaka', 'icon' => '📚', 'badge' => 'Rujukan', 'desc' => 'Daftar referensi buku dan sumber materi'];
     }
-    $pagesList[] = ['id' => 'rekap_nilai', 'sec' => 5, 'sec_name' => '5. Bagian Akhir', 'title' => 'Rekapitulasi Nilai', 'icon' => '📊', 'badge' => 'Transparansi', 'desc' => 'Matriks transparansi skor evaluasi siswa', 'status' => 'done'];
+    $pagesList[] = ['id' => 'rekap_nilai', 'type' => 'rekap', 'sec' => 5, 'sec_name' => '5. Bagian Akhir', 'title' => 'Rekapitulasi Nilai', 'icon' => '📊', 'badge' => 'Transparansi', 'desc' => 'Matriks transparansi skor evaluasi siswa'];
 
-    // Menentukan halaman awal & mode tampilan awal
+    // Status penyelesaian awal untuk tombol Mulai/Lanjut
     $hasPageParam = request()->has('page') || session('success') || session('error');
     $initialViewMode = $hasPageParam ? 'learn' : 'overview';
     $initialPage = request()->query('page', $pagesList[0]['id'] ?? 'kata_pengantar');
-    
-    // Cari tugas pertama yang belum selesai untuk tombol "Lanjutkan Belajar"
-    $firstPendingPage = $pagesList[0]['id'] ?? 'kata_pengantar';
-    foreach ($pagesList as $p) {
-        if ($p['status'] === 'todo') {
-            $firstPendingPage = $p['id'];
-            break;
-        }
-    }
+
+    // Status pengerjaan backend
+    $isPreTestDone = (bool) ($studentResult && $studentResult->pre_test_score !== null);
+    $isVideoDone = (bool) $videoSummary;
+    $isEmbedDone = (bool) $embedSubmission;
+    $isJobSheetDone = (bool) $jobSheetSubmission;
+    $isLkpdDone = (bool) $lkpdSubmission;
+    $isPostTestDone = (bool) ($studentResult && $studentResult->post_test_score !== null);
+
+    // Tautan kembali ke daftar modul kelas spesifik
+    $classSubjectModulesUrl = $module->class_id
+        ? route('student.classes.subject', ['class' => $module->class_id, 'subject' => $module->subject_id])
+        : route('student.modules.subject', $module->subject_id);
+    $classNameText = $module->schoolClass->full_name ?? ($module->schoolClass->name ?? 'Kelas');
 @endphp
 
 <div class="max-w-7xl mx-auto space-y-6"
@@ -116,7 +117,18 @@
         openSections: { 1: true, 2: true, 3: true, 4: true, 5: true },
         mobileDrawerOpen: false,
         searchGlosarium: '',
+        csrfToken: '{{ csrf_token() }}',
+        markReadUrl: '{{ route('student.modules.mark-read', $module) }}',
+        readComponents: {{ json_encode($readList) }},
         pages: {{ json_encode($pagesList) }},
+        serverStatus: {
+            pre_test: {{ $isPreTestDone ? 'true' : 'false' }},
+            video: {{ $isVideoDone ? 'true' : 'false' }},
+            embed: {{ $isEmbedDone ? 'true' : 'false' }},
+            job_sheet: {{ $isJobSheetDone ? 'true' : 'false' }},
+            lkpd: {{ $isLkpdDone ? 'true' : 'false' }},
+            post_test: {{ $isPostTestDone ? 'true' : 'false' }}
+        },
         
         get currentIndex() {
             return this.pages.findIndex(p => p.id === this.activePage);
@@ -130,17 +142,58 @@
         get nextPage() {
             return this.currentIndex < this.pages.length - 1 ? this.pages[this.currentIndex + 1] : null;
         },
-        startLearning(targetPageId) {
-            this.activePage = targetPageId || '{{ $firstPendingPage }}';
-            const target = this.pages.find(p => p.id === this.activePage);
-            if (target) {
-                this.openSections[target.sec] = true;
-            }
-            this.viewMode = 'learn';
-            this.mobileDrawerOpen = false;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // Memeriksa apakah suatu halaman sudah selesai dikerjakan / dibaca
+        isCompleted(pageId) {
+            if (pageId === 'pre_test') return this.serverStatus.pre_test;
+            if (pageId === 'video') return this.serverStatus.video;
+            if (pageId === 'embed') return this.serverStatus.embed;
+            if (pageId === 'job_sheet') return this.serverStatus.job_sheet;
+            if (pageId === 'lkpd') return this.serverStatus.lkpd;
+            if (pageId === 'post_test') return this.serverStatus.post_test;
+            if (pageId === 'rekap_nilai') return true;
+            return this.readComponents.includes(pageId);
         },
+
+        // Memeriksa apakah suatu halaman sudah terbuka berdasarkan alur sekuensial
+        isUnlocked(pageId) {
+            const idx = this.pages.findIndex(p => p.id === pageId);
+            if (idx <= 0) return true; // Halaman pertama (Kata Pengantar / Orientasi) selalu terbuka
+            
+            // Halaman terbuka hanya jika seluruh halaman sebelumnya sudah diselesaikan
+            for (let i = 0; i < idx; i++) {
+                if (!this.isCompleted(this.pages[i].id)) {
+                    return false;
+                }
+            }
+            return true;
+        },
+
+        // Menemukan halaman pertama yang belum selesai dan sudah terbuka
+        getFirstActionablePage() {
+            for (let i = 0; i < this.pages.length; i++) {
+                if (!this.isCompleted(this.pages[i].id)) {
+                    return this.pages[i].id;
+                }
+            }
+            return this.pages[0]?.id || 'kata_pengantar';
+        },
+
+        // Mulai / Lanjut Belajar dari halaman yang terbuka
+        startLearning(targetPageId) {
+            let target = targetPageId || this.getFirstActionablePage();
+            if (!this.isUnlocked(target)) {
+                target = this.getFirstActionablePage();
+            }
+            this.goToPage(target);
+        },
+
+        // Berpindah ke halaman tertentu jika sudah terbuka
         goToPage(pageId) {
+            if (!this.isUnlocked(pageId)) {
+                alert('⚠️ Halaman ini masih terkunci! Silakan baca dan selesaikan langkah sebelumnya terlebih dahulu.');
+                return;
+            }
             this.activePage = pageId;
             const target = this.pages.find(p => p.id === pageId);
             if (target) {
@@ -150,6 +203,33 @@
             this.mobileDrawerOpen = false;
             window.scrollTo({ top: 0, behavior: 'smooth' });
         },
+
+        // Tombol lompat ke halaman baru setelah membaca: Menandai selesai dibaca dan buka langkah selanjutnya
+        markAsReadAndGoNext(currentCompId, nextCompId) {
+            if (!this.readComponents.includes(currentCompId)) {
+                this.readComponents.push(currentCompId);
+            }
+
+            // Kirim status baca ke server secara asinkron (AJAX)
+            fetch(this.markReadUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': this.csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ component: currentCompId })
+            }).catch(err => console.error('Error marking read:', err));
+
+            // Lompat langsung ke halaman baru jika ada
+            if (nextCompId) {
+                this.goToPage(nextCompId);
+            } else {
+                this.viewMode = 'overview';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        },
+
         toggleSection(secNum) {
             this.openSections[secNum] = !this.openSections[secNum];
         }
@@ -161,10 +241,11 @@
             {{-- Title & Badges --}}
             <div class="space-y-2 flex-1">
                 <div class="flex flex-wrap items-center gap-2">
-                    <a href="{{ route('student.modules.subject', $module->subject_id) }}"
-                       class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+                    <a href="{{ $classSubjectModulesUrl }}"
+                       title="Kembali ke Daftar Modul Kelas {{ $classNameText }}"
+                       class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition shadow-2xs">
                         <span>←</span>
-                        <span>{{ $module->subject->name ?? 'Mata Pelajaran' }}</span>
+                        <span>Daftar Modul ({{ $classNameText }})</span>
                     </a>
                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold {{ $module->subject?->badgeClasses() ?? 'bg-blue-100 text-blue-800' }}">
                         <span>{{ $module->subject->code ?? 'MAPEL' }}</span>
@@ -212,8 +293,14 @@
                     </div>
                 @endif
 
-                {{-- Switch View Mode Buttons --}}
+                {{-- Switch View Mode & Back to Module List Buttons --}}
                 <div class="flex items-center gap-1.5 pl-2 border-l border-slate-200">
+                    <a href="{{ $classSubjectModulesUrl }}"
+                       title="Kembali ke Daftar Modul untuk Kelas {{ $classNameText }}"
+                       class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 transition flex items-center gap-1.5 cursor-pointer shadow-2xs">
+                        <span>←</span>
+                        <span>Daftar Modul</span>
+                    </a>
                     <button type="button"
                             @click="viewMode = 'overview'"
                             :class="viewMode === 'overview' ? 'bg-white text-indigo-700 shadow-sm border border-slate-200 font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'"
@@ -222,7 +309,7 @@
                         <span>Detail Modul</span>
                     </button>
                     <button type="button"
-                            @click="startLearning('{{ $firstPendingPage }}')"
+                            @click="startLearning()"
                             :class="viewMode === 'learn' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20 font-bold' : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-bold'"
                             class="px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer">
                         <span>🚀</span>
@@ -248,517 +335,601 @@
     @endif
 
     {{-- ═══════════════════════════════════════════════════════════════════════ --}}
-    {{-- ═══ VIEW 1: TAMPILAN AWAL DETAIL MODUL SISWA (OVERVIEW 5 BAGIAN) ═══ --}}
+    {{-- ═══ VIEW 1: TAMPILAN AWAL DETAIL MODUL SISWA (1 KOLOM BERURUTAN) ═══ --}}
     {{-- ═══════════════════════════════════════════════════════════════════════ --}}
-    <div x-show="viewMode === 'overview'" x-cloak class="space-y-8">
-
-        {{-- ── CTA Big Hero Banner ── --}}
-        <div class="rounded-3xl bg-gradient-to-r from-indigo-900 via-indigo-800 to-slate-900 text-white p-6 sm:p-8 shadow-xl relative overflow-hidden">
-            <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div class="space-y-2 max-w-2xl">
-                    <span class="px-3 py-1 rounded-full bg-white/15 text-indigo-200 text-xs font-extrabold uppercase tracking-wider backdrop-blur-xs">
-                        Panduan Belajar Siswa
-                    </span>
-                    <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-white">
-                        {{ $progressPercent >= 100 ? 'Selamat! Anda Telah Menuntaskan Modul Ini' : ($progressPercent > 0 ? 'Lanjutkan Pembelajaran Anda' : 'Siap Memulai Pembelajaran Interaktif?') }}
-                    </h2>
-                    <p class="text-xs sm:text-sm text-indigo-100 leading-relaxed font-normal">
-                        Pelajari materi secara bertahap mulai dari <strong>Bagian Awal</strong>, kerjakan <strong>Pre-test</strong>, pelajari <strong>Materi & Video</strong>, tuntaskan <strong>Praktik Laboratorium</strong>, dan selesaikan <strong>Post-test</strong> untuk mengukur capaian kompetensi Anda.
-                    </p>
-                </div>
-
-                <div class="shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                    <button type="button"
-                            @click="startLearning('{{ $firstPendingPage }}')"
-                            class="px-8 py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm shadow-lg shadow-emerald-500/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
-                        <span>{{ $progressPercent >= 100 ? 'Buka Kembali Seluruh Materi' : ($progressPercent > 0 ? 'Lanjutkan Belajar Sekarang' : 'Mulai Belajar Sekarang') }}</span>
-                    </button>
-                </div>
-            </div>
-        </div>
+    <div x-show="viewMode === 'overview'" x-cloak class="space-y-6">
 
         {{-- ══════════════════════════════════════════════════════════════════════
-             BARIS 1: BAGIAN 1 & BAGIAN 2 SEJAJAR (INFORMASI UMUM & ORIENTASI)
-             1. Bagian Awal  <─── SEJAJAR ───>  2. Pendahuluan
+             STRUKTUR 5 BAGIAN E-MODUL (1 KOLOM TUNGGAL BERURUTAN & TERPROTEKSI)
              ══════════════════════════════════════════════════════════════════════ --}}
-        <div class="space-y-4">
-            <div class="flex items-center gap-3">
-                <span class="px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-indigo-50 text-indigo-900 border border-indigo-200/80 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
-                    Tahap 1: Bagian Awal & Pendahuluan (Orientasi Belajar)
-                </span>
-                <div class="h-px bg-slate-200 flex-1"></div>
-            </div>
+        <div class="space-y-6">
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-
-                {{-- ── KARTU 1: BAGIAN AWAL ── --}}
-                <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm p-6 sm:p-7 flex flex-col justify-between hover:shadow-md transition">
-                    <div>
-                        <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black text-sm shadow-md shadow-indigo-600/20">
-                                    1
-                                </div>
-                                <div>
-                                    <h3 class="text-base font-bold text-slate-900">Bagian Awal</h3>
-                                    <p class="text-xs text-slate-500">Kata Pengantar & Petunjuk Pembelajaran</p>
-                                </div>
-                            </div>
-                            <span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
-                                Pengantar
-                            </span>
-                        </div>
-
-                        <div class="space-y-3 mb-6">
-                            {{-- Item: Kata Pengantar --}}
-                            @if($module->isInfoComponentActive('kata_pengantar'))
-                                <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70">
-                                    <div class="flex items-center gap-3">
-                                        <span class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-bold">✏️</span>
-                                        <div>
-                                            <h4 class="text-xs font-bold text-slate-900">Kata Pengantar</h4>
-                                            <p class="text-[11px] text-slate-500">Sambutan dan motivasi dari guru pengampu</p>
-                                        </div>
-                                    </div>
-                                    <button type="button"
-                                            @click="goToPage('kata_pengantar')"
-                                            class="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition">
-                                        Baca →
-                                    </button>
-                                </div>
-                            @endif
-
-                            {{-- Item: Petunjuk Penggunaan --}}
-                            @if($module->isInfoComponentActive('petunjuk_penggunaan'))
-                                <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70">
-                                    <div class="flex items-center gap-3">
-                                        <span class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-bold">💡</span>
-                                        <div>
-                                            <h4 class="text-xs font-bold text-slate-900">Petunjuk Penggunaan</h4>
-                                            <p class="text-[11px] text-slate-500">Panduan langkah belajar mandiri peserta didik</p>
-                                        </div>
-                                    </div>
-                                    <button type="button"
-                                            @click="goToPage('petunjuk_penggunaan')"
-                                            class="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition">
-                                        Lihat →
-                                    </button>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-
-                    <div class="pt-4 border-t border-slate-100">
-                        <button type="button"
-                                @click="goToPage('kata_pengantar')"
-                                class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm transition flex items-center justify-center gap-2">
-                            <span>Mulai dari Bagian Awal</span>
-                            <span>→</span>
-                        </button>
-                    </div>
-                </div>
-
-                {{-- ── KARTU 2: PENDAHULUAN ── --}}
-                <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm p-6 sm:p-7 flex flex-col justify-between hover:shadow-md transition">
-                    <div>
-                        <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-2xl bg-teal-600 text-white flex items-center justify-center font-black text-sm shadow-md shadow-teal-600/20">
-                                    2
-                                </div>
-                                <div>
-                                    <h3 class="text-base font-bold text-slate-900">Pendahuluan</h3>
-                                    <p class="text-xs text-slate-500">Capaian, Konsep & Pre-test Diagnostik</p>
-                                </div>
-                            </div>
-                            <span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-teal-50 text-teal-700 border border-teal-100">
-                                Orientasi
-                            </span>
-                        </div>
-
-                        <div class="space-y-3 mb-6">
-                            {{-- Item: Tujuan Pembelajaran --}}
-                            @if($module->isInfoComponentActive('tujuan_pembelajaran'))
-                                <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70">
-                                    <div class="flex items-center gap-3">
-                                        <span class="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center text-sm font-bold">🎯</span>
-                                        <div>
-                                            <h4 class="text-xs font-bold text-slate-900">Tujuan & Capaian</h4>
-                                            <p class="text-[11px] text-slate-500">Rumusan kompetensi CP & TP modul</p>
-                                        </div>
-                                    </div>
-                                    <button type="button"
-                                            @click="goToPage('tujuan_pembelajaran')"
-                                            class="px-3 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-700 text-xs font-bold transition">
-                                        Lihat →
-                                    </button>
-                                </div>
-                            @endif
-
-                            {{-- Item: Peta Konsep --}}
-                            @if($module->isInfoComponentActive('peta_konsep') && (!empty($informasiUmum['peta_konsep']['peta_konsep_image_path']) || !empty($informasiUmum['peta_konsep']['peta_konsep_text'])))
-                                <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70">
-                                    <div class="flex items-center gap-3">
-                                        <span class="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center text-sm font-bold">🗺️</span>
-                                        <div>
-                                            <h4 class="text-xs font-bold text-slate-900">Peta Konsep Materi</h4>
-                                            <p class="text-[11px] text-slate-500">Alur keterkaitan materi kejuruan</p>
-                                        </div>
-                                    </div>
-                                    <button type="button"
-                                            @click="goToPage('peta_konsep')"
-                                            class="px-3 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-700 text-xs font-bold transition">
-                                        Buka →
-                                    </button>
-                                </div>
-                            @endif
-
-                            {{-- Item: Glosarium --}}
-                            @if($module->isInfoComponentActive('glosarium') && !empty($informasiUmum['glosarium']['glosarium']))
-                                <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70">
-                                    <div class="flex items-center gap-3">
-                                        <span class="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center text-sm font-bold">📖</span>
-                                        <div>
-                                            <h4 class="text-xs font-bold text-slate-900">Glosarium Istilah</h4>
-                                            <p class="text-[11px] text-slate-500">Kamus istilah teknis & konsep penting</p>
-                                        </div>
-                                    </div>
-                                    <button type="button"
-                                            @click="goToPage('glosarium')"
-                                            class="px-3 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-700 text-xs font-bold transition">
-                                        Buka →
-                                    </button>
-                                </div>
-                            @endif
-
-                            {{-- Item: Pre-test --}}
-                            @if($module->has_pre_test && $module->preTest)
-                                <div class="flex items-center justify-between p-3.5 rounded-2xl bg-teal-50/60 border border-teal-200">
-                                    <div class="flex items-center gap-3">
-                                        <span class="w-8 h-8 rounded-xl bg-teal-600 text-white flex items-center justify-center text-sm font-bold">⚡</span>
-                                        <div>
-                                            <h4 class="text-xs font-bold text-teal-950">Pre-test (Diagnostik)</h4>
-                                            <p class="text-[11px] text-teal-700">Kuis diagnostik sebelum membaca materi</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        @if($studentResult && $studentResult->pre_test_score !== null)
-                                            <span class="text-xs font-extrabold text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-lg">
-                                                Skor: {{ $studentResult->pre_test_score }}
-                                            </span>
-                                        @else
-                                            <button type="button"
-                                                    @click="goToPage('pre_test')"
-                                                    class="px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-sm transition">
-                                                Kerjakan Kuis
-                                            </button>
-                                        @endif
-                                    </div>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-
-                    <div class="pt-4 border-t border-slate-100">
-                        <button type="button"
-                                @click="goToPage('tujuan_pembelajaran')"
-                                class="w-full py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-sm transition flex items-center justify-center gap-2">
-                            <span>Pelajari Pendahuluan</span>
-                            <span>→</span>
-                        </button>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        {{-- ══════════════════════════════════════════════════════════════════════
-             BARIS 2: BAGIAN 3 & BAGIAN 4 SEJAJAR (MATERI, VIDEO, EMBED & TUGAS)
-             3. Kegiatan Belajar  <─── SEJAJAR ───>  4. Evaluasi & Praktik
-             ══════════════════════════════════════════════════════════════════════ --}}
-        <div class="space-y-4">
-            <div class="flex items-center gap-3">
-                <span class="px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-blue-50 text-blue-900 border border-blue-200/80 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-blue-600"></span>
-                    Tahap 2: Kegiatan Belajar & Praktik Evaluasi
-                </span>
-                <div class="h-px bg-slate-200 flex-1"></div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-
-                {{-- ── KARTU 3: KEGIATAN BELAJAR ── --}}
-                <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm p-6 sm:p-7 flex flex-col justify-between hover:shadow-md transition">
-                    <div>
-                        <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-black text-sm shadow-md shadow-blue-600/20">
-                                    3
-                                </div>
-                                <div>
-                                    <h3 class="text-base font-bold text-slate-900">Kegiatan Belajar</h3>
-                                    <p class="text-xs text-slate-500">Materi Inti & Multi-Video YouTube</p>
-                                </div>
-                            </div>
-                            <span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
-                                Isi Materi
-                            </span>
-                        </div>
-
-                        <div class="space-y-3 mb-6">
-                            {{-- Item: Uraian Materi --}}
-                            @if($module->has_materi)
-                                <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70">
-                                    <div class="flex items-center gap-3">
-                                        <span class="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-bold">📖</span>
-                                        <div>
-                                            <h4 class="text-xs font-bold text-slate-900">Uraian Materi & PPT</h4>
-                                            <p class="text-[11px] text-slate-500">Materi teori komprehensif & slide presentasi</p>
-                                        </div>
-                                    </div>
-                                    <button type="button"
-                                            @click="goToPage('materi')"
-                                            class="px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition">
-                                        Pelajari →
-                                    </button>
-                                </div>
-                            @endif
-
-                            {{-- Item: Multi-Video YouTube --}}
-                            @if($module->has_video)
-                                <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70">
-                                    <div class="flex items-center gap-3">
-                                        <span class="w-8 h-8 rounded-xl bg-red-100 text-red-700 flex items-center justify-center text-sm font-bold">▶️</span>
-                                        <div>
-                                            <h4 class="text-xs font-bold text-slate-900">Video & Resume YouTube</h4>
-                                            <p class="text-[11px] text-slate-500">Tonton video pembelajaran & kirim resume</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        @if($videoSummary)
-                                            <span class="text-[11px] font-bold px-2 py-1 rounded-lg {{ $videoSummary->manual_score !== null ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900' }}">
-                                                {{ $videoSummary->manual_score !== null ? 'Nilai: ' . $videoSummary->manual_score : 'Terkirim' }}
-                                            </span>
-                                        @else
-                                            <button type="button"
-                                                    @click="goToPage('video')"
-                                                    class="px-3 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold transition">
-                                                Tonton →
-                                            </button>
-                                        @endif
-                                    </div>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-
-                    <div class="pt-4 border-t border-slate-100">
-                        <button type="button"
-                                @click="goToPage('materi')"
-                                class="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition flex items-center justify-center gap-2">
-                            <span>Buka Kegiatan Belajar</span>
-                            <span>→</span>
-                        </button>
-                    </div>
-                </div>
-
-                {{-- ── KARTU 4: EVALUASI & PRAKTIK ── --}}
-                <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm p-6 sm:p-7 flex flex-col justify-between hover:shadow-md transition">
-                    <div>
-                        <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-2xl bg-violet-600 text-white flex items-center justify-center font-black text-sm shadow-md shadow-violet-600/20">
-                                    4
-                                </div>
-                                <div>
-                                    <h3 class="text-base font-bold text-slate-900">Evaluasi & Praktik</h3>
-                                    <p class="text-xs text-slate-500">Simulator Interaktif, Job Sheet & LKPD</p>
-                                </div>
-                            </div>
-                            <span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-100">
-                                Praktik & Tugas
-                            </span>
-                        </div>
-
-                        <div class="space-y-3 mb-6">
-                            {{-- Item: Simulator Embed --}}
-                            @if($module->has_embed)
-                                <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70">
-                                    <div class="flex items-center gap-3">
-                                        <span class="w-8 h-8 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center text-sm font-bold">🎮</span>
-                                        <div>
-                                            <h4 class="text-xs font-bold text-slate-900">Simulator Embed</h4>
-                                            <p class="text-[11px] text-slate-500">Praktik langsung & unggah bukti screenshot</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        @if($embedSubmission)
-                                            <span class="text-[11px] font-bold px-2 py-1 rounded-lg {{ $embedSubmission->manual_score !== null ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900' }}">
-                                                {{ $embedSubmission->manual_score !== null ? 'Nilai: ' . $embedSubmission->manual_score : 'Terkirim' }}
-                                            </span>
-                                        @else
-                                            <button type="button"
-                                                    @click="goToPage('embed')"
-                                                    class="px-3 py-1.5 rounded-xl bg-violet-50 hover:bg-violet-100 text-violet-700 text-xs font-bold transition">
-                                                Praktik →
-                                            </button>
-                                        @endif
-                                    </div>
-                                </div>
-                            @endif
-
-                            {{-- Item: Job Sheet --}}
-                            @if($module->has_job_sheet)
-                                <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70">
-                                    <div class="flex items-center gap-3">
-                                        <span class="w-8 h-8 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center text-sm font-bold">📑</span>
-                                        <div>
-                                            <h4 class="text-xs font-bold text-slate-900">Job Sheet Praktikum</h4>
-                                            <p class="text-[11px] text-slate-500">Unduh panduan & unggah laporan PDF</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        @if($jobSheetSubmission)
-                                            <span class="text-[11px] font-bold px-2 py-1 rounded-lg {{ $jobSheetSubmission->manual_score !== null ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900' }}">
-                                                {{ $jobSheetSubmission->manual_score !== null ? 'Nilai: ' . $jobSheetSubmission->manual_score : 'Terkirim' }}
-                                            </span>
-                                        @else
-                                            <button type="button"
-                                                    @click="goToPage('job_sheet')"
-                                                    class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition">
-                                                Tugas →
-                                            </button>
-                                        @endif
-                                    </div>
-                                </div>
-                            @endif
-
-                            {{-- Item: LKPD --}}
-                            @if($module->has_lkpd)
-                                <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70">
-                                    <div class="flex items-center gap-3">
-                                        <span class="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center text-sm font-bold">📋</span>
-                                        <div>
-                                            <h4 class="text-xs font-bold text-slate-900">Tugas LKPD</h4>
-                                            <p class="text-[11px] text-slate-500">Lembar kerja peserta didik & umpan balik</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        @if($lkpdSubmission)
-                                            <span class="text-[11px] font-bold px-2 py-1 rounded-lg {{ $lkpdSubmission->manual_score !== null ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900' }}">
-                                                {{ $lkpdSubmission->manual_score !== null ? 'Nilai: ' . $lkpdSubmission->manual_score : 'Terkirim' }}
-                                            </span>
-                                        @else
-                                            <button type="button"
-                                                    @click="goToPage('lkpd')"
-                                                    class="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold transition">
-                                                Tugas →
-                                            </button>
-                                        @endif
-                                    </div>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-
-                    <div class="pt-4 border-t border-slate-100">
-                        <button type="button"
-                                @click="goToPage('{{ $module->has_embed ? 'embed' : ($module->has_job_sheet ? 'job_sheet' : 'lkpd') }}')"
-                                class="w-full py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold shadow-sm transition flex items-center justify-center gap-2">
-                            <span>Buka Evaluasi & Praktik</span>
-                            <span>→</span>
-                        </button>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        {{-- ══════════════════════════════════════════════════════════════════════
-             BARIS 3: BAGIAN 5 (POST-TEST, DAFTAR PUSTAKA & REKAP NILAI)
-             ══════════════════════════════════════════════════════════════════════ --}}
-        <div class="space-y-4">
-            <div class="flex items-center gap-3">
-                <span class="px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-rose-50 text-rose-900 border border-rose-200/80 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-rose-600"></span>
-                    Tahap 3: Bagian Akhir & Rekapitulasi Penilaian
-                </span>
-                <div class="h-px bg-slate-200 flex-1"></div>
-            </div>
-
-            <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm p-6 sm:p-8 hover:shadow-md transition">
-                <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
+            {{-- ── 1. BAGIAN AWAL ── --}}
+            <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm p-6 sm:p-7 hover:shadow-md transition">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-2xl bg-rose-600 text-white flex items-center justify-center font-black text-sm shadow-md shadow-rose-600/20">
-                            5
+                        <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black text-sm shadow-md shadow-indigo-600/20">
+                            1
                         </div>
                         <div>
-                            <h3 class="text-base font-bold text-slate-900">Bagian Akhir & Evaluasi Sumatif</h3>
-                            <p class="text-xs text-slate-500">Post-test Penutup, Daftar Rujukan, dan Rekap Nilai Siswa</p>
+                            <h3 class="text-base sm:text-lg font-bold text-slate-900">Bagian Awal</h3>
+                            <p class="text-xs text-slate-500">Kata Pengantar & Petunjuk Pembelajaran</p>
                         </div>
                     </div>
-                    <span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-100">
-                        Evaluasi Akhir
+                    <span class="text-[10px] font-extrabold uppercase px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+                        Pengantar
                     </span>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    {{-- Post-test --}}
-                    @if($module->has_post_test && $module->postTest)
-                        <div class="p-4 rounded-2xl bg-rose-50/60 border border-rose-200 flex flex-col justify-between">
-                            <div class="space-y-1.5 mb-3">
-                                <span class="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center text-sm font-bold">🏆</span>
-                                <h4 class="text-xs font-bold text-rose-950">Post-test Evaluasi Akhir</h4>
-                                <p class="text-[11px] text-rose-800">Uji pemahaman komprehensif setelah menuntaskan seluruh materi.</p>
+                <div class="space-y-3">
+                    {{-- Item: Kata Pengantar --}}
+                    @if($module->isInfoComponentActive('kata_pengantar'))
+                        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-bold">✏️</span>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-900">Kata Pengantar</h4>
+                                    <p class="text-[11px] text-slate-500">Sambutan dan motivasi dari guru pengampu</p>
+                                </div>
                             </div>
-                            <div class="flex items-center justify-between pt-2 border-t border-rose-200/60">
-                                @if($studentResult && $studentResult->post_test_score !== null)
-                                    <span class="text-xs font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md">
-                                        Skor: {{ $studentResult->post_test_score }}
-                                    </span>
-                                @else
+                            <div>
+                                <template x-if="isCompleted('kata_pengantar')">
                                     <button type="button"
-                                            @click="goToPage('post_test')"
-                                            class="w-full py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-xs transition">
-                                        Kerjakan Post-test
+                                            @click="goToPage('kata_pengantar')"
+                                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition cursor-pointer">
+                                        <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                        <span>Selesai Dibaca</span>
                                     </button>
+                                </template>
+                                <template x-if="!isCompleted('kata_pengantar')">
+                                    <button type="button"
+                                            @click="goToPage('kata_pengantar')"
+                                            class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition cursor-pointer">
+                                        Baca →
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- Item: Petunjuk Penggunaan --}}
+                    @if($module->isInfoComponentActive('petunjuk_penggunaan'))
+                        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-bold">💡</span>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-900">Petunjuk Penggunaan</h4>
+                                    <p class="text-[11px] text-slate-500">Panduan langkah belajar mandiri peserta didik</p>
+                                </div>
+                            </div>
+                            <div>
+                                <template x-if="isCompleted('petunjuk_penggunaan')">
+                                    <button type="button"
+                                            @click="goToPage('petunjuk_penggunaan')"
+                                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition cursor-pointer">
+                                        <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                        <span>Selesai Dibaca</span>
+                                    </button>
+                                </template>
+                                <template x-if="!isCompleted('petunjuk_penggunaan')">
+                                    <template x-if="isUnlocked('petunjuk_penggunaan')">
+                                        <button type="button"
+                                                @click="goToPage('petunjuk_penggunaan')"
+                                                class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition cursor-pointer">
+                                            Baca →
+                                        </button>
+                                    </template>
+                                </template>
+                                <template x-if="!isUnlocked('petunjuk_penggunaan')">
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed opacity-75">
+                                        <span>🔒</span>
+                                        <span>Terkunci</span>
+                                    </span>
+                                </template>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            {{-- ── 2. PENDAHULUAN ── --}}
+            <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm p-6 sm:p-7 hover:shadow-md transition">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-teal-600 text-white flex items-center justify-center font-black text-sm shadow-md shadow-teal-600/20">
+                            2
+                        </div>
+                        <div>
+                            <h3 class="text-base sm:text-lg font-bold text-slate-900">Pendahuluan</h3>
+                            <p class="text-xs text-slate-500">Capaian Pembelajaran, Peta Konsep, Glosarium & Pre-test Diagnostik</p>
+                        </div>
+                    </div>
+                    <span class="text-[10px] font-extrabold uppercase px-3 py-1 rounded-full bg-teal-50 text-teal-700 border border-teal-100">
+                        Orientasi
+                    </span>
+                </div>
+
+                <div class="space-y-3">
+                    {{-- Item: Tujuan Pembelajaran --}}
+                    @if($module->isInfoComponentActive('tujuan_pembelajaran'))
+                        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center text-sm font-bold">🎯</span>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-900">Tujuan & Capaian</h4>
+                                    <p class="text-[11px] text-slate-500">Rumusan kompetensi CP & TP modul</p>
+                                </div>
+                            </div>
+                            <div>
+                                <template x-if="isCompleted('tujuan_pembelajaran')">
+                                    <button type="button"
+                                            @click="goToPage('tujuan_pembelajaran')"
+                                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition cursor-pointer">
+                                        <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                        <span>Selesai Dibaca</span>
+                                    </button>
+                                </template>
+                                <template x-if="!isCompleted('tujuan_pembelajaran') && isUnlocked('tujuan_pembelajaran')">
+                                    <button type="button"
+                                            @click="goToPage('tujuan_pembelajaran')"
+                                            class="px-4 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-xs transition cursor-pointer">
+                                        Lihat →
+                                    </button>
+                                </template>
+                                <template x-if="!isUnlocked('tujuan_pembelajaran')">
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed opacity-75">
+                                        <span>🔒</span>
+                                        <span>Terkunci</span>
+                                    </span>
+                                </template>
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- Item: Peta Konsep --}}
+                    @if($module->isInfoComponentActive('peta_konsep') && (!empty($informasiUmum['peta_konsep']['peta_konsep_image_path']) || !empty($informasiUmum['peta_konsep']['peta_konsep_text'])))
+                        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center text-sm font-bold">🗺️</span>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-900">Peta Konsep Materi</h4>
+                                    <p class="text-[11px] text-slate-500">Alur keterkaitan materi kejuruan</p>
+                                </div>
+                            </div>
+                            <div>
+                                <template x-if="isCompleted('peta_konsep')">
+                                    <button type="button"
+                                            @click="goToPage('peta_konsep')"
+                                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition cursor-pointer">
+                                        <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                        <span>Selesai Dibaca</span>
+                                    </button>
+                                </template>
+                                <template x-if="!isCompleted('peta_konsep') && isUnlocked('peta_konsep')">
+                                    <button type="button"
+                                            @click="goToPage('peta_konsep')"
+                                            class="px-4 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-xs transition cursor-pointer">
+                                        Buka →
+                                    </button>
+                                </template>
+                                <template x-if="!isUnlocked('peta_konsep')">
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed opacity-75">
+                                        <span>🔒</span>
+                                        <span>Terkunci</span>
+                                    </span>
+                                </template>
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- Item: Glosarium --}}
+                    @if($module->isInfoComponentActive('glosarium') && !empty($informasiUmum['glosarium']['glosarium']))
+                        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center text-sm font-bold">📖</span>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-900">Glosarium Istilah</h4>
+                                    <p class="text-[11px] text-slate-500">Kamus istilah teknis & konsep penting</p>
+                                </div>
+                            </div>
+                            <div>
+                                <template x-if="isCompleted('glosarium')">
+                                    <button type="button"
+                                            @click="goToPage('glosarium')"
+                                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition cursor-pointer">
+                                        <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                        <span>Selesai Dibaca</span>
+                                    </button>
+                                </template>
+                                <template x-if="!isCompleted('glosarium') && isUnlocked('glosarium')">
+                                    <button type="button"
+                                            @click="goToPage('glosarium')"
+                                            class="px-4 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-xs transition cursor-pointer">
+                                        Buka →
+                                    </button>
+                                </template>
+                                <template x-if="!isUnlocked('glosarium')">
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed opacity-75">
+                                        <span>🔒</span>
+                                        <span>Terkunci</span>
+                                    </span>
+                                </template>
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- Item: Pre-test --}}
+                    @if($module->has_pre_test && $module->preTest)
+                        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-teal-50/70 border border-teal-200 hover:bg-teal-100/50 transition">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-xl bg-teal-600 text-white flex items-center justify-center text-sm font-bold">⚡</span>
+                                <div>
+                                    <h4 class="text-xs font-bold text-teal-950">Pre-test (Diagnostik)</h4>
+                                    <p class="text-[11px] text-teal-700">Kuis diagnostik sebelum membaca materi</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                @if($studentResult && $studentResult->pre_test_score !== null)
+                                    <button type="button"
+                                            @click="goToPage('pre_test')"
+                                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-extrabold hover:bg-emerald-100 transition cursor-pointer">
+                                        <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                        <span>Skor: {{ $studentResult->pre_test_score }}</span>
+                                    </button>
+                                @else
+                                    <template x-if="isUnlocked('pre_test')">
+                                        <button type="button"
+                                                @click="goToPage('pre_test')"
+                                                class="px-4 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-sm transition cursor-pointer">
+                                            Kerjakan Kuis →
+                                        </button>
+                                    </template>
+                                    <template x-if="!isUnlocked('pre_test')">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed opacity-75">
+                                            <span>🔒</span>
+                                            <span>Terkunci</span>
+                                        </span>
+                                    </template>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            {{-- ── 3. KEGIATAN BELAJAR ── --}}
+            <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm p-6 sm:p-7 hover:shadow-md transition">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-black text-sm shadow-md shadow-blue-600/20">
+                            3
+                        </div>
+                        <div>
+                            <h3 class="text-base sm:text-lg font-bold text-slate-900">Kegiatan Belajar</h3>
+                            <p class="text-xs text-slate-500">Materi Inti & Multi-Video YouTube</p>
+                        </div>
+                    </div>
+                    <span class="text-[10px] font-extrabold uppercase px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
+                        Isi Materi
+                    </span>
+                </div>
+
+                <div class="space-y-3">
+                    {{-- Item: Uraian Materi --}}
+                    @if($module->has_materi)
+                        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-bold">📖</span>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-900">Uraian Materi & PPT</h4>
+                                    <p class="text-[11px] text-slate-500">Materi teori komprehensif & slide presentasi</p>
+                                </div>
+                            </div>
+                            <div>
+                                <template x-if="isCompleted('materi')">
+                                    <button type="button"
+                                            @click="goToPage('materi')"
+                                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition cursor-pointer">
+                                        <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                        <span>Selesai Dibaca</span>
+                                    </button>
+                                </template>
+                                <template x-if="!isCompleted('materi') && isUnlocked('materi')">
+                                    <button type="button"
+                                            @click="goToPage('materi')"
+                                            class="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs transition cursor-pointer">
+                                        Pelajari →
+                                    </button>
+                                </template>
+                                <template x-if="!isUnlocked('materi')">
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed opacity-75">
+                                        <span>🔒</span>
+                                        <span>Terkunci</span>
+                                    </span>
+                                </template>
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- Item: Multi-Video YouTube --}}
+                    @if($module->has_video)
+                        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-xl bg-red-100 text-red-700 flex items-center justify-center text-sm font-bold">▶️</span>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-900">Video & Resume YouTube</h4>
+                                    <p class="text-[11px] text-slate-500">Tonton video pembelajaran & kirim resume</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                @if($videoSummary)
+                                    <button type="button"
+                                            @click="goToPage('video')"
+                                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition cursor-pointer">
+                                        <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                        <span>{{ $videoSummary->manual_score !== null ? 'Nilai: ' . $videoSummary->manual_score : 'Resume Terkirim' }}</span>
+                                    </button>
+                                @else
+                                    <template x-if="isUnlocked('video')">
+                                        <button type="button"
+                                                @click="goToPage('video')"
+                                                class="px-4 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-xs transition cursor-pointer">
+                                            Tonton →
+                                        </button>
+                                    </template>
+                                    <template x-if="!isUnlocked('video')">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed opacity-75">
+                                            <span>🔒</span>
+                                            <span>Terkunci</span>
+                                        </span>
+                                    </template>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            {{-- ── 4. EVALUASI & PRAKTIK ── --}}
+            <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm p-6 sm:p-7 hover:shadow-md transition">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-violet-600 text-white flex items-center justify-center font-black text-sm shadow-md shadow-violet-600/20">
+                            4
+                        </div>
+                        <div>
+                            <h3 class="text-base sm:text-lg font-bold text-slate-900">Evaluasi & Praktik</h3>
+                            <p class="text-xs text-slate-500">Simulator Interaktif, Job Sheet & LKPD</p>
+                        </div>
+                    </div>
+                    <span class="text-[10px] font-extrabold uppercase px-3 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-100">
+                        Praktik & Tugas
+                    </span>
+                </div>
+
+                <div class="space-y-3">
+                    {{-- Item: Simulator Embed --}}
+                    @if($module->has_embed)
+                        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center text-sm font-bold">🎮</span>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-900">Simulator Embed</h4>
+                                    <p class="text-[11px] text-slate-500">Praktik langsung & unggah bukti screenshot</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                @if($embedSubmission)
+                                    <button type="button"
+                                            @click="goToPage('embed')"
+                                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition cursor-pointer">
+                                        <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                        <span>{{ $embedSubmission->manual_score !== null ? 'Nilai: ' . $embedSubmission->manual_score : 'Terkirim' }}</span>
+                                    </button>
+                                @else
+                                    <template x-if="isUnlocked('embed')">
+                                        <button type="button"
+                                                @click="goToPage('embed')"
+                                                class="px-4 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold shadow-xs transition cursor-pointer">
+                                            Praktik →
+                                        </button>
+                                    </template>
+                                    <template x-if="!isUnlocked('embed')">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed opacity-75">
+                                            <span>🔒</span>
+                                            <span>Terkunci</span>
+                                        </span>
+                                    </template>
                                 @endif
                             </div>
                         </div>
                     @endif
 
-                    {{-- Daftar Pustaka --}}
-                    @if($module->isInfoComponentActive('daftar_pustaka'))
-                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
-                            <div class="space-y-1.5 mb-3">
-                                <span class="w-8 h-8 rounded-xl bg-slate-200 text-slate-700 flex items-center justify-center text-sm font-bold">📚</span>
-                                <h4 class="text-xs font-bold text-slate-900">Daftar Pustaka</h4>
-                                <p class="text-[11px] text-slate-500">Rujukan buku referensi, standar kejuruan, dan modul pembelajaran.</p>
+                    {{-- Item: Job Sheet --}}
+                    @if($module->has_job_sheet)
+                        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center text-sm font-bold">📑</span>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-900">Job Sheet Praktikum</h4>
+                                    <p class="text-[11px] text-slate-500">Unduh panduan & unggah laporan PDF</p>
+                                </div>
                             </div>
-                            <button type="button"
-                                    @click="goToPage('daftar_pustaka')"
-                                    class="w-full py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
-                                Lihat Rujukan →
-                            </button>
+                            <div class="flex items-center gap-2">
+                                @if($jobSheetSubmission)
+                                    <button type="button"
+                                            @click="goToPage('job_sheet')"
+                                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition cursor-pointer">
+                                        <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                        <span>{{ $jobSheetSubmission->manual_score !== null ? 'Nilai: ' . $jobSheetSubmission->manual_score : 'Terkirim' }}</span>
+                                    </button>
+                                @else
+                                    <template x-if="isUnlocked('job_sheet')">
+                                        <button type="button"
+                                                @click="goToPage('job_sheet')"
+                                                class="px-4 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-xs transition cursor-pointer">
+                                            Tugas →
+                                        </button>
+                                    </template>
+                                    <template x-if="!isUnlocked('job_sheet')">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed opacity-75">
+                                            <span>🔒</span>
+                                            <span>Terkunci</span>
+                                        </span>
+                                    </template>
+                                @endif
+                            </div>
                         </div>
                     @endif
 
-                    {{-- Rekap Nilai --}}
-                    <div class="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200 flex flex-col justify-between">
-                        <div class="space-y-1.5 mb-3">
+                    {{-- Item: LKPD --}}
+                    @if($module->has_lkpd)
+                        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center text-sm font-bold">📋</span>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-900">Tugas LKPD</h4>
+                                    <p class="text-[11px] text-slate-500">Lembar kerja peserta didik & umpan balik</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                @if($lkpdSubmission)
+                                    <button type="button"
+                                            @click="goToPage('lkpd')"
+                                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition cursor-pointer">
+                                        <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                        <span>{{ $lkpdSubmission->manual_score !== null ? 'Nilai: ' . $lkpdSubmission->manual_score : 'Terkirim' }}</span>
+                                    </button>
+                                @else
+                                    <template x-if="isUnlocked('lkpd')">
+                                        <button type="button"
+                                                @click="goToPage('lkpd')"
+                                                class="px-4 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-xs transition cursor-pointer">
+                                            Tugas →
+                                        </button>
+                                    </template>
+                                    <template x-if="!isUnlocked('lkpd')">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed opacity-75">
+                                            <span>🔒</span>
+                                            <span>Terkunci</span>
+                                        </span>
+                                    </template>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            {{-- ── 5. BAGIAN AKHIR ── --}}
+            <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm p-6 sm:p-7 hover:shadow-md transition">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-rose-600 text-white flex items-center justify-center font-black text-sm shadow-md shadow-rose-600/20">
+                            5
+                        </div>
+                        <div>
+                            <h3 class="text-base sm:text-lg font-bold text-slate-900">Bagian Akhir & Evaluasi Sumatif</h3>
+                            <p class="text-xs text-slate-500">Post-test Penutup, Daftar Rujukan, dan Rekap Nilai Siswa</p>
+                        </div>
+                    </div>
+                    <span class="text-[10px] font-extrabold uppercase px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-100">
+                        Evaluasi Akhir
+                    </span>
+                </div>
+
+                <div class="space-y-3">
+                    {{-- Item: Post-test --}}
+                    @if($module->has_post_test && $module->postTest)
+                        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-rose-50/70 border border-rose-200 hover:bg-rose-100/50 transition">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center text-sm font-bold">🏆</span>
+                                <div>
+                                    <h4 class="text-xs font-bold text-rose-950">Post-test (Evaluasi Akhir)</h4>
+                                    <p class="text-[11px] text-rose-800">Uji pemahaman komprehensif setelah menuntaskan materi</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                @if($studentResult && $studentResult->post_test_score !== null)
+                                    <button type="button"
+                                            @click="goToPage('post_test')"
+                                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-extrabold hover:bg-emerald-100 transition cursor-pointer">
+                                        <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                        <span>Skor: {{ $studentResult->post_test_score }}</span>
+                                    </button>
+                                @else
+                                    <template x-if="isUnlocked('post_test')">
+                                        <button type="button"
+                                                @click="goToPage('post_test')"
+                                                class="px-4 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm transition cursor-pointer">
+                                            Kerjakan Post-test →
+                                        </button>
+                                    </template>
+                                    <template x-if="!isUnlocked('post_test')">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed opacity-75">
+                                            <span>🔒</span>
+                                            <span>Terkunci</span>
+                                        </span>
+                                    </template>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- Item: Daftar Pustaka --}}
+                    @if($module->isInfoComponentActive('daftar_pustaka'))
+                        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-xl bg-slate-200 text-slate-700 flex items-center justify-center text-sm font-bold">📚</span>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-900">Daftar Pustaka</h4>
+                                    <p class="text-[11px] text-slate-500">Rujukan buku referensi, standar kejuruan, dan modul</p>
+                                </div>
+                            </div>
+                            <div>
+                                <template x-if="isCompleted('daftar_pustaka')">
+                                    <button type="button"
+                                            @click="goToPage('daftar_pustaka')"
+                                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition cursor-pointer">
+                                        <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                        <span>Selesai Dibaca</span>
+                                    </button>
+                                </template>
+                                <template x-if="!isCompleted('daftar_pustaka') && isUnlocked('daftar_pustaka')">
+                                    <button type="button"
+                                            @click="goToPage('daftar_pustaka')"
+                                            class="px-4 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer">
+                                        Lihat →
+                                    </button>
+                                </template>
+                                <template x-if="!isUnlocked('daftar_pustaka')">
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed opacity-75">
+                                        <span>🔒</span>
+                                        <span>Terkunci</span>
+                                    </span>
+                                </template>
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- Item: Rekap Nilai --}}
+                    <div class="flex items-center justify-between p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200 hover:bg-emerald-100/50 transition">
+                        <div class="flex items-center gap-3">
                             <span class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-sm font-bold">📊</span>
-                            <h4 class="text-xs font-bold text-emerald-950">Rekapitulasi Nilai</h4>
-                            <p class="text-[11px] text-emerald-800">Transparansi skor perolehan tugas mandiri & kuis evaluasi.</p>
+                            <div>
+                                <h4 class="text-xs font-bold text-emerald-950">Rekapitulasi Nilai</h4>
+                                <p class="text-[11px] text-emerald-800">Transparansi skor perolehan tugas mandiri & kuis evaluasi</p>
+                            </div>
                         </div>
                         <button type="button"
                                 @click="goToPage('rekap_nilai')"
-                                class="w-full py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition">
-                            Lihat Rekap Nilai →
+                                class="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition cursor-pointer">
+                            Lihat Rekap →
                         </button>
                     </div>
                 </div>
             </div>
+
         </div>
 
     </div>
@@ -782,14 +953,23 @@
                         <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center text-sm font-bold">📑</span>
                         <div>
                             <h3 class="text-sm font-black text-slate-900">Alur Belajar Modul</h3>
-                            <p class="text-[11px] text-slate-400">Pilih materi untuk mulai belajar</p>
+                            <p class="text-[11px] text-slate-400">Ikuti materi secara berurutan</p>
                         </div>
                     </div>
-                    <button type="button"
-                            @click="viewMode = 'overview'"
-                            class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-2 py-1 rounded-lg transition">
-                        Detail Modul 📋
-                    </button>
+                    <div class="flex items-center gap-1.5">
+                        <a href="{{ $classSubjectModulesUrl }}"
+                           title="Kembali ke Daftar Modul Kelas {{ $classNameText }}"
+                           class="text-[11px] font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-lg transition inline-flex items-center gap-1 cursor-pointer">
+                            <span>←</span>
+                            <span>Daftar Modul</span>
+                        </a>
+                        <button type="button"
+                                @click="viewMode = 'overview'"
+                                title="Lihat Tampilan Detail Modul"
+                                class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-lg transition cursor-pointer">
+                            Detail 📋
+                        </button>
+                    </div>
                 </div>
 
                 {{-- Accordion Group 1 to 5 --}}
@@ -801,7 +981,7 @@
                         <div class="rounded-2xl border border-slate-200/80 bg-slate-50/50 overflow-hidden">
                             <button type="button"
                                     @click="toggleSection(1)"
-                                    class="w-full px-3.5 py-3 text-left flex items-center justify-between text-xs font-extrabold text-slate-800 hover:bg-slate-100/60 transition">
+                                    class="w-full px-3.5 py-3 text-left flex items-center justify-between text-xs font-extrabold text-slate-800 hover:bg-slate-100/60 transition cursor-pointer">
                                 <span class="flex items-center gap-2">
                                     <span class="w-5 h-5 rounded-lg bg-indigo-100 text-indigo-700 text-[10px] font-black flex items-center justify-center">1</span>
                                     <span>Bagian Awal</span>
@@ -815,16 +995,23 @@
                                 @foreach($sec1Pages as $page)
                                     <button type="button"
                                             @click="goToPage('{{ $page['id'] }}')"
-                                            :class="activePage === '{{ $page['id'] }}' ? 'sidebar-item-active' : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/60'"
-                                            class="w-full px-3 py-2.5 rounded-xl text-left text-xs font-bold transition flex items-center justify-between gap-2 cursor-pointer">
+                                            :disabled="!isUnlocked('{{ $page['id'] }}')"
+                                            :class="{
+                                                'sidebar-item-active': activePage === '{{ $page['id'] }}',
+                                                'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/60 cursor-pointer': activePage !== '{{ $page['id'] }}' && isUnlocked('{{ $page['id'] }}'),
+                                                'bg-slate-100/70 text-slate-400 border border-slate-200/40 opacity-60 cursor-not-allowed': !isUnlocked('{{ $page['id'] }}')
+                                            }"
+                                            class="w-full px-3 py-2.5 rounded-xl text-left text-xs font-bold transition flex items-center justify-between gap-2">
                                         <span class="flex items-center gap-2 truncate">
                                             <span>{{ $page['icon'] }}</span>
                                             <span class="truncate">{{ $page['title'] }}</span>
                                         </span>
-                                        <span class="text-[10px] px-2 py-0.5 rounded-md font-semibold opacity-80"
-                                              :class="activePage === '{{ $page['id'] }}' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'">
-                                            {{ $page['badge'] }}
-                                        </span>
+                                        <template x-if="isCompleted('{{ $page['id'] }}')">
+                                            <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black shrink-0">✓</span>
+                                        </template>
+                                        <template x-if="!isCompleted('{{ $page['id'] }}') && !isUnlocked('{{ $page['id'] }}')">
+                                            <span class="text-[10px] opacity-70">🔒</span>
+                                        </template>
                                     </button>
                                 @endforeach
                             </div>
@@ -837,7 +1024,7 @@
                         <div class="rounded-2xl border border-slate-200/80 bg-slate-50/50 overflow-hidden">
                             <button type="button"
                                     @click="toggleSection(2)"
-                                    class="w-full px-3.5 py-3 text-left flex items-center justify-between text-xs font-extrabold text-slate-800 hover:bg-slate-100/60 transition">
+                                    class="w-full px-3.5 py-3 text-left flex items-center justify-between text-xs font-extrabold text-slate-800 hover:bg-slate-100/60 transition cursor-pointer">
                                 <span class="flex items-center gap-2">
                                     <span class="w-5 h-5 rounded-lg bg-teal-100 text-teal-700 text-[10px] font-black flex items-center justify-center">2</span>
                                     <span>Pendahuluan</span>
@@ -851,28 +1038,23 @@
                                 @foreach($sec2Pages as $page)
                                     <button type="button"
                                             @click="goToPage('{{ $page['id'] }}')"
-                                            :class="activePage === '{{ $page['id'] }}' ? 'sidebar-item-active' : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/60'"
-                                            class="w-full px-3 py-2.5 rounded-xl text-left text-xs font-bold transition flex items-center justify-between gap-2 cursor-pointer">
+                                            :disabled="!isUnlocked('{{ $page['id'] }}')"
+                                            :class="{
+                                                'sidebar-item-active': activePage === '{{ $page['id'] }}',
+                                                'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/60 cursor-pointer': activePage !== '{{ $page['id'] }}' && isUnlocked('{{ $page['id'] }}'),
+                                                'bg-slate-100/70 text-slate-400 border border-slate-200/40 opacity-60 cursor-not-allowed': !isUnlocked('{{ $page['id'] }}')
+                                            }"
+                                            class="w-full px-3 py-2.5 rounded-xl text-left text-xs font-bold transition flex items-center justify-between gap-2">
                                         <span class="flex items-center gap-2 truncate">
                                             <span>{{ $page['icon'] }}</span>
                                             <span class="truncate">{{ $page['title'] }}</span>
                                         </span>
-                                        @if($page['id'] === 'pre_test')
-                                            @if($studentResult && $studentResult->pre_test_score !== null)
-                                                <span class="text-[10px] px-2 py-0.5 rounded-md font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                                    {{ $studentResult->pre_test_score }}
-                                                </span>
-                                            @else
-                                                <span class="text-[10px] px-2 py-0.5 rounded-md font-bold bg-amber-100 text-amber-900 border border-amber-200">
-                                                    Kuis
-                                                </span>
-                                            @endif
-                                        @else
-                                            <span class="text-[10px] px-2 py-0.5 rounded-md font-semibold opacity-80"
-                                                  :class="activePage === '{{ $page['id'] }}' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'">
-                                                {{ $page['badge'] }}
-                                            </span>
-                                        @endif
+                                        <template x-if="isCompleted('{{ $page['id'] }}')">
+                                            <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black shrink-0">✓</span>
+                                        </template>
+                                        <template x-if="!isCompleted('{{ $page['id'] }}') && !isUnlocked('{{ $page['id'] }}')">
+                                            <span class="text-[10px] opacity-70">🔒</span>
+                                        </template>
                                     </button>
                                 @endforeach
                             </div>
@@ -885,7 +1067,7 @@
                         <div class="rounded-2xl border border-slate-200/80 bg-slate-50/50 overflow-hidden">
                             <button type="button"
                                     @click="toggleSection(3)"
-                                    class="w-full px-3.5 py-3 text-left flex items-center justify-between text-xs font-extrabold text-slate-800 hover:bg-slate-100/60 transition">
+                                    class="w-full px-3.5 py-3 text-left flex items-center justify-between text-xs font-extrabold text-slate-800 hover:bg-slate-100/60 transition cursor-pointer">
                                 <span class="flex items-center gap-2">
                                     <span class="w-5 h-5 rounded-lg bg-blue-100 text-blue-700 text-[10px] font-black flex items-center justify-center">3</span>
                                     <span>Kegiatan Belajar</span>
@@ -899,28 +1081,23 @@
                                 @foreach($sec3Pages as $page)
                                     <button type="button"
                                             @click="goToPage('{{ $page['id'] }}')"
-                                            :class="activePage === '{{ $page['id'] }}' ? 'sidebar-item-active' : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/60'"
-                                            class="w-full px-3 py-2.5 rounded-xl text-left text-xs font-bold transition flex items-center justify-between gap-2 cursor-pointer">
+                                            :disabled="!isUnlocked('{{ $page['id'] }}')"
+                                            :class="{
+                                                'sidebar-item-active': activePage === '{{ $page['id'] }}',
+                                                'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/60 cursor-pointer': activePage !== '{{ $page['id'] }}' && isUnlocked('{{ $page['id'] }}'),
+                                                'bg-slate-100/70 text-slate-400 border border-slate-200/40 opacity-60 cursor-not-allowed': !isUnlocked('{{ $page['id'] }}')
+                                            }"
+                                            class="w-full px-3 py-2.5 rounded-xl text-left text-xs font-bold transition flex items-center justify-between gap-2">
                                         <span class="flex items-center gap-2 truncate">
                                             <span>{{ $page['icon'] }}</span>
                                             <span class="truncate">{{ $page['title'] }}</span>
                                         </span>
-                                        @if($page['id'] === 'video')
-                                            @if($videoSummary)
-                                                <span class="text-[10px] px-2 py-0.5 rounded-md font-bold {{ $videoSummary->manual_score !== null ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900' }}">
-                                                    {{ $videoSummary->manual_score !== null ? 'Nilai ' . $videoSummary->manual_score : 'Terkirim' }}
-                                                </span>
-                                            @else
-                                                <span class="text-[10px] px-2 py-0.5 rounded-md font-semibold bg-slate-100 text-slate-600">
-                                                    Video
-                                                </span>
-                                            @endif
-                                        @else
-                                            <span class="text-[10px] px-2 py-0.5 rounded-md font-semibold opacity-80"
-                                                  :class="activePage === '{{ $page['id'] }}' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'">
-                                                {{ $page['badge'] }}
-                                            </span>
-                                        @endif
+                                        <template x-if="isCompleted('{{ $page['id'] }}')">
+                                            <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black shrink-0">✓</span>
+                                        </template>
+                                        <template x-if="!isCompleted('{{ $page['id'] }}') && !isUnlocked('{{ $page['id'] }}')">
+                                            <span class="text-[10px] opacity-70">🔒</span>
+                                        </template>
                                     </button>
                                 @endforeach
                             </div>
@@ -933,7 +1110,7 @@
                         <div class="rounded-2xl border border-slate-200/80 bg-slate-50/50 overflow-hidden">
                             <button type="button"
                                     @click="toggleSection(4)"
-                                    class="w-full px-3.5 py-3 text-left flex items-center justify-between text-xs font-extrabold text-slate-800 hover:bg-slate-100/60 transition">
+                                    class="w-full px-3.5 py-3 text-left flex items-center justify-between text-xs font-extrabold text-slate-800 hover:bg-slate-100/60 transition cursor-pointer">
                                 <span class="flex items-center gap-2">
                                     <span class="w-5 h-5 rounded-lg bg-violet-100 text-violet-700 text-[10px] font-black flex items-center justify-center">4</span>
                                     <span>Evaluasi & Praktik</span>
@@ -947,38 +1124,23 @@
                                 @foreach($sec4Pages as $page)
                                     <button type="button"
                                             @click="goToPage('{{ $page['id'] }}')"
-                                            :class="activePage === '{{ $page['id'] }}' ? 'sidebar-item-active' : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/60'"
-                                            class="w-full px-3 py-2.5 rounded-xl text-left text-xs font-bold transition flex items-center justify-between gap-2 cursor-pointer">
+                                            :disabled="!isUnlocked('{{ $page['id'] }}')"
+                                            :class="{
+                                                'sidebar-item-active': activePage === '{{ $page['id'] }}',
+                                                'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/60 cursor-pointer': activePage !== '{{ $page['id'] }}' && isUnlocked('{{ $page['id'] }}'),
+                                                'bg-slate-100/70 text-slate-400 border border-slate-200/40 opacity-60 cursor-not-allowed': !isUnlocked('{{ $page['id'] }}')
+                                            }"
+                                            class="w-full px-3 py-2.5 rounded-xl text-left text-xs font-bold transition flex items-center justify-between gap-2">
                                         <span class="flex items-center gap-2 truncate">
                                             <span>{{ $page['icon'] }}</span>
                                             <span class="truncate">{{ $page['title'] }}</span>
                                         </span>
-
-                                        @if($page['id'] === 'embed')
-                                            @if($embedSubmission)
-                                                <span class="text-[10px] px-2 py-0.5 rounded-md font-bold {{ $embedSubmission->manual_score !== null ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900' }}">
-                                                    {{ $embedSubmission->manual_score !== null ? 'Nilai ' . $embedSubmission->manual_score : 'Terkirim' }}
-                                                </span>
-                                            @else
-                                                <span class="text-[10px] px-2 py-0.5 rounded-md font-semibold bg-slate-100 text-slate-600">Praktik</span>
-                                            @endif
-                                        @elseif($page['id'] === 'job_sheet')
-                                            @if($jobSheetSubmission)
-                                                <span class="text-[10px] px-2 py-0.5 rounded-md font-bold {{ $jobSheetSubmission->manual_score !== null ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900' }}">
-                                                    {{ $jobSheetSubmission->manual_score !== null ? 'Nilai ' . $jobSheetSubmission->manual_score : 'Terkirim' }}
-                                                </span>
-                                            @else
-                                                <span class="text-[10px] px-2 py-0.5 rounded-md font-semibold bg-slate-100 text-slate-600">PDF</span>
-                                            @endif
-                                        @elseif($page['id'] === 'lkpd')
-                                            @if($lkpdSubmission)
-                                                <span class="text-[10px] px-2 py-0.5 rounded-md font-bold {{ $lkpdSubmission->manual_score !== null ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900' }}">
-                                                    {{ $lkpdSubmission->manual_score !== null ? 'Nilai ' . $lkpdSubmission->manual_score : 'Terkirim' }}
-                                                </span>
-                                            @else
-                                                <span class="text-[10px] px-2 py-0.5 rounded-md font-semibold bg-slate-100 text-slate-600">LKPD</span>
-                                            @endif
-                                        @endif
+                                        <template x-if="isCompleted('{{ $page['id'] }}')">
+                                            <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black shrink-0">✓</span>
+                                        </template>
+                                        <template x-if="!isCompleted('{{ $page['id'] }}') && !isUnlocked('{{ $page['id'] }}')">
+                                            <span class="text-[10px] opacity-70">🔒</span>
+                                        </template>
                                     </button>
                                 @endforeach
                             </div>
@@ -991,7 +1153,7 @@
                         <div class="rounded-2xl border border-slate-200/80 bg-slate-50/50 overflow-hidden">
                             <button type="button"
                                     @click="toggleSection(5)"
-                                    class="w-full px-3.5 py-3 text-left flex items-center justify-between text-xs font-extrabold text-slate-800 hover:bg-slate-100/60 transition">
+                                    class="w-full px-3.5 py-3 text-left flex items-center justify-between text-xs font-extrabold text-slate-800 hover:bg-slate-100/60 transition cursor-pointer">
                                 <span class="flex items-center gap-2">
                                     <span class="w-5 h-5 rounded-lg bg-rose-100 text-rose-700 text-[10px] font-black flex items-center justify-center">5</span>
                                     <span>Bagian Akhir</span>
@@ -1005,29 +1167,23 @@
                                 @foreach($sec5Pages as $page)
                                     <button type="button"
                                             @click="goToPage('{{ $page['id'] }}')"
-                                            :class="activePage === '{{ $page['id'] }}' ? 'sidebar-item-active' : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/60'"
-                                            class="w-full px-3 py-2.5 rounded-xl text-left text-xs font-bold transition flex items-center justify-between gap-2 cursor-pointer">
+                                            :disabled="!isUnlocked('{{ $page['id'] }}')"
+                                            :class="{
+                                                'sidebar-item-active': activePage === '{{ $page['id'] }}',
+                                                'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/60 cursor-pointer': activePage !== '{{ $page['id'] }}' && isUnlocked('{{ $page['id'] }}'),
+                                                'bg-slate-100/70 text-slate-400 border border-slate-200/40 opacity-60 cursor-not-allowed': !isUnlocked('{{ $page['id'] }}')
+                                            }"
+                                            class="w-full px-3 py-2.5 rounded-xl text-left text-xs font-bold transition flex items-center justify-between gap-2">
                                         <span class="flex items-center gap-2 truncate">
                                             <span>{{ $page['icon'] }}</span>
                                             <span class="truncate">{{ $page['title'] }}</span>
                                         </span>
-
-                                        @if($page['id'] === 'post_test')
-                                            @if($studentResult && $studentResult->post_test_score !== null)
-                                                <span class="text-[10px] px-2 py-0.5 rounded-md font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                                    {{ $studentResult->post_test_score }}
-                                                </span>
-                                            @else
-                                                <span class="text-[10px] px-2 py-0.5 rounded-md font-bold bg-rose-100 text-rose-900 border border-rose-200">
-                                                    Uji Akhir
-                                                </span>
-                                            @endif
-                                        @else
-                                            <span class="text-[10px] px-2 py-0.5 rounded-md font-semibold opacity-80"
-                                                  :class="activePage === '{{ $page['id'] }}' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'">
-                                                {{ $page['badge'] }}
-                                            </span>
-                                        @endif
+                                        <template x-if="isCompleted('{{ $page['id'] }}')">
+                                            <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black shrink-0">✓</span>
+                                        </template>
+                                        <template x-if="!isCompleted('{{ $page['id'] }}') && !isUnlocked('{{ $page['id'] }}')">
+                                            <span class="text-[10px] opacity-70">🔒</span>
+                                        </template>
                                     </button>
                                 @endforeach
                             </div>
@@ -1057,6 +1213,12 @@
                                 <h2 class="text-xl sm:text-2xl font-black text-slate-900">Kata Pengantar</h2>
                             </div>
                         </div>
+                        <template x-if="isCompleted('kata_pengantar')">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-extrabold">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                <span>Sudah Selesai Dibaca</span>
+                            </span>
+                        </template>
                     </div>
 
                     <div class="prose prose-slate max-w-none text-sm sm:text-base text-slate-700 leading-relaxed space-y-3">
@@ -1075,6 +1237,21 @@
                         <p>{{ $informasiUmum['kata_pengantar']['tempat_tanggal'] ?? 'Yogyakarta, ' . date('d F Y') }}</p>
                         <p class="font-bold text-slate-900 mt-1 text-sm">{{ $informasiUmum['kata_pengantar']['nama_penyusun'] ?? $module->teacher->name }}</p>
                         <p class="text-[11px] text-slate-400">Guru Pengampu Mata Pelajaran</p>
+                    </div>
+
+                    {{-- Tombol Tandai Selesai Dibaca & Lanjut ke Halaman Baru --}}
+                    <div class="mt-8 pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div>
+                            <p class="text-xs text-slate-500">
+                                💡 Klik tombol di samping setelah selesai membaca untuk membuka langkah pembelajaran berikutnya.
+                            </p>
+                        </div>
+                        <button type="button"
+                                @click="markAsReadAndGoNext('kata_pengantar', nextPage ? nextPage.id : null)"
+                                class="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs sm:text-sm shadow-md shadow-indigo-600/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
+                            <span>Tandai Selesai Dibaca & Lanjut</span>
+                            <span>→</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1138,6 +1315,19 @@
                         </ul>
                     </div>
                 </div>
+
+                {{-- Tombol Tandai Selesai Dibaca & Lanjut --}}
+                <div class="rounded-3xl bg-white border border-slate-200/90 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <p class="text-xs text-slate-500">
+                        💡 Tandai sudah membaca petunjuk untuk membuka tahap Pendahuluan & Capaian Pembelajaran.
+                    </p>
+                    <button type="button"
+                            @click="markAsReadAndGoNext('petunjuk_penggunaan', nextPage ? nextPage.id : null)"
+                            class="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-black text-xs sm:text-sm shadow-md shadow-teal-600/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
+                        <span>Tandai Selesai Dibaca & Lanjut</span>
+                        <span>→</span>
+                    </button>
+                </div>
             </div>
 
             {{-- ═══════════════════════════════════════════════════════════════ --}}
@@ -1145,12 +1335,20 @@
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             <div x-show="activePage === 'tujuan_pembelajaran'" x-cloak class="space-y-6">
                 <div class="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 shadow-sm space-y-6">
-                    <div class="flex items-center gap-3 pb-4 border-b border-slate-100">
-                        <span class="w-10 h-10 rounded-2xl bg-teal-100 text-teal-700 flex items-center justify-center text-lg font-bold">🎯</span>
-                        <div>
-                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-teal-600">Bagian 2: Pendahuluan</span>
-                            <h2 class="text-xl sm:text-2xl font-black text-slate-900">Tujuan Pembelajaran & Capaian</h2>
+                    <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                        <div class="flex items-center gap-3">
+                            <span class="w-10 h-10 rounded-2xl bg-teal-100 text-teal-700 flex items-center justify-center text-lg font-bold">🎯</span>
+                            <div>
+                                <span class="text-[10px] font-extrabold uppercase tracking-wider text-teal-600">Bagian 2: Pendahuluan</span>
+                                <h2 class="text-xl sm:text-2xl font-black text-slate-900">Tujuan Pembelajaran & Capaian</h2>
+                            </div>
                         </div>
+                        <template x-if="isCompleted('tujuan_pembelajaran')">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-extrabold">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                <span>Sudah Selesai Dibaca</span>
+                            </span>
+                        </template>
                     </div>
 
                     @if(!empty($informasiUmum['tujuan_pembelajaran']['capaian_pembelajaran']))
@@ -1181,6 +1379,19 @@
                             {!! nl2br(e($informasiUmum['tujuan_pembelajaran'])) !!}
                         </div>
                     @endif
+
+                    {{-- Tombol Tandai Selesai Dibaca & Lanjut --}}
+                    <div class="pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <p class="text-xs text-slate-500">
+                            💡 Pahami tujuan di atas, lalu tandai selesai untuk melanjutkan ke materi/kuis selanjutnya.
+                        </p>
+                        <button type="button"
+                                @click="markAsReadAndGoNext('tujuan_pembelajaran', nextPage ? nextPage.id : null)"
+                                class="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-black text-xs sm:text-sm shadow-md shadow-teal-600/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
+                            <span>Tandai Selesai Dibaca & Lanjut</span>
+                            <span>→</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -1189,12 +1400,20 @@
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             <div x-show="activePage === 'peta_konsep'" x-cloak class="space-y-6">
                 <div class="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 shadow-sm space-y-6">
-                    <div class="flex items-center gap-3 pb-4 border-b border-slate-100">
-                        <span class="w-10 h-10 rounded-2xl bg-teal-100 text-teal-700 flex items-center justify-center text-lg font-bold">🗺️</span>
-                        <div>
-                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-teal-600">Bagian 2: Pendahuluan</span>
-                            <h2 class="text-xl sm:text-2xl font-black text-slate-900">Peta Konsep Materi</h2>
+                    <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                        <div class="flex items-center gap-3">
+                            <span class="w-10 h-10 rounded-2xl bg-teal-100 text-teal-700 flex items-center justify-center text-lg font-bold">🗺️</span>
+                            <div>
+                                <span class="text-[10px] font-extrabold uppercase tracking-wider text-teal-600">Bagian 2: Pendahuluan</span>
+                                <h2 class="text-xl sm:text-2xl font-black text-slate-900">Peta Konsep Materi</h2>
+                            </div>
                         </div>
+                        <template x-if="isCompleted('peta_konsep')">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-extrabold">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                <span>Sudah Selesai Dibaca</span>
+                            </span>
+                        </template>
                     </div>
 
                     @if(!empty($informasiUmum['peta_konsep']['peta_konsep_image_path']))
@@ -1214,6 +1433,19 @@
                             {!! nl2br(e($informasiUmum['peta_konsep'])) !!}
                         </div>
                     @endif
+
+                    {{-- Tombol Tandai Selesai Dibaca & Lanjut --}}
+                    <div class="pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <p class="text-xs text-slate-500">
+                            💡 Amati struktur keterkaitan materi pada bagan di atas sebelum melangkah ke tahap berikutnya.
+                        </p>
+                        <button type="button"
+                                @click="markAsReadAndGoNext('peta_konsep', nextPage ? nextPage.id : null)"
+                                class="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-black text-xs sm:text-sm shadow-md shadow-teal-600/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
+                            <span>Tandai Selesai Dibaca & Lanjut</span>
+                            <span>→</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -1268,6 +1500,19 @@
                             </div>
                         @endforeach
                     </div>
+
+                    {{-- Tombol Tandai Selesai Dibaca & Lanjut --}}
+                    <div class="pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <p class="text-xs text-slate-500">
+                            💡 Pelajari istilah-istilah di atas, lalu tandai selesai untuk masuk ke tahap kuis/materi berikutnya.
+                        </p>
+                        <button type="button"
+                                @click="markAsReadAndGoNext('glosarium', nextPage ? nextPage.id : null)"
+                                class="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-black text-xs sm:text-sm shadow-md shadow-teal-600/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
+                            <span>Tandai Selesai Dibaca & Lanjut</span>
+                            <span>→</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -1297,7 +1542,7 @@
 
                     <div class="p-6 sm:p-8">
                         @if($studentResult && $studentResult->pre_test_score !== null)
-                            <div class="rounded-2xl bg-emerald-50 border border-emerald-200 p-6 text-center space-y-3">
+                            <div class="rounded-2xl bg-emerald-50 border border-emerald-200 p-6 text-center space-y-4">
                                 <div class="w-14 h-14 rounded-full bg-emerald-500 text-white flex items-center justify-center text-2xl mx-auto shadow-md">
                                     ✓
                                 </div>
@@ -1306,6 +1551,16 @@
                                     Anda telah menyelesaikan tes diagnostik ini dengan perolehan skor <strong>{{ $studentResult->pre_test_score }}</strong>.
                                     Silakan lanjutkan mempelajari materi pembelajaran pada langkah berikutnya.
                                 </p>
+                                <div class="pt-2">
+                                    <template x-if="nextPage">
+                                        <button type="button"
+                                                @click="goToPage(nextPage.id)"
+                                                class="px-8 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-indigo-600/25 transition cursor-pointer">
+                                            <span>Lanjut ke <strong x-text="nextPage.title"></strong></span>
+                                            <span>→</span>
+                                        </button>
+                                    </template>
+                                </div>
                             </div>
                         @else
                             <form action="{{ route('student.modules.pre-test.submit', $module) }}" method="POST" class="space-y-8">
@@ -1364,13 +1619,21 @@
             <div x-show="activePage === 'materi'" x-cloak class="space-y-6">
                 <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm overflow-hidden">
                     <div class="p-6 sm:p-8 border-b border-slate-100 bg-gradient-to-r from-blue-50/70 to-slate-50">
-                        <div class="flex flex-wrap items-center gap-2 mb-3">
-                            <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-bold border border-blue-200">
-                                ⏱️ Estimasi Belajar: {{ $materiData['estimasi_waktu'] ?? 45 }} Menit
-                            </span>
-                            <span class="px-3 py-1 rounded-full bg-slate-200/80 text-slate-800 text-xs font-bold">
-                                📖 Bagian 3: Kegiatan Belajar
-                            </span>
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-bold border border-blue-200">
+                                    ⏱️ Estimasi Belajar: {{ $materiData['estimasi_waktu'] ?? 45 }} Menit
+                                </span>
+                                <span class="px-3 py-1 rounded-full bg-slate-200/80 text-slate-800 text-xs font-bold">
+                                    📖 Bagian 3: Kegiatan Belajar
+                                </span>
+                            </div>
+                            <template x-if="isCompleted('materi')">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-extrabold">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                    <span>Selesai Dipelajari</span>
+                                </span>
+                            </template>
                         </div>
                         <h2 class="text-2xl sm:text-3xl font-black text-slate-900">
                             {{ $materiData['judul_materi'] ?? $module->title }}
@@ -1408,6 +1671,19 @@
                                 </a>
                             </div>
                         @endif
+
+                        {{-- Tombol Tandai Selesai Membaca Materi & Lanjut --}}
+                        <div class="mt-8 pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <p class="text-xs text-slate-500">
+                                💡 Tandai materi ini telah dipelajari untuk membuka video pembelajaran & tugas berikutnya.
+                            </p>
+                            <button type="button"
+                                    @click="markAsReadAndGoNext('materi', nextPage ? nextPage.id : null)"
+                                    class="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs sm:text-sm shadow-md shadow-blue-600/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
+                                <span>Tandai Selesai Mempelajari Materi & Lanjut</span>
+                                <span>→</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1527,7 +1803,7 @@
                             </div>
 
                             @if($videoSummary)
-                                <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+                                <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
                                     <p class="text-xs text-slate-500">Dikirim pada: {{ $videoSummary->created_at->translatedFormat('d M Y, H:i') }} WIB</p>
                                     <div class="text-sm text-slate-800 leading-relaxed whitespace-pre-line font-medium">
                                         {{ $videoSummary->summary_text }}
@@ -1538,6 +1814,16 @@
                                             <span class="text-sm">{{ $videoSummary->manual_score }}/100</span>
                                         </div>
                                     @endif
+                                    <div class="pt-3 border-t border-slate-200 flex justify-end">
+                                        <template x-if="nextPage">
+                                            <button type="button"
+                                                    @click="goToPage(nextPage.id)"
+                                                    class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+                                                <span>Lanjut ke <strong x-text="nextPage.title"></strong></span>
+                                                <span>→</span>
+                                            </button>
+                                        </template>
+                                    </div>
                                 </div>
                             @else
                                 <form action="{{ route('student.modules.video.submit', $module) }}" method="POST" class="space-y-3"
@@ -1637,7 +1923,7 @@
                             </div>
 
                             @if($embedSubmission)
-                                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center gap-4">
+                                <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center gap-4">
                                     <img src="{{ asset('storage/' . $embedSubmission->screenshot_path) }}"
                                          alt="Bukti Screenshot"
                                          class="w-full sm:w-48 h-32 object-cover rounded-xl border border-slate-300 shadow-sm">
@@ -1649,6 +1935,16 @@
                                         @else
                                             <p class="text-amber-600 font-medium">Menunggu penilaian guru pengampu</p>
                                         @endif
+                                        <div class="pt-2">
+                                            <template x-if="nextPage">
+                                                <button type="button"
+                                                        @click="goToPage(nextPage.id)"
+                                                        class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer">
+                                                    <span>Lanjut ke <strong x-text="nextPage.title"></strong></span>
+                                                    <span>→</span>
+                                                </button>
+                                            </template>
+                                        </div>
                                     </div>
                                 </div>
                             @else
@@ -1768,6 +2064,14 @@
                                            class="px-4 py-2 rounded-xl bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-bold transition">
                                             Lihat Berkas ↗
                                         </a>
+                                        <template x-if="nextPage">
+                                            <button type="button"
+                                                    @click="goToPage(nextPage.id)"
+                                                    class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer">
+                                                <span>Lanjut ke <strong x-text="nextPage.title"></strong></span>
+                                                <span>→</span>
+                                            </button>
+                                        </template>
                                     </div>
                                 </div>
                             @else
@@ -1875,6 +2179,14 @@
                                            class="px-4 py-2 rounded-xl bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-bold transition">
                                             Lihat Berkas ↗
                                         </a>
+                                        <template x-if="nextPage">
+                                            <button type="button"
+                                                    @click="goToPage(nextPage.id)"
+                                                    class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer">
+                                                <span>Lanjut ke <strong x-text="nextPage.title"></strong></span>
+                                                <span>→</span>
+                                            </button>
+                                        </template>
                                     </div>
                                 </div>
                             @else
@@ -1944,6 +2256,16 @@
                                         </span>
                                     @endif
                                 </p>
+                                <div class="pt-2">
+                                    <template x-if="nextPage">
+                                        <button type="button"
+                                                @click="goToPage(nextPage.id)"
+                                                class="px-8 py-3.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-rose-600/25 transition cursor-pointer">
+                                            <span>Lanjut ke <strong x-text="nextPage.title"></strong></span>
+                                            <span>→</span>
+                                        </button>
+                                    </template>
+                                </div>
                             </div>
                         @else
                             <form action="{{ route('student.modules.post-test.submit', $module) }}" method="POST" class="space-y-8">
@@ -2000,12 +2322,20 @@
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             <div x-show="activePage === 'daftar_pustaka'" x-cloak class="space-y-6">
                 <div class="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 shadow-sm space-y-6">
-                    <div class="flex items-center gap-3 pb-4 border-b border-slate-100">
-                        <span class="w-10 h-10 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center text-lg font-bold">📚</span>
-                        <div>
-                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-rose-600">Bagian 5 • Bagian Akhir</span>
-                            <h2 class="text-xl sm:text-2xl font-black text-slate-900">Daftar Pustaka & Rujukan</h2>
+                    <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                        <div class="flex items-center gap-3">
+                            <span class="w-10 h-10 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center text-lg font-bold">📚</span>
+                            <div>
+                                <span class="text-[10px] font-extrabold uppercase tracking-wider text-rose-600">Bagian 5 • Bagian Akhir</span>
+                                <h2 class="text-xl sm:text-2xl font-black text-slate-900">Daftar Pustaka & Rujukan</h2>
+                            </div>
                         </div>
+                        <template x-if="isCompleted('daftar_pustaka')">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-extrabold">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                <span>Sudah Selesai Dibaca</span>
+                            </span>
+                        </template>
                     </div>
 
                     @php
@@ -2045,6 +2375,19 @@
                         @else
                             <p class="text-slate-400 italic text-sm">Tidak ada daftar pustaka yang dicantumkan.</p>
                         @endif
+                    </div>
+
+                    {{-- Tombol Tandai Selesai Dibaca & Buka Rekapitulasi Nilai --}}
+                    <div class="pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <p class="text-xs text-slate-500">
+                            💡 Klik tombol di samping untuk membuka lembar transparansi Rekapitulasi Nilai Anda.
+                        </p>
+                        <button type="button"
+                                @click="markAsReadAndGoNext('daftar_pustaka', 'rekap_nilai')"
+                                class="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm shadow-md shadow-emerald-600/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
+                            <span>Tandai Selesai & Buka Rekapitulasi Nilai</span>
+                            <span>→</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -2196,8 +2539,14 @@
             {{-- ═══ 3. BOTTOM SEQUENTIAL NAVIGATION BAR (NEXT / PREV) ════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             <div class="rounded-3xl bg-white border border-slate-200/90 p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-                {{-- Tombol Sebelumnya --}}
-                <div>
+                {{-- Tombol Sebelumnya & Daftar Modul --}}
+                <div class="flex flex-wrap items-center gap-2">
+                    <a href="{{ $classSubjectModulesUrl }}"
+                       title="Kembali ke Daftar Modul Kelas {{ $classNameText }}"
+                       class="w-full sm:w-auto px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs">
+                        <span>←</span>
+                        <span>Daftar Modul</span>
+                    </a>
                     <template x-if="prevPage">
                         <button type="button"
                                 @click="goToPage(prevPage.id)"
@@ -2209,8 +2558,8 @@
                     <template x-if="!prevPage">
                         <button type="button"
                                 @click="viewMode = 'overview'"
-                                class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer">
-                            <span>← Kembali ke Detail Modul</span>
+                                class="w-full sm:w-auto px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
+                            <span>📋 Detail Modul</span>
                         </button>
                     </template>
                 </div>
@@ -2220,9 +2569,14 @@
                     <template x-if="nextPage">
                         <button type="button"
                                 @click="goToPage(nextPage.id)"
-                                class="w-full sm:w-auto px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold shadow-md shadow-indigo-600/25 transition flex items-center justify-center gap-2 cursor-pointer">
-                            <span>Lanjut: <strong x-text="nextPage.title"></strong></span>
-                            <span>→</span>
+                                :disabled="!isUnlocked(nextPage.id)"
+                                :class="{
+                                    'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/25 cursor-pointer': isUnlocked(nextPage.id),
+                                    'bg-slate-200 text-slate-400 cursor-not-allowed opacity-75': !isUnlocked(nextPage.id)
+                                }"
+                                class="w-full sm:w-auto px-6 py-3 rounded-2xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2">
+                            <span x-show="isUnlocked(nextPage.id)">Lanjut: <strong x-text="nextPage.title"></strong> →</span>
+                            <span x-show="!isUnlocked(nextPage.id)">🔒 Selesaikan Langkah Ini Terlebih Dahulu</span>
                         </button>
                     </template>
                     <template x-if="!nextPage">

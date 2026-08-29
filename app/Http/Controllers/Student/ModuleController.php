@@ -174,6 +174,14 @@ class ModuleController extends Controller
 
         // Hasil belajar dan tugas siswa
         $studentResult = $module->studentResults->first();
+        if ($studentResult) {
+            $studentResult->touch();
+        } else {
+            $studentResult = StudentResult::firstOrCreate(
+                ['student_id' => $student->id, 'module_id' => $module->id],
+                ['summative_score' => 0, 'grading_status' => 'pending', 'read_components' => []]
+            );
+        }
         $videoSummary = $module->videoSummaries->first();
         $embedSubmission = $module->embedSubmissions->first();
 
@@ -198,6 +206,7 @@ class ModuleController extends Controller
         // Hitung progres belajar
         $activeComps = $module->activeComponents();
         $totalActive = count($activeComps);
+        $readComponents = $studentResult?->read_components ?? [];
         $completedTasks = 0;
 
         if ($module->pre_test_active && $studentResult && $studentResult->pre_test_score !== null) {
@@ -248,8 +257,41 @@ class ModuleController extends Controller
             'lkpdSubmission',
             'completedTasks',
             'totalActive',
-            'progressPercent'
+            'progressPercent',
+            'readComponents'
         ));
+    }
+
+    /**
+     * Tandai komponen bacaan/informasi (Kata Pengantar, Petunjuk, Tujuan, Peta Konsep, Glosarium, Materi, Daftar Pustaka) sudah dibaca.
+     */
+    public function markRead(Request $request, Module $module)
+    {
+        $this->authorizeStudentAccess($module);
+        $student = $this->student();
+        $component = (string) $request->input('component');
+
+        $studentResult = StudentResult::firstOrCreate(
+            ['student_id' => $student->id, 'module_id' => $module->id],
+            ['summative_score' => 0, 'grading_status' => 'pending', 'read_components' => []]
+        );
+
+        if (!empty($component)) {
+            $studentResult->markComponentRead($component);
+        }
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success'         => true,
+                'read_components' => $studentResult->read_components ?? [],
+            ]);
+        }
+
+        $next = $request->input('next', $component);
+        return redirect()->route('student.modules.show', [
+            'module' => $module->id,
+            'page'   => $next,
+        ]);
     }
 
     /**
