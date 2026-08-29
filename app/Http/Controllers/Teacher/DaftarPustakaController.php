@@ -45,8 +45,17 @@ class DaftarPustakaController extends Controller
 
         $infoData = is_array($module->informasi_umum_data) ? $module->informasi_umum_data : [];
 
+        $daftarPustaka = [];
+        if (isset($infoData['daftar_pustaka'])) {
+            if (is_array($infoData['daftar_pustaka'])) {
+                $daftarPustaka = isset($infoData['daftar_pustaka']['daftar_pustaka']) && is_array($infoData['daftar_pustaka']['daftar_pustaka'])
+                    ? $infoData['daftar_pustaka']['daftar_pustaka']
+                    : $infoData['daftar_pustaka'];
+            }
+        }
+
         $data = [
-            'daftar_pustaka' => $infoData['daftar_pustaka'] ?? [],
+            'daftar_pustaka' => $daftarPustaka,
             'toggles'        => $infoData['toggles'] ?? [],
         ];
 

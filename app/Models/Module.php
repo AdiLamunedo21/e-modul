@@ -149,14 +149,12 @@ class Module extends Model
     public function activeInfoComponents(): array
     {
         $all = [
-            'cover'               => '1. Halaman Cover',
-            'kata_pengantar'      => '2. Kata Pengantar',
-            'daftar_isi'          => '3. Daftar Isi',
-            'peta_konsep'         => '4. Peta Konsep',
-            'glosarium'           => '5. Glosarium',
-            'petunjuk_penggunaan' => '6. Petunjuk Penggunaan',
-            'tujuan_pembelajaran' => '7. Tujuan Pembelajaran',
-            'daftar_pustaka'      => '8. Daftar Pustaka',
+            'kata_pengantar'      => '1. Kata Pengantar',
+            'peta_konsep'         => '2. Peta Konsep',
+            'glosarium'           => '3. Glosarium',
+            'petunjuk_penggunaan' => '4. Petunjuk Penggunaan',
+            'tujuan_pembelajaran' => '5. Tujuan Pembelajaran',
+            'daftar_pustaka'      => '6. Daftar Pustaka',
         ];
         $active = [];
         foreach ($all as $key => $label) {
@@ -171,17 +169,6 @@ class Module extends Model
     public function bagianAwalComponents(): array
     {
         return [
-            'cover' => [
-                'key'         => 'cover',
-                'name'        => 'Halaman Sampul (Cover)',
-                'emoji'       => '📷',
-                'badge'       => 'Identitas Visual',
-                'desc'        => 'Halaman sampul depan dan identitas visual modul pembelajaran',
-                'is_active'   => $this->isInfoComponentActive('cover'),
-                'edit_url'    => route('teacher.modules.bagian-awal.edit', $this) . '#sec-cover',
-                'toggle_url'  => route('teacher.modules.bagian-awal.toggle', [$this, 'cover']),
-                'preview_url' => null,
-            ],
             'kata_pengantar' => [
                 'key'         => 'kata_pengantar',
                 'name'        => 'Kata Pengantar',
@@ -191,17 +178,6 @@ class Module extends Model
                 'is_active'   => $this->isInfoComponentActive('kata_pengantar'),
                 'edit_url'    => route('teacher.modules.bagian-awal.edit', $this) . '#sec-kata',
                 'toggle_url'  => route('teacher.modules.bagian-awal.toggle', [$this, 'kata_pengantar']),
-                'preview_url' => null,
-            ],
-            'daftar_isi' => [
-                'key'         => 'daftar_isi',
-                'name'        => 'Daftar Isi',
-                'emoji'       => '📋',
-                'badge'       => 'Navigasi Modul',
-                'desc'        => 'Daftar isi dan struktur navigasi halaman modul pembelajaran',
-                'is_active'   => $this->isInfoComponentActive('daftar_isi'),
-                'edit_url'    => route('teacher.modules.bagian-awal.edit', $this) . '#sec-daftar',
-                'toggle_url'  => route('teacher.modules.bagian-awal.toggle', [$this, 'daftar_isi']),
                 'preview_url' => null,
             ],
             'petunjuk_penggunaan' => [
@@ -381,7 +357,7 @@ class Module extends Model
                 'id'           => 'sec-bagian-awal',
                 'number'       => 1,
                 'title'        => 'Bagian Awal',
-                'subtitle'     => 'Halaman sampul (cover), kata pengantar, daftar isi, serta petunjuk penggunaan e-modul bagi siswa dan guru.',
+                'subtitle'     => 'Kata pengantar serta petunjuk penggunaan e-modul bagi siswa dan guru.',
                 'theme'        => 'indigo',
                 'header_bg'    => 'bg-indigo-600',
                 'badge_color'  => 'bg-indigo-100 text-indigo-800 border-indigo-200',
@@ -390,7 +366,7 @@ class Module extends Model
                 'active_count' => collect($sec1)->filter(fn($c) => $c['is_active'])->count(),
                 'total_count'  => count($sec1),
                 'edit_all_url' => route('teacher.modules.bagian-awal.edit', $this),
-                'edit_all_label' => 'Edit 4 Komponen Bagian Awal',
+                'edit_all_label' => 'Edit 2 Komponen Bagian Awal',
             ],
             'pendahuluan' => [
                 'id'           => 'sec-pendahuluan',

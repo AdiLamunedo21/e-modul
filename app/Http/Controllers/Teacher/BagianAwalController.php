@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Module;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * =============================================================================
@@ -16,12 +15,10 @@ use Illuminate\Support\Facades\Storage;
  * PANDUAN PENGEMBANG (DEVELOPER ARCHITECTURE NOTES):
  * -----------------------------------------------------------------------------
  * Controller ini khusus mengelola "1. Bagian Awal" E-Modul yang terdiri dari 
- * tepat 4 komponen:
+ * tepat 2 komponen:
  * 
- * 1. Halaman Sampul (Cover Image)  => 'cover_image_path'
- * 2. Kata Pengantar               => 'kata_pengantar'
- * 3. Daftar Isi (Navigasi Modul)  => 'daftar_isi' (Array [{judul, anchor}])
- * 4. Petunjuk Penggunaan          => 'petunjuk_penggunaan'
+ * 1. Kata Pengantar      => 'kata_pengantar'
+ * 2. Petunjuk Penggunaan => 'petunjuk_penggunaan'
  * 
  * Data disimpan secara terisolasi dan aman ke dalam kolom JSON `informasi_umum_data`
  * pada tabel `modules` tanpa mengganggu data Pendahuluan, Kegiatan Belajar, 
@@ -41,7 +38,7 @@ class BagianAwalController extends Controller
     }
 
     /**
-     * Menampilkan form editor khusus untuk 4 Komponen Bagian Awal.
+     * Menampilkan form editor khusus untuk 2 Komponen Bagian Awal.
      */
     public function edit(Module $module)
     {
@@ -50,11 +47,36 @@ class BagianAwalController extends Controller
 
         $infoData = is_array($module->informasi_umum_data) ? $module->informasi_umum_data : [];
 
+        // Normalisasi kata_pengantar (mendukung string langsung maupun array berstruktur)
+        $kataPengantar = '';
+        if (isset($infoData['kata_pengantar'])) {
+            if (is_array($infoData['kata_pengantar'])) {
+                $kataPengantar = $infoData['kata_pengantar']['kata_pengantar_text'] ?? ($infoData['kata_pengantar']['text'] ?? '');
+            } else {
+                $kataPengantar = (string) $infoData['kata_pengantar'];
+            }
+        }
+
+        // Normalisasi petunjuk_penggunaan
+        $petunjuk = '';
+        if (isset($infoData['petunjuk_penggunaan'])) {
+            if (is_array($infoData['petunjuk_penggunaan'])) {
+                $parts = [];
+                if (!empty($infoData['petunjuk_penggunaan']['petunjuk_siswa'])) {
+                    $parts[] = "Petunjuk Bagi Siswa:\n" . implode("\n", array_map(fn($item) => is_array($item) ? ($item['text'] ?? '') : $item, (array)$infoData['petunjuk_penggunaan']['petunjuk_siswa']));
+                }
+                if (!empty($infoData['petunjuk_penggunaan']['petunjuk_guru'])) {
+                    $parts[] = "Petunjuk Bagi Guru:\n" . implode("\n", array_map(fn($item) => is_array($item) ? ($item['text'] ?? '') : $item, (array)$infoData['petunjuk_penggunaan']['petunjuk_guru']));
+                }
+                $petunjuk = !empty($parts) ? implode("\n\n", $parts) : ($infoData['petunjuk_penggunaan']['text'] ?? '');
+            } else {
+                $petunjuk = (string) $infoData['petunjuk_penggunaan'];
+            }
+        }
+
         $data = [
-            'cover_image_path'    => $infoData['cover_image_path'] ?? null,
-            'kata_pengantar'      => $infoData['kata_pengantar'] ?? '',
-            'daftar_isi'          => $infoData['daftar_isi'] ?? [],
-            'petunjuk_penggunaan' => $infoData['petunjuk_penggunaan'] ?? '',
+            'kata_pengantar'      => $kataPengantar,
+            'petunjuk_penggunaan' => $petunjuk,
             'toggles'             => $infoData['toggles'] ?? [],
         ];
 
@@ -62,57 +84,22 @@ class BagianAwalController extends Controller
     }
 
     /**
-     * Menyimpan pembaruan khusus 4 Komponen Bagian Awal ke JSON `informasi_umum_data`.
+     * Menyimpan pembaruan khusus 2 Komponen Bagian Awal ke JSON `informasi_umum_data`.
      */
     public function update(Request $request, Module $module)
     {
         $this->authorize($module);
 
         $request->validate([
-            'cover_image'         => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
-            'remove_cover'        => ['nullable', 'boolean'],
             'kata_pengantar'      => ['nullable', 'string'],
             'petunjuk_penggunaan' => ['nullable', 'string'],
-            'daftar_isi'          => ['nullable', 'array'],
-            'daftar_isi.*.judul'  => ['required_with:daftar_isi', 'string', 'max:200'],
-            'daftar_isi.*.anchor' => ['nullable', 'string', 'max:200'],
         ]);
 
         $existingData = is_array($module->informasi_umum_data) ? $module->informasi_umum_data : [];
-        $coverPath = $existingData['cover_image_path'] ?? null;
 
-        // 1. Upload Cover Baru jika ada
-        if ($request->hasFile('cover_image')) {
-            if ($coverPath && Storage::disk('public')->exists($coverPath)) {
-                Storage::disk('public')->delete($coverPath);
-            }
-            $coverPath = $request->file('cover_image')
-                ->store("covers/teacher-{$this->teacher()->id}", 'public');
-        }
-
-        // 2. Hapus Cover jika opsi hapus dipilih
-        if ($request->boolean('remove_cover') && $coverPath) {
-            if (Storage::disk('public')->exists($coverPath)) {
-                Storage::disk('public')->delete($coverPath);
-            }
-            $coverPath = null;
-        }
-
-        // 3. Normalisasi Daftar Isi (Filter array kosong)
-        $daftarIsi = collect($request->daftar_isi ?? [])
-            ->filter(fn($d) => !empty($d['judul']))
-            ->map(fn($d) => [
-                'judul'  => trim($d['judul']),
-                'anchor' => !empty($d['anchor']) ? trim($d['anchor']) : '',
-            ])
-            ->values()
-            ->toArray();
-
-        // 4. Update data Bagian Awal ke dalam JSON tanpa menimpa bagian lain
+        // Update data Bagian Awal ke dalam JSON tanpa menimpa bagian lain
         $updatedData = array_merge($existingData, [
-            'cover_image_path'    => $coverPath,
             'kata_pengantar'      => $request->kata_pengantar ?? '',
-            'daftar_isi'          => $daftarIsi,
             'petunjuk_penggunaan' => $request->petunjuk_penggunaan ?? '',
         ]);
 
@@ -120,20 +107,18 @@ class BagianAwalController extends Controller
 
         return redirect()
             ->route('teacher.modules.show', $module)
-            ->with('success', 'Bagian Awal E-Modul (4 Komponen) berhasil disimpan! ✅');
+            ->with('success', 'Bagian Awal E-Modul (2 Komponen) berhasil disimpan! ✅');
     }
 
     /**
-     * Mengubah status sakelar aktif/nonaktif khusus 4 komponen Bagian Awal.
+     * Mengubah status sakelar aktif/nonaktif khusus 2 komponen Bagian Awal.
      */
     public function toggle(Request $request, Module $module, string $component)
     {
         $this->authorize($module);
 
         $allowed = [
-            'cover'               => 'Halaman Sampul (Cover)',
             'kata_pengantar'      => 'Kata Pengantar',
-            'daftar_isi'          => 'Daftar Isi',
             'petunjuk_penggunaan' => 'Petunjuk Penggunaan',
         ];
 

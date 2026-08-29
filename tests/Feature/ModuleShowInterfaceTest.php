@@ -27,9 +27,7 @@ class ModuleShowInterfaceTest extends TestCase
 
         // 1. Bagian Awal
         $response->assertSee('Bagian Awal');
-        $response->assertSee('Halaman Sampul (Cover)');
         $response->assertSee('Kata Pengantar');
-        $response->assertSee('Daftar Isi');
         $response->assertSee('Petunjuk Penggunaan');
 
         // 2. Pendahuluan

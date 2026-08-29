@@ -110,7 +110,7 @@
                 </p>
                 <div class="space-y-1.5">
                     @foreach([
-                        ['1', 'Informasi Umum (Mandatori)', 'Cover, Kata Pengantar, Peta Konsep, Glosarium, Tujuan Pembelajaran.'],
+                        ['1', 'Bagian Awal & Pendahuluan', 'Kata Pengantar, Petunjuk Penggunaan, Peta Konsep, Glosarium, Tujuan Pembelajaran.'],
                         ['2', 'Komponen Inti (7 Toggle Opsional)', 'Pre-test, Materi+PPT, Video YouTube, Praktik Embed, Job Sheet, LKPD, Post-test.'],
                         ['3', 'Bagian Akhir (Mandatori)', 'Evaluasi Sumatif, Kunci Jawaban & Standar Nilai, & Daftar Pustaka.'],
                     ] as [$no, $title, $desc])

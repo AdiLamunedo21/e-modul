@@ -97,7 +97,7 @@
                 </div>
                 <div>
                     <h3 class="text-xs font-bold tracking-tight line-clamp-1">Bagian Awal</h3>
-                    <p class="text-[10px] opacity-80 truncate">Cover & Petunjuk</p>
+                    <p class="text-[10px] opacity-80 truncate">Pengantar & Petunjuk</p>
                 </div>
             </button>
 
@@ -136,15 +136,15 @@
             {{-- Step 4: Evaluasi & Latihan --}}
             <button type="button"
                     @click="currentTab = 4"
-                    :class="currentTab === 4 ? 'bg-amber-600 text-white shadow-md shadow-amber-600/20 ring-2 ring-amber-600' : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200/70'"
+                    :class="currentTab === 4 ? 'bg-violet-600 text-white shadow-md shadow-violet-600/20 ring-2 ring-violet-600' : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200/70'"
                     class="p-3 rounded-2xl text-left transition-all duration-200 flex flex-col justify-between group">
                 <div class="flex items-center justify-between w-full mb-1">
-                    <span class="text-xs font-black" :class="currentTab === 4 ? 'text-amber-200' : 'text-amber-700'">04</span>
-                    <span class="text-sm">⚡</span>
+                    <span class="text-xs font-black" :class="currentTab === 4 ? 'text-violet-200' : 'text-violet-600'">04</span>
+                    <span class="text-sm">🛠️</span>
                 </div>
                 <div>
-                    <h3 class="text-xs font-bold tracking-tight line-clamp-1">Evaluasi Praktik</h3>
-                    <p class="text-[10px] opacity-80 truncate">Embed, LKPD, Jobsheet</p>
+                    <h3 class="text-xs font-bold tracking-tight line-clamp-1">Evaluasi & Praktik</h3>
+                    <p class="text-[10px] opacity-80 truncate">Simulasi, LKPD & Job Sheet</p>
                 </div>
             </button>
 
@@ -152,29 +152,31 @@
             <button type="button"
                     @click="currentTab = 5"
                     :class="currentTab === 5 ? 'bg-rose-600 text-white shadow-md shadow-rose-600/20 ring-2 ring-rose-600' : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200/70'"
-                    class="p-3 rounded-2xl text-left transition-all duration-200 flex flex-col justify-between group col-span-2 sm:col-span-1">
+                    class="p-3 rounded-2xl text-left transition-all duration-200 flex flex-col justify-between group">
                 <div class="flex items-center justify-between w-full mb-1">
                     <span class="text-xs font-black" :class="currentTab === 5 ? 'text-rose-200' : 'text-rose-600'">05</span>
-                    <span class="text-sm">🎯</span>
+                    <span class="text-sm">🏁</span>
                 </div>
                 <div>
                     <h3 class="text-xs font-bold tracking-tight line-clamp-1">Bagian Akhir</h3>
-                    <p class="text-[10px] opacity-80 truncate">Post-test & Rekap</p>
+                    <p class="text-[10px] opacity-80 truncate">
+                        {{ $module->has_post_test ? 'Post-test & Pustaka' : 'Daftar Pustaka' }}
+                    </p>
                 </div>
             </button>
         </div>
     </div>
 
-    {{-- Alert Notifikasi Session --}}
+    {{-- Alert Evaluasi Berhasil --}}
     @if(session('success'))
-        <div class="rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-emerald-800 text-sm font-bold flex items-center gap-3 shadow-sm">
-            <span class="text-xl">✅</span>
+        <div class="mb-6 rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-sm font-semibold text-emerald-800 flex items-center gap-3">
+            <span>✅</span>
             <span>{{ session('success') }}</span>
         </div>
     @endif
     @if(session('error'))
-        <div class="rounded-2xl bg-red-50 border border-red-200 p-4 text-red-800 text-sm font-bold flex items-center gap-3 shadow-sm">
-            <span class="text-xl">⚠️</span>
+        <div class="mb-6 rounded-2xl bg-rose-50 border border-rose-200 p-4 text-sm font-semibold text-rose-800 flex items-center gap-3">
+            <span>⚠️</span>
             <span>{{ session('error') }}</span>
         </div>
     @endif
@@ -184,51 +186,7 @@
     {{-- ═══════════════════════════════════════════════════════════════════════ --}}
     <div x-show="currentTab === 1" x-cloak class="space-y-6">
 
-        {{-- 1.1 Sampul Modul (Cover) --}}
-        @if($module->isInfoComponentActive('cover'))
-            <div class="rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white p-8 sm:p-10 shadow-xl relative overflow-hidden">
-                <div class="absolute right-0 top-0 translate-x-12 -translate-y-12 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-                <div class="flex flex-col md:flex-row items-center gap-8 relative z-10">
-                    @if(!empty($informasiUmum['cover']['cover_image_path']))
-                        <div class="w-full md:w-48 lg:w-56 shrink-0">
-                            <img src="{{ asset('storage/' . $informasiUmum['cover']['cover_image_path']) }}"
-                                 alt="Cover {{ $module->title }}"
-                                 class="w-full h-auto rounded-2xl shadow-2xl border-2 border-white/20 object-cover">
-                        </div>
-                    @else
-                        <div class="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl bg-gradient-to-tr from-indigo-600 to-teal-400 flex items-center justify-center text-4xl sm:text-5xl shadow-2xl shrink-0 border border-white/20">
-                            📚
-                        </div>
-                    @endif
-
-                    <div class="space-y-3 text-center md:text-left flex-1">
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-teal-300 text-xs font-bold border border-white/10">
-                            <span>SMK NEGERI 3 YOGYAKARTA</span>
-                            <span>•</span>
-                            <span>{{ $informasiUmum['cover']['tahun_ajaran'] ?? date('Y') . '/' . (date('Y')+1) }}</span>
-                        </div>
-                        <h2 class="text-2xl sm:text-4xl font-black tracking-tight leading-tight">
-                            {{ $informasiUmum['cover']['judul_cover'] ?? $module->title }}
-                        </h2>
-                        @if(!empty($informasiUmum['cover']['sub_judul']))
-                            <p class="text-indigo-200 text-sm sm:text-base font-medium">
-                                {{ $informasiUmum['cover']['sub_judul'] }}
-                            </p>
-                        @endif
-                        <div class="pt-4 flex flex-wrap items-center justify-center md:justify-start gap-4 text-xs text-slate-300">
-                            <div>Penyusun: <strong class="text-white">{{ $informasiUmum['cover']['penyusun'] ?? $module->teacher->name }}</strong></div>
-                            <span>•</span>
-                            <div>Mata Pelajaran: <strong class="text-white">{{ $module->subject->name }}</strong></div>
-                            <span>•</span>
-                            <div>Kelas: <strong class="text-white">{{ $module->schoolClass->full_name }}</strong></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        {{-- 1.2 Kata Pengantar --}}
+        {{-- 1.1 Kata Pengantar --}}
         @if($module->isInfoComponentActive('kata_pengantar'))
             <div class="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 shadow-sm">
                 <div class="flex items-center gap-3 mb-4 pb-4 border-b border-slate-100">

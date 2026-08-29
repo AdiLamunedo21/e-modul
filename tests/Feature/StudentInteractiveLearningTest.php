@@ -56,12 +56,11 @@ class StudentInteractiveLearningTest extends TestCase
             ],
             'informasi_umum_data' => [
                 'toggles' => [
-                    'cover' => true,
                     'kata_pengantar' => true,
                     'petunjuk_penggunaan' => true,
                     'tujuan_pembelajaran' => true,
                 ],
-                'cover' => ['judul_cover' => 'Sampul Modul Web'],
+                'kata_pengantar' => 'Selamat datang di modul pembelajaran web.',
                 'tujuan_pembelajaran' => [
                     'capaian_pembelajaran' => 'Memahami struktur web',
                     'tujuan_pembelajaran' => ['Membuat halaman web responsive'],

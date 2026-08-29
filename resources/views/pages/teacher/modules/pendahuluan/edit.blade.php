@@ -167,7 +167,7 @@
                                   rows="7"
                                   required
                                   class="prose-editor w-full rounded-2xl border @error('tujuan_pembelajaran') border-rose-400 bg-rose-50/40 @else border-slate-200 bg-slate-50/50 @enderror p-4 text-sm text-slate-800 focus:bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all leading-relaxed font-normal"
-                                  placeholder="Setelah menyelesaikan modul pembelajaran ini, peserta didik diharapkan mampu:&#10;1. Mengidentifikasi konsep dasar dan fungsi komponen utama.&#10;2. Menerapkan prosedur pemecahan masalah secara tepat.&#10;3. Merancang hasil karya atau solusi berbasis praktik nyata.">{{ old('tujuan_pembelajaran', $data['tujuan_pembelajaran']) }}</textarea>
+                                  placeholder="Setelah menyelesaikan modul pembelajaran ini, peserta didik diharapkan mampu:&#10;1. Mengidentifikasi konsep dasar dan fungsi komponen utama.&#10;2. Menerapkan prosedur pemecahan masalah secara tepat.&#10;3. Merancang hasil karya atau solusi berbasis praktik nyata.">{{ is_string(old('tujuan_pembelajaran', $data['tujuan_pembelajaran'])) ? old('tujuan_pembelajaran', $data['tujuan_pembelajaran']) : '' }}</textarea>
                         @error('tujuan_pembelajaran')
                             <p class="text-xs text-rose-600 font-semibold">{{ $message }}</p>
                         @enderror
@@ -211,7 +211,7 @@
                                   name="peta_konsep_text"
                                   rows="6"
                                   class="prose-editor w-full rounded-2xl border border-slate-200 bg-slate-50/50 p-4 text-sm text-slate-800 focus:bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all leading-relaxed"
-                                  placeholder="Alur Peta Konsep Modul:&#10;1. Fondasi & Pengenalan Konsep&#10;   └── Teori Dasar → Studi Kasus Pengantar&#10;2. Pendalaman Materi & Prosedur Praktis&#10;   └── Langkah Kerja → Pengujian / Simulasi&#10;3. Evaluasi Ketercapaian Kompetensi&#10;   └── Penugasan LKPD → Uji Akhir Post-test">{{ old('peta_konsep_text', $data['peta_konsep_text']) }}</textarea>
+                                  placeholder="Alur Peta Konsep Modul:&#10;1. Fondasi & Pengenalan Konsep&#10;   └── Teori Dasar → Studi Kasus Pengantar&#10;2. Pendalaman Materi & Prosedur Praktis&#10;   └── Langkah Kerja → Pengujian / Simulasi&#10;3. Evaluasi Ketercapaian Kompetensi&#10;   └── Penugasan LKPD → Uji Akhir Post-test">{{ is_string(old('peta_konsep_text', $data['peta_konsep_text'])) ? old('peta_konsep_text', $data['peta_konsep_text']) : '' }}</textarea>
                         @error('peta_konsep_text')
                             <p class="text-xs text-rose-600 font-semibold">{{ $message }}</p>
                         @enderror

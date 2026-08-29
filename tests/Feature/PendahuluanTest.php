@@ -51,7 +51,7 @@ class PendahuluanTest extends TestCase
             'daftar_pustaka'      => [
                 ['judul' => 'Buku Referensi Laravel', 'penulis' => 'Taylor Otwell', 'tahun' => '2024'],
             ],
-            'toggles'             => ['cover' => true],
+            'toggles'             => ['kata_pengantar' => true],
         ];
         $module->update(['informasi_umum_data' => $initialData]);
 
@@ -84,7 +84,7 @@ class PendahuluanTest extends TestCase
         $this->assertEquals('Pengantar awal yang tidak boleh terhapus.', $infoData['kata_pengantar']);
         $this->assertCount(1, $infoData['daftar_pustaka']);
         $this->assertEquals('Buku Referensi Laravel', $infoData['daftar_pustaka'][0]['judul']);
-        $this->assertTrue($infoData['toggles']['cover']);
+        $this->assertTrue($infoData['toggles']['kata_pengantar']);
     }
 
     public function test_teacher_can_toggle_pendahuluan_component(): void

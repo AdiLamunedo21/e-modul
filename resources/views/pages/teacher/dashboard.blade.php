@@ -570,7 +570,7 @@
                 <ul class="mt-3 space-y-1.5 text-xs text-blue-50">
                     <li class="flex items-start gap-1.5">
                         <span class="font-bold text-white bg-blue-500/40 rounded px-1 text-[10px]">1</span>
-                        <span><strong>Bagian Awal:</strong> Cover, Kata Pengantar, Petunjuk.</span>
+                        <span><strong>Bagian Awal:</strong> Kata Pengantar, Petunjuk Penggunaan.</span>
                     </li>
                     <li class="flex items-start gap-1.5">
                         <span class="font-bold text-white bg-blue-500/40 rounded px-1 text-[10px]">2</span>

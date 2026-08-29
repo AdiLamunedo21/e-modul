@@ -48,10 +48,50 @@ class PendahuluanController extends Controller
 
         $infoData = is_array($module->informasi_umum_data) ? $module->informasi_umum_data : [];
 
+        // Normalisasi tujuan_pembelajaran
+        $tujuan = '';
+        if (isset($infoData['tujuan_pembelajaran'])) {
+            if (is_array($infoData['tujuan_pembelajaran'])) {
+                $parts = [];
+                if (!empty($infoData['tujuan_pembelajaran']['capaian_pembelajaran'])) {
+                    $parts[] = "Capaian Pembelajaran (CP):\n" . $infoData['tujuan_pembelajaran']['capaian_pembelajaran'];
+                }
+                if (!empty($infoData['tujuan_pembelajaran']['tujuan_pembelajaran'])) {
+                    $tps = array_map(fn($t) => is_array($t) ? ($t['text'] ?? '') : $t, (array)$infoData['tujuan_pembelajaran']['tujuan_pembelajaran']);
+                    $parts[] = "Tujuan Pembelajaran (TP):\n" . implode("\n", $tps);
+                }
+                $tujuan = !empty($parts) ? implode("\n\n", $parts) : ($infoData['tujuan_pembelajaran']['text'] ?? '');
+            } else {
+                $tujuan = (string) $infoData['tujuan_pembelajaran'];
+            }
+        }
+
+        // Normalisasi peta_konsep_text
+        $petaKonsep = '';
+        if (isset($infoData['peta_konsep'])) {
+            if (is_array($infoData['peta_konsep'])) {
+                $petaKonsep = $infoData['peta_konsep']['peta_konsep_text'] ?? ($infoData['peta_konsep']['text'] ?? '');
+            } else {
+                $petaKonsep = (string) $infoData['peta_konsep'];
+            }
+        } elseif (isset($infoData['peta_konsep_text'])) {
+            $petaKonsep = is_string($infoData['peta_konsep_text']) ? $infoData['peta_konsep_text'] : '';
+        }
+
+        // Normalisasi glosarium
+        $glosarium = [];
+        if (isset($infoData['glosarium'])) {
+            if (is_array($infoData['glosarium'])) {
+                $glosarium = isset($infoData['glosarium']['glosarium']) && is_array($infoData['glosarium']['glosarium'])
+                    ? $infoData['glosarium']['glosarium']
+                    : $infoData['glosarium'];
+            }
+        }
+
         $data = [
-            'tujuan_pembelajaran' => $infoData['tujuan_pembelajaran'] ?? '',
-            'peta_konsep_text'    => $infoData['peta_konsep_text'] ?? '',
-            'glosarium'           => $infoData['glosarium'] ?? [],
+            'tujuan_pembelajaran' => $tujuan,
+            'peta_konsep_text'    => $petaKonsep,
+            'glosarium'           => $glosarium,
             'toggles'             => $infoData['toggles'] ?? [],
         ];
 

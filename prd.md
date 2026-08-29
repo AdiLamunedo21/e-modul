@@ -35,10 +35,9 @@ Pengembangan platform ini diinisiasi untuk memecahkan masalah utama (_pain point
 
 Tujuan dari proyek ini adalah membangun portal E-Modul terpusat berbasis **Laravel 11** dengan sistem manajemen akses multi-peran (**Admin**, **Guru**, dan **Siswa**).
 
-Sistem ini ditargetkan untuk:
-
-1. Memberikan fasilitas _E-Module Builder_ bagi guru untuk merakit materi secara terstruktur menjadi **5 Bagian Utama Standar E-Modul (15 Komponen Fleksibel)**:
-   - **1. Bagian Awal (4 Komponen):** Halaman sampul (_cover_), kata pengantar, daftar isi, serta petunjuk penggunaan e-modul bagi siswa dan guru (dikelola mandiri via `BagianAwalController`).
+Sistem ini ditargetkan:
+1. Memberikan fasilitas _E-Module Builder_ bagi guru untuk merakit materi secara terstruktur menjadi **5 Bagian Utama Standar E-Modul (13 Komponen Fleksibel)**:
+   - **1. Bagian Awal (2 Komponen):** Kata pengantar serta petunjuk penggunaan e-modul bagi siswa dan guru (dikelola mandiri via `BagianAwalController`).
    - **2. Pendahuluan (4 Komponen):** Rumusan tujuan pembelajaran & capaian, peta konsep alur materi, glosarium istilah (dikelola via `PendahuluanController`), serta soal latihan diagnostik / Pre-test (`has_pre_test` dikelola via `PreTestController`).
    - **3. Kegiatan Belajar / Isi Materi (2 Komponen):** Uraian materi pembelajaran berbasis teks & slide PPT (`has_materi`), serta integrasi multimedia **Multi-Video YouTube & Keterangan Video dengan Satu Ringkasan Terpadu** (`has_video` dikelola via `VideoController`).
    - **4. Evaluasi & Latihan (3 Komponen):** Game edukasi interaktif & media embed simulator (`has_embed`), lembar kerja praktik / _Job Sheet_ PDF (`has_job_sheet`), serta tugas lembar kerja peserta didik & umpan balik / LKPD (`has_lkpd`).
@@ -59,12 +58,6 @@ Sistem ini ditargetkan untuk:
 Untuk fase rilis operasional, ruang lingkup aplikasi mencakup:
 
 - **Multi-Guard Access:** Admin (Supervisi & Master Data), Guru (Pendidik & Kreator Modul), dan Siswa (Peserta Didik).
-- **Master Data Akademik:** Manajemen Guru (Multi-Mapel), Siswa (Berbasis Rombel Kelas & Mapel), Mata Pelajaran, Jurusan/Konsentrasi Keahlian, dan Rombel Kelas.
-- **Antarmuka Berjenjang Siswa:** Direktori Rombel Kelas $\rightarrow$ Detail Siswa per Kelas.
-- **Personalisasi Portal Siswa:** Live filter & search toolbar, filter kartu mata pelajaran, sidebar dinamis via View Composer, dan proteksi hak akses per mapel.
-- **Dynamic E-Module Builder (5 Bagian & 15 Komponen):** Pengelolaan konten independen dengan sistem sakelar instan (AJAX Toggle Switch).
-- **Fitur Multimedia Multi-Video & Keterangan:** Penambahan multi-video YouTube, keterangan video per item, tombol hapus dinamis, live embed preview, dan 1 kolom pengumpulan resume terpadu bagi siswa.
-- **Library Modul Bersama:** Repositori kurikulum terbuka antar-guru dan fasilitas *deep cloning* modul.
 - **Navigasi Siswa Bertahap (Stepper 5 Bagian):** Akses materi terstruktur dengan tombol navigasi bertahap.
 - **Penilaian Hibrida & Grading Center:** Penilaian otomatis (Pre-test & Post-test) dan manual (Resume Video, Praktik Embed, Job Sheet, dan LKPD).
 - **Ekspor Nilai Adaptif (.xlsx):** Pembangkit laporan spreadsheet Excel dinamis sesuai komponen aktif pada modul.
@@ -479,7 +472,7 @@ e-modul/
 │   │   │   │   ├── DashboardController.php     # Dashboard Siswa (Personalized Subject, Live Search & Filter)
 │   │   │   │   └── ModuleController.php        # Halaman Modul per Mapel & Pembelajaran 5 Bagian
 │   │   │   └── Teacher/                        # Dedicated Workspace & Modular Component Editors
-│   │   │       ├── BagianAwalController.php    # Editor Bagian 1 (Cover, Kata Pengantar, Daftar Isi, Petunjuk)
+│   │   │       ├── BagianAwalController.php    # Editor Bagian 1 (Cover, Kata Pengantar, Petunjuk Penggunaan)
 │   │   │       ├── PendahuluanController.php   # Editor Bagian 2 (Tujuan Pembelajaran, Peta Konsep, Glosarium)
 │   │   │       ├── PreTestController.php       # Editor Pre-test (Kuis Diagnostik & Builder Soal)
 │   │   │       ├── MateriController.php        # Editor Materi Pembelajaran & Upload PPT
