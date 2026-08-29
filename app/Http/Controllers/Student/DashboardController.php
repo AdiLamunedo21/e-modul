@@ -562,22 +562,25 @@ class DashboardController extends Controller
             ->latest('updated_at');
 
         $allModules = $modulesQuery->get();
-        // Urutkan modul berdasarkan waktu pembuatan/terbitan terbaru
-        $processedModules = $this->processStudentModules($allModules, $student)->sortByDesc('created_at')->values();
+        // Seluruh modul diproses
+        $processedModules = $this->processStudentModules($allModules, $student);
 
-        // Cari modul yang paling baru dibuka / sedang diakses oleh siswa
-        $recentlyOpenedModule = $processedModules
+        // 1. Modul yang baru dibuka / terakhir diakses siswa (Recent Opened Modules - Bagian Teratas)
+        $recentOpenedModules = $processedModules
             ->filter(fn($m) => !empty($m['last_accessed_at']) || $m['progress_percent'] > 0)
             ->sortByDesc(fn($m) => $m['last_accessed_at'] ?? $m['updated_at'])
-            ->first();
+            ->values();
+
+        // 2. Modul yang baru dibuat / ditambahkan oleh guru (Newest Added Modules - Di Bawahnya)
+        $newlyAddedModules = $processedModules->sortByDesc('created_at')->values();
 
         // Filter status belajar
         $filterStatus = $request->query('status', 'all');
         $filteredModules = match ($filterStatus) {
-            'in_progress' => $processedModules->where('progress_status', 'in_progress')->values(),
-            'completed'   => $processedModules->where('progress_status', 'completed')->values(),
-            'not_started' => $processedModules->where('progress_status', 'not_started')->values(),
-            default       => $processedModules->values(),
+            'in_progress' => $newlyAddedModules->where('progress_status', 'in_progress')->values(),
+            'completed'   => $newlyAddedModules->where('progress_status', 'completed')->values(),
+            'not_started' => $newlyAddedModules->where('progress_status', 'not_started')->values(),
+            default       => $newlyAddedModules->values(),
         };
 
         // Guru Pengampu
@@ -610,8 +613,9 @@ class DashboardController extends Controller
             'teacherDisplay',
             'teacherNames',
             'processedModules',
+            'recentOpenedModules',
+            'newlyAddedModules',
             'filteredModules',
-            'recentlyOpenedModule',
             'stats',
             'filterStatus'
         ));
