@@ -110,7 +110,7 @@
     $classNameText = $module->schoolClass->full_name ?? ($module->schoolClass->name ?? 'Kelas');
 @endphp
 
-<div class="max-w-7xl mx-auto space-y-6"
+<div class="w-full space-y-6"
      x-data="{
         viewMode: '{{ $initialViewMode }}',
         activePage: '{{ $initialPage }}',
@@ -335,9 +335,9 @@
     @endif
 
     {{-- ═══════════════════════════════════════════════════════════════════════ --}}
-    {{-- ═══ VIEW 1: TAMPILAN AWAL DETAIL MODUL SISWA (1 KOLOM BERURUTAN) ═══ --}}
+    {{-- ═══ VIEW 1: TAMPILAN AWAL DETAIL MODUL SISWA (FULL WIDTH CARD) ═════ --}}
     {{-- ═══════════════════════════════════════════════════════════════════════ --}}
-    <div x-show="viewMode === 'overview'" x-cloak class="space-y-6">
+    <div x-show="viewMode === 'overview'" x-cloak class="w-full space-y-6">
 
         {{-- ══════════════════════════════════════════════════════════════════════
              STRUKTUR 5 BAGIAN E-MODUL (1 KOLOM TUNGGAL BERURUTAN & TERPROTEKSI)
@@ -938,7 +938,7 @@
     {{-- ═══════════════════════════════════════════════════════════════════════ --}}
     {{-- ═══ VIEW 2: MODE BELAJAR INTERAKTIF (ACCORDION SILABUS + WORKSPACE) ═══ --}}
     {{-- ═══════════════════════════════════════════════════════════════════════ --}}
-    <div x-show="viewMode === 'learn'" x-cloak class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <div x-show="viewMode === 'learn'" x-cloak class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full">
 
         {{-- ─────────────────────────────────────────────────────────────────── --}}
         {{-- ── LEFT COLUMN: ACCORDION SILABUS MODUL (4 Cols on Desktop) ─────── --}}
@@ -1203,7 +1203,7 @@
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             {{-- 1. KATA PENGANTAR ═════════════════════════════════════════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
-            <div x-show="activePage === 'kata_pengantar'" x-cloak class="space-y-6">
+            <div x-show="activePage === 'kata_pengantar'" x-cloak class="w-full space-y-6">
                 <div class="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 shadow-sm">
                     <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-100">
                         <div class="flex items-center gap-3">
@@ -1259,7 +1259,7 @@
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             {{-- 2. PETUNJUK PENGGUNAAN ════════════════════════════════════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
-            <div x-show="activePage === 'petunjuk_penggunaan'" x-cloak class="space-y-6">
+            <div x-show="activePage === 'petunjuk_penggunaan'" x-cloak class="w-full space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {{-- Petunjuk Siswa --}}
                     <div class="rounded-3xl bg-white border border-teal-200/80 p-6 sm:p-7 shadow-sm space-y-4">
@@ -1333,7 +1333,7 @@
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             {{-- 3. TUJUAN PEMBELAJARAN ════════════════════════════════════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
-            <div x-show="activePage === 'tujuan_pembelajaran'" x-cloak class="space-y-6">
+            <div x-show="activePage === 'tujuan_pembelajaran'" x-cloak class="w-full space-y-6">
                 <div class="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 shadow-sm space-y-6">
                     <div class="flex items-center justify-between pb-4 border-b border-slate-100">
                         <div class="flex items-center gap-3">
@@ -1398,7 +1398,7 @@
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             {{-- 4. PETA KONSEP ════════════════════════════════════════════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
-            <div x-show="activePage === 'peta_konsep'" x-cloak class="space-y-6">
+            <div x-show="activePage === 'peta_konsep'" x-cloak class="w-full space-y-6">
                 <div class="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 shadow-sm space-y-6">
                     <div class="flex items-center justify-between pb-4 border-b border-slate-100">
                         <div class="flex items-center gap-3">
@@ -1452,7 +1452,7 @@
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             {{-- 5. GLOSARIUM ══════════════════════════════════════════════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
-            <div x-show="activePage === 'glosarium'" x-cloak class="space-y-6">
+            <div x-show="activePage === 'glosarium'" x-cloak class="w-full space-y-6">
                 <div class="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 shadow-sm space-y-6">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
                         <div class="flex items-center gap-3">
@@ -1463,13 +1463,15 @@
                             </div>
                         </div>
                         <div class="relative w-full sm:w-64">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                </svg>
+                            </div>
                             <input type="text"
                                    x-model="searchGlosarium"
                                    placeholder="Cari istilah teknis..."
-                                   class="w-full pl-9 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:bg-white outline-none transition">
-                            <svg class="w-4 h-4 absolute left-3 top-2.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                            </svg>
+                                   class="w-full pl-9 pr-4 py-2 text-xs bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition font-medium text-slate-800 placeholder-slate-400">
                         </div>
                     </div>
 
@@ -1520,22 +1522,22 @@
             {{-- 6. PRE-TEST (SOAL LATIHAN DIAGNOSTIK) ═════════════════════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             @if($module->has_pre_test && $module->preTest)
-            <div x-show="activePage === 'pre_test'" x-cloak class="space-y-6">
+            <div x-show="activePage === 'pre_test'" x-cloak class="w-full space-y-6">
                 <div class="rounded-3xl bg-white border border-teal-200/90 shadow-sm overflow-hidden" id="section-pre-test">
-                    <div class="bg-gradient-to-r from-teal-700 to-emerald-700 text-white p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="p-6 sm:p-7 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div class="flex items-center gap-3.5">
-                            <span class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-2xl shrink-0">⚡</span>
+                            <span class="w-12 h-12 rounded-2xl bg-teal-100 text-teal-700 flex items-center justify-center text-2xl font-bold shrink-0">⚡</span>
                             <div>
-                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-teal-200">Bagian 2 • Latihan Diagnostik</span>
-                                <h2 class="text-xl sm:text-2xl font-black leading-tight">{{ $module->preTest->title ?? 'Pre-test Pembuka' }}</h2>
-                                <p class="text-xs text-teal-100 mt-0.5">Durasi: {{ $module->preTest->duration_minutes ?? 15 }} Menit • Target KKTP: {{ $module->preTest->kktp ?? 75 }}</p>
+                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-teal-600">Bagian 2 • Latihan Diagnostik</span>
+                                <h2 class="text-xl sm:text-2xl font-black text-slate-900 leading-tight">{{ $module->preTest->title ?? 'Pre-test Pembuka' }}</h2>
+                                <p class="text-xs text-slate-500 font-medium mt-0.5">Durasi: {{ $module->preTest->duration_minutes ?? 15 }} Menit • Target KKTP: {{ $module->preTest->kktp ?? 75 }}</p>
                             </div>
                         </div>
 
                         @if($studentResult && $studentResult->pre_test_score !== null)
-                            <div class="bg-white/15 px-4 py-2 rounded-2xl border border-white/20 text-center shrink-0">
-                                <span class="text-[10px] font-bold text-teal-200 uppercase block">Skor Pre-test</span>
-                                <span class="text-2xl font-black text-white">{{ $studentResult->pre_test_score }}/100</span>
+                            <div class="bg-teal-50 px-4 py-2 rounded-2xl border border-teal-200 text-center shrink-0">
+                                <span class="text-[10px] font-bold text-teal-700 uppercase block">Skor Pre-test</span>
+                                <span class="text-2xl font-black text-teal-900">{{ $studentResult->pre_test_score }}/100</span>
                             </div>
                         @endif
                     </div>
@@ -1616,7 +1618,7 @@
             {{-- 7. URAIAN MATERI PEMBELAJARAN & PPT ═══════════════════════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             @if($module->has_materi)
-            <div x-show="activePage === 'materi'" x-cloak class="space-y-6">
+            <div x-show="activePage === 'materi'" x-cloak class="w-full space-y-6">
                 <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm overflow-hidden">
                     <div class="p-6 sm:p-8 border-b border-slate-100 bg-gradient-to-r from-blue-50/70 to-slate-50">
                         <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
@@ -1697,20 +1699,20 @@
                 $vList = !empty($videosList) ? $videosList : $module->videosList();
                 $minCharsRequired = (int)($videoData['min_summary_chars'] ?? 20);
             @endphp
-            <div x-show="activePage === 'video'" x-cloak class="space-y-6">
+            <div x-show="activePage === 'video'" x-cloak class="w-full space-y-6">
                 <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm overflow-hidden" id="section-video">
                     {{-- Header Multimedia --}}
-                    <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="p-6 sm:p-7 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div class="flex items-center gap-3">
-                            <span class="w-10 h-10 rounded-2xl bg-red-600 text-white flex items-center justify-center text-lg font-bold shadow-sm">▶️</span>
+                            <span class="w-10 h-10 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center text-lg font-bold shadow-xs">▶️</span>
                             <div>
-                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-300">Multimedia Pembelajaran ({{ count($vList) }} Video)</span>
-                                <h2 class="text-lg sm:text-xl font-bold">{{ $videoData['video_title'] ?? ($videoData['judul_video'] ?? 'Video Pembelajaran YouTube') }}</h2>
+                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600">Multimedia Pembelajaran ({{ count($vList) }} Video)</span>
+                                <h2 class="text-lg sm:text-xl font-black text-slate-900">{{ $videoData['video_title'] ?? ($videoData['judul_video'] ?? 'Video Pembelajaran YouTube') }}</h2>
                             </div>
                         </div>
                         <div class="flex items-center gap-2 flex-wrap">
                             @if($videoSummary)
-                                <span class="px-3 py-1 rounded-full text-xs font-bold {{ $videoSummary->manual_score !== null ? 'bg-emerald-500 text-white' : 'bg-amber-400 text-amber-950' }}">
+                                <span class="px-3.5 py-1 rounded-full text-xs font-bold {{ $videoSummary->manual_score !== null ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-amber-100 text-amber-800 border border-amber-200' }}">
                                     {{ $videoSummary->manual_score !== null ? 'Nilai: ' . $videoSummary->manual_score : 'Resume Terkirim (Pending)' }}
                                 </span>
                             @endif
@@ -1859,18 +1861,18 @@
             {{-- 9. SIMULATOR EMBED / MEDIA INTERAKTIF ═════════════════════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             @if($module->has_embed)
-            <div x-show="activePage === 'embed'" x-cloak class="space-y-6">
+            <div x-show="activePage === 'embed'" x-cloak class="w-full space-y-6">
                 <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm overflow-hidden" id="section-embed">
-                    <div class="bg-gradient-to-r from-violet-950 via-slate-900 to-indigo-950 text-white p-6 sm:p-7 flex items-center justify-between gap-4">
+                    <div class="p-6 sm:p-7 border-b border-slate-100 flex items-center justify-between gap-4">
                         <div class="flex items-center gap-3">
-                            <span class="w-10 h-10 rounded-2xl bg-emerald-500 text-white flex items-center justify-center text-lg font-bold shadow-sm">⚡</span>
+                            <span class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg font-bold shadow-xs">⚡</span>
                             <div>
-                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-emerald-300">Bagian 4 • Praktik Interaktif</span>
-                                <h2 class="text-lg sm:text-xl font-bold">{{ $embedData['judul_embed'] ?? 'Eksplorasi Simulator / Embed Media' }}</h2>
+                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-emerald-600">Bagian 4 • Praktik Interaktif</span>
+                                <h2 class="text-lg sm:text-xl font-black text-slate-900">{{ $embedData['judul_embed'] ?? 'Eksplorasi Simulator / Embed Media' }}</h2>
                             </div>
                         </div>
                         @if($embedSubmission)
-                            <span class="px-3 py-1 rounded-full text-xs font-bold {{ $embedSubmission->manual_score !== null ? 'bg-emerald-500 text-white' : 'bg-amber-400 text-amber-950' }}">
+                            <span class="px-3.5 py-1 rounded-full text-xs font-bold {{ $embedSubmission->manual_score !== null ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-amber-100 text-amber-800 border border-amber-200' }}">
                                 {{ $embedSubmission->manual_score !== null ? 'Nilai: ' . $embedSubmission->manual_score : 'Screenshot Terunggah' }}
                             </span>
                         @endif
@@ -1989,18 +1991,18 @@
             {{-- 10. LEMBAR KERJA PRAKTIK (JOB SHEET PDF) ══════════════════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             @if($module->has_job_sheet)
-            <div x-show="activePage === 'job_sheet'" x-cloak class="space-y-6">
+            <div x-show="activePage === 'job_sheet'" x-cloak class="w-full space-y-6">
                 <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm overflow-hidden" id="section-jobsheet">
-                    <div class="bg-gradient-to-r from-rose-950 to-slate-900 text-white p-6 sm:p-7 flex items-center justify-between gap-4">
+                    <div class="p-6 sm:p-7 border-b border-slate-100 flex items-center justify-between gap-4">
                         <div class="flex items-center gap-3">
-                            <span class="w-10 h-10 rounded-2xl bg-rose-600 text-white flex items-center justify-center text-lg font-bold shadow-sm">📋</span>
+                            <span class="w-10 h-10 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-lg font-bold shadow-xs">📋</span>
                             <div>
-                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-rose-300">Bagian 4 • Lembar Kerja Praktik</span>
-                                <h2 class="text-lg sm:text-xl font-bold">{{ $jobSheetData['judul_jobsheet'] ?? 'Job Sheet Praktikum Bengkel/Lab' }}</h2>
+                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-rose-600">Bagian 4 • Lembar Kerja Praktik</span>
+                                <h2 class="text-lg sm:text-xl font-black text-slate-900">{{ $jobSheetData['judul_jobsheet'] ?? 'Job Sheet Praktikum Bengkel/Lab' }}</h2>
                             </div>
                         </div>
                         @if($jobSheetSubmission)
-                            <span class="px-3 py-1 rounded-full text-xs font-bold {{ $jobSheetSubmission->manual_score !== null ? 'bg-emerald-500 text-white' : 'bg-amber-400 text-amber-950' }}">
+                            <span class="px-3.5 py-1 rounded-full text-xs font-bold {{ $jobSheetSubmission->manual_score !== null ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-amber-100 text-amber-800 border border-amber-200' }}">
                                 {{ $jobSheetSubmission->manual_score !== null ? 'Nilai: ' . $jobSheetSubmission->manual_score : 'Laporan PDF Terkirim' }}
                             </span>
                         @endif
@@ -2104,18 +2106,18 @@
             {{-- 11. TUGAS LKPD ════════════════════════════════════════════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             @if($module->has_lkpd)
-            <div x-show="activePage === 'lkpd'" x-cloak class="space-y-6">
+            <div x-show="activePage === 'lkpd'" x-cloak class="w-full space-y-6">
                 <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm overflow-hidden" id="section-lkpd">
-                    <div class="bg-gradient-to-r from-amber-950 via-slate-900 to-amber-950 text-white p-6 sm:p-7 flex items-center justify-between gap-4">
+                    <div class="p-6 sm:p-7 border-b border-slate-100 flex items-center justify-between gap-4">
                         <div class="flex items-center gap-3">
-                            <span class="w-10 h-10 rounded-2xl bg-amber-500 text-slate-950 flex items-center justify-center text-lg font-bold shadow-sm">👥</span>
+                            <span class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg font-bold shadow-xs">👥</span>
                             <div>
-                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-amber-300">Bagian 4 • Lembar Kerja Peserta Didik</span>
-                                <h2 class="text-lg sm:text-xl font-bold">{{ $lkpdData['judul_lkpd'] ?? 'Tugas Lembar Kerja (LKPD)' }}</h2>
+                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-amber-600">Bagian 4 • Lembar Kerja Peserta Didik</span>
+                                <h2 class="text-lg sm:text-xl font-black text-slate-900">{{ $lkpdData['judul_lkpd'] ?? 'Tugas Lembar Kerja (LKPD)' }}</h2>
                             </div>
                         </div>
                         @if($lkpdSubmission)
-                            <span class="px-3 py-1 rounded-full text-xs font-bold {{ $lkpdSubmission->manual_score !== null ? 'bg-emerald-500 text-white' : 'bg-amber-400 text-amber-950' }}">
+                            <span class="px-3.5 py-1 rounded-full text-xs font-bold {{ $lkpdSubmission->manual_score !== null ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-amber-100 text-amber-800 border border-amber-200' }}">
                                 {{ $lkpdSubmission->manual_score !== null ? 'Nilai: ' . $lkpdSubmission->manual_score : 'Tugas LKPD Terkirim' }}
                             </span>
                         @endif
@@ -2219,22 +2221,22 @@
             {{-- 12. POST-TEST (EVALUASI AKHIR MODUL) ══════════════════════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             @if($module->has_post_test && $module->postTest)
-            <div x-show="activePage === 'post_test'" x-cloak class="space-y-6">
+            <div x-show="activePage === 'post_test'" x-cloak class="w-full space-y-6">
                 <div class="rounded-3xl bg-white border border-rose-200/90 shadow-sm overflow-hidden" id="section-post-test">
-                    <div class="bg-gradient-to-r from-rose-700 to-pink-700 text-white p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="p-6 sm:p-7 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div class="flex items-center gap-3.5">
-                            <span class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-2xl shrink-0">🏆</span>
+                            <span class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-2xl font-bold shrink-0">🏆</span>
                             <div>
-                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-rose-200">Bagian 5 • Evaluasi Akhir</span>
-                                <h2 class="text-xl sm:text-2xl font-black leading-tight">{{ $module->postTest->title ?? 'Post-test: Evaluasi Pemahaman' }}</h2>
-                                <p class="text-xs text-rose-100 mt-0.5">Durasi: {{ $module->postTest->duration_minutes ?? 20 }} Menit • Target KKTP: {{ $module->postTest->kktp ?? 75 }}</p>
+                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-rose-600">Bagian 5 • Evaluasi Akhir</span>
+                                <h2 class="text-xl sm:text-2xl font-black text-slate-900 leading-tight">{{ $module->postTest->title ?? 'Post-test: Evaluasi Pemahaman' }}</h2>
+                                <p class="text-xs text-slate-500 font-medium mt-0.5">Durasi: {{ $module->postTest->duration_minutes ?? 20 }} Menit • Target KKTP: {{ $module->postTest->kktp ?? 75 }}</p>
                             </div>
                         </div>
 
                         @if($studentResult && $studentResult->post_test_score !== null)
-                            <div class="bg-white/15 px-4 py-2 rounded-2xl border border-white/20 text-center shrink-0">
-                                <span class="text-[10px] font-bold text-rose-200 uppercase block">Skor Post-test</span>
-                                <span class="text-2xl font-black text-white">{{ $studentResult->post_test_score }}/100</span>
+                            <div class="bg-rose-50 px-4 py-2 rounded-2xl border border-rose-200 text-center shrink-0">
+                                <span class="text-[10px] font-bold text-rose-700 uppercase block">Skor Post-test</span>
+                                <span class="text-2xl font-black text-rose-900">{{ $studentResult->post_test_score }}/100</span>
                             </div>
                         @endif
                     </div>
@@ -2320,7 +2322,7 @@
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             {{-- 13. DAFTAR PUSTAKA ════════════════════════════════════════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
-            <div x-show="activePage === 'daftar_pustaka'" x-cloak class="space-y-6">
+            <div x-show="activePage === 'daftar_pustaka'" x-cloak class="w-full space-y-6">
                 <div class="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 shadow-sm space-y-6">
                     <div class="flex items-center justify-between pb-4 border-b border-slate-100">
                         <div class="flex items-center gap-3">
@@ -2395,7 +2397,7 @@
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             {{-- 14. REKAPITULASI NILAI BELAJAR SISWA ══════════════════════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
-            <div x-show="activePage === 'rekap_nilai'" x-cloak class="space-y-6">
+            <div x-show="activePage === 'rekap_nilai'" x-cloak class="w-full space-y-6">
                 <div class="rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 shadow-sm space-y-6">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
                         <div class="flex items-center gap-3">
@@ -2538,15 +2540,9 @@
             {{-- ═══════════════════════════════════════════════════════════════ --}}
             {{-- ═══ 3. BOTTOM SEQUENTIAL NAVIGATION BAR (NEXT / PREV) ════════ --}}
             {{-- ═══════════════════════════════════════════════════════════════ --}}
-            <div class="rounded-3xl bg-white border border-slate-200/90 p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-                {{-- Tombol Sebelumnya & Daftar Modul --}}
+            <div class="w-full rounded-3xl bg-white border border-slate-200/90 p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                {{-- Tombol Sebelumnya --}}
                 <div class="flex flex-wrap items-center gap-2">
-                    <a href="{{ $classSubjectModulesUrl }}"
-                       title="Kembali ke Daftar Modul Kelas {{ $classNameText }}"
-                       class="w-full sm:w-auto px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs">
-                        <span>←</span>
-                        <span>Daftar Modul</span>
-                    </a>
                     <template x-if="prevPage">
                         <button type="button"
                                 @click="goToPage(prevPage.id)"

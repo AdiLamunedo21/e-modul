@@ -49,14 +49,25 @@
             {{-- Toolbar: Live Search & View Mode Switcher --}}
             <div class="flex items-center gap-2.5 shrink-0">
                 {{-- Search Box --}}
-                <div class="relative w-full sm:w-56">
+                <div class="relative w-full sm:w-64">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
+                    </div>
                     <input type="text"
                            x-model="searchKeyword"
                            placeholder="Cari modul..."
-                           class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none transition">
-                    <svg class="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
+                           class="w-full pl-9 pr-8 py-2 text-xs bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition font-medium text-slate-800 placeholder-slate-400">
+                    
+                    {{-- Clear button --}}
+                    <button type="button"
+                            x-show="searchKeyword && searchKeyword.length > 0"
+                            x-cloak
+                            @click="searchKeyword = ''"
+                            class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer">
+                        <span class="w-4 h-4 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-[9px] font-bold text-slate-600">✕</span>
+                    </button>
                 </div>
 
                 {{-- View Toggle (Grid / List) --}}
