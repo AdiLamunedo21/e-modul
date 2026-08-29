@@ -311,7 +311,7 @@
                         </div>
                         <input type="text"
                                x-model.debounce.150ms="searchQuery"
-                               placeholder="Cari kelas, jurusan, kode, atau nama guru..."
+                               placeholder="Cari kelas, jurusan, atau kode kelas..."
                                class="w-full pl-10 pr-9 py-2.5 bg-slate-50 hover:bg-slate-100/80 focus:bg-white border border-slate-200 rounded-2xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-emerald-500/15 focus:border-emerald-500 transition-all shadow-inner">
                         
                         {{-- Tombol Clear Input --}}
@@ -446,14 +446,6 @@
                                 </h3>
                                 <p class="text-xs font-semibold text-emerald-600">
                                     {{ $classItem['major_name'] }}
-                                </p>
-                            </div>
-
-                            {{-- Guru Pengampu di Kelas Ini --}}
-                            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
-                                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Guru Pengampu</p>
-                                <p class="text-xs font-bold text-slate-800 truncate" title="{{ $classItem['teacher_display'] }}">
-                                    {{ $classItem['teacher_display'] }}
                                 </p>
                             </div>
 

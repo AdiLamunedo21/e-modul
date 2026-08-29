@@ -193,7 +193,7 @@
                             </span>
                             <a href="{{ route('student.modules.show', $recMod['id']) }}"
                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition">
-                                <span>Buka Modul</span>
+                                <span>{{ $recMod['progress_status'] === 'completed' ? 'Review Modul' : ($recMod['progress_status'] === 'in_progress' ? 'Lanjutkan Belajar' : 'Mulai Belajar') }}</span>
                                 <span>→</span>
                             </a>
                         </div>
@@ -343,8 +343,8 @@
                                ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
                                : ($mod['progress_status'] === 'in_progress'
                                    ? 'bg-amber-600 hover:bg-amber-700 text-white'
-                                   : 'bg-slate-900 hover:bg-emerald-600 text-white') }}">
-                            <span>{{ $mod['progress_status'] === 'completed' ? 'Review Modul' : ($mod['progress_status'] === 'in_progress' ? 'Lanjutkan Belajar' : 'Buka Modul') }}</span>
+                                   : 'bg-emerald-600 hover:bg-emerald-700 text-white') }}">
+                            <span>{{ $mod['progress_status'] === 'completed' ? 'Review Modul' : ($mod['progress_status'] === 'in_progress' ? 'Lanjutkan Belajar' : 'Mulai Belajar') }}</span>
                             <span>→</span>
                         </a>
                     </div>
@@ -417,8 +417,8 @@
                             </td>
                             <td class="py-3.5 px-4 text-right">
                                 <a href="{{ route('student.modules.show', $mod['id']) }}"
-                                   class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-emerald-600 text-white font-bold text-xs transition inline-flex items-center gap-1">
-                                    <span>Buka</span>
+                                   class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition inline-flex items-center gap-1">
+                                    <span>Mulai Belajar</span>
                                     <span>→</span>
                                 </a>
                             </td>

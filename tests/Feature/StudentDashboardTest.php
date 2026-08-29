@@ -46,7 +46,7 @@ class StudentDashboardTest extends TestCase
             ->get(route('student.dashboard'));
 
         $response->assertStatus(200);
-        $response->assertSee('Guru', false);
+        $response->assertSee('Kelas', false);
         $response->assertSee('Modul', false);
     }
 
