@@ -77,6 +77,23 @@ class AdminUserManagementTest extends TestCase
         $newTeacher->delete();
     }
 
+    public function test_admin_can_view_teacher_show_page()
+    {
+        $admin = $this->getAdmin();
+        $teacher = Teacher::first();
+        if (!$teacher) {
+            $this->markTestSkipped('Teacher not seeded.');
+        }
+
+        $response = $this->actingAs($admin, 'admin')
+            ->get(route('admin.teachers.show', $teacher));
+
+        $response->assertStatus(200);
+        $response->assertSee($teacher->name, false);
+        $response->assertSee('Profil Guru & Direktori Modul', false);
+        $response->assertSee('Komponen Aktif Modul', false);
+    }
+
     public function test_admin_can_update_teacher()
     {
         $admin = $this->getAdmin();

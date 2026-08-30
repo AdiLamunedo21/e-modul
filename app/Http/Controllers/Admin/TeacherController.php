@@ -20,7 +20,7 @@ class TeacherController extends Controller
         $search = $request->query('search');
         $subjectId = $request->query('subject_id');
 
-        $query = Teacher::with(['subjects', 'classes.major', 'modules.schoolClass'])
+        $query = Teacher::with(['subjects', 'classes.major', 'modules.schoolClass.major', 'modules.subject'])
             ->withCount([
                 'modules',
                 'modules as published_modules_count' => fn($q) => $q->where('status', 'published'),
@@ -61,6 +61,69 @@ class TeacherController extends Controller
             'stats',
             'search',
             'subjectId'
+        ));
+    }
+
+    /**
+     * Menampilkan halaman detail profil guru beserta seluruh modul yang telah dibuat.
+     */
+    public function show(Request $request, Teacher $teacher)
+    {
+        $teacher->load(['subjects', 'classes.major']);
+
+        $search = $request->query('search');
+        $status = $request->query('status');
+        $subjectId = $request->query('subject_id');
+
+        $modulesQuery = $teacher->modules()->with(['schoolClass.major', 'subject']);
+
+        if ($search) {
+            $modulesQuery->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhereHas('subject', function ($sq) use ($search) {
+                      $sq->where('name', 'like', "%{$search}%")
+                         ->orWhere('code', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('schoolClass', function ($cq) use ($search) {
+                      $cq->where('grade', 'like', "%{$search}%")
+                         ->orWhere('section', 'like', "%{$search}%")
+                         ->orWhere('major_name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        if ($status && $status !== 'all') {
+            $modulesQuery->where('status', $status);
+        }
+
+        if ($subjectId && $subjectId !== 'all') {
+            $modulesQuery->where('subject_id', $subjectId);
+        }
+
+        $modules = $modulesQuery->latest('updated_at')->paginate(9)->withQueryString();
+
+        $stats = [
+            'total_modules'     => $teacher->modules()->count(),
+            'published_modules' => $teacher->modules()->where('status', 'published')->count(),
+            'draft_modules'     => $teacher->modules()->where('status', 'draft')->count(),
+            'closed_modules'    => $teacher->modules()->where('status', 'closed')->count(),
+            'shared_modules'    => $teacher->modules()->where('is_shared', true)->count(),
+        ];
+
+        $teacherSubjects = $teacher->subjects;
+        $allClasses = SchoolClass::with('major')->orderBy('grade')->orderBy('major_id')->orderBy('section')->get();
+        $allSubjects = Subject::orderBy('name')->get();
+
+        return view('pages.admin.teachers.show', compact(
+            'teacher',
+            'modules',
+            'stats',
+            'search',
+            'status',
+            'subjectId',
+            'teacherSubjects',
+            'allClasses',
+            'allSubjects'
         ));
     }
 
@@ -161,4 +224,3 @@ class TeacherController extends Controller
             ->with('success', "Akun guru {$name} (NIP: {$nip}) berhasil dihapus dari Master Data.");
     }
 }
-

@@ -56,6 +56,7 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     // Master Data & Pendaftaran Guru
     Route::get('/teachers',              [AdminTeacherController::class, 'index'])->name('admin.teachers.index');
     Route::post('/teachers',             [AdminTeacherController::class, 'store'])->name('admin.teachers.store');
+    Route::get('/teachers/{teacher}',    [AdminTeacherController::class, 'show'])->name('admin.teachers.show');
     Route::patch('/teachers/{teacher}',   [AdminTeacherController::class, 'update'])->name('admin.teachers.update');
     Route::delete('/teachers/{teacher}',  [AdminTeacherController::class, 'destroy'])->name('admin.teachers.destroy');
 
