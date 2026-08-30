@@ -65,6 +65,7 @@
                 $isSubjectsActive  = request()->routeIs('admin.subjects.*');
                 $isMajorsActive    = request()->routeIs('admin.majors.*');
                 $isClassesActive   = request()->routeIs('admin.classes.*');
+                $isLibraryActive   = request()->routeIs('admin.library.*');
             @endphp
 
             <a href="{{ route('admin.dashboard') }}"
@@ -140,6 +141,21 @@
                     </svg>
                     <span>Build Kelas</span>
                 </div>
+            </a>
+
+            {{-- Supervisi Library Modul --}}
+            <a href="{{ route('admin.library.index') }}"
+               class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all
+                   {{ $isLibraryActive ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                <div class="flex items-center gap-3 truncate">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.333A48.357 48.357 0 0012 9.75c-2.551 0-5.056.2-7.5.583V21M3 21h18M12 6.75h.008v.008H12V6.75z" />
+                    </svg>
+                    <span>Library Modul</span>
+                </div>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                    Publik
+                </span>
             </a>
         </nav>
 

@@ -96,7 +96,17 @@ class ModuleLibraryController extends Controller
             }
         }
 
-        $modules = $query->latest('shared_at')->latest('id')->paginate(9)->withQueryString();
+        // Sorting Urutan
+        $sort = $request->get('sort', 'latest');
+        if ($sort === 'popular') {
+            $query->orderByDesc('clone_count')->orderByDesc('shared_at')->orderByDesc('id');
+        } elseif ($sort === 'title_asc') {
+            $query->orderBy('title', 'asc');
+        } else {
+            $query->latest('shared_at')->latest('id');
+        }
+
+        $modules = $query->paginate(9)->withQueryString();
 
         // Statistik Agregat Perpustakaan Modul
         $allSharedModules = Module::where('is_shared', true)->get();
@@ -120,6 +130,7 @@ class ModuleLibraryController extends Controller
             'modules',
             'stats',
             'tab',
+            'sort',
             'availableGrades',
             'availableMajors',
             'contributors',

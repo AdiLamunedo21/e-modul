@@ -191,6 +191,16 @@
 
             {{-- Filter Controls --}}
             <div class="flex flex-wrap items-center gap-2.5">
+                {{-- Sort By --}}
+                <div class="w-full sm:w-44">
+                    <select name="sort" onchange="this.form.submit()"
+                            class="w-full py-2.5 px-3 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-700 transition-all cursor-pointer">
+                        <option value="latest" {{ ($sort ?? '') == 'latest' ? 'selected' : '' }}>✨ Terbaru Dibagikan</option>
+                        <option value="popular" {{ ($sort ?? '') == 'popular' ? 'selected' : '' }}>🔥 Paling Banyak Dikloning</option>
+                        <option value="title_asc" {{ ($sort ?? '') == 'title_asc' ? 'selected' : '' }}>🔤 Judul (A - Z)</option>
+                    </select>
+                </div>
+
                 {{-- Filter Tingkat --}}
                 <div class="w-full sm:w-32">
                     <select name="grade" onchange="this.form.submit()"
@@ -213,21 +223,6 @@
                     </select>
                 </div>
 
-                {{-- Filter Komponen --}}
-                <div class="w-full sm:w-44">
-                    <select name="component" onchange="this.form.submit()"
-                            class="w-full py-2.5 px-3 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-700 transition-all cursor-pointer">
-                        <option value="">Semua Komponen</option>
-                        <option value="materi" {{ request('component') == 'materi' ? 'selected' : '' }}>Materi & PPT</option>
-                        <option value="video" {{ request('component') == 'video' ? 'selected' : '' }}>Video YouTube</option>
-                        <option value="pre_test" {{ request('component') == 'pre_test' ? 'selected' : '' }}>Pre-test Kuis</option>
-                        <option value="post_test" {{ request('component') == 'post_test' ? 'selected' : '' }}>Post-test Kuis</option>
-                        <option value="embed" {{ request('component') == 'embed' ? 'selected' : '' }}>Praktik Embed</option>
-                        <option value="job_sheet" {{ request('component') == 'job_sheet' ? 'selected' : '' }}>Job Sheet PDF</option>
-                        <option value="lkpd" {{ request('component') == 'lkpd' ? 'selected' : '' }}>Tugas LKPD</option>
-                    </select>
-                </div>
-
                 {{-- Filter Guru --}}
                 @if($contributors->count() > 1)
                 <div class="w-full sm:w-44">
@@ -242,7 +237,7 @@
                 @endif
 
                 {{-- Reset Button --}}
-                @if(request()->hasAny(['search', 'grade', 'major', 'component', 'teacher_id']))
+                @if(request()->hasAny(['search', 'grade', 'major', 'teacher_id']) || ($sort ?? '') !== 'latest')
                     <a href="{{ route('teacher.library.index', ['tab' => $tab]) }}"
                        class="inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 hover:text-slate-700 rounded-xl transition-all"
                        title="Reset Filter">
@@ -254,6 +249,26 @@
                 @endif
             </div>
         </form>
+
+        {{-- Quick Filter Chips --}}
+        <div class="flex items-center gap-1.5 flex-wrap pt-3 mt-3 border-t border-slate-100 text-xs">
+            <span class="text-slate-400 font-bold text-[11px] mr-1">Filter Cepat:</span>
+            
+            <a href="{{ route('teacher.library.index', array_merge(request()->except('sort', 'page'), ['sort' => 'latest'])) }}"
+               class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all {{ ($sort ?? 'latest') === 'latest' ? 'bg-indigo-600 text-white shadow-xs font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                ✨ Terbaru Dibagikan
+            </a>
+
+            <a href="{{ route('teacher.library.index', array_merge(request()->except('sort', 'page'), ['sort' => 'popular'])) }}"
+               class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all {{ ($sort ?? '') === 'popular' ? 'bg-amber-600 text-white shadow-xs font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                🔥 Paling Banyak Dikloning
+            </a>
+
+            <a href="{{ route('teacher.library.index', array_merge(request()->except('sort', 'page'), ['sort' => 'title_asc'])) }}"
+               class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all {{ ($sort ?? '') === 'title_asc' ? 'bg-purple-600 text-white shadow-xs font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                🔤 Judul (A - Z)
+            </a>
+        </div>
     </div>
 </div>
 

@@ -79,6 +79,8 @@ Sistem memisahkan wewenang dan tampilan antarmuka secara ketat berdasarkan tiga 
   - Mengelola Master Data Siswa dengan navigasi berjenjang berbasis rombel kelas, pendaftaran siswa ke kelas tertentu, dan plotting mata pelajaran yang ditempuh.
   - Mengelola Master Data Mata Pelajaran (kode, warna badge, icon, deskripsi).
   - Mengelola Master Data Jurusan / Konsentrasi Keahlian (kode jurusan, nama keahlian).
+  - Mengakses **Halaman Khusus Detail Guru & Direktori Modul (`/admin/teachers/{teacher}`)** untuk supervisi menyeluruh profil, kelas didik, dan portofolio modul guru.
+  - Mengelola **Supervisi Perpustakaan Modul (Library Modul Overview - `/admin/library`)**: Meninjau modul-modul publik yang dibagikan guru, analitik jumlah kloning/adopsi guru lain, highlight Top 3 Modul Terfavorit, inspeksi 5 bagian kurikulum, riwayat pengadopsi, serta moderasi status berbagi.
   - Meninjau kelayakan konten modul (_Preview Mode_) dan memantau analitik sekolah.
 - **Guru (Pendidik/Kreator Modul):**
   - Mengakses direktori **Kelas Didik** (rombel kelas yang ditugaskan oleh Admin) di bawah *Dashboard Workspace*.
@@ -250,6 +252,7 @@ Pusat kendali operasional sekolah:
 graph TD
     A[Admin Login] --> B[Dashboard Admin]
     B --> C[Master Data Guru: Ploting Mapel & Kelas Didik]
+    C -->|Klik Detail Guru| C1[Halaman Profil Guru & Direktori Modul]
     B --> D[Master Data Mata Pelajaran & Jurusan]
     B --> E[Build Kelas & Rombel: Otomatis Generate Kode Kelas 6 Karakter]
     E -->|Salin / Regenerate Kode| E1[Bagikan Kode Kelas ke Siswa/Guru]
@@ -258,7 +261,8 @@ graph TD
     F -->|Pilih Kelas misal: Kelas X TE 1| G[Daftar Siswa Kelas X TE 1]
     G -->|Daftarkan Siswa Baru| H[Pilih Mapel yang Wajib Ditempuh Siswa]
     G -->|Edit / Hapus Siswa| I[Perbarui Data / Mapel Siswa]
-    G -->|Kembali| F
+    B --> J[Library Modul: Supervisi Perpustakaan Sekolah]
+    J -->|Analitik Kloning & Top 3 Modul| J1[Inspeksi 5 Bagian Kurikulum & Moderasi Publikasi]
 ```
 
 ---

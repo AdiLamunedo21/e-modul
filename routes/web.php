@@ -85,6 +85,11 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::patch('/classes/{class}',                  [AdminClassController::class, 'update'])->name('admin.classes.update');
     Route::delete('/classes/{class}',                 [AdminClassController::class, 'destroy'])->name('admin.classes.destroy');
     Route::post('/classes/{class}/regenerate-code',   [AdminClassController::class, 'regenerateCode'])->name('admin.classes.regenerate-code');
+
+    // Supervisi Perpustakaan Modul (Library Modul Overview)
+    Route::get('/library',                           [\App\Http\Controllers\Admin\ModuleLibraryController::class, 'index'])->name('admin.library.index');
+    Route::get('/library/{module}',                  [\App\Http\Controllers\Admin\ModuleLibraryController::class, 'show'])->name('admin.library.show');
+    Route::post('/library/{module}/toggle-share',    [\App\Http\Controllers\Admin\ModuleLibraryController::class, 'toggleShare'])->name('admin.library.toggle-share');
 });
 
 // ─── Teacher Protected ─────────────────────────────────────────────────────
