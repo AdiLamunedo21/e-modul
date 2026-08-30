@@ -234,40 +234,40 @@
     {{-- ══ 4. TOOLBAR: LIVE SEARCH, FILTER DROPDOWNS & VIEW MODE SWITCHER ══ --}}
     <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 sm:p-6 mb-6 space-y-4">
         
-        {{-- Row 1: Live Search + Filters + View Switcher --}}
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        {{-- Row 1: Live Search + Filters + View Switcher (Sejajar di Versi Desktop) --}}
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
             
-            {{-- Toolbar Search Box (dengan Live Search x-model & Clear Button) --}}
-            <div class="relative w-full lg:w-80">
-                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                    </svg>
+            {{-- Server Filter & Search Form --}}
+            <form method="GET" action="{{ route('admin.library.index') }}" class="flex flex-col sm:flex-row sm:items-center gap-2.5 flex-1 min-w-0">
+                
+                {{-- Live Search Box (Flex-1) --}}
+                <div class="relative flex-1 min-w-[200px]">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
+                    </div>
+                    <input type="text"
+                           name="search"
+                           x-model="searchKeyword"
+                           placeholder="Cari judul modul, guru, mapel, kelas..."
+                           class="w-full pl-10 pr-9 py-2.5 text-xs bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition font-medium text-slate-800 placeholder-slate-400">
+                    
+                    {{-- Clear Search Button --}}
+                    <button type="button"
+                            x-show="searchKeyword && searchKeyword.length > 0"
+                            x-cloak
+                            @click="searchKeyword = ''"
+                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer">
+                        <span class="w-4 h-4 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-[9px] font-bold text-slate-600">✕</span>
+                    </button>
                 </div>
-                <input type="text"
-                       x-model="searchKeyword"
-                       placeholder="Cari judul, guru penyusun, mapel, kelas..."
-                       class="w-full pl-10 pr-9 py-2.5 text-xs bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition font-medium text-slate-800 placeholder-slate-400">
-                
-                {{-- Clear Search Button --}}
-                <button type="button"
-                        x-show="searchKeyword && searchKeyword.length > 0"
-                        x-cloak
-                        @click="searchKeyword = ''"
-                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer">
-                    <span class="w-4 h-4 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-[9px] font-bold text-slate-600">✕</span>
-                </button>
-            </div>
 
-            {{-- Row Server Filters & View Mode Switcher --}}
-            <div class="flex items-center gap-2.5 flex-wrap justify-between lg:justify-end">
-                
-                {{-- Server Filter Form --}}
-                <form method="GET" action="{{ route('admin.library.index') }}" class="flex items-center gap-2 flex-wrap">
-                    {{-- Filter Mapel --}}
+                {{-- Filter Mapel --}}
+                <div class="w-full sm:w-auto sm:min-w-[150px]">
                     <select name="subject_id"
                             onchange="this.form.submit()"
-                            class="text-xs rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-700 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
+                            class="w-full text-xs rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-slate-700 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium cursor-pointer">
                         <option value="all">-- Semua Mapel --</option>
                         @foreach($subjects as $s)
                             <option value="{{ $s->id }}" {{ (string)$subjectId === (string)$s->id ? 'selected' : '' }}>
@@ -275,11 +275,13 @@
                             </option>
                         @endforeach
                     </select>
+                </div>
 
-                    {{-- Filter Guru --}}
+                {{-- Filter Guru --}}
+                <div class="w-full sm:w-auto sm:min-w-[150px]">
                     <select name="teacher_id"
                             onchange="this.form.submit()"
-                            class="text-xs rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-700 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
+                            class="w-full text-xs rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-slate-700 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium cursor-pointer">
                         <option value="all">-- Semua Guru --</option>
                         @foreach($contributors as $c)
                             <option value="{{ $c->id }}" {{ (string)$teacherId === (string)$c->id ? 'selected' : '' }}>
@@ -287,40 +289,41 @@
                             </option>
                         @endforeach
                     </select>
-
-                    @if($search || ($subjectId && $subjectId !== 'all') || ($grade && $grade !== 'all') || ($teacherId && $teacherId !== 'all'))
-                        <a href="{{ route('admin.library.index') }}" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-semibold transition-colors">
-                            Reset
-                        </a>
-                    @endif
-                </form>
-
-                {{-- ══ VIEW MODE SWITCHER (GRID vs LIST) ══ --}}
-                <div class="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 shrink-0">
-                    <button type="button"
-                            @click="explorerView = 'grid'"
-                            :class="explorerView === 'grid' ? 'bg-white text-indigo-700 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800'"
-                            title="Tampilan Grid Kartu"
-                            class="p-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
-                        </svg>
-                        <span class="hidden sm:inline text-[11px]">Grid</span>
-                    </button>
-
-                    <button type="button"
-                            @click="explorerView = 'list'"
-                            :class="explorerView === 'list' ? 'bg-white text-indigo-700 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800'"
-                            title="Tampilan Tabel / Daftar Rinci"
-                            class="p-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                        </svg>
-                        <span class="hidden sm:inline text-[11px]">Tabel</span>
-                    </button>
                 </div>
 
+                {{-- Reset Filter Button --}}
+                @if($search || ($subjectId && $subjectId !== 'all') || ($grade && $grade !== 'all') || ($teacherId && $teacherId !== 'all'))
+                    <a href="{{ route('admin.library.index') }}" class="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl text-xs font-bold transition-colors whitespace-nowrap text-center">
+                        Reset
+                    </a>
+                @endif
+            </form>
+
+            {{-- ══ VIEW MODE SWITCHER (GRID vs LIST) ══ --}}
+            <div class="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 shrink-0 self-start sm:self-center">
+                <button type="button"
+                        @click="explorerView = 'grid'"
+                        :class="explorerView === 'grid' ? 'bg-white text-indigo-700 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800'"
+                        title="Tampilan Grid Kartu"
+                        class="px-3 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                    </svg>
+                    <span class="text-[11px]">Grid</span>
+                </button>
+
+                <button type="button"
+                        @click="explorerView = 'list'"
+                        :class="explorerView === 'list' ? 'bg-white text-indigo-700 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800'"
+                        title="Tampilan Tabel / Daftar Rinci"
+                        class="px-3 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                    <span class="text-[11px]">Tabel</span>
+                </button>
             </div>
+
         </div>
 
         {{-- Row 2: Status Filter Tabs (Filter Cepat) --}}
