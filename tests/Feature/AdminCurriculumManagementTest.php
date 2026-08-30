@@ -215,8 +215,8 @@ class AdminCurriculumManagementTest extends TestCase
             ->get(route('admin.classes.index'));
 
         $response->assertStatus(200);
-        $response->assertSee('Master Kelas & Rombongan Belajar', false);
-        $response->assertSee('Tambah Rombel Baru', false);
+        $response->assertSee('Pusat Build Kelas & Rombongan Belajar', false);
+        $response->assertSee('Build Kelas Baru', false);
     }
 
     public function test_admin_can_create_class_with_grade_major_and_section()
@@ -243,11 +243,33 @@ class AdminCurriculumManagementTest extends TestCase
         $response->assertRedirect(route('admin.classes.index'));
         $response->assertSessionHas('success');
 
+        $newClass = SchoolClass::where('section', '3')->where('major_id', $major->id)->first();
+        $this->assertNotNull($newClass);
+        $this->assertNotEmpty($newClass->code);
+        $this->assertEquals(6, strlen($newClass->code));
+
         $this->assertDatabaseHas('classes', [
             'grade'    => 'X',
             'major_id' => $major->id,
             'section'  => '3',
         ]);
+    }
+
+    public function test_admin_can_regenerate_class_code()
+    {
+        $admin = $this->getAdmin();
+        $class = SchoolClass::first();
+        if (!$class) {
+            $this->markTestSkipped('Seed data required.');
+        }
+
+        $oldCode = $class->code;
+
+        $response = $this->actingAs($admin, 'admin')
+            ->post(route('admin.classes.regenerate-code', $class));
+
+        $response->assertRedirect(route('admin.classes.index'));
+        $this->assertNotEquals($oldCode, $class->fresh()->code);
     }
 
     public function test_admin_can_update_class()

@@ -78,11 +78,12 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::patch('/majors/{major}',       [AdminMajorController::class, 'update'])->name('admin.majors.update');
     Route::delete('/majors/{major}',      [AdminMajorController::class, 'destroy'])->name('admin.majors.destroy');
 
-    // Master Data Rombel Kelas
-    Route::get('/classes',               [AdminClassController::class, 'index'])->name('admin.classes.index');
-    Route::post('/classes',              [AdminClassController::class, 'store'])->name('admin.classes.store');
-    Route::patch('/classes/{class}',      [AdminClassController::class, 'update'])->name('admin.classes.update');
-    Route::delete('/classes/{class}',     [AdminClassController::class, 'destroy'])->name('admin.classes.destroy');
+    // Master Data & Build Rombel Kelas
+    Route::get('/classes',                           [AdminClassController::class, 'index'])->name('admin.classes.index');
+    Route::post('/classes',                          [AdminClassController::class, 'store'])->name('admin.classes.store');
+    Route::patch('/classes/{class}',                  [AdminClassController::class, 'update'])->name('admin.classes.update');
+    Route::delete('/classes/{class}',                 [AdminClassController::class, 'destroy'])->name('admin.classes.destroy');
+    Route::post('/classes/{class}/regenerate-code',   [AdminClassController::class, 'regenerateCode'])->name('admin.classes.regenerate-code');
 });
 
 // ─── Teacher Protected ─────────────────────────────────────────────────────

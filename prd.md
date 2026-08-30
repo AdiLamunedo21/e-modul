@@ -25,9 +25,9 @@ Berdasarkan permasalahan tersebut, platform E-Modul ini dibangun menggunakan ker
 
 Pengembangan platform ini diinisiasi untuk memecahkan masalah utama (_pain points_) yang dialami oleh pemangku kepentingan di sekolah:
 
-- **Kendala Guru:** Pengelolaan materi dan penilaian saat ini terpencar. Guru sering kali merasa dibatasi oleh _template_ modul digital yang kaku. Selain itu, seorang guru kejuruan sering kali mengampu lebih dari satu mata pelajaran sekaligus (misal: Informatika dan Teknik Elektro). Dibutuhkan sebuah sistem _builder_ yang modular, terstruktur sesuai 5 Bagian Utama E-Modul, mendukung integrasi multimedia multi-video YouTube, dan dilengkapi *Subject Switcher* terintegrasi.
-- **Kendala Siswa:** Siswa sering mengalami disorientasi jika materi disajikan dalam satu halaman panjang tak berujung (_scroll_ panjang) atau jika dashboard dipenuhi modul mata pelajaran yang tidak mereka tempuh. Siswa membutuhkan modul digital yang terbagi ke dalam tahapan sistematis (Bagian Awal, Pendahuluan, Kegiatan Belajar, Evaluasi & Latihan, hingga Bagian Akhir), pencarian & filter instan modul yang efisien di dashboard, tampilan modul yang disaring khusus berdasarkan mata pelajaran yang mereka ambil, pemutar video interaktif dengan daftar putar, serta transparansi penilaian hasil belajar.
-- **Kendala Manajemen Sekolah (Admin & Kurikulum):** Pihak kurikulum memerlukan panel administrasi terpadu untuk mengelola Master Data Pengguna (Guru & Siswa), Master Kurikulum (Mata Pelajaran & Jurusan/Konsentrasi Keahlian), pembagian Rombongan Belajar (Rombel Kelas), penentuan mata pelajaran yang wajib ditempuh siswa, serta supervisi mutu materi modul dari seluruh guru.
+- **Kendala Guru:** Pengelolaan materi dan penilaian saat ini terpencar. Guru sering kali merasa dibatasi oleh _template_ modul digital yang kaku. Selain itu, seorang guru kejuruan sering kali mengampu lebih dari satu mata pelajaran sekaligus (misal: Informatika dan Teknik Elektro) dan memiliki beberapa rombongan belajar kelas tanggung jawab mengajar (**Kelas Didik**). Dibutuhkan sebuah sistem _builder_ yang modular, terstruktur sesuai 5 Bagian Utama E-Modul, mendukung integrasi multimedia multi-video YouTube, isolasi kelas didik yang bersih tanpa terganggu kelas lain di sekolah, dan dilengkapi *Subject Switcher* terintegrasi.
+- **Kendala Siswa:** Siswa sering mengalami disorientasi jika materi disajikan dalam satu halaman panjang tak berujung (_scroll_ panjang) atau jika dashboard dipenuhi modul mata pelajaran yang tidak mereka tempuh. Siswa membutuhkan modul digital yang terbagi ke dalam tahapan sistematis (Bagian Awal, Pendahuluan, Kegiatan Belajar, Evaluasi & Latihan, hingga Bagian Akhir), pencarian & filter instan modul yang efisien di dashboard, tampilan modul yang disaring khusus berdasarkan mata pelajaran yang mereka ambil, pemutar video interaktif dengan daftar putar, kemudahan bergabung kelas via Kode Kelas unik, serta transparansi penilaian hasil belajar.
+- **Kendala Manajemen Sekolah (Admin & Kurikulum):** Pihak kurikulum memerlukan panel administrasi terpadu untuk mengelola Master Data Pengguna (Guru & Siswa), Master Kurikulum (Mata Pelajaran & Jurusan/Konsentrasi Keahlian), **Sentralisasi Build Rombongan Belajar Kelas dengan Kode Kelas Unik Otomatis**, penugasan Kelas Didik & Mapel bagi guru, penentuan mata pelajaran yang wajib ditempuh siswa, serta supervisi mutu materi modul dari seluruh guru.
 
 ---
 
@@ -42,14 +42,15 @@ Sistem ini ditargetkan:
    - **3. Kegiatan Belajar / Isi Materi (2 Komponen):** Uraian materi pembelajaran berbasis teks & slide PPT (`has_materi`), serta integrasi multimedia **Multi-Video YouTube & Keterangan Video dengan Satu Ringkasan Terpadu** (`has_video` dikelola via `VideoController`).
    - **4. Evaluasi & Latihan (3 Komponen):** Game edukasi interaktif & media embed simulator (`has_embed`), lembar kerja praktik / _Job Sheet_ PDF (`has_job_sheet`), serta tugas lembar kerja peserta didik & umpan balik / LKPD (`has_lkpd`).
    - **5. Bagian Akhir (2 Komponen):** Tes akhir modul / Post-test (`has_post_test`), dan daftar pustaka kepustakaan & rujukan (dikelola mandiri via `DaftarPustakaController`).
-2. Menyediakan **Panel Administrasi Master Data Terpadu** bagi Admin untuk mengelola data akun guru, akun siswa per rombel kelas, master mata pelajaran, master jurusan / konsentrasi keahlian, dan rombongan belajar kelas.
-3. Mengimplementasikan **Antarmuka Master Data Siswa Berjenjang (Two-Tier Architecture)**: Halaman utama menampilkan direktori kartu rombel kelas (seperti *Kelas X TE 2*, *Kelas X PPLG 1*), diikuti dengan halaman khusus daftar siswa per kelas terpilih untuk mempermudah administrasi.
-4. Menerapkan **Ploting Mata Pelajaran Siswa saat Registrasi**: Admin dapat menentukan mata pelajaran apa saja yang harus ditempuh oleh setiap siswa.
-5. Menyediakan **Personalisasi Dashboard Siswa dengan Live Filter & Search Toolbar**: Dashboard siswa dilengkapi pencarian instan (Live Search), chip filter tingkat kelas, filter status penyelesaian (*To-Do / Completed*), kartu KPI progres belajar, dan navigasi modular per mata pelajaran yang ditempuh.
-6. Menyediakan **Integrasi Multi-Video YouTube & Satu Ringkasan Terpadu**: Guru dapat menambahkan banyak video YouTube lengkap dengan judul, tautan URL, keterangan video khusus, dan tombol hapus individual. Siswa menyimak seluruh video melalui pemutar daftar putar (*playlist switcher*) interaktif dan menyusun **1 (satu) resume intisari terpadu**.
-7. Menyediakan **Library Modul (Repositori Kolaboratif Antar-Guru)** untuk saling berbagi dan menduplikasi (*deep clone*) instrumen pembelajaran digital.
-8. Memfasilitasi guru dengan **Grading Center Adaptif** dan **Ekspor Spreadsheet Excel (.xlsx)** yang dinamis menyesuaikan komponen aktif pada modul.
-9. Mengintegrasikan **Manajemen Multi-Tanggung Jawab Guru**, memungkinkan seorang guru mengampu 2 atau lebih mata pelajaran dengan *Subject Switcher* pada seluruh menu guru.
+2. Menyediakan **Panel Administrasi Master Data & Build Kelas Terpadu** bagi Admin untuk mengelola akun guru, akun siswa per rombel kelas, master mata pelajaran, master jurusan / konsentrasi keahlian, serta membangun rombongan belajar kelas dengan **Generator Kode Unik Kelas Otomatis (6 Karakter Kapital)**.
+3. Menyediakan **Sistem Penugasan Kelas Didik & Multi-Mapel Guru oleh Admin**: Admin memploting mata pelajaran yang diampu serta memilihkan rombel kelas yang menjadi tanggung jawab guru (`class_teacher`), sehingga ruang kerja guru hanya menampilkan kelas binaan yang relevan.
+4. Mengimplementasikan **Antarmuka Master Data Siswa Berjenjang (Two-Tier Architecture)**: Halaman utama menampilkan direktori kartu rombel kelas (seperti *Kelas X TE 2*, *Kelas X PPLG 1*), diikuti dengan halaman khusus daftar siswa per kelas terpilih untuk mempermudah administrasi.
+5. Menerapkan **Ploting Mata Pelajaran Siswa saat Registrasi**: Admin dapat menentukan mata pelajaran apa saja yang harus ditempuh oleh setiap siswa.
+6. Menyediakan **Personalisasi Dashboard Siswa dengan Live Filter & Search Toolbar**: Dashboard siswa dilengkapi pencarian instan (Live Search), chip filter tingkat kelas, filter status penyelesaian (*To-Do / Completed*), kartu KPI progres belajar, dan navigasi modular per mata pelajaran yang ditempuh.
+7. Menyediakan **Integrasi Multi-Video YouTube & Satu Ringkasan Terpadu**: Guru dapat menambahkan banyak video YouTube lengkap dengan judul, tautan URL, keterangan video khusus, dan tombol hapus individual. Siswa menyimak seluruh video melalui pemutar daftar putar (*playlist switcher*) interaktif dan menyusun **1 (satu) resume intisari terpadu**.
+8. Menyediakan **Library Modul (Repositori Kolaboratif Antar-Guru)** untuk saling berbagi dan menduplikasi (*deep clone*) instrumen pembelajaran digital.
+9. Memfasilitasi guru dengan **Grading Center Adaptif** dan **Ekspor Spreadsheet Excel (.xlsx)** yang dinamis menyesuaikan komponen aktif pada modul.
+10. Mengintegrasikan **Manajemen Multi-Tanggung Jawab Guru**, memungkinkan seorang guru mengampu 2 atau lebih mata pelajaran dengan *Subject Switcher* pada seluruh menu guru.
 
 ---
 
@@ -58,6 +59,8 @@ Sistem ini ditargetkan:
 Untuk fase rilis operasional, ruang lingkup aplikasi mencakup:
 
 - **Multi-Guard Access:** Admin (Supervisi & Master Data), Guru (Pendidik & Kreator Modul), dan Siswa (Peserta Didik).
+- **Sentralisasi Build Kelas di Admin:** Pembuatan, pengeditan, dan penghapusan rombel kelas dikelola terpusat oleh Admin dengan otomatisasi kode unik kelas.
+- **Isolasi Kelas Didik Guru:** Guru hanya mengakses rombel kelas yang ditugaskan oleh Admin kepadanya.
 - **Navigasi Siswa Bertahap (Stepper 5 Bagian):** Akses materi terstruktur dengan tombol navigasi bertahap.
 - **Penilaian Hibrida & Grading Center:** Penilaian otomatis (Pre-test & Post-test) dan manual (Resume Video, Praktik Embed, Job Sheet, dan LKPD).
 - **Ekspor Nilai Adaptif (.xlsx):** Pembangkit laporan spreadsheet Excel dinamis sesuai komponen aktif pada modul.
@@ -71,13 +74,14 @@ Untuk fase rilis operasional, ruang lingkup aplikasi mencakup:
 Sistem memisahkan wewenang dan tampilan antarmuka secara ketat berdasarkan tiga peran utama:
 
 - **Admin (Supervisi, Kurikulum & Master Data):**
-  - Mengelola Master Data Guru (registrasi, edit, hapus, plotting multi-mapel).
+  - Mengelola Master Data Guru (registrasi, edit, hapus, plotting multi-mapel, serta penugasan kelas didik yang diampu).
+  - Mengelola **Build Kelas & Rombongan Belajar** (pembuatan rombel tingkat X s/d XIII, nomor rombel, jurusan, **otomatis generate kode kelas unik 6 karakter**, tombol 1-click copy kode, acak ulang/regenerate kode kelas, dan ploting guru pengampu kelas).
   - Mengelola Master Data Siswa dengan navigasi berjenjang berbasis rombel kelas, pendaftaran siswa ke kelas tertentu, dan plotting mata pelajaran yang ditempuh.
   - Mengelola Master Data Mata Pelajaran (kode, warna badge, icon, deskripsi).
   - Mengelola Master Data Jurusan / Konsentrasi Keahlian (kode jurusan, nama keahlian).
-  - Mengelola Master Data Rombongan Belajar Kelas (tingkat X s/d XIII, jurusan, nomor rombel).
   - Meninjau kelayakan konten modul (_Preview Mode_) dan memantau analitik sekolah.
 - **Guru (Pendidik/Kreator Modul):**
+  - Mengakses direktori **Kelas Didik** (rombel kelas yang ditugaskan oleh Admin) di bawah *Dashboard Workspace*.
   - Mengelola portofolio modul dengan *Subject Switcher*.
   - Merakit konten pada 5 Bagian Utama E-Modul (15 komponen terisolasi).
   - Menambahkan banyak video YouTube dengan keterangan khusus per video serta mengatur panduan ringkasan satu pintu.
@@ -94,7 +98,34 @@ Sistem memisahkan wewenang dan tampilan antarmuka secara ketat berdasarkan tiga 
 
 ---
 
-### 2.2 Arsitektur Antarmuka Master Data Siswa (Two-Tier Interface)
+### 2.2 Sentralisasi Fitur Build Kelas & Otomatisasi Kode Kelas
+
+1. **Pembuatan Kelas Terpusat di Admin (`/admin/classes`):**
+   - Hak akses pembuatan (`create/store`) dan penghapusan (`destroy`) rombel kelas resmi berada 100% di bawah kendali Admin kurikulum.
+   - Menu pada sidebar Admin dinamakan **"Build Kelas"**.
+2. **Otomatisasi Generator Kode Kelas (Unique 6-Character Code):**
+   - Saat Admin membuat kelas baru, sistem secara otomatis mengeksekusi `SchoolClass::generateUniqueCode()` yang menghasilkan kode alfanumerik kapital acak unik 6 karakter (contoh: `A8X2P9`).
+   - Kode kelas ditampilkan pada baris tabel Master Data Kelas, dilengkapi tombol **Salin Kode (1-Click Copy)** dan fitur **Acak Ulang Kode (Regenerate Code)**.
+   - Kode kelas digunakan siswa saat registrasi mandiri (`/register/student?code=XXXXXX`) untuk langsung terdaftar di rombel kelas yang sesuai.
+3. **Ploting Guru Pengampu & Kelas Didik:**
+   - Admin dapat memploting guru yang bertanggung jawab langsung pada modal form *Build Kelas Baru* dan *Edit Rombel Kelas*.
+   - Sebaliknya, pada modal *Master Data Guru* (`/admin/teachers`), Admin juga dapat memilihkan rombel kelas didik yang diampu oleh setiap guru.
+
+---
+
+### 2.3 Isolasi Ruang Kerja Guru (Kelas Didik)
+
+1. **Menu Sidebar Guru ("Kelas Didik"):**
+   - Menu navigasi pada sidebar guru diubah dari *"Build Kelas"* menjadi **"Kelas Didik"**, diposisikan tepat di bawah *Dashboard Workspace*.
+2. **Filter Terisolasi:**
+   - Seluruh halaman kerja guru (**Dashboard Workspace**, **Kelas Didik**, **Pembuatan Modul Baru**, **Grading Center**, dan **Laporan Nilai**) terisolasi secara ketat sehingga **hanya menampilkan rombel kelas didik yang ditugaskan oleh Admin** kepada guru tersebut (`$teacher->classes()`).
+   - Guru tidak dapat melihat data kelas lain di sekolah yang bukan kelas binaannya.
+3. **Katalog Kelas Didik Guru (`/teacher/classes`):**
+   - Menampilkan kartu kelas didik guru, kode gabung kelas untuk dibagikan ke siswa, direktori siswa di kelas tersebut, serta tombol impor modul dari kelas lain.
+
+---
+
+### 2.4 Arsitektur Antarmuka Master Data Siswa (Two-Tier Interface)
 
 Untuk menjaga kerapian data pada skala sekolah kejuruan dengan puluhan rombongan belajar dan ribuan siswa:
 - **Tingkat 1 (Direktori Rombel Kelas — `/admin/students`):** Menampilkan grid kartu informatif seluruh rombongan belajar kelas (contoh: *Kelas X TE 2*, *Kelas X PPLG 1*), metrik jumlah siswa per kelas, filter tingkat (X, XI, XII, XIII), filter jurusan, dan modal pendaftaran siswa baru secara global.
@@ -102,7 +133,7 @@ Untuk menjaga kerapian data pada skala sekolah kejuruan dengan puluhan rombongan
 
 ---
 
-### 2.3 Personalisasi Portal Belajar Siswa
+### 2.5 Personalisasi Portal Belajar Siswa
 
 - **Live Search & Multi-Grade Filter Toolbar:** Siswa dapat mencari modul secara instan berdasarkan judul materi atau nama guru/mata pelajaran, memilih filter chip tingkat kelas (Semua Tingkat, X, XI, XII, XIII), serta menyaring status pengerjaan (*To-Do / Completed*) secara *real-time* berbasis Alpine.js tanpa reload halaman.
 - **Filtering Berdasarkan Mata Pelajaran yang Ditempuh:** Siswa hanya melihat kartu mata pelajaran dan modul kelas yang sesuai dengan mata pelajaran yang ditentukan oleh Admin saat registrasi/edit siswa (`student_subjects`).
@@ -111,7 +142,7 @@ Untuk menjaga kerapian data pada skala sekolah kejuruan dengan puluhan rombongan
 
 ---
 
-### 2.4 Struktur 5 Bagian Utama E-Modul (Modular & Paginated System)
+### 2.6 Struktur 5 Bagian Utama E-Modul (Modular & Paginated System)
 
 Materi E-Modul dikelompokkan ke dalam **5 Bagian Utama**:
 
@@ -143,7 +174,7 @@ Materi E-Modul dikelompokkan ke dalam **5 Bagian Utama**:
 
 ---
 
-### 2.5 Fitur Multi-Video YouTube & Keterangan Video (Bagian 3.2)
+### 2.7 Fitur Multi-Video YouTube & Keterangan Video (Bagian 3.2)
 
 1. **Multi-Video Card Repeater:**
    - Guru dapat menambahkan lebih dari satu video pembelajaran YouTube dalam satu modul.
@@ -158,7 +189,7 @@ Materi E-Modul dikelompokkan ke dalam **5 Bagian Utama**:
 
 ---
 
-### 2.6 Sistem Penilaian Adaptif & Laporan Excel (.XLSX)
+### 2.8 Sistem Penilaian Adaptif & Laporan Excel (.XLSX)
 
 - **Penilaian Adaptif:** Mesin penilaian (_Grading System_) beradaptasi secara dinamis dengan komponen evaluasi yang diaktifkan guru (Pre-test, Video Summary, Embed, Job Sheet, LKPD, Post-test).
 - **Kebijakan Unggah Ulang (Re-submission):** Siswa diizinkan membatalkan dan mengunggah ulang tugas selama status penilaian masih `pending`. Jika sudah dinilai (`graded`), form terkunci otomatis.
@@ -172,28 +203,32 @@ Materi E-Modul dikelompokkan ke dalam **5 Bagian Utama**:
 
 Pusat kendali operasional sekolah:
 - **Statistik & Supervisi Dashboard (`/admin/dashboard`):** Menampilkan metrik total guru, siswa, kelas, jurusan, mapel, modul terbit, dan modul perpustakaan.
-- **Master Data Guru (`/admin/teachers`):** Pengelolaan akun guru dan penetapan mata pelajaran yang diampu (multi-mapel dengan multi-select).
+- **Master Data Guru (`/admin/teachers`):** Pengelolaan akun guru, penetapan mata pelajaran yang diampu (multi-mapel), serta pemilihan **Kelas Didik (Tanggung Jawab Mengajar)**.
+- **Build Kelas & Rombel (`/admin/classes`):**
+  - Pembuatan rombel kelas baru (Tingkat X, XI, XII, XIII, Nomor Rombel, dan Jurusan).
+  - **Otomatisasi Generator Kode Kelas Unik (6 Karakter Kapital)**.
+  - Tombol Salin Kode Kelas & Tombol Regenerate Kode Kelas.
+  - Penugasan guru pengampu kelas langsung pada modal build/edit kelas.
 - **Master Data Siswa (`/admin/students`):**
-  - Direktori kartu rombel kelas (misal: *Kelas X TE 2*, *Kelas X PPLG 1*) dengan ringkasan jumlah siswa dan modul.
+  - Direktori kartu rombel kelas dengan ringkasan jumlah siswa dan modul.
   - Halaman khusus daftar siswa per kelas (`/admin/students/class/{class}`).
   - Pendaftaran siswa baru lengkap dengan penentuan mata pelajaran yang harus ditempuh siswa.
 - **Master Data Mata Pelajaran (`/admin/subjects`):** Manajemen nama mapel, kode singkatan, icon, dan palet warna badge.
 - **Master Data Jurusan (`/admin/majors`):** Manajemen konsentrasi keahlian (PPLG, TE, TITL, TKR, dll).
-- **Master Data Rombel Kelas (`/admin/classes`):** Manajemen kelas berdasarkan tingkat dan jurusan dengan format penamaan otomatis (`Kelas X TE 2`).
-- **Standardized Modals:** Seluruh modal formulir terstandarisasi (`max-w-md` untuk create/edit, `max-w-sm` untuk konfirmasi hapus).
+- **Standardized Modals:** Seluruh modal formulir terstandarisasi (`max-w-lg` untuk create/edit, `max-w-sm` untuk konfirmasi hapus).
 
 ---
 
 ### 3.2 Dashboard & Workspace Guru (Teacher Portal)
 
 - **Manajer Modul (`/teacher/modules`):** Menampilkan daftar modul dengan *Subject Switcher*, badge mapel, dan progress pengumpulan tugas siswa.
-- **Form Pembuatan Modul Baru:** Pilihan mata pelajaran (dengan penanda mapel yang diampu), judul modul, dan target rombel kelas.
+- **Form Pembuatan Modul Baru:** Pilihan mata pelajaran (dengan penanda mapel yang diampu), judul modul, dan **target kelas yang hanya mencakup Kelas Didik guru**.
 - **E-Module Detail & Builder (5 Bagian):** Antarmuka terstruktur 5 Bagian Utama E-Modul dengan progress kesiapan komponen dan sakelar AJAX.
 - **Dedicated Modular Component Editors:** Editor mandiri untuk Bagian Awal, Pendahuluan, Pre-test, Materi & PPT, Video YouTube (Multi-Video), Embed Praktik, Job Sheet PDF, Tugas LKPD, Post-test, dan Daftar Pustaka.
-- **Grading Center (`/teacher/grading`):** Panel penilaian tugas siswa dengan filter mata pelajaran dan matriks nilai adaptif.
+- **Grading Center (`/teacher/grading`):** Panel penilaian tugas siswa dengan filter mata pelajaran dan matriks nilai adaptif (hanya memuat kelas didik guru).
 - **Library Modul (`/teacher/library`):** Repositori publik antar-guru untuk berbagi dan menduplikasi (*deep clone*) modul pembelajaran.
-- **Laporan Nilai (`/teacher/reports`):** Rekapitulasi nilai dan ekspor spreadsheet Excel (.xlsx).
-- **Direktori Kelas Binaan (`/teacher/classes`):** Pemantauan rombel kelas yang menerima modul guru bersangkutan.
+- **Laporan Nilai (`/teacher/reports`):** Rekapitulasi nilai dan ekspor spreadsheet Excel (.xlsx) per kelas didik.
+- **Katalog Kelas Didik (`/teacher/classes`):** Pemantauan rombel kelas didik yang ditugaskan oleh Admin, kode kelas, direktori siswa, dan fitur salin modul antar kelas didik.
 
 ---
 
@@ -201,49 +236,58 @@ Pusat kendali operasional sekolah:
 
 - **Personalisasi Dashboard (`/student/dashboard`):** Menampilkan ringkasan KPI belajar, Live Search & Filter Toolbar, kartu mata pelajaran yang ditempuh, serta modul yang ditugaskan per mata pelajaran.
 - **Navigasi Sidebar Dinamis:** Daftar sub-menu mata pelajaran disaring hanya untuk mata pelajaran yang diambil siswa.
-- **Halaman Modul per Mapel (`/student/modules/subject/{subject}`):** Katalog modul khusus untuk mata pelajaran terpilih lengkap dengan filter status (*To-Do / Completed*).
+- **Halaman Modul per Mapel (`/student/modules/subject/{subject}`):** Katalog modul khusus untuk mata pelajaran terpilih lengkap dengan batasan 3 modul terbaru/baru dibuka dan filter status (*To-Do / Completed*).
 - **Direktori Modul Kelas (`/student/classes/{class}` & `/student/classes/{class}/subjects/{subject}/modules`):** Akses hierarkis materi modul kelas yang terdaftar.
-- **Antarmuka Belajar Interaktif Sekuensial Berstruktur Accordion (LMS Step-by-Step Learning Path):** Dilengkapi panel silabus interaktif berbasis Accordion 5 Bagian di sebelah kiri dan lembar kerja aktivitas mandiri (*dedicated component view*) di sebelah kanan. Alur belajar bersifat sekuensial terproteksi (*progressive locked steps*) di mana siswa wajib memulai dari Bagian Awal (Kata Pengantar) dan menekan tombol *"Tandai Selesai Dibaca & Lanjut"* untuk membuka langkah berikutnya. Komponen yang telah selesai ditandai dengan badge icon centang hijau (`✓ Selesai Dibaca` / `✓ Nilai / Terkirim`), sementara langkah berikutnya yang belum dapat diakses berstatus terkunci (`🔒 Terkunci`).
+- **Antarmuka Belajar Interaktif Sekuensial Berstruktur Modular Partials (LMS Step-by-Step Learning Path):** Arsitektur view modular dengan 19 sub-komponen terpisah di bawah `partials/` untuk menjamin performa render yang ringan dan cepat. Panel silabus interaktif berbasis Accordion 5 Bagian di sebelah kiri dan lembar kerja aktivitas mandiri di sebelah kanan dengan progres sekuensial terproteksi (*progressive locked steps*).
 
 ---
 
 ## 4. **User Flow (Alur Pengguna)**
 
-### 4.1 Alur Admin (Supervisi & Registrasi Siswa)
+### 4.1 Alur Admin (Supervisi, Build Kelas & Registrasi Siswa)
 
 ```mermaid
 graph TD
     A[Admin Login] --> B[Dashboard Admin]
-    B --> C[Master Data Guru - Multi Mapel]
+    B --> C[Master Data Guru: Ploting Mapel & Kelas Didik]
     B --> D[Master Data Mata Pelajaran & Jurusan]
-    B --> E[Master Data Rombel Kelas]
+    B --> E[Build Kelas & Rombel: Otomatis Generate Kode Kelas 6 Karakter]
+    E -->|Salin / Regenerate Kode| E1[Bagikan Kode Kelas ke Siswa/Guru]
+    E -->|Ploting Guru Pengampu| E2[Hubungkan Guru ke Kelas Didik]
     B --> F[Master Data Siswa: Direktori Kartu Kelas]
-    F -->|Pilih Kelas misal: Kelas X TE 2| G[Daftar Siswa Kelas X TE 2]
+    F -->|Pilih Kelas misal: Kelas X TE 1| G[Daftar Siswa Kelas X TE 1]
     G -->|Daftarkan Siswa Baru| H[Pilih Mapel yang Wajib Ditempuh Siswa]
     G -->|Edit / Hapus Siswa| I[Perbarui Data / Mapel Siswa]
     G -->|Kembali| F
 ```
 
+---
+
 ### 4.2 Alur Guru (Perancangan Modul & Penilaian)
 
 ```mermaid
 graph TD
-    A[Guru Login] --> B[Workspace Guru]
-    B --> C[Manajer Modul: Subject Switcher]
-    C --> D[Buat Modul: Pilih Mapel & Target Kelas]
-    D --> E[Module Builder: 5 Bagian & 15 Komponen]
-    E --> F[Toggle Komponen & Isi Editor Mandiri]
-    F --> G[Multi-Video YouTube: Tambah Video, Keterangan & Live Preview]
-    E --> H[Publikasikan Modul / Bagikan ke Library]
-    B --> I[Grading Center: Nilai Tugas Siswa]
-    B --> J[Ekspor Laporan Nilai Excel .xlsx]
+    A[Guru Login] --> B[Dashboard Workspace Guru]
+    B --> C[Kelas Didik: Pantau Rombel yang Ditugaskan Admin]
+    C -->|Salin Kode / Impor Modul| C1[Kelola Instrumen Kelas Didik]
+    B --> D[Manajer Modul: Subject Switcher]
+    D --> E[Buat Modul: Pilih Mapel & Target Kelas Didik]
+    E --> F[Module Builder: 5 Bagian & 15 Komponen]
+    F --> G[Toggle Komponen & Isi Editor Mandiri]
+    G --> H[Multi-Video YouTube: Tambah Video, Keterangan & Live Preview]
+    F --> I[Publikasikan Modul / Bagikan ke Library]
+    B --> J[Grading Center: Nilai Tugas Siswa Kelas Didik]
+    B --> K[Ekspor Laporan Nilai Excel .xlsx]
 ```
+
+---
 
 ### 4.3 Alur Siswa (Belajar Bertahap per Mapel)
 
 ```mermaid
 graph TD
-    A[Siswa Login] --> B[Dashboard Siswa: Live Search & Filter]
+    A[Siswa Registrasi / Login] -->|Input Kode Kelas Unik misal: A8X2P9| A1[Terdaftar di Rombel Kelas]
+    A1 --> B[Dashboard Siswa: Live Search & Filter]
     B --> C[Buka Modul dari Mapel yang Diambil]
     C --> D[1. Bagian Awal: Cover, Pengantar, Petunjuk]
     D --> E[2. Pendahuluan: Capaian & Pre-test]
@@ -274,9 +318,11 @@ Sistem menerapkan **Multi-Guard Authentication**:
 - **Model `Student`**:
   - Relasi `belongsTo(SchoolClass::class, 'class_id')`.
   - Relasi `belongsToMany(Subject::class, 'student_subjects')` untuk memetakan mata pelajaran yang ditempuh siswa.
+  - Relasi `belongsToMany(SchoolClass::class, 'class_student')`.
   - Helper `subjectNames(): string`.
 - **Model `Teacher`**:
   - Relasi `belongsToMany(Subject::class, 'teacher_subjects')` untuk mendukung multi-mapel.
+  - Relasi `belongsToMany(SchoolClass::class, 'class_teacher')` untuk memetakan **Kelas Didik**.
   - Helper `subjectNames(): string` dan `assignedClasses(?int $subjectId)`.
 - **Model `Subject`**:
   - Relasi `belongsToMany(Teacher::class, 'teacher_subjects')`.
@@ -285,9 +331,12 @@ Sistem menerapkan **Multi-Guard Authentication**:
   - Helper visual: `badgeClasses()`, `softBgColor()`, `textColor()`.
 - **Model `SchoolClass`**:
   - Relasi `belongsTo(Major::class, 'major_id')`.
-  - Relasi `hasMany(Student::class, 'class_id')`.
+  - Relasi `belongsToMany(Teacher::class, 'class_teacher')`.
+  - Relasi `belongsToMany(Student::class, 'class_student')`.
   - Relasi `hasMany(Module::class, 'class_id')`.
-  - Accessor `full_name` (misal: `"Kelas X TE 2"`) dan `short_name` (misal: `"X TE 2"`).
+  - Kolom `code` unik dengan auto-generation via `booted()` event.
+  - Accessor `full_name` (misal: `"Kelas X TE 1"`) dan `short_name` (misal: `"X TE 1"`).
+  - Helper `regenerateCode(): string`.
 - **Model `Major`**:
   - Relasi `hasMany(SchoolClass::class, 'major_id')`.
 - **Model `Module`**:
@@ -312,12 +361,13 @@ erDiagram
     MAJORS {
         bigint id PK
         string name "Nama Jurusan / Keahlian"
-        string code "Kode Singkatan (PPLG, TE, dll)"
+        string code "Kode Singkatan (TE, DP, TKJ, dll)"
         text description
     }
     CLASSES {
         bigint id PK
         bigint major_id FK
+        string code "Kode Kelas Unik (6 Karakter Kapital)"
         string grade "Tingkat (X, XI, XII, XIII)"
         string section "Nomor Rombel (1, 2, dll)"
         string major_name "Fallback Nama Jurusan"
@@ -341,6 +391,10 @@ erDiagram
         bigint teacher_id FK
         bigint subject_id FK
     }
+    CLASS_TEACHER {
+        bigint teacher_id FK
+        bigint class_id FK
+    }
     STUDENTS {
         bigint id PK
         string name
@@ -352,6 +406,10 @@ erDiagram
         bigint id PK
         bigint student_id FK
         bigint subject_id FK
+    }
+    CLASS_STUDENT {
+        bigint class_id FK
+        bigint student_id FK
     }
     MODULES {
         bigint id PK
@@ -386,7 +444,10 @@ erDiagram
     }
 
     MAJORS ||--o{ CLASSES : "memiliki rombel"
-    CLASSES ||--o{ STUDENTS : "menampung siswa"
+    CLASSES ||--o{ CLASS_TEACHER : "ditugaskan ke"
+    TEACHERS ||--o{ CLASS_TEACHER : "mengampu kelas didik"
+    CLASSES ||--o{ CLASS_STUDENT : "menampung siswa"
+    STUDENTS ||--o{ CLASS_STUDENT : "terdaftar pada"
     CLASSES ||--o{ MODULES : "ditargetkan untuk"
     TEACHERS ||--o{ TEACHER_SUBJECTS : "mengampu"
     SUBJECTS ||--o{ TEACHER_SUBJECTS : "diampu oleh"
@@ -397,6 +458,8 @@ erDiagram
     STUDENTS ||--o{ STUDENT_RESULTS : "memiliki hasil belajar"
     MODULES ||--o{ STUDENT_RESULTS : "dievaluasi"
 ```
+
+---
 
 ### 6.2 Data Dictionary Struktur Data Video (`video_data` JSON)
 
@@ -436,17 +499,17 @@ erDiagram
 ### 7.1 Backend & Arsitektur
 - **Framework:** Laravel 11 (PHP 8.2+) dengan arsitektur Monolithic MVC.
 - **Autentikasi:** Laravel Multi-Guard Authentication (`admin`, `teacher`, `student`).
-- **ORM & Database Engine:** Eloquent ORM pada MySQL / MariaDB dengan dukungan tipe data JSON dan relasi *Many-to-Many*.
+- **ORM & Database Engine:** Eloquent ORM pada MySQL / MariaDB dengan dukungan tipe data JSON dan relasi *Many-to-Many* (`class_teacher`, `teacher_subjects`, `student_subjects`, `class_student`).
 
 ### 7.2 Frontend & UI
-- **Templating:** Blade Templating Engine.
+- **Templating:** Blade Templating Engine dengan arsitektur sub-komponen modular (`partials/`).
 - **Styling:** Tailwind CSS dengan estetika visual modern, micro-animation, palet warna berharmonisasi, dan *responsive layout*.
-- **Interaktivitas:** Alpine.js untuk manajemen state modal dialog, live search, playlist video switcher, dan form dinamis, serta AJAX handler untuk toggle switch builder.
+- **Interaktivitas:** Alpine.js untuk manajemen state modal dialog, 1-click clipboard copier, live search, playlist video switcher, dan form dinamis, serta AJAX handler untuk toggle switch builder.
 - **Asset Bundler:** Vite 7.
 
 ### 7.3 Penyimpanan Berkas & Pelaporan
 - **File Storage:** Laravel Storage Symlink dengan validasi MIME-type (Screenshot, PDF Job Sheet / LKPD, Cover Modul).
-- **Spreadsheet / Excel Reporting:** `maatwebsite/excel` (atau `phpoffice/phpspreadsheet`) untuk ekspor laporan rekapitulasi nilai dinamis (.xlsx).
+- **Spreadsheet / Excel Reporting:** `maatwebsite/excel` untuk ekspor laporan rekapitulasi nilai dinamis (.xlsx).
 
 ---
 
@@ -463,11 +526,11 @@ e-modul/
 │   │   │   ├── Controller.php                  # Base Controller
 │   │   │   ├── Admin/                          # Admin Management & Supervision Controllers
 │   │   │   │   ├── AdminDashboardController.php # Dasbor Supervisi & Statistik Sekolah
-│   │   │   │   ├── TeacherController.php       # Master Data Guru & Multi-Mapel
+│   │   │   │   ├── TeacherController.php       # Master Data Guru, Multi-Mapel & Ploting Kelas Didik
 │   │   │   │   ├── StudentController.php       # Master Data Siswa (Direktori Kelas & Siswa per Kelas)
 │   │   │   │   ├── SubjectController.php       # Master Data Mata Pelajaran
 │   │   │   │   ├── MajorController.php         # Master Data Jurusan / Konsentrasi Keahlian
-│   │   │   │   └── ClassController.php         # Master Data Rombel Kelas
+│   │   │   │   └── ClassController.php         # Build Kelas, Generator Kode Unik & Regenerate Code
 │   │   │   ├── Student/                        # Student Portal Controllers
 │   │   │   │   ├── DashboardController.php     # Dashboard Siswa (Personalized Subject, Live Search & Filter)
 │   │   │   │   └── ModuleController.php        # Halaman Modul per Mapel & Pembelajaran 5 Bagian
@@ -486,17 +549,17 @@ e-modul/
 │   │   │       ├── GradingController.php       # Matriks Penilaian Adaptif & Rekapitulasi Nilai Siswa
 │   │   │       ├── ModuleLibraryController.php # Perpustakaan Modul Bersama & Kloning Kurikulum
 │   │   │       ├── ReportController.php        # Ekspor & Laporan Rekap Nilai Excel (.xlsx)
-│   │   │       ├── ClassController.php         # Manajemen Kelas Binaan & Direktori Akademik Siswa
+│   │   │       ├── ClassController.php         # Manajemen Kelas Didik Guru & Direktori Akademik Siswa
 │   │   │       └── ModuleManagerController.php # Manajer Modul (CRUD, Publish, Close, Subject Switcher)
 │   │   └── Middleware/
 │   │       └── Authenticate.php                # Multi-guard authentication middleware handler
 │   ├── Models/
 │   │   ├── Admin.php                           # Model entitas Administrator
-│   │   ├── Teacher.php                         # Model entitas Guru (Multi-Mapel via teacher_subjects)
+│   │   ├── Teacher.php                         # Model entitas Guru (Multi-Mapel & Kelas Didik)
 │   │   ├── Student.php                         # Model entitas Siswa (Mapel via student_subjects)
 │   │   ├── Subject.php                         # Model entitas Master Mata Pelajaran (Mapel)
 │   │   ├── Major.php                           # Model entitas Jurusan / Konsentrasi Keahlian
-│   │   ├── SchoolClass.php                     # Model entitas Rombel Kelas & Relasi Major
+│   │   ├── SchoolClass.php                     # Model entitas Rombel Kelas, Auto Code & Relasi Major
 │   │   ├── Module.php                          # Model E-Modul Sentral, Helper 5 Bagian & Multi-Video List
 │   │   ├── PreTest.php                         # Model konfigurasi Pre-test
 │   │   ├── PreTestQuestion.php                 # Model butir soal Pre-test
@@ -525,13 +588,13 @@ e-modul/
 │   │   └── pages/
 │   │       ├── admin/
 │   │       │   ├── dashboard.blade.php         # Dasbor supervisi admin
-│   │       │   ├── teachers/index.blade.php    # Master data & pendaftaran guru (multi-mapel)
+│   │       │   ├── teachers/index.blade.php    # Master data & pendaftaran guru (multi-mapel & kelas didik)
 │   │       │   ├── students/
 │   │       │   │   ├── index.blade.php         # Master data siswa (Direktori Kartu Rombel Kelas)
 │   │       │   │   └── class.blade.php         # Master data siswa (Daftar Siswa per Kelas Terpilih)
 │   │       │   ├── subjects/index.blade.php    # Master data mata pelajaran
 │   │       │   ├── majors/index.blade.php      # Master data jurusan / keahlian
-│   │       │   └── classes/index.blade.php     # Master data rombel kelas
+│   │       │   └── classes/index.blade.php     # Build kelas, generator kode unik & ploting guru
 │   │       ├── student/
 │   │       │   ├── dashboard.blade.php         # Portal belajar siswa (Live Search & Multi-Grade Toolbar)
 │   │       │   ├── classes/
@@ -540,27 +603,29 @@ e-modul/
 │   │       │   └── modules/
 │   │       │       ├── index.blade.php         # Katalog modul siswa
 │   │       │       ├── subject.blade.php       # Modul belajar per mata pelajaran
-│   │       │       └── show.blade.php          # Pembelajaran interaktif 5 bagian (Multi-Video Playlist)
+│   │       │       ├── show.blade.php          # Pembelajaran interaktif 5 bagian orchestrator
+│   │       │       └── partials/               # 19 modul parsial antarmuka pembelajaran interaktif
 │   │       └── teacher/
-│   │           ├── dashboard.blade.php         # Dashboard Workspace Guru
+│   │           ├── dashboard.blade.php         # Dashboard Workspace Guru (Khusus Kelas Didik)
 │   │           ├── library/                    # Katalog perpustakaan modul bersama
-│   │           ├── classes/                    # Manajemen kelas & siswa binaan
-│   │           ├── grading/                    # Pusat penilaian Grading Center
+│   │           ├── classes/                    # Manajemen kelas didik guru & direktori siswa
+│   │           ├── grading/                    # Pusat penilaian Grading Center (Khusus Kelas Didik)
 │   │           ├── modules/                    # Manajer & Builder modul pembelajaran 5 bagian
 │   │           │   ├── video.blade.php         # Editor Multi-Video YouTube, Keterangan & Resume
 │   │           │   └── preview-video.blade.php # Simulasi Playlist Multi-Video & Resume Siswa
 │   │           └── reports/                    # Laporan & ekspor spreadsheet Excel (.xlsx)
-├── routes/
-│   ├── web.php                                 # Rute aplikasi lengkap (Admin, Guru, Siswa)
-│   └── console.php                             # Rute perintah artisan CLI
+│   └── routes/
+│       ├── web.php                             # Rute aplikasi lengkap (Admin, Guru, Siswa)
+│       └── console.php                         # Rute perintah artisan CLI
 ├── tests/
 │   └── Feature/
+│       ├── AdminCurriculumManagementTest.php   # Pengujian kurikulum, mapel, jurusan & build kelas
 │       ├── AdminUserManagementTest.php         # Pengujian CRUD guru, siswa, rombel, mapel
 │       ├── StudentDashboardTest.php            # Pengujian dashboard, live filter, search & status
 │       ├── StudentModuleTest.php               # Pengujian akses modul & proteksi mapel
 │       ├── StudentInteractiveLearningTest.php  # Pengujian pembelajaran interaktif & submit tugas
 │       ├── TeacherVideoManagementTest.php      # Pengujian Multi-Video, Keterangan & Satu Resume
-│       ├── TeacherClassTest.php                # Pengujian manajemen kelas & siswa binaan guru
+│       ├── TeacherClassTest.php                # Pengujian kelas didik & penugasan admin
 │       ├── BagianAwalTest.php                  # Pengujian editor Bagian Awal
 │       ├── PendahuluanTest.php                 # Pengujian editor Pendahuluan
 │       ├── DaftarPustakaTest.php               # Pengujian editor Daftar Pustaka

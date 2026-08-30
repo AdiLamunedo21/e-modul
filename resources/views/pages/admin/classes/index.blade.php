@@ -1,7 +1,7 @@
 @extends('layouts.admin.dashboardadmin')
 
-@section('title', 'Master Kelas & Rombel — Admin E-Modul')
-@section('page-title', 'Master Kelas & Rombel')
+@section('title', 'Build Kelas & Manajemen Rombel — Admin E-Modul')
+@section('page-title', 'Build Kelas')
 
 @section('content')
 
@@ -9,9 +9,10 @@
     createModalOpen: false,
     editModalOpen: false,
     deleteModalOpen: false,
-    activeClass: { id: null, grade: 'X', major_id: '', section: '1', name: '' },
+    activeClass: { id: null, grade: 'X', major_id: '', section: '1', name: '', code: '', teacher_ids: [] },
     openEdit(cls) {
         this.activeClass = JSON.parse(JSON.stringify(cls));
+        if (!this.activeClass.teacher_ids) this.activeClass.teacher_ids = [];
         this.editModalOpen = true;
     },
     openDelete(cls) {
@@ -26,20 +27,20 @@
             <nav class="flex items-center gap-2 text-xs text-slate-400 mb-1">
                 <a href="{{ route('admin.dashboard') }}" class="hover:text-indigo-600 transition-colors">Dashboard</a>
                 <span>/</span>
-                <span class="text-slate-700 font-semibold">Master Kelas & Rombel</span>
+                <span class="text-slate-700 font-semibold">Build Kelas</span>
             </nav>
             <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
-                <span>Master Kelas & Rombongan Belajar</span>
+                <span>Pusat Build Kelas & Rombongan Belajar</span>
                 <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
                     {{ $stats['total'] }} Rombel
                 </span>
             </h1>
             <p class="mt-1 text-sm text-slate-500">
-                Kelola rombongan belajar kelas spesifik berdasarkan tingkat (X, XI, XII), jurusan, dan nomor pararel.
+                Bangun rombel kelas baru dengan generator kode unik kelas otomatis untuk pendaftaran siswa dan ploting guru pendidik.
             </p>
         </div>
 
-        {{-- Button Tambah Kelas --}}
+        {{-- Button Build Kelas --}}
         <div>
             <button type="button"
                     @click="createModalOpen = true"
@@ -47,7 +48,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
-                <span>Tambah Rombel Baru</span>
+                <span>Build Kelas Baru</span>
             </button>
         </div>
     </div>
@@ -92,7 +93,7 @@
                 <input type="text"
                        name="search"
                        value="{{ $search }}"
-                       placeholder="Cari tingkat, rombel, atau jurusan..."
+                       placeholder="Cari kode kelas, rombel, jurusan, atau guru..."
                        class="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
             </div>
 
@@ -102,9 +103,10 @@
                         onchange="this.form.submit()"
                         class="text-xs rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-700 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
                     <option value="all">-- Semua Tingkat --</option>
-                    <option value="X" {{ $grade === 'X' ? 'selected' : '' }}>Tingkat X (Sepuluh)</option>
-                    <option value="XI" {{ $grade === 'XI' ? 'selected' : '' }}>Tingkat XI (Sebelas)</option>
-                    <option value="XII" {{ $grade === 'XII' ? 'selected' : '' }}>Tingkat XII (Dua Belas)</option>
+                    <option value="X" {{ $grade === 'X' ? 'selected' : '' }}>Tingkat X</option>
+                    <option value="XI" {{ $grade === 'XI' ? 'selected' : '' }}>Tingkat XI</option>
+                    <option value="XII" {{ $grade === 'XII' ? 'selected' : '' }}>Tingkat XII</option>
+                    <option value="XIII" {{ $grade === 'XIII' ? 'selected' : '' }}>Tingkat XIII</option>
                 </select>
 
                 <select name="major_id"
@@ -131,64 +133,97 @@
         </form>
     </div>
 
-    {{-- ══ 3. TABEL MASTER KELAS ══ --}}
+    {{-- ══ 3. TABEL BUILD KELAS ══ --}}
     <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden mb-6">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
                 <thead>
                     <tr class="bg-slate-50/80 border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                        <th class="py-4 px-6">Identitas Rombel Kelas</th>
-                        <th class="py-4 px-4">Tingkat</th>
-                        <th class="py-4 px-4">Jurusan / Konsentrasi</th>
+                        <th class="py-4 px-6">Identitas Rombel</th>
+                        <th class="py-4 px-4">Kode Kelas (Auto)</th>
+                        <th class="py-4 px-4">Jurusan & Tingkat</th>
+                        <th class="py-4 px-4">Guru Pengampu</th>
                         <th class="py-4 px-4 text-center">Jumlah Siswa</th>
-                        <th class="py-4 px-4 text-center">Modul Ditugaskan</th>
-                        <th class="py-4 px-6 text-right">Aksi Manajemen</th>
+                        <th class="py-4 px-4 text-center">Modul Ajar</th>
+                        <th class="py-4 px-6 text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse($classes as $c)
                         @php
+                            $cTeacherIds = $c->teachers->pluck('id')->toArray();
                             $cJson = json_encode([
                                 'id' => $c->id,
                                 'grade' => $c->grade,
                                 'major_id' => $c->major_id,
                                 'section' => $c->section ?: '1',
                                 'name' => $c->full_name,
+                                'code' => $c->code,
+                                'teacher_ids' => $cTeacherIds,
                             ]);
                         @endphp
                         <tr class="hover:bg-slate-50/60 transition-colors">
                             {{-- Nama Rombel --}}
                             <td class="py-4 px-6">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-800 font-black text-xs flex items-center justify-center border border-slate-200 shrink-0">
+                                    <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-700 font-black text-xs flex items-center justify-center border border-indigo-100 shrink-0">
                                         {{ $c->grade }}
                                     </div>
                                     <div>
                                         <p class="font-bold text-slate-900 text-xs">{{ $c->full_name }}</p>
-                                        <p class="text-[11px] text-slate-400">Rombel: {{ $c->section ?: '1' }}</p>
+                                        <p class="text-[11px] text-slate-400 font-mono">Rombel {{ $c->section ?: '1' }}</p>
                                     </div>
                                 </div>
                             </td>
 
-                            {{-- Tingkat --}}
+                            {{-- Kode Kelas (Auto-Generated) with Copy & Regenerate --}}
                             <td class="py-4 px-4">
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
-                                    Kelas {{ $c->grade }}
-                                </span>
+                                <div class="inline-flex items-center gap-1.5 p-1.5 rounded-xl bg-slate-50 border border-slate-200" x-data="{ copied: false }">
+                                    <span class="font-mono font-black text-xs text-slate-800 px-2 tracking-wider select-all">{{ $c->code }}</span>
+                                    
+                                    {{-- Tombol Salin Kode --}}
+                                    <button type="button"
+                                            @click="navigator.clipboard.writeText('{{ $c->code }}'); copied = true; setTimeout(() => copied = false, 2000)"
+                                            :class="copied ? 'bg-emerald-600 text-white' : 'bg-white hover:bg-indigo-600 hover:text-white text-slate-600 border border-slate-200 shadow-2xs'"
+                                            class="p-1.5 rounded-lg text-xs transition-all"
+                                            title="Salin Kode Kelas">
+                                        <svg x-show="!copied" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184"/></svg>
+                                        <svg x-show="copied" x-cloak class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                                    </button>
+
+                                    {{-- Tombol Regenerate Kode --}}
+                                    <form action="{{ route('admin.classes.regenerate-code', $c) }}" method="POST" class="inline" onsubmit="return confirm('Acak ulang kode kelas untuk {{ $c->full_name }}?')">
+                                        @csrf
+                                        <button type="submit" class="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-white transition-all" title="Acak Ulang Kode Kelas">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
 
-                            {{-- Jurusan --}}
+                            {{-- Jurusan & Tingkat --}}
                             <td class="py-4 px-4">
-                                @if($c->major)
-                                    <div>
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono">
-                                            {{ $c->major->code }}
+                                <div>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-black bg-indigo-50 text-indigo-700 border border-indigo-100 font-mono">
+                                        {{ $c->major?->code ?? $c->major_name }}
+                                    </span>
+                                    <span class="text-xs text-slate-600 ml-1 font-medium">{{ $c->major?->name ?? '' }}</span>
+                                </div>
+                            </td>
+
+                            {{-- Guru Pengampu --}}
+                            <td class="py-4 px-4">
+                                <div class="flex flex-wrap gap-1 max-w-[200px]">
+                                    @forelse($c->teachers as $tch)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
+                                            {{ $tch->name }}
                                         </span>
-                                        <span class="text-xs text-slate-600 ml-1 font-medium">{{ $c->major->name }}</span>
-                                    </div>
-                                @else
-                                    <span class="text-xs text-slate-600">{{ $c->major_name }}</span>
-                                @endif
+                                    @empty
+                                        <span class="text-[11px] text-amber-600 italic">Belum diplot</span>
+                                    @endforelse
+                                </div>
                             </td>
 
                             {{-- Jumlah Siswa --}}
@@ -212,7 +247,7 @@
                                     <button type="button"
                                             @click="openEdit({{ $cJson }})"
                                             class="p-2 text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition-colors"
-                                            title="Edit Kelas">
+                                            title="Edit Rombel & Ploting Guru">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/>
                                         </svg>
@@ -231,8 +266,8 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="py-12 text-center text-slate-400 text-xs">
-                                Tidak ada data kelas yang ditemukan.
+                            <td colspan="7" class="py-12 text-center text-slate-400 text-xs">
+                                Tidak ada data rombel kelas yang ditemukan.
                             </td>
                         </tr>
                     @endforelse
@@ -247,7 +282,7 @@
         @endif
     </div>
 
-    {{-- ══ 4. MODAL: TAMBAH KELAS ROMBEL ══ --}}
+    {{-- ══ 4. MODAL: BUILD KELAS BARU ══ --}}
     <div x-cloak 
          x-show="createModalOpen" 
          @keydown.escape.window="createModalOpen = false" 
@@ -256,7 +291,6 @@
          role="dialog" 
          aria-modal="true">
 
-        {{-- Backdrop Blur (Strictly covers only workspace area right of the sidebar) --}}
         <div x-show="createModalOpen" 
              x-transition.opacity 
              class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity"
@@ -271,13 +305,16 @@
                  x-transition:leave="transition ease-in duration-200"
                  x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                  x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                 class="relative z-10 w-full max-w-md mx-auto transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all my-8 border border-slate-100">
+                 class="relative z-10 w-full max-w-lg mx-auto transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all my-8 border border-slate-100">
                 
                 <form action="{{ route('admin.classes.store') }}" method="POST">
                     @csrf
                     <div class="bg-white p-6 sm:p-7">
                         <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
-                            <h3 class="text-lg font-black text-slate-900">Tambah Rombel Kelas Baru</h3>
+                            <div>
+                                <h3 class="text-lg font-black text-slate-900">Build Rombel Kelas Baru</h3>
+                                <p class="text-xs text-slate-500 mt-0.5">Kode unik kelas akan dibuat secara otomatis oleh sistem.</p>
+                            </div>
                             <button type="button" @click="createModalOpen = false" class="text-slate-400 hover:text-slate-600 text-lg">&times;</button>
                         </div>
 
@@ -307,6 +344,35 @@
                                     @endforeach
                                 </select>
                             </div>
+
+                            {{-- Ploting Guru Pengampu --}}
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">Guru Pengampu / Tanggung Jawab Kelas (Opsional)</label>
+                                <p class="text-[11px] text-slate-500 mb-1.5">Pilih guru yang akan memiliki akses ke kelas ini:</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-36 overflow-y-auto p-2.5 rounded-2xl bg-slate-50 border border-slate-200">
+                                    @forelse($teachers as $t)
+                                        <label class="flex items-center gap-2.5 text-slate-700 cursor-pointer p-2 rounded-xl hover:bg-white transition-all border border-transparent hover:border-slate-200">
+                                            <input type="checkbox" name="teacher_ids[]" value="{{ $t->id }}" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300">
+                                            <div class="min-w-0">
+                                                <p class="text-xs font-bold text-slate-800 truncate">{{ $t->name }}</p>
+                                                <p class="text-[10px] font-mono text-slate-500">NIP: {{ $t->identity_number }}</p>
+                                            </div>
+                                        </label>
+                                    @empty
+                                        <p class="col-span-2 text-xs text-slate-400 italic p-2">Belum ada data guru.</p>
+                                    @endforelse
+                                </div>
+                            </div>
+
+                            {{-- Notice Kode Kelas --}}
+                            <div class="p-3 rounded-2xl bg-indigo-50/70 border border-indigo-200/80 flex items-center gap-2.5 text-indigo-900">
+                                <svg class="w-5 h-5 text-indigo-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                                </svg>
+                                <span class="text-[11px] leading-tight">
+                                    Kode kelas (6 digit kapital unik) akan dibuat otomatis saat tombol disimpan ditekan.
+                                </span>
+                            </div>
                         </div>
                     </div>
 
@@ -315,7 +381,7 @@
                             Batal
                         </button>
                         <button type="submit" class="px-5 py-2 rounded-xl text-xs font-extrabold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/25 transition-all">
-                            Simpan Kelas Rombel
+                            Simpan & Generate Kode Kelas
                         </button>
                     </div>
                 </form>
@@ -332,7 +398,6 @@
          role="dialog" 
          aria-modal="true">
 
-        {{-- Backdrop Blur (Strictly covers only workspace area right of the sidebar) --}}
         <div x-show="editModalOpen" 
              x-transition.opacity 
              class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity"
@@ -347,7 +412,7 @@
                  x-transition:leave="transition ease-in duration-200"
                  x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                  x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                 class="relative z-10 w-full max-w-md mx-auto transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all my-8 border border-slate-100">
+                 class="relative z-10 w-full max-w-lg mx-auto transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all my-8 border border-slate-100">
                 
                 <form :action="'{{ url('/admin/classes') }}/' + activeClass.id" method="POST">
                     @csrf
@@ -355,7 +420,10 @@
 
                     <div class="bg-white p-6 sm:p-7">
                         <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
-                            <h3 class="text-lg font-black text-slate-900">Edit Rombel Kelas</h3>
+                            <div>
+                                <h3 class="text-lg font-black text-slate-900">Edit Rombel & Guru Pengampu</h3>
+                                <p class="text-xs text-slate-500 mt-0.5">Kode Kelas: <strong class="font-mono text-indigo-600 font-bold" x-text="activeClass.code"></strong></p>
+                            </div>
                             <button type="button" @click="editModalOpen = false" class="text-slate-400 hover:text-slate-600 text-lg">&times;</button>
                         </div>
 
@@ -384,6 +452,29 @@
                                     @endforeach
                                 </select>
                             </div>
+
+                            {{-- Ploting Guru Pengampu --}}
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">Guru Pengampu / Tanggung Jawab Kelas</label>
+                                <p class="text-[11px] text-slate-500 mb-1.5">Centang guru yang diplot untuk mengajar di kelas ini:</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-36 overflow-y-auto p-2.5 rounded-2xl bg-slate-50 border border-slate-200">
+                                    @forelse($teachers as $t)
+                                        <label class="flex items-center gap-2.5 text-slate-700 cursor-pointer p-2 rounded-xl hover:bg-white transition-all border border-transparent hover:border-slate-200">
+                                            <input type="checkbox"
+                                                   name="teacher_ids[]"
+                                                   value="{{ $t->id }}"
+                                                   :checked="activeClass.teacher_ids && activeClass.teacher_ids.includes({{ $t->id }})"
+                                                   class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300">
+                                            <div class="min-w-0">
+                                                <p class="text-xs font-bold text-slate-800 truncate">{{ $t->name }}</p>
+                                                <p class="text-[10px] font-mono text-slate-500">NIP: {{ $t->identity_number }}</p>
+                                            </div>
+                                        </label>
+                                    @empty
+                                        <p class="col-span-2 text-xs text-slate-400 italic p-2">Belum ada data guru.</p>
+                                    @endforelse
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -409,7 +500,6 @@
          role="dialog" 
          aria-modal="true">
 
-        {{-- Backdrop Blur (Strictly covers only workspace area right of the sidebar) --}}
         <div x-show="deleteModalOpen" 
              x-transition.opacity 
              class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity"
@@ -433,7 +523,7 @@
                     <div class="bg-white p-6 sm:p-7 text-center">
                         <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-4 border border-red-100">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.008v.008H12v-.008z"/>
                             </svg>
                         </div>
 
