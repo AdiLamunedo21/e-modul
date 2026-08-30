@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\SchoolClass;
 use App\Models\Subject;
 use App\Models\Teacher;
 use Illuminate\Http\Request;
@@ -19,7 +20,7 @@ class TeacherController extends Controller
         $search = $request->query('search');
         $subjectId = $request->query('subject_id');
 
-        $query = Teacher::with(['subjects', 'modules.schoolClass'])
+        $query = Teacher::with(['subjects', 'classes.major', 'modules.schoolClass'])
             ->withCount([
                 'modules',
                 'modules as published_modules_count' => fn($q) => $q->where('status', 'published'),
@@ -42,6 +43,7 @@ class TeacherController extends Controller
 
         // Data pendukung
         $subjects = Subject::orderBy('name')->get();
+        $classes = SchoolClass::with('major')->orderBy('grade')->orderBy('major_id')->orderBy('section')->get();
         $totalTeachers = Teacher::count();
         $assignedTeachersCount = Teacher::has('subjects')->count();
         $unassignedTeachersCount = Teacher::doesntHave('subjects')->count();
@@ -55,6 +57,7 @@ class TeacherController extends Controller
         return view('pages.admin.teachers.index', compact(
             'teachers',
             'subjects',
+            'classes',
             'stats',
             'search',
             'subjectId'
@@ -72,6 +75,8 @@ class TeacherController extends Controller
             'password'        => ['required', 'string', 'min:6'],
             'subject_ids'     => ['nullable', 'array'],
             'subject_ids.*'   => ['exists:subjects,id'],
+            'class_ids'       => ['nullable', 'array'],
+            'class_ids.*'     => ['exists:classes,id'],
         ], [
             'name.required'            => 'Nama lengkap guru wajib diisi.',
             'identity_number.required' => 'NIP / NUPTK / Identitas wajib diisi.',
@@ -88,6 +93,10 @@ class TeacherController extends Controller
 
         if (!empty($validated['subject_ids'])) {
             $teacher->subjects()->sync($validated['subject_ids']);
+        }
+
+        if (!empty($validated['class_ids'])) {
+            $teacher->classes()->sync($validated['class_ids']);
         }
 
         return redirect()->route('admin.teachers.index')
@@ -110,6 +119,8 @@ class TeacherController extends Controller
             'password'        => ['nullable', 'string', 'min:6'],
             'subject_ids'     => ['nullable', 'array'],
             'subject_ids.*'   => ['exists:subjects,id'],
+            'class_ids'       => ['nullable', 'array'],
+            'class_ids.*'     => ['exists:classes,id'],
         ], [
             'name.required'            => 'Nama lengkap guru wajib diisi.',
             'identity_number.required' => 'NIP / Identitas wajib diisi.',
@@ -127,6 +138,7 @@ class TeacherController extends Controller
         $teacher->save();
 
         $teacher->subjects()->sync($validated['subject_ids'] ?? []);
+        $teacher->classes()->sync($validated['class_ids'] ?? []);
 
         return redirect()->route('admin.teachers.index')
             ->with('success', "Data guru {$teacher->name} berhasil diperbarui.");
@@ -140,11 +152,13 @@ class TeacherController extends Controller
         $name = $teacher->name;
         $nip = $teacher->identity_number;
 
-        // Detach subjects first
+        // Detach subjects & classes first
         $teacher->subjects()->detach();
+        $teacher->classes()->detach();
         $teacher->delete();
 
         return redirect()->route('admin.teachers.index')
             ->with('success', "Akun guru {$name} (NIP: {$nip}) berhasil dihapus dari Master Data.");
     }
 }
+

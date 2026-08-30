@@ -103,7 +103,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // ═════════════════════════════════════════════════════════════════
-        // 5. GURU PENGAMPU
+        // 5. GURU PENGAMPU & PENUGASAN KELAS DIDIK
         // ═════════════════════════════════════════════════════════════════
         $teacher1 = Teacher::create([
             'name'            => 'Budi Santoso, S.Kom.',
@@ -111,6 +111,7 @@ class DatabaseSeeder extends Seeder
             'password'        => $password,
         ]);
         $teacher1->subjects()->attach([$subjectInformatika->id, $subjectJaringan->id]);
+        $teacher1->classes()->attach([$classTe1->id, $classDp1->id]);
 
         $teacher2 = Teacher::create([
             'name'            => 'Siti Aminah, M.T.',
@@ -118,6 +119,7 @@ class DatabaseSeeder extends Seeder
             'password'        => $password,
         ]);
         $teacher2->subjects()->attach([$subjectInformatika->id, $subjectJaringan->id]);
+        $teacher2->classes()->attach([$classDp1->id]);
 
         $teacher3 = Teacher::create([
             'name'            => 'Hendra Wijaya, S.T.',
@@ -125,6 +127,7 @@ class DatabaseSeeder extends Seeder
             'password'        => $password,
         ]);
         $teacher3->subjects()->attach([$subjectInformatika->id, $subjectJaringan->id]);
+        $teacher3->classes()->attach([$classTkj1->id]);
 
         // ═════════════════════════════════════════════════════════════════
         // 6. 10 SISWA BINAAN

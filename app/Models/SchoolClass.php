@@ -59,6 +59,11 @@ class SchoolClass extends Model
         return $this->hasMany(Module::class, 'class_id');
     }
 
+    public function teachers()
+    {
+        return $this->belongsToMany(Teacher::class, 'class_teacher', 'class_id', 'teacher_id')->withTimestamps();
+    }
+
     /** Label nama kelas lengkap (Contoh: Kelas X RPL 1 atau Kelas XI RPL) */
     public function getFullNameAttribute(): string
     {

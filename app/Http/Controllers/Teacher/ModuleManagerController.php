@@ -128,7 +128,10 @@ class ModuleManagerController extends Controller
         if ($teacherSubjects->isEmpty()) {
             $teacherSubjects = Subject::orderBy('name')->get();
         }
-        $classes = SchoolClass::orderBy('grade')->orderBy('major_name')->get();
+        $classes = $teacher->classes()->with('major')->orderBy('grade')->orderBy('section')->get();
+        if ($classes->isEmpty()) {
+            $classes = SchoolClass::orderBy('grade')->orderBy('major_name')->get();
+        }
 
         return view('pages.teacher.modules.create', compact('classes', 'teacherSubjects'));
     }
@@ -178,7 +181,10 @@ class ModuleManagerController extends Controller
         if ($teacherSubjects->isEmpty()) {
             $teacherSubjects = Subject::orderBy('name')->get();
         }
-        $classes = SchoolClass::orderBy('grade')->orderBy('major_name')->get();
+        $classes = $teacher->classes()->with('major')->orderBy('grade')->orderBy('section')->get();
+        if ($classes->isEmpty()) {
+            $classes = SchoolClass::orderBy('grade')->orderBy('major_name')->get();
+        }
 
         return view('pages.teacher.modules.show', compact('module', 'teacherSubjects', 'classes'));
     }

@@ -47,12 +47,15 @@ class ClassController extends Controller
         $teacherSubjects = $teacher->subjects()->get();
         $selectedSubjectId = $request->filled('subject_id') ? (int) $request->subject_id : null;
 
-        $query = SchoolClass::with(['major', 'students', 'modules' => function ($q) use ($teacher, $selectedSubjectId) {
-            $q->where('teacher_id', $teacher->id)->with(['studentResults', 'subject']);
-            if ($selectedSubjectId) {
-                $q->where('subject_id', $selectedSubjectId);
-            }
-        }])->withCount(['students']);
+        $assignedClassIds = $teacher->classes()->pluck('classes.id')->toArray();
+
+        $query = SchoolClass::whereIn('id', $assignedClassIds)
+            ->with(['major', 'students', 'modules' => function ($q) use ($teacher, $selectedSubjectId) {
+                $q->where('teacher_id', $teacher->id)->with(['studentResults', 'subject']);
+                if ($selectedSubjectId) {
+                    $q->where('subject_id', $selectedSubjectId);
+                }
+            }])->withCount(['students']);
 
         // Filter Tingkat Kelas (X, XI, XII, XIII)
         if ($request->filled('grade') && $request->grade !== 'all') {

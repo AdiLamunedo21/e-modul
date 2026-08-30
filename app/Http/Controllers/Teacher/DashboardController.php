@@ -56,8 +56,8 @@ class DashboardController extends Controller
         $closedCount       = $allTeacherModules->where('status', 'closed')->count();
         $sharedCount       = $allTeacherModules->where('is_shared', true)->count();
 
-        // Kelas Binaan & Siswa
-        $assignedClasses = $allTeacherModules->pluck('schoolClass')->filter()->unique('id');
+        // Kelas Binaan & Siswa (Sesuai penugasan Admin)
+        $assignedClasses = $teacher->assignedClasses();
         $totalStudentsCount = $assignedClasses->sum(function ($c) {
             return $c->students ? $c->students->count() : 0;
         });

@@ -41,11 +41,23 @@ class Teacher extends Authenticatable
     }
 
     /**
-     * Mengambil daftar kelas binaan (kelas-kelas yang memiliki modul dari guru ini).
+     * Relasi kelas didik yang menjadi tanggung jawab guru ini.
+     */
+    public function classes()
+    {
+        return $this->belongsToMany(SchoolClass::class, 'class_teacher', 'teacher_id', 'class_id')->withTimestamps();
+    }
+
+    /**
+     * Mengambil daftar kelas binaan (kelas didik yang ditugaskan ke guru).
      * Dapat difilter berdasarkan subject_id jika ada.
      */
     public function assignedClasses(?int $subjectId = null)
     {
+        if ($this->classes()->exists()) {
+            return $this->classes()->with(['major', 'students', 'modules.studentResults'])->get();
+        }
+
         $query = $this->modules()->with(['schoolClass.major', 'schoolClass.students', 'schoolClass.modules.studentResults']);
         if ($subjectId) {
             $query->where('subject_id', $subjectId);

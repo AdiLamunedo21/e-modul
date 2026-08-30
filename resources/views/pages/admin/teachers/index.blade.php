@@ -9,9 +9,10 @@
     createModalOpen: false,
     editModalOpen: false,
     deleteModalOpen: false,
-    activeTeacher: { id: null, name: '', identity_number: '', subjects: [] },
+    activeTeacher: { id: null, name: '', identity_number: '', subjects: [], class_ids: [] },
     openEdit(teacher) {
         this.activeTeacher = JSON.parse(JSON.stringify(teacher));
+        if (!this.activeTeacher.class_ids) this.activeTeacher.class_ids = [];
         this.editModalOpen = true;
     },
     openDelete(teacher) {
@@ -35,7 +36,7 @@
                 </span>
             </h1>
             <p class="mt-1 text-sm text-slate-500">
-                Kelola akun guru pendidik, ploting mata pelajaran pengampu, dan pantau modul ajar.
+                Kelola akun guru pendidik, ploting mata pelajaran pengampu, serta penugasan kelas didik.
             </p>
         </div>
 
@@ -132,8 +133,8 @@
                     <tr class="bg-slate-50/80 border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
                         <th class="py-4 px-6">Identitas & Nama Guru</th>
                         <th class="py-4 px-4">Mata Pelajaran Diampu</th>
+                        <th class="py-4 px-4">Kelas Didik (Tanggung Jawab)</th>
                         <th class="py-4 px-4 text-center">Modul Ajar</th>
-                        <th class="py-4 px-4 text-center">Kelas Binaan</th>
                         <th class="py-4 px-6 text-right">Aksi Manajemen</th>
                     </tr>
                 </thead>
@@ -141,13 +142,14 @@
                     @forelse($teachers as $t)
                         @php
                             $tSubjectsIds = $t->subjects->pluck('id')->toArray();
+                            $tClassIds = $t->classes->pluck('id')->toArray();
                             $tDataJson = json_encode([
                                 'id' => $t->id,
                                 'name' => $t->name,
                                 'identity_number' => $t->identity_number,
                                 'subject_ids' => $tSubjectsIds,
+                                'class_ids' => $tClassIds,
                             ]);
-                            $assignedClassesCount = $t->assignedClasses()->count();
                         @endphp
                         <tr class="hover:bg-slate-50/60 transition-colors">
                             {{-- Nama & NIP --}}
@@ -165,13 +167,26 @@
 
                             {{-- Mata Pelajaran --}}
                             <td class="py-4 px-4">
-                                <div class="flex flex-wrap gap-1 max-w-[260px]">
+                                <div class="flex flex-wrap gap-1 max-w-[220px]">
                                     @forelse($t->subjects as $subj)
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
                                             {{ $subj->name }}
                                         </span>
                                     @empty
                                         <span class="text-[11px] text-slate-400 italic">Belum diplot</span>
+                                    @endforelse
+                                </div>
+                            </td>
+
+                            {{-- Kelas Didik --}}
+                            <td class="py-4 px-4">
+                                <div class="flex flex-wrap gap-1 max-w-[240px]">
+                                    @forelse($t->classes as $cls)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
+                                            {{ $cls->short_name }}
+                                        </span>
+                                    @empty
+                                        <span class="text-[11px] text-amber-600 italic font-medium">Belum dipilihkan</span>
                                     @endforelse
                                 </div>
                             </td>
@@ -190,20 +205,13 @@
                                 </div>
                             </td>
 
-                            {{-- Kelas Binaan --}}
-                            <td class="py-4 px-4 text-center">
-                                <span class="text-xs font-bold text-slate-700">
-                                    {{ $assignedClassesCount }} Rombel
-                                </span>
-                            </td>
-
                             {{-- Aksi --}}
                             <td class="py-4 px-6 text-right">
                                 <div class="flex items-center justify-end gap-2">
                                     <button type="button"
                                             @click="openEdit({{ $tDataJson }})"
                                             class="p-2 text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition-colors"
-                                            title="Edit Data Guru">
+                                            title="Edit Data & Kelas Didik">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/>
                                         </svg>
@@ -248,7 +256,6 @@
          role="dialog" 
          aria-modal="true">
 
-        {{-- Backdrop Blur (Strictly covers only workspace area right of the sidebar) --}}
         <div x-show="createModalOpen" 
              x-transition.opacity 
              class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity"
@@ -263,7 +270,7 @@
                  x-transition:leave="transition ease-in duration-200"
                  x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                  x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                 class="relative z-10 w-full max-w-md mx-auto transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all my-8 border border-slate-100">
+                 class="relative z-10 w-full max-w-lg mx-auto transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all my-8 border border-slate-100">
                 
                 <form action="{{ route('admin.teachers.store') }}" method="POST">
                     @csrf
@@ -292,11 +299,11 @@
                                 <input type="password" name="password" required minlength="6" placeholder="Minimal 6 karakter" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
                             </div>
 
-                            {{-- Ploting Mata Pelajaran (Centang / Checkboxes) --}}
+                            {{-- Ploting Mata Pelajaran --}}
                             <div>
                                 <label class="block font-bold text-slate-700 mb-1">Mata Pelajaran yang Diampu</label>
-                                <p class="text-[11px] text-slate-500 mb-1.5">Pilih satu atau beberapa mata pelajaran yang diampu oleh guru ini:</p>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-44 overflow-y-auto p-2.5 rounded-2xl bg-slate-50 border border-slate-200">
+                                <p class="text-[11px] text-slate-500 mb-1.5">Pilih mata pelajaran pengampu guru:</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-36 overflow-y-auto p-2.5 rounded-2xl bg-slate-50 border border-slate-200">
                                     @forelse($subjects as $s)
                                         <label class="flex items-center gap-2.5 text-slate-700 cursor-pointer p-2 rounded-xl hover:bg-white transition-all border border-transparent hover:border-slate-200">
                                             <input type="checkbox" name="subject_ids[]" value="{{ $s->id }}" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300">
@@ -307,6 +314,25 @@
                                         </label>
                                     @empty
                                         <p class="col-span-2 text-xs text-slate-400 italic p-2">Belum ada data mata pelajaran.</p>
+                                    @endforelse
+                                </div>
+                            </div>
+
+                            {{-- Penugasan Kelas Didik (Admin Memilihkan Kelas) --}}
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">Kelas Didik (Tanggung Jawab Mengajar)</label>
+                                <p class="text-[11px] text-slate-500 mb-1.5">Pilih rombel kelas yang akan muncul di dashboard guru ini:</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2.5 rounded-2xl bg-slate-50 border border-slate-200">
+                                    @forelse($classes as $cls)
+                                        <label class="flex items-center gap-2.5 text-slate-700 cursor-pointer p-2 rounded-xl hover:bg-white transition-all border border-transparent hover:border-slate-200">
+                                            <input type="checkbox" name="class_ids[]" value="{{ $cls->id }}" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300">
+                                            <div class="min-w-0">
+                                                <p class="text-xs font-bold text-slate-800 truncate">{{ $cls->full_name }}</p>
+                                                <p class="text-[10px] text-slate-500">{{ $cls->major?->name ?? $cls->major_name }}</p>
+                                            </div>
+                                        </label>
+                                    @empty
+                                        <p class="col-span-2 text-xs text-slate-400 italic p-2">Belum ada data kelas.</p>
                                     @endforelse
                                 </div>
                             </div>
@@ -326,7 +352,7 @@
         </div>
     </div>
 
-    {{-- ══ 5. MODAL: EDIT DATA GURU ══ --}}
+    {{-- ══ 5. MODAL: EDIT DATA GURU & KELAS DIDIK ══ --}}
     <div x-cloak 
          x-show="editModalOpen" 
          @keydown.escape.window="editModalOpen = false" 
@@ -335,7 +361,6 @@
          role="dialog" 
          aria-modal="true">
 
-        {{-- Backdrop Blur (Strictly covers only workspace area right of the sidebar) --}}
         <div x-show="editModalOpen" 
              x-transition.opacity 
              class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity"
@@ -350,7 +375,7 @@
                  x-transition:leave="transition ease-in duration-200"
                  x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                  x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                 class="relative z-10 w-full max-w-md mx-auto transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all my-8 border border-slate-100">
+                 class="relative z-10 w-full max-w-lg mx-auto transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all my-8 border border-slate-100">
                 
                 <form :action="'{{ url('/admin/teachers') }}/' + activeTeacher.id" method="POST">
                     @csrf
@@ -358,7 +383,7 @@
 
                     <div class="bg-white p-6 sm:p-7">
                         <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
-                            <h3 class="text-lg font-black text-slate-900">Edit Data Guru</h3>
+                            <h3 class="text-lg font-black text-slate-900">Edit Guru & Kelas Didik</h3>
                             <button type="button" @click="editModalOpen = false" class="text-slate-400 hover:text-slate-600 text-lg">&times;</button>
                         </div>
 
@@ -381,11 +406,11 @@
                                 <input type="password" name="password" minlength="6" placeholder="Kosongkan jika tidak ingin mengubah password" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
                             </div>
 
-                            {{-- Ploting Mata Pelajaran (Centang / Checkboxes) --}}
+                            {{-- Ploting Mata Pelajaran --}}
                             <div>
                                 <label class="block font-bold text-slate-700 mb-1">Mata Pelajaran yang Diampu</label>
-                                <p class="text-[11px] text-slate-500 mb-1.5">Pilih satu atau beberapa mata pelajaran yang diampu oleh guru ini:</p>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-44 overflow-y-auto p-2.5 rounded-2xl bg-slate-50 border border-slate-200">
+                                <p class="text-[11px] text-slate-500 mb-1.5">Pilih mata pelajaran pengampu guru:</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-36 overflow-y-auto p-2.5 rounded-2xl bg-slate-50 border border-slate-200">
                                     @forelse($subjects as $s)
                                         <label class="flex items-center gap-2.5 text-slate-700 cursor-pointer p-2 rounded-xl hover:bg-white transition-all border border-transparent hover:border-slate-200">
                                             <input type="checkbox"
@@ -400,6 +425,29 @@
                                         </label>
                                     @empty
                                         <p class="col-span-2 text-xs text-slate-400 italic p-2">Belum ada data mata pelajaran.</p>
+                                    @endforelse
+                                </div>
+                            </div>
+
+                            {{-- Penugasan Kelas Didik (Admin Memilihkan Kelas) --}}
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">Kelas Didik (Tanggung Jawab Mengajar)</label>
+                                <p class="text-[11px] text-slate-500 mb-1.5">Pilih rombel kelas yang akan menjadi tanggung jawab guru ini:</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2.5 rounded-2xl bg-slate-50 border border-slate-200">
+                                    @forelse($classes as $cls)
+                                        <label class="flex items-center gap-2.5 text-slate-700 cursor-pointer p-2 rounded-xl hover:bg-white transition-all border border-transparent hover:border-slate-200">
+                                            <input type="checkbox"
+                                                   name="class_ids[]"
+                                                   value="{{ $cls->id }}"
+                                                   :checked="activeTeacher.class_ids && activeTeacher.class_ids.includes({{ $cls->id }})"
+                                                   class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300">
+                                            <div class="min-w-0">
+                                                <p class="text-xs font-bold text-slate-800 truncate">{{ $cls->full_name }}</p>
+                                                <p class="text-[10px] text-slate-500">{{ $cls->major?->name ?? $cls->major_name }}</p>
+                                            </div>
+                                        </label>
+                                    @empty
+                                        <p class="col-span-2 text-xs text-slate-400 italic p-2">Belum ada data kelas.</p>
                                     @endforelse
                                 </div>
                             </div>
@@ -428,7 +476,6 @@
          role="dialog" 
          aria-modal="true">
 
-        {{-- Backdrop Blur (Strictly covers only workspace area right of the sidebar) --}}
         <div x-show="deleteModalOpen" 
              x-transition.opacity 
              class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity"
@@ -452,7 +499,7 @@
                     <div class="bg-white p-6 sm:p-7 text-center">
                         <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-4 border border-red-100">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.008v.008H12v-.008z"/>
                             </svg>
                         </div>
 

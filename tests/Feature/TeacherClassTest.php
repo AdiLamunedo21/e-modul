@@ -24,8 +24,8 @@ class TeacherClassTest extends TestCase
             ->get(route('teacher.classes.index'));
 
         $response->assertStatus(200);
-        $response->assertSee('Pusat Build Kelas');
-        $response->assertSee('Buat Kelas Baru');
+        $response->assertSee('Pusat Kelas Didik');
+        $response->assertSee('Dikelola oleh Admin');
     }
 
     public function test_classes_index_filters_work()
@@ -35,6 +35,8 @@ class TeacherClassTest extends TestCase
         if (!$teacher || !$class) {
             $this->markTestSkipped('Seed data required.');
         }
+
+        $teacher->classes()->syncWithoutDetaching([$class->id]);
 
         // Filter by grade
         $response = $this->actingAs($teacher, 'teacher')
@@ -51,33 +53,24 @@ class TeacherClassTest extends TestCase
         $responseSearch->assertSee($class->full_name);
     }
 
-    public function test_teacher_can_create_new_class()
+    public function test_admin_can_assign_classes_to_teacher()
     {
+        $admin = \App\Models\Admin::first();
         $teacher = Teacher::first();
-        $major = Major::first();
-        if (!$teacher || !$major) {
+        $class = SchoolClass::first();
+        if (!$admin || !$teacher || !$class) {
             $this->markTestSkipped('Seed data required.');
         }
 
-        $section = 'R' . rand(10000, 99999);
-
-        $response = $this->actingAs($teacher, 'teacher')
-            ->post(route('teacher.classes.store'), [
-                'grade'    => 'X',
-                'major_id' => $major->id,
-                'section'  => $section,
+        $response = $this->actingAs($admin, 'admin')
+            ->patch(route('admin.teachers.update', $teacher), [
+                'name'            => $teacher->name,
+                'identity_number' => $teacher->identity_number,
+                'class_ids'       => [$class->id],
             ]);
 
-        $newClass = SchoolClass::where('section', $section)->latest('id')->first();
-        $this->assertNotNull($newClass);
-        $response->assertRedirect(route('teacher.classes.show', $newClass));
-
-        $this->assertDatabaseHas('classes', [
-            'id'       => $newClass->id,
-            'grade'    => 'X',
-            'major_id' => $major->id,
-            'section'  => $section,
-        ]);
+        $response->assertRedirect(route('admin.teachers.index'));
+        $this->assertTrue($teacher->fresh()->classes->contains($class->id));
     }
 
     public function test_teacher_can_import_modules_from_another_class()

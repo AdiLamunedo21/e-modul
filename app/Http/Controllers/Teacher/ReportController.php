@@ -43,7 +43,8 @@ class ReportController extends Controller
         $grade = $request->query('grade');
         $majorId = $request->query('major_id');
 
-        $query = SchoolClass::with(['major'])->withCount(['students']);
+        $assignedClassIds = $teacher->classes()->pluck('classes.id')->toArray();
+        $query = SchoolClass::whereIn('id', $assignedClassIds)->with(['major'])->withCount(['students']);
 
         if ($search) {
             $query->where(function ($q) use ($search) {
