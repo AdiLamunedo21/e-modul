@@ -191,16 +191,6 @@
 
             {{-- Filter Controls --}}
             <div class="flex flex-wrap items-center gap-2.5">
-                {{-- Sort By --}}
-                <div class="w-full sm:w-44">
-                    <select name="sort" onchange="this.form.submit()"
-                            class="w-full py-2.5 px-3 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-700 transition-all cursor-pointer">
-                        <option value="latest" {{ ($sort ?? '') == 'latest' ? 'selected' : '' }}>✨ Terbaru Dibagikan</option>
-                        <option value="popular" {{ ($sort ?? '') == 'popular' ? 'selected' : '' }}>🔥 Paling Banyak Dikloning</option>
-                        <option value="title_asc" {{ ($sort ?? '') == 'title_asc' ? 'selected' : '' }}>🔤 Judul (A - Z)</option>
-                    </select>
-                </div>
-
                 {{-- Filter Tingkat --}}
                 <div class="w-full sm:w-32">
                     <select name="grade" onchange="this.form.submit()"
