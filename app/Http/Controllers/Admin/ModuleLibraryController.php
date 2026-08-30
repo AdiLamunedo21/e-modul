@@ -127,7 +127,33 @@ class ModuleLibraryController extends Controller
             'lkpds'
         ]);
 
-        return view('pages.admin.library.show', compact('module'));
+        $informasiUmum = $module->informasi_umum_data ?? [];
+        $materiData = $module->materi_data ?? [];
+        $videoData = $module->video_data ?? [];
+        $videosList = $module->videosList();
+        $embedData = $module->embed_data ?? [];
+        $jobSheetData = $module->job_sheet_data ?? [];
+        $lkpdData = $module->lkpd_data ?? [];
+
+        $jobSheet = $module->jobSheets->first();
+        $lkpd = $module->lkpds->first();
+
+        // 5 Bagian Kurikulum
+        $sections = $module->moduleSectionsSummary();
+
+        return view('pages.admin.library.show', compact(
+            'module',
+            'informasiUmum',
+            'materiData',
+            'videoData',
+            'videosList',
+            'embedData',
+            'jobSheetData',
+            'lkpdData',
+            'jobSheet',
+            'lkpd',
+            'sections'
+        ));
     }
 
     /**

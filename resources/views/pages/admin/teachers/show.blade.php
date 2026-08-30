@@ -84,7 +84,7 @@
                         </span>
                     </div>
                     <p class="text-xs text-slate-400 font-mono mt-1 flex items-center gap-2">
-                        <span>NIP / NUPTK:</span>
+                        <span>NIP:</span>
                         <span class="font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">{{ $teacher->identity_number }}</span>
                     </p>
 

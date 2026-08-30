@@ -67,8 +67,8 @@ class AdminLibraryTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee(e($module->title), false);
-        $response->assertSee('Inspeksi & Pratinjau Modul', false);
-        $response->assertSee('Rincian 5 Bagian Kurikulum E-Modul', false);
+        $response->assertSee('Pratinjau E-Modul Pembelajaran', false);
+        $response->assertSee('Silabus Pembelajaran', false);
     }
 
     public function test_admin_can_toggle_share_status()
