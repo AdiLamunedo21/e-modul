@@ -142,7 +142,7 @@
                         <th class="py-4 px-6">Identitas Rombel</th>
                         <th class="py-4 px-4">Kode Kelas (Auto)</th>
                         <th class="py-4 px-4">Jurusan & Tingkat</th>
-                        <th class="py-4 px-4">Guru Pengampu</th>
+                        <th class="py-4 px-4 text-center">Guru Pengampu</th>
                         <th class="py-4 px-4 text-center">Jumlah Siswa</th>
                         <th class="py-4 px-4 text-center">Modul Ajar</th>
                         <th class="py-4 px-6 text-right">Aksi</th>
@@ -213,17 +213,21 @@
                                 </div>
                             </td>
 
-                            {{-- Guru Pengampu --}}
-                            <td class="py-4 px-4">
-                                <div class="flex flex-wrap gap-1 max-w-[200px]">
-                                    @forelse($c->teachers as $tch)
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
-                                            {{ $tch->name }}
-                                        </span>
-                                    @empty
-                                        <span class="text-[11px] text-amber-600 italic">Belum diplot</span>
-                                    @endforelse
-                                </div>
+                            {{-- Guru Pengampu (Jumlah/Angka Guru) --}}
+                            <td class="py-4 px-4 text-center">
+                                @if($c->teachers->count() > 0)
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 shadow-2xs"
+                                          title="Guru Pengampu: {{ $c->teachers->pluck('name')->implode(', ') }}">
+                                        <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                        </svg>
+                                        <span>{{ $c->teachers->count() }} Guru</span>
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-400 border border-slate-200" title="Belum ada guru yang diplot">
+                                        0 Guru
+                                    </span>
+                                @endif
                             </td>
 
                             {{-- Jumlah Siswa --}}
