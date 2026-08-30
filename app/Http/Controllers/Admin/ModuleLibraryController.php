@@ -95,6 +95,7 @@ class ModuleLibraryController extends Controller
 
         return view('pages.admin.library.index', compact(
             'modules',
+            'allShared',
             'topClonedModules',
             'stats',
             'subjects',

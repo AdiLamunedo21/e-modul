@@ -109,12 +109,15 @@ class ModuleLibraryController extends Controller
         $modules = $query->paginate(9)->withQueryString();
 
         // Statistik Agregat Perpustakaan Modul
-        $allSharedModules = Module::where('is_shared', true)->get();
+        $allSharedModules = Module::with(['teacher', 'schoolClass', 'clonedFrom.teacher', 'subject'])
+            ->where('is_shared', true)
+            ->get();
+
         $stats = [
             'total_shared'       => $allSharedModules->count(),
             'total_contributors' => $allSharedModules->pluck('teacher_id')->unique()->count(),
             'total_cloned'       => (int) $allSharedModules->sum('clone_count'),
-            'my_shared_count'    => Module::where('teacher_id', $currentTeacher->id)->where('is_shared', true)->count(),
+            'my_shared_count'    => $allSharedModules->where('teacher_id', $currentTeacher->id)->count(),
             'my_total_modules'   => Module::where('teacher_id', $currentTeacher->id)->count(),
         ];
 
@@ -128,6 +131,7 @@ class ModuleLibraryController extends Controller
 
         return view('pages.teacher.library.index', compact(
             'modules',
+            'allSharedModules',
             'stats',
             'tab',
             'sort',

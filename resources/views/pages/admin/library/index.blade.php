@@ -6,12 +6,15 @@
 @section('content')
 
 @php
-    $modulesJson = $modules->getCollection()->map(function($m) {
+    $modulesToSerialize = isset($allShared) && $allShared->isNotEmpty() ? $allShared : $modules->getCollection();
+    $modulesJson = $modulesToSerialize->map(function($m) {
         return [
             'id' => $m->id,
             'title' => $m->title,
+            'teacher_id' => (string) $m->teacher_id,
             'teacher_name' => $m->teacher->name ?? 'Guru Pendidik',
             'teacher_nip' => $m->teacher->identity_number ?? '',
+            'subject_id' => (string) $m->subject_id,
             'subject_name' => $m->subject?->name ?? 'Mapel',
             'subject_code' => $m->subject?->code ?? '-',
             'class_name' => $m->schoolClass?->short_name ?? ($m->schoolClass ? ($m->schoolClass->grade . ' ' . $m->schoolClass->major_name) : 'Semua Kelas'),
@@ -32,14 +35,26 @@
 @endphp
 
 <div x-data="{
-    searchKeyword: '{{ addslashes($search) }}',
-    explorerView: 'grid',
+    searchKeyword: '{{ addslashes($search ?? '') }}',
+    selectedSubject: '{{ addslashes($subjectId ?? 'all') }}',
+    selectedTeacher: '{{ addslashes($teacherId ?? 'all') }}',
     activeTab: 'all',
+    explorerView: 'grid',
     items: {{ json_encode($modulesJson) }},
     get displayItems() {
         let list = [...this.items];
         
-        // 1. Keyword Search
+        // 1. Filter Mata Pelajaran (Instan Tanpa Refresh)
+        if (this.selectedSubject !== 'all') {
+            list = list.filter(m => String(m.subject_id) === String(this.selectedSubject));
+        }
+
+        // 2. Filter Guru Kontributor (Instan Tanpa Refresh)
+        if (this.selectedTeacher !== 'all') {
+            list = list.filter(m => String(m.teacher_id) === String(this.selectedTeacher));
+        }
+
+        // 3. Keyword Search (Instan Tanpa Refresh)
         if (this.searchKeyword.trim() !== '') {
             const kw = this.searchKeyword.toLowerCase();
             list = list.filter(m => {
@@ -51,7 +66,7 @@
             });
         }
 
-        // 2. Filter & Sort Tabs
+        // 4. Status Filter & Sorting Tabs (Instan Tanpa Refresh)
         if (this.activeTab === 'cloned') {
             list = list.filter(m => m.clone_count > 0);
             list.sort((a, b) => b.clone_count - a.clone_count);
@@ -64,6 +79,15 @@
         }
 
         return list;
+    },
+    resetFilters() {
+        this.searchKeyword = '';
+        this.selectedSubject = 'all';
+        this.selectedTeacher = 'all';
+        this.activeTab = 'all';
+    },
+    get isFiltered() {
+        return this.searchKeyword.trim() !== '' || this.selectedSubject !== 'all' || this.selectedTeacher !== 'all' || this.activeTab !== 'all';
     }
 }">
 
@@ -77,7 +101,7 @@
             </nav>
             <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
                 <span>Supervisi Perpustakaan Modul</span>
-                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200" x-text="items.length + ' Modul Publik'">
                     {{ $stats['total_shared'] }} Modul Publik
                 </span>
             </h1>
@@ -237,8 +261,8 @@
         {{-- Row 1: Live Search + Filters + View Switcher (Sejajar di Versi Desktop) --}}
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
             
-            {{-- Server Filter & Search Form --}}
-            <form method="GET" action="{{ route('admin.library.index') }}" class="flex flex-col sm:flex-row sm:items-center gap-2.5 flex-1 min-w-0">
+            {{-- Form Wrapper (Bisa Live Filter Tanpa Reload Halaman) --}}
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2.5 flex-1 min-w-0">
                 
                 {{-- Live Search Box (Flex-1) --}}
                 <div class="relative flex-1 min-w-[200px]">
@@ -248,7 +272,6 @@
                         </svg>
                     </div>
                     <input type="text"
-                           name="search"
                            x-model="searchKeyword"
                            placeholder="Cari judul modul, guru, mapel, kelas..."
                            class="w-full pl-10 pr-9 py-2.5 text-xs bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition font-medium text-slate-800 placeholder-slate-400">
@@ -263,41 +286,41 @@
                     </button>
                 </div>
 
-                {{-- Filter Mapel --}}
-                <div class="w-full sm:w-auto sm:min-w-[150px]">
-                    <select name="subject_id"
-                            onchange="this.form.submit()"
-                            class="w-full text-xs rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-slate-700 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium cursor-pointer">
+                {{-- Filter Mapel (Instan Tanpa Refresh) --}}
+                <div class="w-full sm:w-auto sm:min-w-[160px]">
+                    <select x-model="selectedSubject"
+                            class="w-full text-xs rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-slate-700 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium cursor-pointer">
                         <option value="all">-- Semua Mapel --</option>
                         @foreach($subjects as $s)
-                            <option value="{{ $s->id }}" {{ (string)$subjectId === (string)$s->id ? 'selected' : '' }}>
+                            <option value="{{ $s->id }}">
                                 {{ $s->name }} ({{ $s->code }})
                             </option>
                         @endforeach
                     </select>
                 </div>
 
-                {{-- Filter Guru --}}
-                <div class="w-full sm:w-auto sm:min-w-[150px]">
-                    <select name="teacher_id"
-                            onchange="this.form.submit()"
-                            class="w-full text-xs rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-slate-700 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium cursor-pointer">
+                {{-- Filter Guru (Instan Tanpa Refresh) --}}
+                <div class="w-full sm:w-auto sm:min-w-[160px]">
+                    <select x-model="selectedTeacher"
+                            class="w-full text-xs rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-slate-700 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium cursor-pointer">
                         <option value="all">-- Semua Guru --</option>
                         @foreach($contributors as $c)
-                            <option value="{{ $c->id }}" {{ (string)$teacherId === (string)$c->id ? 'selected' : '' }}>
+                            <option value="{{ $c->id }}">
                                 {{ $c->name }}
                             </option>
                         @endforeach
                     </select>
                 </div>
 
-                {{-- Reset Filter Button --}}
-                @if($search || ($subjectId && $subjectId !== 'all') || ($grade && $grade !== 'all') || ($teacherId && $teacherId !== 'all'))
-                    <a href="{{ route('admin.library.index') }}" class="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl text-xs font-bold transition-colors whitespace-nowrap text-center">
-                        Reset
-                    </a>
-                @endif
-            </form>
+                {{-- Reset Filter Button (Instan Tanpa Refresh) --}}
+                <button type="button"
+                        x-show="isFiltered"
+                        x-cloak
+                        @click="resetFilters()"
+                        class="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl text-xs font-bold transition-colors whitespace-nowrap text-center cursor-pointer">
+                    Reset Filter
+                </button>
+            </div>
 
             {{-- ══ VIEW MODE SWITCHER (GRID vs LIST) ══ --}}
             <div class="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 shrink-0 self-start sm:self-center">
@@ -307,7 +330,7 @@
                         title="Tampilan Grid Kartu"
                         class="px-3 py-2 rounded-xl text-xs transition cursor-pointer flex items-center gap-1.5">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                     </svg>
                     <span class="text-[11px]">Grid</span>
                 </button>
@@ -334,14 +357,14 @@
                     @click="activeTab = 'all'"
                     :class="activeTab === 'all' ? 'bg-indigo-600 text-white shadow-xs font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 font-semibold'"
                     class="px-3 py-1.5 rounded-xl text-xs transition cursor-pointer">
-                Semua Modul ({{ $stats['total_shared'] }})
+                Semua Modul (<span x-text="items.length"></span>)
             </button>
 
             <button type="button"
                     @click="activeTab = 'cloned'"
                     :class="activeTab === 'cloned' ? 'bg-amber-600 text-white shadow-xs font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 font-semibold'"
                     class="px-3 py-1.5 rounded-xl text-xs transition cursor-pointer">
-                🔥 Pernah Dikloning ({{ $modules->getCollection()->where('clone_count', '>', 0)->count() }})
+                🔥 Pernah Dikloning (<span x-text="items.filter(m => m.clone_count > 0).length"></span>)
             </button>
 
             <button type="button"
@@ -369,11 +392,11 @@
     </div>
 
     {{-- ══ 5. KATALOG MODUL BERSAMA ══ --}}
-    @if($modules->count() > 0)
+    @if(count($modulesJson) > 0)
         
         {{-- ═══ VIEW MODE 1: GRID CARDS ═══ --}}
         <div x-show="explorerView === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
-            <template x-for="m in displayItems" :key="m.id">
+            <template x-for="m in displayItems" :key="'card-' + m.id">
                 <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 hover:border-indigo-300 hover:shadow-md transition-all flex flex-col justify-between group">
                     
                     <div>
@@ -437,7 +460,7 @@
                         <form :action="m.toggle_url" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menarik modul ini dari Library Sekolah?');">
                             @csrf
                             <button type="submit"
-                                    class="px-2.5 py-1.5 text-[11px] font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors border border-rose-200"
+                                    class="px-2.5 py-1.5 text-[11px] font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors border border-rose-200 cursor-pointer"
                                     title="Moderasi: Tarik modul dari perpustakaan publik">
                                 Tarik Akses
                             </button>
@@ -527,7 +550,7 @@
                                     <div class="flex items-center justify-end gap-2">
                                         <form :action="m.toggle_url" method="POST" onsubmit="return confirm('Tarik modul ini dari Library Sekolah?');">
                                             @csrf
-                                            <button type="submit" class="px-2.5 py-1.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-[11px] font-bold transition-all">
+                                            <button type="submit" class="px-2.5 py-1.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-[11px] font-bold transition-all cursor-pointer">
                                                 Tarik
                                             </button>
                                         </form>
@@ -550,17 +573,10 @@
         {{-- No match in Alpine --}}
         <div x-show="displayItems.length === 0" class="bg-white rounded-3xl border border-slate-200/80 p-12 text-center shadow-sm mb-8">
             <p class="text-sm font-bold text-slate-800">Tidak ada modul yang cocok dengan filter atau kata kunci ini.</p>
-            <button type="button" @click="searchKeyword = ''; activeTab = 'all'" class="mt-3 px-4 py-2 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-xl hover:bg-indigo-100 transition-colors">
+            <button type="button" @click="resetFilters()" class="mt-3 px-4 py-2 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-xl hover:bg-indigo-100 transition-colors cursor-pointer">
                 Reset Pencarian & Filter
             </button>
         </div>
-
-        {{-- Pagination --}}
-        @if($modules->hasPages())
-            <div class="mt-6">
-                {{ $modules->links() }}
-            </div>
-        @endif
 
     @else
         {{-- Empty State --}}
@@ -574,11 +590,6 @@
             <p class="text-xs text-slate-500 max-w-sm mx-auto">
                 Belum ada guru yang membagikan modul ke Library Sekolah atau kriteria pencarian tidak menemukan hasil.
             </p>
-            @if($search || ($subjectId && $subjectId !== 'all') || ($grade && $grade !== 'all') || ($teacherId && $teacherId !== 'all'))
-                <a href="{{ route('admin.library.index') }}" class="inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all">
-                    Reset Filter
-                </a>
-            @endif
         </div>
     @endif
 
