@@ -39,7 +39,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // ═════════════════════════════════════════════════════════════════
-        // 2. 4 JURUSAN (TE, DP, TL, TO)
+        // 2. 3 JURUSAN UTAMA
         // ═════════════════════════════════════════════════════════════════
         $majorTe = Major::create([
             'name'        => 'Teknik Elektro',
@@ -53,35 +53,38 @@ class DatabaseSeeder extends Seeder
             'description' => 'Program keahlian gambar teknik digital, pemodelan 3D, dan Building Information Modeling (BIM).',
         ]);
 
-        $majorTl = Major::create([
-            'name'        => 'Teknik Listrik',
-            'code'        => 'TL',
-            'description' => 'Program keahlian instalasi tenaga listrik, panel daya industri, dan sistem kelistrikan.',
-        ]);
-
-        $majorTo = Major::create([
-            'name'        => 'Teknik Otomotif',
-            'code'        => 'TO',
-            'description' => 'Program keahlian mekanika kendaraan, sistem kelistrikan otomotif, dan mesin bertenaga.',
+        $majorTkj = Major::create([
+            'name'        => 'Teknik Komputer & Jaringan',
+            'code'        => 'TKJ',
+            'description' => 'Program keahlian infrastruktur jaringan komputer, sistem komputasi, dan rekayasa perangkat lunak.',
         ]);
 
         // ═════════════════════════════════════════════════════════════════
-        // 3. KELAS HANYA TINGKAT X (2 ROMBEL PER JURUSAN = 8 KELAS)
+        // 3. 3 KELAS (TINGKAT X)
         // ═════════════════════════════════════════════════════════════════
-        $classTe1 = SchoolClass::create(['major_id' => $majorTe->id, 'grade' => 'X', 'section' => '1', 'major_name' => 'TE']);
-        $classTe2 = SchoolClass::create(['major_id' => $majorTe->id, 'grade' => 'X', 'section' => '2', 'major_name' => 'TE']);
+        $classTe1 = SchoolClass::create([
+            'major_id'   => $majorTe->id,
+            'grade'      => 'X',
+            'section'    => '1',
+            'major_name' => 'TE',
+        ]);
 
-        $classDp1 = SchoolClass::create(['major_id' => $majorDp->id, 'grade' => 'X', 'section' => '1', 'major_name' => 'DP']);
-        $classDp2 = SchoolClass::create(['major_id' => $majorDp->id, 'grade' => 'X', 'section' => '2', 'major_name' => 'DP']);
+        $classDp1 = SchoolClass::create([
+            'major_id'   => $majorDp->id,
+            'grade'      => 'X',
+            'section'    => '1',
+            'major_name' => 'DP',
+        ]);
 
-        $classTl1 = SchoolClass::create(['major_id' => $majorTl->id, 'grade' => 'X', 'section' => '1', 'major_name' => 'TL']);
-        $classTl2 = SchoolClass::create(['major_id' => $majorTl->id, 'grade' => 'X', 'section' => '2', 'major_name' => 'TL']);
-
-        $classTo1 = SchoolClass::create(['major_id' => $majorTo->id, 'grade' => 'X', 'section' => '1', 'major_name' => 'TO']);
-        $classTo2 = SchoolClass::create(['major_id' => $majorTo->id, 'grade' => 'X', 'section' => '2', 'major_name' => 'TO']);
+        $classTkj1 = SchoolClass::create([
+            'major_id'   => $majorTkj->id,
+            'grade'      => 'X',
+            'section'    => '1',
+            'major_name' => 'TKJ',
+        ]);
 
         // ═════════════════════════════════════════════════════════════════
-        // 4. 2 MATA PELAJARAN: Informatika dan Jaringan
+        // 4. MATA PELAJARAN
         // ═════════════════════════════════════════════════════════════════
         $subjectInformatika = Subject::create([
             'name'        => 'Informatika',
@@ -100,7 +103,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // ═════════════════════════════════════════════════════════════════
-        // 5. 3 GURU BERBEDA (SETIAP GURU MENGAMPU INFORMATIKA & JARINGAN)
+        // 5. GURU PENGAMPU
         // ═════════════════════════════════════════════════════════════════
         $teacher1 = Teacher::create([
             'name'            => 'Budi Santoso, S.Kom.',
@@ -124,16 +127,19 @@ class DatabaseSeeder extends Seeder
         $teacher3->subjects()->attach([$subjectInformatika->id, $subjectJaringan->id]);
 
         // ═════════════════════════════════════════════════════════════════
-        // 6. SISWA BINAAN DI KELAS TINGKAT X
+        // 6. 10 SISWA BINAAN
         // ═════════════════════════════════════════════════════════════════
         $studentsData = [
             ['name' => 'Ahmad Pratama',  'identity_number' => 'NISN001', 'class_id' => $classTe1->id],
             ['name' => 'Bunga Citra',    'identity_number' => 'NISN002', 'class_id' => $classTe1->id],
-            ['name' => 'Candra Wijaya',  'identity_number' => 'NISN003', 'class_id' => $classDp1->id],
+            ['name' => 'Candra Wijaya',  'identity_number' => 'NISN003', 'class_id' => $classTe1->id],
             ['name' => 'Dedi Kurniawan', 'identity_number' => 'NISN004', 'class_id' => $classDp1->id],
-            ['name' => 'Eka Safitri',    'identity_number' => 'NISN005', 'class_id' => $classTl1->id],
-            ['name' => 'Fajar Hidayat',  'identity_number' => 'NISN006', 'class_id' => $classTo1->id],
-            ['name' => 'Gita Lestari',   'identity_number' => 'NISN007', 'class_id' => $classTo2->id],
+            ['name' => 'Eka Safitri',    'identity_number' => 'NISN005', 'class_id' => $classDp1->id],
+            ['name' => 'Fajar Hidayat',  'identity_number' => 'NISN006', 'class_id' => $classDp1->id],
+            ['name' => 'Gita Lestari',   'identity_number' => 'NISN007', 'class_id' => $classTkj1->id],
+            ['name' => 'Hendra Pratama', 'identity_number' => 'NISN008', 'class_id' => $classTkj1->id],
+            ['name' => 'Indah Permata',  'identity_number' => 'NISN009', 'class_id' => $classTkj1->id],
+            ['name' => 'Joko Susilo',    'identity_number' => 'NISN010', 'class_id' => $classTkj1->id],
         ];
 
         $studentModels = [];
@@ -144,562 +150,270 @@ class DatabaseSeeder extends Seeder
                 'class_id'        => $st['class_id'],
                 'password'        => $password,
             ]);
+            $student->classes()->syncWithoutDetaching([$st['class_id']]);
             $student->subjects()->attach([$subjectInformatika->id, $subjectJaringan->id]);
             $studentModels[] = $student;
         }
 
-        // Helper closure to build complete module record
-        $createModuleRecord = function ($teacher, $class, $subject, $title, $materiJudul, $materiContent, $preTestQ, $postTestQ, $isShared = false) {
-            $informasiUmum = [
-                'kata_pengantar'      => "Puji syukur kami panjatkan kepada Tuhan Yang Maha Esa atas tersusunnya E-Modul {$title}.",
-                'tujuan_pembelajaran' => "Peserta didik mampu memahami dan menguasai kompetensi dasar serta praktik langsung pada materi {$title}.",
-                'peta_konsep'         => "Peta konsep modul mencakup fondasi teoritis, demonstrasi interaktif, simulasi praktik, dan evaluasi hasil belajar mandiri.",
-                'petunjuk_penggunaan' => "1. Pelajari uraian materi secara mandiri.\n2. Tonton tayangan video pembelajaran dan buat rangkuman.\n3. Kerjakan tugas lembar kerja dan uji pemahaman Anda pada evaluasi akhir.",
-                'glosarium'           => [
-                    ['istilah' => 'Konsep Pokok', 'definisi' => 'Prinsip fundamental yang mendasari materi pembelajaran ini.'],
-                    ['istilah' => 'Implementasi', 'definisi' => 'Penerapan praktis konsep dalam proyek nyata.'],
-                ],
-                'daftar_isi'          => [
-                    ['judul' => 'Bagian I — Pengantar & Konsep Fundamental'],
-                    ['judul' => 'Bagian II — Penerapan & Lembar Praktik'],
-                ],
-                'daftar_pustaka'      => [
-                    ['judul' => "Buku Panduan {$title} Kurikulum Merdeka", 'penulis' => 'Pusat Kurikulum dan Perbukuan Kemendikbudristek', 'tahun' => '2024', 'tautan' => 'https://kemdikbud.go.id'],
-                    ['judul' => 'Standar Kompetensi Keahlian SMK Nasional', 'penulis' => 'Direktorat SMK', 'tahun' => '2023', 'tautan' => ''],
-                ],
-                'toggles'             => [
-                    'cover'               => true,
-                    'kata_pengantar'      => true,
-                    'daftar_isi'          => true,
-                    'peta_konsep'         => true,
-                    'glosarium'           => true,
-                    'petunjuk_penggunaan' => true,
-                    'tujuan_pembelajaran' => true,
-                    'daftar_pustaka'      => true,
-                ],
-            ];
+        // ═════════════════════════════════════════════════════════════════
+        // 7. 1 MODUL UTAMA: Pengertian Notasi & Algoritma
+        // ═════════════════════════════════════════════════════════════════
+        $moduleTitle = 'Pengertian Notasi & Algoritma';
 
-            $materiData = [
-                'judul_materi'     => $materiJudul,
-                'estimasi_waktu'   => 45,
-                'uraian_materi'    => "## A. Pengantar Teori\n{$materiContent}\n\n### 1. Prinsip Kerja & Fondasi\nModul ini mengedepankan pendekatan *Project-Based Learning* untuk memperkuat pemahaman aplikatif peserta didik.\n\n[INFO] Ikuti setiap instruksi keselamatan kerja dan langkah praktik yang tertera pada lembar kerja.",
-                'ringkasan_materi' => "Ringkasan intisari materi {$title}.",
-                'poin_penting'     => [
-                    'Kuasai konsep dasar sebelum memulai pengujian praktik.',
-                    'Gunakan instrumen dan simulator yang disediakan untuk memvalidasi pemahaman.',
-                ],
-                'ppt_file_path'    => null,
-                'ppt_file_name'    => null,
-                'ppt_file_size'    => null,
-            ];
+        $informasiUmum = [
+            'kata_pengantar'      => "Puji syukur kami panjatkan kepada Tuhan Yang Maha Esa atas tersusunnya E-Modul Pembelajaran {$moduleTitle}. Modul ini disusun secara terstruktur dengan pendekatan saintifik dan interaktif untuk membimbing peserta didik memahami logika pemecahan masalah serta penyusunan algoritma komputasi secara runut dan efisien.",
+            'tujuan_pembelajaran' => "Peserta didik mampu memahami konsep fundamental algoritma, menganalisis struktur logika masalah komputasi, menyajikan solusi menggunakan notasi deskriptif, diagram alir (flowchart), dan pseudocode, serta menerapkannya dalam pemecahan masalah nyata secara mandiri dan kritis.",
+            'peta_konsep'         => "Peta konsep modul mencakup: 1. Konsep Dasar Algoritma → 2. Struktur Dasar Logika (Sekuensial, Percabangan, Perulangan) → 3. Tiga Notasi Algoritma (Deskriptif, Flowchart, Pseudocode) → 4. Uji Coba Simulasi Praktik & Evaluasi Komputasi.",
+            'petunjuk_penggunaan' => "1. Bacalah kata pengantar dan pahami tujuan pembelajaran yang harus dicapai.\n2. Kerjakan kuis diagnostik Pre-Test untuk mengukur pemahaman awal Anda.\n3. Pelajari secara saksama uraian teori dan slide materi pendukung.\n4. Tonton tayangan video YouTube interaktif dan susun resume intisari pembelajarannya.\n5. Bereksplorasi dengan simulator embed interaktif.\n6. Unduh Job Sheet praktikum dan selesaikan tugas LKPD yang diberikan.\n7. Uji pencapaian akhir Anda melalui evaluasi Post-Test.",
+            'glosarium'           => [
+                ['istilah' => 'Algoritma', 'definisi' => 'Urutan langkah-langkah logis dan terstruktur yang disusun secara sistematis untuk menyelesaikan suatu masalah atau menghasilkan output tertentu.'],
+                ['istilah' => 'Flowchart', 'definisi' => 'Diagram grafis yang menggambarkan aliran proses atau algoritma menggunakan simbol-simbol standar seperti terminator, proses, dan percabangan.'],
+                ['istilah' => 'Pseudocode', 'definisi' => 'Notasi penulisan algoritma yang menyerupai bahasa pemrograman tingkat tinggi namun ditulis dengan bahasa yang mudah dipahami manusia tanpa aturan sintaks yang kaku.'],
+                ['istilah' => 'Notasi Deskriptif', 'definisi' => 'Penyajian algoritma menggunakan untaian kalimat bahasa alami sehari-hari secara terurut dari awal hingga akhir.'],
+                ['istilah' => 'Percabangan (Branching)', 'definisi' => 'Struktur kontrol algoritma di mana eksekusi langkah selanjutnya ditentukan oleh hasil evaluasi suatu kondisi logika (True/False).'],
+                ['istilah' => 'Perulangan (Looping)', 'definisi' => 'Struktur kontrol yang mengeksekusi satu atau serangkaian instruksi secara berulang-ulang selama kondisi tertentu masih terpenuhi.'],
+            ],
+            'daftar_isi'          => [
+                ['judul' => 'Bagian I — Orientasi & Fondasi Notasi Algoritma'],
+                ['judul' => 'Bagian II — Notasi Deskriptif & Diagram Alir (Flowchart)'],
+                ['judul' => 'Bagian III — Notasi Pseudocode & Studi Kasus Logika'],
+                ['judul' => 'Bagian IV — Praktik Simulator, Job Sheet, dan Evaluasi'],
+            ],
+            'daftar_pustaka'      => [
+                ['judul' => 'Buku Siswa Informatika Kelas X Kurikulum Merdeka', 'penulis' => 'Pusat Kurikulum dan Perbukuan Kemendikbudristek', 'tahun' => '2024', 'tautan' => 'https://kemdikbud.go.id'],
+                ['judul' => 'Algoritma dan Pemrograman dalam Bahasa Pascal dan C', 'penulis' => 'Rinaldi Munir', 'tahun' => '2021', 'tautan' => ''],
+                ['judul' => 'Introduction to Algorithms, Fourth Edition', 'penulis' => 'Thomas H. Cormen, Charles E. Leiserson', 'tahun' => '2022', 'tautan' => 'https://mitpress.mit.edu'],
+            ],
+            'toggles'             => [
+                'cover'               => true,
+                'kata_pengantar'      => true,
+                'daftar_isi'          => true,
+                'peta_konsep'         => true,
+                'glosarium'           => true,
+                'petunjuk_penggunaan' => true,
+                'tujuan_pembelajaran' => true,
+                'daftar_pustaka'      => true,
+            ],
+        ];
 
-            $preTestData = [
-                'judul'        => "Pre-test: Pemahaman Awal {$title}",
-                'durasi_menit' => 15,
-                'kktp'         => 75,
-                'petunjuk'     => 'Kerjakan soal pre-test ini untuk mengukur pemahaman awal Anda sebelum memulai pembelajaran.',
-                'acak_soal'    => false,
-                'questions'    => $preTestQ,
-            ];
+        $materiData = [
+            'judul_materi'     => 'Kegiatan Belajar 1: Konsep Algoritma, Notasi Deskriptif, Flowchart, dan Pseudocode',
+            'estimasi_waktu'   => 45,
+            'uraian_materi'    => "## A. Hakikat dan Definisi Algoritma\nAlgoritma adalah serangkaian langkah logis yang terdefinisi secara jelas (*unambiguous*), berurutan, dan memiliki kondisi awal serta kondisi akhir yang pasti untuk menyelesaikan suatu permasalahan tertentu.\n\n### Karakteristik Algoritma yang Baik:\n1. **Finiteness (Keterbatasan)**: Algoritma harus berakhir setelah sejumlah langkah yang berhingga.\n2. **Definiteness (Kepastian)**: Setiap langkah harus didefinisikan secara tepat tanpa ambiguitas.\n3. **Input (Masukan)**: Memiliki nol atau lebih masukan yang diberikan ke algoritma.\n4. **Output (Keluaran)**: Menghasilkan minimal satu keluaran yang merupakan solusi masalah.\n5. **Effectiveness (Efektivitas)**: Setiap instruksi harus sederhana dan dapat dikerjakan dalam waktu wajar.\n\n---\n\n## B. Tiga Jenis Notasi Algoritma\n\n### 1. Notasi Deskriptif\nMenuliskan algoritma menggunakan bahasa manusia (bahasa Indonesia/Inggris). Cocok untuk masalah sederhana, namun kurang efektif untuk algoritma kompleks karena berpotensi menimbulkan multitafsir.\n\n### 2. Diagram Alir (Flowchart)\nPenggambaran alur algoritma secara visual dengan simbol-simbol standar internasional (ANSI):\n- **Oval / Terminator**: Menandai awal (*Start*) atau akhir (*End*) algoritma.\n- **Persegi Panjang / Process**: Menandakan operasi pengolahan data atau kalkulasi aritmatika.\n- **Jajar Genjang / Input-Output**: Menandakan operasi pembacaan data masukan atau pencetakan hasil.\n- **Belah Ketupat / Decision**: Menandakan percabangan berdasarkan pengujian kondisi logika.\n- **Garis Alir / Flowline**: Menunjukkan arah urutan eksekusi instruksi.\n\n### 3. Pseudocode\nNotasi yang menjembatani bahasa alami dengan bahasa pemrograman komputer. Struktur umumnya menggunakan kata kunci seperti `IF...THEN...ELSE`, `WHILE...DO`, `FOR...TO`, dan `PRINT`.\n\n> [!NOTE]\n> Pilihlah notasi yang paling sesuai dengan tingkat kompleksitas masalah. Flowchart sangat baik untuk presentasi logika alur, sedangkan Pseudocode sangat ideal sebelum implementasi koding langsung.",
+            'ringkasan_materi' => "Algoritma merupakan fondasi utama computational thinking. Penguasaan tiga notasi (Deskriptif, Flowchart, dan Pseudocode) memungkinkan seorang pengembang merancang solusi komputasi yang efisien, mudah diverifikasi, dan siap diimplementasikan dalam bahasa pemrograman apa pun.",
+            'poin_penting'     => [
+                'Algoritma harus memiliki kejelasan langkah dan pasti berhenti (Finiteness).',
+                'Simbol Decision (Belah Ketupat) pada Flowchart selalu menghasilkan dua arah cabang logika (Ya/Tidak).',
+                'Pseudocode mempermudah konversi logika ke dalam berbagai bahasa pemrograman seperti Python, C++, atau PHP.',
+            ],
+            'ppt_file_path'    => null,
+            'ppt_file_name'    => null,
+            'ppt_file_size'    => null,
+        ];
 
-            $postTestData = [
-                'judul'        => "Post-test: Evaluasi Akhir {$title}",
-                'durasi_menit' => 20,
-                'kktp'         => 75,
-                'petunjuk'     => 'Kerjakan soal evaluasi post-test berikut untuk mengukur ketuntasan belajar Anda.',
-                'acak_soal'    => false,
-                'questions'    => $postTestQ,
-            ];
+        $preTestQ = [
+            [
+                'id' => 1,
+                'pertanyaan' => 'Urutan langkah-langkah logis dan sistematis yang disusun secara runtut untuk menyelesaikan suatu permasalahan komputasi disebut...',
+                'pilihan' => ['A' => 'Algoritma', 'B' => 'Hardware', 'C' => 'Pseudocode', 'D' => 'Topologi', 'E' => 'Operating System'],
+                'kunci_jawaban' => 'A',
+                'bobot' => 50,
+                'pembahasan' => 'Algoritma adalah urutan langkah logis penyelesaian masalah yang sistematis dan terstruktur.',
+            ],
+            [
+                'id' => 2,
+                'pertanyaan' => 'Simbol diagram alir (Flowchart) yang berbentuk belah ketupat (diamond) berfungsi untuk...',
+                'pilihan' => ['A' => 'Pengambilan keputusan / percabangan kondisi', 'B' => 'Memulai atau mengakhiri program', 'C' => 'Melakukan operasi aritmatika proses', 'D' => 'Memasukkan input data manual', 'E' => 'Menghubungkan alur antar-halaman'],
+                'kunci_jawaban' => 'A',
+                'bobot' => 50,
+                'pembahasan' => 'Simbol belah ketupat (Decision) digunakan untuk percabangan pemilihan kondisi logika (True/False).',
+            ],
+        ];
 
-            $mod = Module::create([
-                'teacher_id'          => $teacher->id,
-                'class_id'            => $class->id,
-                'subject_id'          => $subject->id,
-                'title'               => $title,
-                'informasi_umum_data' => $informasiUmum,
-                'materi_data'         => $materiData,
-                'pre_test_data'       => $preTestData,
-                'post_test_data'      => $postTestData,
-                'has_pre_test'        => true,
-                'has_materi'          => true,
-                'has_video'           => true,
-                'has_embed'           => true,
-                'has_job_sheet'       => true,
-                'has_lkpd'            => true,
-                'has_post_test'       => true,
-                'status'              => 'published',
-                'is_shared'           => $isShared,
-                'shared_at'           => $isShared ? now() : null,
+        $postTestQ = [
+            [
+                'id' => 1,
+                'pertanyaan' => 'Notasi penulisan algoritma yang menyerupai sintaks bahasa pemrograman namun menggunakan bahasa yang mudah dipahami manusia tanpa aturan sintaksis kaku disebut...',
+                'pilihan' => ['A' => 'Pseudocode', 'B' => 'Flowchart', 'C' => 'Notasi Deskriptif', 'D' => 'Source Code Murni', 'E' => 'Machine Language'],
+                'kunci_jawaban' => 'A',
+                'bobot' => 50,
+                'pembahasan' => 'Pseudocode adalah representasi algoritma informal tingkat tinggi yang menyerupai bahasa pemrograman.',
+            ],
+            [
+                'id' => 2,
+                'pertanyaan' => 'Manakah di bawah ini yang merupakan ciri utama dari sebuah algoritma yang baik (Finiteness)?',
+                'pilihan' => ['A' => 'Algoritma harus berakhir setelah melakukan sejumlah langkah terhingga', 'B' => 'Algoritma harus berjalan terus-menerus tanpa henti', 'C' => 'Algoritma harus ditulis dengan bahasa biner', 'D' => 'Algoritma tidak boleh memiliki masukan sama sekali', 'E' => 'Algoritma hanya boleh menggunakan simbol gambar'],
+                'kunci_jawaban' => 'A',
+                'bobot' => 50,
+                'pembahasan' => 'Karakteristik Finiteness mensyaratkan algoritma harus memiliki titik akhir yang pasti setelah langkah berhingga.',
+            ],
+        ];
+
+        $preTestData = [
+            'judul'        => "Pre-test: Pemahaman Awal {$moduleTitle}",
+            'durasi_menit' => 15,
+            'kktp'         => 75,
+            'petunjuk'     => 'Kerjakan soal pre-test ini untuk mengukur pemahaman awal Anda mengenai notasi dan algoritma.',
+            'acak_soal'    => false,
+            'questions'    => $preTestQ,
+        ];
+
+        $postTestData = [
+            'judul'        => "Post-test: Evaluasi Akhir {$moduleTitle}",
+            'durasi_menit' => 20,
+            'kktp'         => 75,
+            'petunjuk'     => 'Kerjakan soal evaluasi post-test berikut secara cermat untuk mengukur ketuntasan belajar Anda.',
+            'acak_soal'    => false,
+            'questions'    => $postTestQ,
+        ];
+
+        $module = Module::create([
+            'teacher_id'          => $teacher1->id,
+            'class_id'            => $classTe1->id,
+            'subject_id'          => $subjectInformatika->id,
+            'title'               => $moduleTitle,
+            'informasi_umum_data' => $informasiUmum,
+            'materi_data'         => $materiData,
+            'pre_test_data'       => $preTestData,
+            'post_test_data'      => $postTestData,
+            'has_pre_test'        => true,
+            'has_materi'          => true,
+            'has_video'           => true,
+            'has_embed'           => true,
+            'has_job_sheet'       => true,
+            'has_lkpd'            => true,
+            'has_post_test'       => true,
+            'status'              => 'published',
+            'is_shared'           => true,
+            'shared_at'           => now(),
+        ]);
+
+        // PreTest Relasional
+        $preTestModel = PreTest::create([
+            'module_id'           => $module->id,
+            'title'               => "Pre-test: Pemahaman Awal {$moduleTitle}",
+            'duration_minutes'    => 15,
+            'kktp'                => 75,
+            'instructions'        => 'Kerjakan soal pre-test ini untuk mengukur pemahaman awal Anda.',
+            'randomize_questions' => false,
+        ]);
+
+        foreach ($preTestQ as $idx => $q) {
+            PreTestQuestion::create([
+                'pre_test_id'    => $preTestModel->id,
+                'question_text'  => $q['pertanyaan'],
+                'options'        => $q['pilihan'],
+                'correct_answer' => $q['kunci_jawaban'],
+                'score_weight'   => $q['bobot'],
+                'explanation'    => $q['pembahasan'],
+                'order_num'      => $idx + 1,
             ]);
+        }
 
-            // Create relational PreTest
-            $preTestModel = PreTest::create([
-                'module_id'           => $mod->id,
-                'title'               => "Pre-test: Pemahaman Awal {$title}",
-                'duration_minutes'    => 15,
-                'kktp'                => 75,
-                'instructions'        => 'Kerjakan soal pre-test ini untuk mengukur pemahaman awal Anda.',
-                'randomize_questions' => false,
+        // PostTest Relasional
+        $postTestModel = PostTest::create([
+            'module_id'           => $module->id,
+            'title'               => "Post-test: Evaluasi Akhir {$moduleTitle}",
+            'duration_minutes'    => 20,
+            'kktp'                => 75,
+            'instructions'        => 'Kerjakan soal evaluasi post-test berikut.',
+            'randomize_questions' => false,
+        ]);
+
+        foreach ($postTestQ as $idx => $q) {
+            PostTestQuestion::create([
+                'post_test_id'   => $postTestModel->id,
+                'question_text'  => $q['pertanyaan'],
+                'options'        => $q['pilihan'],
+                'correct_answer' => $q['kunci_jawaban'],
+                'score_weight'   => $q['bobot'],
+                'explanation'    => $q['pembahasan'],
+                'order_num'      => $idx + 1,
             ]);
+        }
 
-            foreach ($preTestQ as $idx => $q) {
-                PreTestQuestion::create([
-                    'pre_test_id'    => $preTestModel->id,
-                    'question_text'  => $q['pertanyaan'],
-                    'options'        => $q['pilihan'],
-                    'correct_answer' => $q['kunci_jawaban'],
-                    'score_weight'   => $q['bobot'],
-                    'explanation'    => $q['pembahasan'] ?? 'Pembahasan soal pre-test.',
-                    'order_num'      => $idx + 1,
-                ]);
-            }
+        // JobSheet & LKPD Relasional
+        $jobSheet = JobSheet::create([
+            'module_id'     => $module->id,
+            'pdf_file_path' => 'job_sheets/sample_jobsheet.pdf',
+        ]);
 
-            // Create relational PostTest
-            $postTestModel = PostTest::create([
-                'module_id'           => $mod->id,
-                'title'               => "Post-test: Evaluasi Akhir {$title}",
-                'duration_minutes'    => 20,
-                'kktp'                => 75,
-                'instructions'        => 'Kerjakan soal evaluasi post-test berikut.',
-                'randomize_questions' => false,
-            ]);
-
-            foreach ($postTestQ as $idx => $q) {
-                PostTestQuestion::create([
-                    'post_test_id'   => $postTestModel->id,
-                    'question_text'  => $q['pertanyaan'],
-                    'options'        => $q['pilihan'],
-                    'correct_answer' => $q['kunci_jawaban'],
-                    'score_weight'   => $q['bobot'],
-                    'explanation'    => $q['pembahasan'] ?? 'Pembahasan soal post-test.',
-                    'order_num'      => $idx + 1,
-                ]);
-            }
-
-            // Create JobSheet & LKPD
-            $jobSheet = JobSheet::create([
-                'module_id'     => $mod->id,
-                'pdf_file_path' => 'job_sheets/sample_jobsheet.pdf',
-            ]);
-
-            $lkpd = Lkpd::create([
-                'module_id'     => $mod->id,
-                'pdf_file_path' => 'lkpds/sample_lkpd.pdf',
-            ]);
-
-            return ['module' => $mod, 'jobSheet' => $jobSheet, 'lkpd' => $lkpd];
-        };
+        $lkpd = Lkpd::create([
+            'module_id'     => $module->id,
+            'pdf_file_path' => 'lkpds/sample_lkpd.pdf',
+        ]);
 
         // ═════════════════════════════════════════════════════════════════
-        // 7. 3 MODUL GURU 1: Budi Santoso, S.Kom.
+        // 8. SAMPLE SUBMISSIONS & HASIL BELAJAR SISWA (UNTUK PENGUJIAN UI)
         // ═════════════════════════════════════════════════════════════════
-        $qPre1 = [
-            [
-                'id' => 1, 'pertanyaan' => 'Tag HTML standar yang digunakan untuk membuat judul utama paling tinggi tingkatannya adalah...',
-                'pilihan' => ['A' => '<h1>', 'B' => '<head>', 'C' => '<title>', 'D' => '<header>', 'E' => '<top>'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'Tag <h1> merepresentasikan heading tingkat pertama pada dokumen HTML.',
-            ],
-            [
-                'id' => 2, 'pertanyaan' => 'Struktur kontrol percabangan logika dalam bahasa pemrograman menggunakan kata kunci...',
-                'pilihan' => ['A' => 'if - else', 'B' => 'for - loop', 'C' => 'while - do', 'D' => 'echo - print', 'E' => 'include - require'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'if-else digunakan untuk percabangan pemilihan kondisi.',
-            ]
-        ];
-        $qPost1 = [
-            [
-                'id' => 1, 'pertanyaan' => 'Properti CSS yang digunakan untuk mengatur warna latar belakang elemen adalah...',
-                'pilihan' => ['A' => 'background-color', 'B' => 'color', 'C' => 'font-color', 'D' => 'border-color', 'E' => 'fill-color'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'background-color menetapkan warna background elemen.',
-            ],
-            [
-                'id' => 2, 'pertanyaan' => 'Tipe data yang hanya menyimpan nilai kebenaran TRUE atau FALSE adalah...',
-                'pilihan' => ['A' => 'Boolean', 'B' => 'Integer', 'C' => 'String', 'D' => 'Float', 'E' => 'Array'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'Boolean merepresentasikan nilai logika benar atau salah.',
-            ]
-        ];
-        $res1 = $createModuleRecord(
-            $teacher1, $classTe1, $subjectInformatika,
-            'Dasar Pemrograman Web & Struktur Logika Algoritma',
-            'Kegiatan Belajar 1: Pengantar HTML5, Tata Letak CSS3, dan Logika Percabangan Algoritma',
-            'Pemrograman web dasar mempelajari struktur dokumen semantik HTML5, penataan gaya visual CSS3, serta logika algoritma dasar untuk merancang halaman web interaktif.',
-            $qPre1, $qPost1, true
-        );
-
-        $qPre2 = [
-            [
-                'id' => 1, 'pertanyaan' => 'Model referensi OSI terdiri dari berapa lapisan (layers)?',
-                'pilihan' => ['A' => '7 Layer', 'B' => '4 Layer', 'C' => '5 Layer', 'D' => '6 Layer', 'E' => '8 Layer'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'OSI 7 Layer: Physical, Data Link, Network, Transport, Session, Presentation, Application.',
-            ],
-            [
-                'id' => 2, 'pertanyaan' => 'Jenis konektor yang umum digunakan pada kabel UTP jaringan LAN adalah...',
-                'pilihan' => ['A' => 'RJ-45', 'B' => 'RJ-11', 'C' => 'BNC', 'D' => 'FC', 'E' => 'SC'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'Konektor RJ-45 adalah standar terminasi kabel UTP Cat5e/Cat6.',
-            ]
-        ];
-        $qPost2 = [
-            [
-                'id' => 1, 'pertanyaan' => 'Urutan warna standar kabel straight-through T568B diawali dengan warna...',
-                'pilihan' => ['A' => 'Putih-Oranye, Oranye', 'B' => 'Putih-Hijau, Hijau', 'C' => 'Putih-Biru, Biru', 'D' => 'Putih-Cokelat, Cokelat', 'E' => 'Oranye, Putih-Oranye'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'Standar T568B dimulai dengan: Putih-Oranye, Oranye, Putih-Hijau, Biru, Putih-Biru, Hijau, Putih-Cokelat, Cokelat.',
-            ],
-            [
-                'id' => 2, 'pertanyaan' => 'Perangkat keras jaringan yang bekerja pada Data Link Layer (Layer 2) untuk meneruskan frame berdasarkan MAC Address adalah...',
-                'pilihan' => ['A' => 'Switch', 'B' => 'Hub', 'C' => 'Repeater', 'D' => 'Modem dial-up', 'E' => 'Kabel Coaxial'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'Switch Layer 2 membaca MAC address table untuk switching frame data.',
-            ]
-        ];
-        $res2 = $createModuleRecord(
-            $teacher1, $classTe1, $subjectJaringan,
-            'Fondasi Jaringan Komputer, Model OSI & Pengkabelan LAN',
-            'Kegiatan Belajar 1: Analisis Model OSI 7 Layer, Standar Crimping T568A/B, dan Uji Konektivitas LAN',
-            'Jaringan komputer menghubungkan berbagai node perangkat untuk berbagi sumber daya melalui media transmisi terstandarisasi dan protokol komunikasi yang andal.',
-            $qPre2, $qPost2, false
-        );
-
-        $qPre3 = [
-            [
-                'id' => 1, 'pertanyaan' => 'Perintah Linux CLI untuk melihat direktori aktif saat ini adalah...',
-                'pilihan' => ['A' => 'pwd', 'B' => 'ls', 'C' => 'cd', 'D' => 'whoami', 'E' => 'dir'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'pwd (print working directory) menampilkan path direktori yang sedang dibuka.',
-            ],
-            [
-                'id' => 2, 'pertanyaan' => 'Superuser dengan hak akses tertinggi pada sistem operasi Linux adalah...',
-                'pilihan' => ['A' => 'root', 'B' => 'admin', 'C' => 'supervisor', 'D' => 'master', 'E' => 'system'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'root adalah akun administrator utama di lingkungan Unix/Linux.',
-            ]
-        ];
-        $qPost3 = [
-            [
-                'id' => 1, 'pertanyaan' => 'Perintah untuk membuat folder/direktori baru di terminal Linux adalah...',
-                'pilihan' => ['A' => 'mkdir', 'B' => 'touch', 'C' => 'cat', 'D' => 'rm', 'E' => 'mv'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'mkdir (make directory) membuat folder baru.',
-            ],
-            [
-                'id' => 2, 'pertanyaan' => 'Hak akses chmod 755 pada file Linux memberikan izin kepada pemilik (owner) berupa...',
-                'pilihan' => ['A' => 'Read, Write, Execute (rwx)', 'B' => 'Read Only (r--)', 'C' => 'Write Only (-w-)', 'D' => 'Execute Only (--x)', 'E' => 'No Access (---)'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'Angka 7 pada chmod bernilai 4 (read) + 2 (write) + 1 (execute) = rwx.',
-            ]
-        ];
-        $res3 = $createModuleRecord(
-            $teacher1, $classDp1, $subjectInformatika,
-            'Pengenalan Sistem Operasi Linux & Perintah Dasar CLI',
-            'Kegiatan Belajar 1: Instalasi Linux Server, Manajemen File Direktori, dan Hak Akses Pengguna',
-            'Sistem operasi Linux merupakan platform terbuka yang banyak digunakan pada server dan sistem komputasi modern karena stabilitas dan keamanannya.',
-            $qPre3, $qPost3, false
-        );
-
-        // ═════════════════════════════════════════════════════════════════
-        // 8. 3 MODUL GURU 2: Siti Aminah, M.T.
-        // ═════════════════════════════════════════════════════════════════
-        $qPre4 = [
-            [
-                'id' => 1, 'pertanyaan' => 'Berapa jumlah total host yang valid pada subnet IPv4 dengan prefix /29?',
-                'pilihan' => ['A' => '6 host', 'B' => '8 host', 'C' => '14 host', 'D' => '30 host', 'E' => '2 host'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => '2^(32-29) - 2 = 8 - 2 = 6 host valid.',
-            ],
-            [
-                'id' => 2, 'pertanyaan' => 'Alamat IP khusus yang digunakan untuk testing antarmuka loopback lokal adalah...',
-                'pilihan' => ['A' => '127.0.0.1', 'B' => '192.168.1.1', 'C' => '10.0.0.1', 'D' => '255.255.255.255', 'E' => '0.0.0.0'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => '127.0.0.1 adalah standar IP loopback IPv4.',
-            ]
-        ];
-        $qPost4 = [
-            [
-                'id' => 1, 'pertanyaan' => 'Proses membagi sebuah blok jaringan besar menjadi beberapa subjaringan yang lebih kecil disebut...',
-                'pilihan' => ['A' => 'Subnetting', 'B' => 'Bridging', 'C' => 'Switching', 'D' => 'Routing', 'E' => 'Broadcasting'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'Subnetting mengoptimalkan alokasi IP dan mereduksi broadcast domain.',
-            ],
-            [
-                'id' => 2, 'pertanyaan' => 'Rute default (Default Gateway) pada konfigurasi tabel routing static dinotasikan dengan...',
-                'pilihan' => ['A' => '0.0.0.0/0', 'B' => '255.255.255.255/32', 'C' => '127.0.0.1/8', 'D' => '192.168.0.0/16', 'E' => '10.0.0.0/8'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => '0.0.0.0/0 mewakili seluruh tujuan paket di luar subnet lokal.',
-            ]
-        ];
-        $res4 = $createModuleRecord(
-            $teacher2, $classDp1, $subjectJaringan,
-            'Konfigurasi Subnetting IPv4 & Routing Dasar RouterOS',
-            'Kegiatan Belajar 1: Perhitungan VLSM, Alokasi IP Address, dan Konfigurasi Static Routing',
-            'Subnetting dan routing merupakan fondasi utama pengalamatan logis serta pengiriman paket data antar-jaringan yang berbeda.',
-            $qPre4, $qPost4, true
-        );
-
-        $qPre5 = [
-            [
-                'id' => 1, 'pertanyaan' => 'Struktur data LIFO (Last In First Out) diterapkan pada...',
-                'pilihan' => ['A' => 'Stack', 'B' => 'Queue', 'C' => 'Array', 'D' => 'Graph', 'E' => 'Tree'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'Stack menggunakan prinsip LIFO.',
-            ],
-            [
-                'id' => 2, 'pertanyaan' => 'Prinsip OOP yang membungkus data dan fungsi ke dalam objek terproteksi disebut...',
-                'pilihan' => ['A' => 'Enkapsulasi', 'B' => 'Inheritance', 'C' => 'Polimorfisme', 'D' => 'Overloading', 'E' => 'Inisialisasi'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'Enkapsulasi menyatukan data dan metode sekaligus membatasi akses langsung.',
-            ]
-        ];
-        $qPost5 = [
-            [
-                'id' => 1, 'pertanyaan' => 'Konsep pewarisan sifat dan fungsi dari kelas induk ke kelas turunan dalam OOP adalah...',
-                'pilihan' => ['A' => 'Inheritance', 'B' => 'Polymorphism', 'C' => 'Encapsulation', 'D' => 'Abstraction', 'E' => 'Aggregation'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'Inheritance memungkinkan kelas anak mewarisi method dan atribut induk.',
-            ],
-            [
-                'id' => 2, 'pertanyaan' => 'Tipe struktur data antrean yang menerapkan prinsip FIFO (First In First Out) adalah...',
-                'pilihan' => ['A' => 'Queue', 'B' => 'Stack', 'C' => 'Linked List', 'D' => 'Binary Tree', 'E' => 'Heap'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'Queue (antrean) menerapkan prinsip FIFO.',
-            ]
-        ];
-        $res5 = $createModuleRecord(
-            $teacher2, $classTl1, $subjectInformatika,
-            'Algoritma Pemrograman Berorientasi Objek & Modularitas Kode',
-            'Kegiatan Belajar 1: Pemodelan Kelas, Objek, Enkapsulasi, dan Implementasi Queue FIFO',
-            'Pemrograman berorientasi objek meningkatkan modularitas, keterbacaan, dan pemeliharaan kode perangkat lunak melalui abstraksi kelas dan objek.',
-            $qPre5, $qPost5, false
-        );
-
-        $qPre6 = [
-            [
-                'id' => 1, 'pertanyaan' => 'Frekuensi radio standar yang digunakan oleh teknologi jaringan Wi-Fi modern adalah...',
-                'pilihan' => ['A' => '2.4 GHz dan 5 GHz', 'B' => '100 MHz dan 200 MHz', 'C' => '900 MHz dan 1.8 GHz', 'D' => '10 GHz dan 20 GHz', 'E' => '50 Hz dan 60 Hz'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'Wi-Fi bekerja pada pita frekuensi 2.4 GHz dan 5 GHz (serta 6 GHz pada Wi-Fi 6E).',
-            ],
-            [
-                'id' => 2, 'pertanyaan' => 'Nama pengenal jaringan nirkabel yang dipancarkan oleh Access Point disebut...',
-                'pilihan' => ['A' => 'SSID', 'B' => 'BSSID', 'C' => 'WPA', 'D' => 'DHCP', 'E' => 'NAT'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'SSID (Service Set Identifier) adalah nama jaringan nirkabel.',
-            ]
-        ];
-        $qPost6 = [
-            [
-                'id' => 1, 'pertanyaan' => 'Protokol enkripsi keamanan Wi-Fi standar yang paling aman saat ini adalah...',
-                'pilihan' => ['A' => 'WPA3', 'B' => 'WEP', 'C' => 'WPA', 'D' => 'Open Authentication', 'E' => 'WPA-TKIP'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'WPA3 menggunakan enkripsi 192-bit dan algoritma SAE.',
-            ],
-            [
-                'id' => 2, 'pertanyaan' => 'Fitur manajemen bandwidth pada router untuk membatasi kecepatan unduh dan unggah klien adalah...',
-                'pilihan' => ['A' => 'Queue / QoS (Quality of Service)', 'B' => 'DNS Server', 'C' => 'NTP Client', 'D' => 'Telnet', 'E' => 'SNMP'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'Queue / QoS mengatur prioritas dan pembatasan bandwidth data.',
-            ]
-        ];
-        $res6 = $createModuleRecord(
-            $teacher2, $classTl1, $subjectJaringan,
-            'Manajemen Bandwidth & Keamanan Jaringan Nirkabel Wi-Fi',
-            'Kegiatan Belajar 1: Konfigurasi Access Point, Simple Queue MikroTik, dan Enkripsi WPA2/WPA3',
-            'Manajemen bandwidth dan pengamanan jaringan nirkabel sangat penting untuk menjamin kualitas layanan data (QoS) serta melindungi data dari akses tanpa izin.',
-            $qPre6, $qPost6, false
-        );
-
-        // ═════════════════════════════════════════════════════════════════
-        // 9. 3 MODUL GURU 3: Hendra Wijaya, S.T.
-        // ═════════════════════════════════════════════════════════════════
-        $qPre7 = [
-            [
-                'id' => 1, 'pertanyaan' => 'Perintah SQL DDL yang digunakan untuk membuat tabel baru adalah...',
-                'pilihan' => ['A' => 'CREATE TABLE', 'B' => 'INSERT INTO', 'C' => 'UPDATE SET', 'D' => 'DROP TABLE', 'E' => 'SELECT FROM'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'CREATE TABLE membuat entitas tabel baru dalam database.',
-            ],
-            [
-                'id' => 2, 'pertanyaan' => 'Kolom unik yang membedakan setiap baris rekaman pada tabel database disebut...',
-                'pilihan' => ['A' => 'Primary Key', 'B' => 'Foreign Key', 'C' => 'Index Key', 'D' => 'Candidate Key', 'E' => 'Composite Key'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'Primary Key menjamin keunikan identitas data pada setiap baris.',
-            ]
-        ];
-        $qPost7 = [
-            [
-                'id' => 1, 'pertanyaan' => 'Tahap normalisasi 1NF (First Normal Form) mensyaratkan setiap kolom bernilai...',
-                'pilihan' => ['A' => 'Atomik (tunggal)', 'B' => 'Ganda', 'C' => 'Array', 'D' => 'Tergantung transitif', 'E' => 'Kombinasi'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => '1NF mengharuskan setiap field hanya memuat nilai tunggal (atomik).',
-            ],
-            [
-                'id' => 2, 'pertanyaan' => 'Perintah SQL untuk menggabungkan data dari dua tabel berdasarkan relasi kunci asing adalah...',
-                'pilihan' => ['A' => 'JOIN', 'B' => 'UNION', 'C' => 'GROUP BY', 'D' => 'ORDER BY', 'E' => 'HAVING'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'JOIN menggabungkan baris dari dua tabel atau lebih.',
-            ]
-        ];
-        $res7 = $createModuleRecord(
-            $teacher3, $classTo1, $subjectInformatika,
-            'Perancangan Basis Data Relasional & Normalisasi Tabel SQL',
-            'Kegiatan Belajar 1: Desain ERD, Normalisasi 1NF-3NF, dan Query Relasi Tabel',
-            'Basis data relasional menyusun data dalam relasi tabel matematis dengan foreign key untuk menjamin integritas referensial dan konsistensi transaksi.',
-            $qPre7, $qPost7, true
-        );
-
-        $qPre8 = [
-            [
-                'id' => 1, 'pertanyaan' => 'Topologi jaringan yang menghubungkan semua komputer ke satu titik pusat (Switch/Hub) disebut topologi...',
-                'pilihan' => ['A' => 'Star (Bintang)', 'B' => 'Bus', 'C' => 'Ring (Cincin)', 'D' => 'Mesh', 'E' => 'Tree'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'Topologi Star menghubungkan setiap node ke switch sentral.',
-            ],
-            [
-                'id' => 2, 'pertanyaan' => 'Teknologi virtualisasi jaringan lokal untuk mengisolasi traffic secara logis pada switch adalah...',
-                'pilihan' => ['A' => 'VLAN (Virtual LAN)', 'B' => 'VPN', 'C' => 'NAT', 'D' => 'DNS', 'E' => 'DHCP'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'VLAN membagi switch fisik menjadi beberapa broadcast domain logis.',
-            ]
-        ];
-        $qPost8 = [
-            [
-                'id' => 1, 'pertanyaan' => 'Protokol IEEE standar untuk VLAN Trunking yang menyisipkan tag VLAN ID pada header frame Ethernet adalah...',
-                'pilihan' => ['A' => 'IEEE 802.1Q', 'B' => 'IEEE 802.11', 'C' => 'IEEE 802.3', 'D' => 'IEEE 802.15', 'E' => 'IEEE 802.1X'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'IEEE 802.1Q adalah standar industri untuk VLAN Tagging.',
-            ],
-            [
-                'id' => 2, 'pertanyaan' => 'Jaringan yang mencakup area geografis sangat luas menghubungkan antar-kota atau negara adalah...',
-                'pilihan' => ['A' => 'WAN (Wide Area Network)', 'B' => 'LAN', 'C' => 'PAN', 'D' => 'WLAN', 'E' => 'SAN'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'WAN mencakup area luas menggunakan sirkuit telekomunikasi.',
-            ]
-        ];
-        $res8 = $createModuleRecord(
-            $teacher3, $classTo1, $subjectJaringan,
-            'Arsitektur Jaringan Komputer, Topologi LAN/WAN & Switch VLAN',
-            'Kegiatan Belajar 1: Perancangan Topologi Star, Konfigurasi Switch VLAN, dan Trunking Port',
-            'Arsitektur jaringan yang dirancang dengan baik memastikan skalabilitas, efisiensi lalu lintas data, dan isolasi keamanan menggunakan teknologi VLAN.',
-            $qPre8, $qPost8, false
-        );
-
-        $qPre9 = [
-            [
-                'id' => 1, 'pertanyaan' => 'Perintah terminal untuk menguji konektivitas end-to-end ke host tujuan dengan protokol ICMP adalah...',
-                'pilihan' => ['A' => 'ping', 'B' => 'tracert', 'C' => 'netstat', 'D' => 'nslookup', 'E' => 'ipconfig'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'ping mengirimkan paket ICMP Echo Request untuk menguji koneksi.',
-            ],
-            [
-                'id' => 2, 'pertanyaan' => 'Perangkat lunak simulasi jaringan interaktif buatan Cisco yang populer untuk pembelajaran adalah...',
-                'pilihan' => ['A' => 'Cisco Packet Tracer', 'B' => 'Wireshark', 'C' => 'PuTTY', 'D' => 'Notepad++', 'E' => 'VirtualBox'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'Cisco Packet Tracer adalah simulator jaringan visual interaktif.',
-            ]
-        ];
-        $qPost9 = [
-            [
-                'id' => 1, 'pertanyaan' => 'Perintah untuk melacak jalur lompatan (hop) router yang dilewati paket menuju host tujuan adalah...',
-                'pilihan' => ['A' => 'traceroute / tracert', 'B' => 'ping', 'C' => 'arp -a', 'D' => 'route print', 'E' => 'hostname'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'traceroute/tracert melacak rute hop yang dilalui paket ke alamat tujuan.',
-            ],
-            [
-                'id' => 2, 'pertanyaan' => 'Status balasan ping "Request Timed Out (RTO)" mengindikasikan bahwa...',
-                'pilihan' => ['A' => 'Paket tidak menerima balasan dalam batas waktu tertentu', 'B' => 'Kabel terputus total', 'C' => 'IP address bertabrakan', 'D' => 'DNS gagal resolve', 'E' => 'Kartu jaringan rusak'],
-                'kunci_jawaban' => 'A', 'bobot' => 50, 'pembahasan' => 'RTO terjadi saat balasan ICMP Echo Reply tidak tiba sebelum timeout.',
-            ]
-        ];
-        $res9 = $createModuleRecord(
-            $teacher3, $classTo2, $subjectJaringan,
-            'Simulasi Jaringan Interaktif & Troubleshooting Konektivitas TCP/IP',
-            'Kegiatan Belajar 1: Simulasi Packet Tracer, Analisis Logika Ping, dan Uji Jalur Traceroute',
-            'Troubleshooting jaringan memerlukan metode diagnosis bertahap (bottom-up / top-down) untuk mengidentifikasi letak kegagalan komunikasi data.',
-            $qPre9, $qPost9, false
-        );
-
-        // ═════════════════════════════════════════════════════════════════
-        // 10. CONTOH SUBMISSIONS & HASIL PENILAIAN SISWA
-        // ═════════════════════════════════════════════════════════════════
-        // Siswa 1 pada Modul 1 (Informatika - Budi Santoso)
+        // Siswa 1 (Ahmad Pratama) - Status TUNTAS (Graded 100%)
         VideoSummary::create([
-            'module_id'    => $res1['module']->id,
+            'module_id'    => $module->id,
             'student_id'   => $studentModels[0]->id,
-            'summary_text' => 'Video menjelaskan konsep struktur HTML5, styling CSS3, dan logika percabangan. Saya memahami cara membangun layout responsif dan logika program.',
-            'manual_score' => 92,
+            'summary_text' => 'Video menjelaskan dengan sangat jelas mengenai pengertian algoritma, perbedaan notasi deskriptif, flowchart, dan pseudocode serta contoh penerapannya dalam kehidupan sehari-hari.',
+            'manual_score' => 95,
         ]);
 
         EmbedSubmission::create([
-            'module_id'       => $res1['module']->id,
+            'module_id'       => $module->id,
             'student_id'      => $studentModels[0]->id,
             'screenshot_path' => 'embed_submissions/sample_terminal.png',
-            'manual_score'    => 90,
+            'manual_score'    => 92,
         ]);
 
         JobSheetSubmission::create([
-            'job_sheet_id'       => $res1['jobSheet']->id,
+            'job_sheet_id'       => $jobSheet->id,
             'student_id'         => $studentModels[0]->id,
-            'uploaded_file_path' => 'job_sheet_submissions/laporan_praktik_siswa1.pdf',
-            'manual_score'       => 95,
+            'uploaded_file_path' => 'job_sheet_submissions/laporan_praktik_ahmad.pdf',
+            'manual_score'       => 96,
         ]);
 
         Submission::create([
-            'lkpd_id'            => $res1['lkpd']->id,
+            'lkpd_id'            => $lkpd->id,
             'student_id'         => $studentModels[0]->id,
-            'uploaded_file_path' => 'lkpd_submissions/jawaban_lkpd_siswa1.pdf',
+            'uploaded_file_path' => 'lkpd_submissions/jawaban_lkpd_ahmad.pdf',
             'manual_score'       => 94,
         ]);
 
         StudentResult::create([
             'student_id'      => $studentModels[0]->id,
-            'module_id'       => $res1['module']->id,
+            'module_id'       => $module->id,
             'pre_test_score'  => 100,
-            'video_score'     => 92,
-            'embed_score'     => 90,
-            'job_sheet_score' => 95,
+            'video_score'     => 95,
+            'embed_score'     => 92,
+            'job_sheet_score' => 96,
             'lkpd_score'      => 94,
-            'post_test_score' => 100,
-            'summative_score' => 95,
-            'grading_status'  => 'graded',
-        ]);
-
-        // Siswa 2 pada Modul 1 (Pending)
-        VideoSummary::create([
-            'module_id'    => $res1['module']->id,
-            'student_id'   => $studentModels[1]->id,
-            'summary_text' => 'Rangkuman materi HTML5 dan CSS dasar untuk perancangan halaman antarmuka web modern.',
-            'manual_score' => null,
-        ]);
-
-        JobSheetSubmission::create([
-            'job_sheet_id'       => $res1['jobSheet']->id,
-            'student_id'         => $studentModels[1]->id,
-            'uploaded_file_path' => 'job_sheet_submissions/laporan_praktik_siswa2.pdf',
-            'manual_score'       => null,
-        ]);
-
-        StudentResult::create([
-            'student_id'      => $studentModels[1]->id,
-            'module_id'       => $res1['module']->id,
-            'pre_test_score'  => 100,
-            'video_score'     => null,
-            'embed_score'     => null,
-            'job_sheet_score' => null,
-            'lkpd_score'      => null,
-            'post_test_score' => 100,
-            'summative_score' => 100,
-            'grading_status'  => 'pending',
-        ]);
-
-        // Siswa 3 pada Modul 4 (Jaringan - Siti Aminah)
-        VideoSummary::create([
-            'module_id'    => $res4['module']->id,
-            'student_id'   => $studentModels[2]->id,
-            'summary_text' => 'Video mendemonstrasikan perhitungan subnetting VLSM dan konfigurasi static routing pada router jaringan.',
-            'manual_score' => 90,
-        ]);
-
-        StudentResult::create([
-            'student_id'      => $studentModels[2]->id,
-            'module_id'       => $res4['module']->id,
-            'pre_test_score'  => 100,
-            'video_score'     => 90,
-            'embed_score'     => null,
-            'job_sheet_score' => null,
-            'lkpd_score'      => null,
             'post_test_score' => 100,
             'summative_score' => 96,
             'grading_status'  => 'graded',
         ]);
 
-        // Siswa 6 pada Modul 7 (Informatika - Hendra Wijaya)
+        // Siswa 2 (Bunga Citra) - Status SEDANG BERJALAN (Pending review)
         VideoSummary::create([
-            'module_id'    => $res7['module']->id,
-            'student_id'   => $studentModels[5]->id,
-            'summary_text' => 'Rangkuman mengenai konsep normalisasi basis data relasional 1NF-3NF dan implementasi query SELECT JOIN.',
-            'manual_score' => 94,
+            'module_id'    => $module->id,
+            'student_id'   => $studentModels[1]->id,
+            'summary_text' => 'Rangkuman pemahaman mengenai simbol flowchart dan langkah pembuatan algoritma secara sistematis.',
+            'manual_score' => null,
+        ]);
+
+        JobSheetSubmission::create([
+            'job_sheet_id'       => $jobSheet->id,
+            'student_id'         => $studentModels[1]->id,
+            'uploaded_file_path' => 'job_sheet_submissions/laporan_praktik_bunga.pdf',
+            'manual_score'       => null,
         ]);
 
         StudentResult::create([
-            'student_id'      => $studentModels[5]->id,
-            'module_id'       => $res7['module']->id,
+            'student_id'      => $studentModels[1]->id,
+            'module_id'       => $module->id,
             'pre_test_score'  => 100,
-            'video_score'     => 94,
+            'video_score'     => null,
             'embed_score'     => null,
             'job_sheet_score' => null,
             'lkpd_score'      => null,
-            'post_test_score' => 100,
-            'summative_score' => 98,
-            'grading_status'  => 'graded',
+            'post_test_score' => null,
+            'summative_score' => 50,
+            'grading_status'  => 'pending',
         ]);
     }
 }
