@@ -565,10 +565,11 @@ class DashboardController extends Controller
         // Seluruh modul diproses
         $processedModules = $this->processStudentModules($allModules, $student);
 
-        // 1. Modul yang baru dibuka / terakhir diakses siswa (Recent Opened Modules - Bagian Teratas)
+        // 1. Modul yang baru dibuka / terakhir diakses siswa (Recent Opened Modules - Bagian Teratas, maks 3)
         $recentOpenedModules = $processedModules
             ->filter(fn($m) => !empty($m['last_accessed_at']) || $m['progress_percent'] > 0)
             ->sortByDesc(fn($m) => $m['last_accessed_at'] ?? $m['updated_at'])
+            ->take(3)
             ->values();
 
         // 2. Modul yang baru dibuat / ditambahkan oleh guru (Newest Added Modules - Di Bawahnya)
