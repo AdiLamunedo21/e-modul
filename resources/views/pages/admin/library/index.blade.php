@@ -40,8 +40,10 @@
     selectedTeacher: '{{ addslashes($teacherId ?? 'all') }}',
     activeTab: 'all',
     explorerView: 'grid',
+    perPage: 9,
+    currentPage: 1,
     items: {{ json_encode($modulesJson) }},
-    get displayItems() {
+    get filteredList() {
         let list = [...this.items];
         
         // 1. Filter Mata Pelajaran (Instan Tanpa Refresh)
@@ -80,16 +82,37 @@
 
         return list;
     },
+    get totalPages() {
+        return Math.max(1, Math.ceil(this.filteredList.length / this.perPage));
+    },
+    get displayItems() {
+        if (this.currentPage > this.totalPages) {
+            this.currentPage = 1;
+        }
+        const start = (this.currentPage - 1) * this.perPage;
+        return this.filteredList.slice(start, start + this.perPage);
+    },
+    goToPage(pageNum) {
+        if (pageNum >= 1 && pageNum <= this.totalPages) {
+            this.currentPage = pageNum;
+            const targetEl = document.getElementById('module-explorer-section');
+            if (targetEl) {
+                targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    },
     resetFilters() {
         this.searchKeyword = '';
         this.selectedSubject = 'all';
         this.selectedTeacher = 'all';
         this.activeTab = 'all';
+        this.currentPage = 1;
     },
     get isFiltered() {
         return this.searchKeyword.trim() !== '' || this.selectedSubject !== 'all' || this.selectedTeacher !== 'all' || this.activeTab !== 'all';
     }
-}">
+}"
+x-init="$watch('searchKeyword', () => currentPage = 1); $watch('selectedSubject', () => currentPage = 1); $watch('selectedTeacher', () => currentPage = 1); $watch('activeTab', () => currentPage = 1)">
 
     {{-- ══ 1. BREADCRUMB & HEADER ══ --}}
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
@@ -188,75 +211,8 @@
         </div>
     </div>
 
-    {{-- ══ 3. SECTION: TOP MODUL PALING BANYAK DIKLONING ══ --}}
-    @if($topClonedModules->count() > 0 && $topClonedModules->first()->clone_count > 0)
-        <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 sm:p-7 text-white shadow-xl shadow-indigo-950/20 mb-8 border border-indigo-800/40 relative overflow-hidden">
-            <div class="absolute -top-12 -right-12 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-            <div class="flex items-center justify-between gap-4 mb-5 relative z-10">
-                <div>
-                    <h2 class="text-lg sm:text-xl font-black text-white tracking-tight flex items-center gap-2">
-                        <span>Top Modul Paling Banyak Dikloning</span>
-                    </h2>
-                    <p class="text-xs text-slate-300 mt-0.5">
-                        Koleksi materi pembelajaran dengan adopsi tertinggi yang paling sering dijadikan rujukan oleh guru lain.
-                    </p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
-                @foreach($topClonedModules as $index => $topMod)
-                    <div class="bg-white/10 backdrop-blur-md border border-white/10 hover:border-amber-400/50 rounded-2xl p-4 sm:p-5 transition-all flex flex-col justify-between group">
-                        <div>
-                            {{-- Ranking Badge & Clone Count --}}
-                            <div class="flex items-center justify-between gap-2 mb-3">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black
-                                    {{ $index === 0 ? 'bg-amber-400 text-slate-950 shadow-sm' : ($index === 1 ? 'bg-slate-200 text-slate-900' : 'bg-amber-700/60 text-amber-200') }}">
-                                    @if($index === 0) Peringkat 1 @elseif($index === 1) Peringkat 2 @else Peringkat 3 @endif
-                                </span>
-
-                                <span class="inline-flex items-center gap-1 text-xs font-extrabold text-amber-300 bg-amber-500/20 px-2.5 py-0.5 rounded-full border border-amber-400/30">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
-                                    </svg>
-                                    <span>{{ $topMod->clone_count }}x Klon</span>
-                                </span>
-                            </div>
-
-                            {{-- Title --}}
-                            <h3 class="text-sm font-bold text-white group-hover:text-amber-300 transition-colors line-clamp-2 mb-2">
-                                {{ $topMod->title }}
-                            </h3>
-
-                            {{-- Author & Subject --}}
-                            <p class="text-xs text-slate-300 mb-1 flex items-center gap-1.5 truncate">
-                                <span>Penyusun:</span>
-                                <strong class="text-white truncate">{{ $topMod->teacher->name ?? 'Guru' }}</strong>
-                            </p>
-                            <p class="text-[11px] text-slate-400">
-                                {{ $topMod->subject?->name ?? 'Mapel' }} &bull; {{ $topMod->schoolClass?->short_name ?? 'Semua Kelas' }}
-                            </p>
-                        </div>
-
-                        {{-- Action Button --}}
-                        <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
-                            <span class="text-[10px] text-slate-400 font-mono">#{{ $topMod->id }}</span>
-                            <a href="{{ route('admin.library.show', $topMod) }}"
-                               class="inline-flex items-center gap-1 text-xs font-bold text-amber-300 hover:text-white transition-colors">
-                                <span>Pratinjau Modul</span>
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
-                                </svg>
-                            </a>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    @endif
-
-    {{-- ══ 4. TOOLBAR: LIVE SEARCH, FILTER DROPDOWNS & VIEW MODE SWITCHER ══ --}}
-    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 sm:p-6 mb-6 space-y-4">
+    {{-- ══ 3. TOOLBAR: LIVE SEARCH, FILTER DROPDOWNS & VIEW MODE SWITCHER ══ --}}
+    <div id="module-explorer-section" class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 sm:p-6 mb-6 space-y-4">
         
         {{-- Row 1: Live Search + Filters + View Switcher (Sejajar di Versi Desktop) --}}
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
@@ -567,6 +523,47 @@
                         </template>
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        {{-- ══ 5. INTERACTIVE PAGINATION CONTROLS (1, 2, 3, 4 dst.) ══ --}}
+        <div x-show="filteredList.length > 0" class="mt-8 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-sm">
+            {{-- Info Range --}}
+            <div class="text-xs font-semibold text-slate-500 text-center sm:text-left">
+                Menampilkan <span class="font-black text-slate-800" x-text="filteredList.length === 0 ? 0 : ((currentPage - 1) * perPage) + 1"></span> sampai <span class="font-black text-slate-800" x-text="Math.min(currentPage * perPage, filteredList.length)"></span> dari <span class="font-black text-indigo-600" x-text="filteredList.length"></span> modul
+            </div>
+
+            {{-- Numeric Page Buttons & Navigation --}}
+            <div class="flex items-center gap-1.5 flex-wrap justify-center" x-show="totalPages > 1">
+                {{-- Prev Button --}}
+                <button type="button"
+                        @click="goToPage(currentPage - 1)"
+                        :disabled="currentPage === 1"
+                        :class="currentPage === 1 ? 'opacity-40 cursor-not-allowed text-slate-400 bg-slate-50' : 'hover:bg-slate-100 text-slate-700 bg-white cursor-pointer'"
+                        class="inline-flex items-center gap-1 px-3 py-2 text-xs font-bold rounded-xl border border-slate-200 transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+                    <span class="hidden sm:inline">Sebelumnya</span>
+                </button>
+
+                {{-- Numbered Page Buttons (1, 2, 3, 4 dst.) --}}
+                <template x-for="pageNum in totalPages" :key="'page-btn-' + pageNum">
+                    <button type="button"
+                            @click="goToPage(pageNum)"
+                            :class="currentPage === pageNum ? 'bg-indigo-600 text-white font-black shadow-sm shadow-indigo-600/25 border-transparent' : 'bg-white hover:bg-slate-100 text-slate-700 font-bold border-slate-200'"
+                            class="w-9 h-9 flex items-center justify-center text-xs rounded-xl border transition-all cursor-pointer"
+                            x-text="pageNum">
+                    </button>
+                </template>
+
+                {{-- Next Button --}}
+                <button type="button"
+                        @click="goToPage(currentPage + 1)"
+                        :disabled="currentPage === totalPages"
+                        :class="currentPage === totalPages ? 'opacity-40 cursor-not-allowed text-slate-400 bg-slate-50' : 'hover:bg-slate-100 text-slate-700 bg-white cursor-pointer'"
+                        class="inline-flex items-center gap-1 px-3 py-2 text-xs font-bold rounded-xl border border-slate-200 transition-all">
+                    <span class="hidden sm:inline">Selanjutnya</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                </button>
             </div>
         </div>
 

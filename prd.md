@@ -387,7 +387,7 @@ erDiagram
     TEACHERS {
         bigint id PK
         string name
-        string identity_number "NIP/NUPTK Guru"
+        string identity_number "NIP Guru"
         string password
     }
     TEACHER_SUBJECTS {

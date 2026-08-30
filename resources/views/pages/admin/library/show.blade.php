@@ -20,16 +20,6 @@
     .materi-prose blockquote { border-left: 4px solid #4f46e5; background: #eef2ff; padding: .75rem 1rem; margin: 1rem 0; border-radius: 0 .5rem .5rem 0; font-style: italic; color: #3730a3; }
     .materi-prose hr { border: none; border-top: 2px solid #e2e8f0; margin: 1.5rem 0; }
     .materi-prose a { color: #4f46e5; text-decoration: underline; }
-
-    /* Active styling in learning syllabus */
-    .sidebar-item-active {
-        background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
-        color: #ffffff !important;
-        box-shadow: 0 4px 12px -2px rgba(79, 70, 229, 0.35);
-    }
-    .sidebar-item-active * {
-        color: #ffffff !important;
-    }
 </style>
 @endpush
 
@@ -293,17 +283,22 @@
                                 </span>
                                 <svg class="w-4 h-4 text-slate-400 transform transition-transform" :class="openSections[1] ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                             </button>
-                            <div x-show="openSections[1]" class="p-2 space-y-1 bg-white">
+                            <div x-show="openSections[1]" class="p-2 space-y-1.5 bg-white">
                                 @foreach($sec1Items as $item)
                                     <button type="button"
                                             @click="goToPage('{{ $item['id'] }}')"
-                                            :class="activePage === '{{ $item['id'] }}' ? 'sidebar-item-active' : 'hover:bg-slate-50 text-slate-700'"
-                                            class="w-full px-3 py-2 rounded-xl flex items-center justify-between text-left transition cursor-pointer">
+                                            :class="activePage === '{{ $item['id'] }}'
+                                                ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/25 border-transparent'
+                                                : 'bg-white hover:bg-slate-50 text-slate-700 font-medium border-slate-200/70'"
+                                            class="w-full px-3 py-2 rounded-xl border flex items-center justify-between text-left transition-all cursor-pointer">
                                         <div class="flex items-center gap-2 min-w-0">
                                             <span class="text-sm shrink-0">{{ $item['icon'] }}</span>
-                                            <span class="truncate font-semibold">{{ $item['title'] }}</span>
+                                            <span class="truncate" :class="activePage === '{{ $item['id'] }}' ? 'text-white font-bold' : 'text-slate-800'">{{ $item['title'] }}</span>
                                         </div>
-                                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 shrink-0">{{ $item['badge'] }}</span>
+                                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-md shrink-0 transition-colors"
+                                              :class="activePage === '{{ $item['id'] }}' ? 'bg-white/20 text-white' : 'bg-blue-50 text-blue-700'">
+                                            {{ $item['badge'] }}
+                                        </span>
                                     </button>
                                 @endforeach
                             </div>
@@ -321,17 +316,22 @@
                                 </span>
                                 <svg class="w-4 h-4 text-slate-400 transform transition-transform" :class="openSections[2] ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                             </button>
-                            <div x-show="openSections[2]" class="p-2 space-y-1 bg-white">
+                            <div x-show="openSections[2]" class="p-2 space-y-1.5 bg-white">
                                 @foreach($sec2Items as $item)
                                     <button type="button"
                                             @click="goToPage('{{ $item['id'] }}')"
-                                            :class="activePage === '{{ $item['id'] }}' ? 'sidebar-item-active' : 'hover:bg-slate-50 text-slate-700'"
-                                            class="w-full px-3 py-2 rounded-xl flex items-center justify-between text-left transition cursor-pointer">
+                                            :class="activePage === '{{ $item['id'] }}'
+                                                ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/25 border-transparent'
+                                                : 'bg-white hover:bg-slate-50 text-slate-700 font-medium border-slate-200/70'"
+                                            class="w-full px-3 py-2 rounded-xl border flex items-center justify-between text-left transition-all cursor-pointer">
                                         <div class="flex items-center gap-2 min-w-0">
                                             <span class="text-sm shrink-0">{{ $item['icon'] }}</span>
-                                            <span class="truncate font-semibold">{{ $item['title'] }}</span>
+                                            <span class="truncate" :class="activePage === '{{ $item['id'] }}' ? 'text-white font-bold' : 'text-slate-800'">{{ $item['title'] }}</span>
                                         </div>
-                                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 shrink-0">{{ $item['badge'] }}</span>
+                                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-md shrink-0 transition-colors"
+                                              :class="activePage === '{{ $item['id'] }}' ? 'bg-white/20 text-white' : 'bg-indigo-50 text-indigo-700'">
+                                            {{ $item['badge'] }}
+                                        </span>
                                     </button>
                                 @endforeach
                             </div>
@@ -349,17 +349,22 @@
                                 </span>
                                 <svg class="w-4 h-4 text-slate-400 transform transition-transform" :class="openSections[3] ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                             </button>
-                            <div x-show="openSections[3]" class="p-2 space-y-1 bg-white">
+                            <div x-show="openSections[3]" class="p-2 space-y-1.5 bg-white">
                                 @foreach($sec3Items as $item)
                                     <button type="button"
                                             @click="goToPage('{{ $item['id'] }}')"
-                                            :class="activePage === '{{ $item['id'] }}' ? 'sidebar-item-active' : 'hover:bg-slate-50 text-slate-700'"
-                                            class="w-full px-3 py-2 rounded-xl flex items-center justify-between text-left transition cursor-pointer">
+                                            :class="activePage === '{{ $item['id'] }}'
+                                                ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/25 border-transparent'
+                                                : 'bg-white hover:bg-slate-50 text-slate-700 font-medium border-slate-200/70'"
+                                            class="w-full px-3 py-2 rounded-xl border flex items-center justify-between text-left transition-all cursor-pointer">
                                         <div class="flex items-center gap-2 min-w-0">
                                             <span class="text-sm shrink-0">{{ $item['icon'] }}</span>
-                                            <span class="truncate font-semibold">{{ $item['title'] }}</span>
+                                            <span class="truncate" :class="activePage === '{{ $item['id'] }}' ? 'text-white font-bold' : 'text-slate-800'">{{ $item['title'] }}</span>
                                         </div>
-                                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 shrink-0">{{ $item['badge'] }}</span>
+                                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-md shrink-0 transition-colors"
+                                              :class="activePage === '{{ $item['id'] }}' ? 'bg-white/20 text-white' : 'bg-amber-50 text-amber-700'">
+                                            {{ $item['badge'] }}
+                                        </span>
                                     </button>
                                 @endforeach
                             </div>
@@ -377,17 +382,22 @@
                                 </span>
                                 <svg class="w-4 h-4 text-slate-400 transform transition-transform" :class="openSections[4] ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                             </button>
-                            <div x-show="openSections[4]" class="p-2 space-y-1 bg-white">
+                            <div x-show="openSections[4]" class="p-2 space-y-1.5 bg-white">
                                 @foreach($sec4Items as $item)
                                     <button type="button"
                                             @click="goToPage('{{ $item['id'] }}')"
-                                            :class="activePage === '{{ $item['id'] }}' ? 'sidebar-item-active' : 'hover:bg-slate-50 text-slate-700'"
-                                            class="w-full px-3 py-2 rounded-xl flex items-center justify-between text-left transition cursor-pointer">
+                                            :class="activePage === '{{ $item['id'] }}'
+                                                ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/25 border-transparent'
+                                                : 'bg-white hover:bg-slate-50 text-slate-700 font-medium border-slate-200/70'"
+                                            class="w-full px-3 py-2 rounded-xl border flex items-center justify-between text-left transition-all cursor-pointer">
                                         <div class="flex items-center gap-2 min-w-0">
                                             <span class="text-sm shrink-0">{{ $item['icon'] }}</span>
-                                            <span class="truncate font-semibold">{{ $item['title'] }}</span>
+                                            <span class="truncate" :class="activePage === '{{ $item['id'] }}' ? 'text-white font-bold' : 'text-slate-800'">{{ $item['title'] }}</span>
                                         </div>
-                                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-50 text-purple-700 shrink-0">{{ $item['badge'] }}</span>
+                                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-md shrink-0 transition-colors"
+                                              :class="activePage === '{{ $item['id'] }}' ? 'bg-white/20 text-white' : 'bg-purple-50 text-purple-700'">
+                                            {{ $item['badge'] }}
+                                        </span>
                                     </button>
                                 @endforeach
                             </div>
@@ -405,17 +415,22 @@
                                 </span>
                                 <svg class="w-4 h-4 text-slate-400 transform transition-transform" :class="openSections[5] ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                             </button>
-                            <div x-show="openSections[5]" class="p-2 space-y-1 bg-white">
+                            <div x-show="openSections[5]" class="p-2 space-y-1.5 bg-white">
                                 @foreach($sec5Items as $item)
                                     <button type="button"
                                             @click="goToPage('{{ $item['id'] }}')"
-                                            :class="activePage === '{{ $item['id'] }}' ? 'sidebar-item-active' : 'hover:bg-slate-50 text-slate-700'"
-                                            class="w-full px-3 py-2 rounded-xl flex items-center justify-between text-left transition cursor-pointer">
+                                            :class="activePage === '{{ $item['id'] }}'
+                                                ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/25 border-transparent'
+                                                : 'bg-white hover:bg-slate-50 text-slate-700 font-medium border-slate-200/70'"
+                                            class="w-full px-3 py-2 rounded-xl border flex items-center justify-between text-left transition-all cursor-pointer">
                                         <div class="flex items-center gap-2 min-w-0">
                                             <span class="text-sm shrink-0">{{ $item['icon'] }}</span>
-                                            <span class="truncate font-semibold">{{ $item['title'] }}</span>
+                                            <span class="truncate" :class="activePage === '{{ $item['id'] }}' ? 'text-white font-bold' : 'text-slate-800'">{{ $item['title'] }}</span>
                                         </div>
-                                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-teal-50 text-teal-700 shrink-0">{{ $item['badge'] }}</span>
+                                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-md shrink-0 transition-colors"
+                                              :class="activePage === '{{ $item['id'] }}' ? 'bg-white/20 text-white' : 'bg-teal-50 text-teal-700'">
+                                            {{ $item['badge'] }}
+                                        </span>
                                     </button>
                                 @endforeach
                             </div>
