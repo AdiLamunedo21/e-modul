@@ -59,73 +59,13 @@ class DashboardController extends Controller
             ->take(10)
             ->get();
 
-        // ── 3. Feed Aktivitas Belajar Siswa Terbaru (Real-Time Submissions Log) ──
-        $recentLkpd = Submission::with(['student.schoolClass', 'lkpd.module'])
-            ->latest('updated_at')
-            ->take(6)
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'type'         => 'lkpd',
-                    'badge'        => 'LKPD',
-                    'badge_class'  => 'bg-cyan-100 text-cyan-800 border-cyan-200',
-                    'student_name' => $item->student->name ?? 'Siswa',
-                    'class_name'   => $item->student->schoolClass->full_name ?? ($item->student->schoolClass ? ($item->student->schoolClass->grade . ' ' . $item->student->schoolClass->major_name) : '-'),
-                    'module_title' => $item->lkpd->module->title ?? 'E-Modul',
-                    'score'        => $item->manual_score,
-                    'time'         => $item->updated_at,
-                ];
-            });
-
-        $recentJobSheets = JobSheetSubmission::with(['student.schoolClass', 'jobSheet.module'])
-            ->latest('updated_at')
-            ->take(6)
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'type'         => 'job_sheet',
-                    'badge'        => 'Job Sheet',
-                    'badge_class'  => 'bg-amber-100 text-amber-800 border-amber-200',
-                    'student_name' => $item->student->name ?? 'Siswa',
-                    'class_name'   => $item->student->schoolClass->full_name ?? ($item->student->schoolClass ? ($item->student->schoolClass->grade . ' ' . $item->student->schoolClass->major_name) : '-'),
-                    'module_title' => $item->jobSheet->module->title ?? 'E-Modul',
-                    'score'        => $item->manual_score,
-                    'time'         => $item->updated_at,
-                ];
-            });
-
-        $recentResults = StudentResult::with(['student.schoolClass', 'module'])
-            ->latest('updated_at')
-            ->take(6)
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'type'         => 'quiz_result',
-                    'badge'        => 'Evaluasi / Kuis',
-                    'badge_class'  => 'bg-emerald-100 text-emerald-800 border-emerald-200',
-                    'student_name' => $item->student->name ?? 'Siswa',
-                    'class_name'   => $item->student->schoolClass->full_name ?? ($item->student->schoolClass ? ($item->student->schoolClass->grade . ' ' . $item->student->schoolClass->major_name) : '-'),
-                    'module_title' => $item->module->title ?? 'E-Modul',
-                    'score'        => $item->post_test_score ?? $item->pre_test_score,
-                    'time'         => $item->updated_at,
-                ];
-            });
-
-        $recentActivities = $recentLkpd->concat($recentJobSheets)->concat($recentResults)
-            ->sortByDesc('time')
-            ->take(8)
-            ->values();
-
-        // ── 4. Ringkasan Mata Pelajaran & Kelas ──
+        // ── 3. Ringkasan Mata Pelajaran ──
         $subjects = Subject::withCount(['modules', 'teachers'])->get();
-        $classes = SchoolClass::withCount(['students', 'modules'])->get();
 
         return view('pages.admin.dashboard', compact(
             'stats',
             'teachers',
-            'recentActivities',
-            'subjects',
-            'classes'
+            'subjects'
         ));
     }
 }

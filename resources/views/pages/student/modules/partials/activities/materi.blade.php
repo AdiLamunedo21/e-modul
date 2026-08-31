@@ -7,9 +7,6 @@
         <div class="p-6 sm:p-8 border-b border-slate-100 bg-gradient-to-r from-blue-50/70 to-slate-50">
             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                 <div class="flex items-center gap-2">
-                    <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-bold border border-blue-200">
-                        ⏱️ Estimasi Belajar: {{ $materiData['estimasi_waktu'] ?? 45 }} Menit
-                    </span>
                     <span class="px-3 py-1 rounded-full bg-slate-200/80 text-slate-800 text-xs font-bold">
                         📖 Bagian 3: Kegiatan Belajar
                     </span>

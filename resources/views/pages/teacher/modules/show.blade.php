@@ -59,6 +59,9 @@
                         Kelas {{ $module->schoolClass->grade }} {{ $module->schoolClass->major_name }}
                     </span>
                 @endif
+                <span class="px-3 py-1 rounded-full text-xs font-bold border {{ $module->semester_badge['color'] }}">
+                    {{ $module->semester_badge['label'] }}
+                </span>
                 <span class="text-xs text-slate-400">
                     Dibuat {{ $module->created_at->format('d M Y') }} &bull; Terakhir diperbarui {{ $module->updated_at->diffForHumans() }}
                 </span>
@@ -665,6 +668,23 @@
                             Kelas {{ $cls->grade }} - {{ $cls->major_name }}
                         </option>
                     @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label for="module_semester" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Semester Pembelajaran <span class="text-red-500">*</span>
+                </label>
+                <select name="semester"
+                        id="module_semester"
+                        required
+                        class="w-full px-4 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-semibold text-slate-800 transition-all cursor-pointer">
+                    <option value="1" {{ old('semester', (string)$module->semester) === '1' ? 'selected' : '' }}>
+                        Semester 1 (Ganjil)
+                    </option>
+                    <option value="2" {{ old('semester', (string)$module->semester) === '2' ? 'selected' : '' }}>
+                        Semester 2 (Genap)
+                    </option>
                 </select>
             </div>
 

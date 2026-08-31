@@ -40,6 +40,12 @@
                 <a href="{{ route('student.classes.show', $class->id) }}" class="hover:text-emerald-700 font-bold shrink-0">
                     {{ $class->full_name }}
                 </a>
+                @if($selectedSemester)
+                    <span class="text-slate-400 font-mono">›</span>
+                    <a href="{{ route('student.classes.show', ['class' => $class->id, 'semester' => $selectedSemester]) }}" class="hover:text-emerald-700 font-bold shrink-0">
+                        {{ $selectedSemester == '2' ? 'Semester 2 (Genap)' : 'Semester 1 (Ganjil)' }}
+                    </a>
+                @endif
                 <span class="text-slate-400 font-mono">›</span>
                 <span class="text-slate-900 font-extrabold shrink-0">
                     {{ $subject->name }}
@@ -93,7 +99,7 @@
                 </div>
 
                 {{-- Back to Class Subjects --}}
-                <a href="{{ route('student.classes.show', $class->id) }}"
+                <a href="{{ route('student.classes.show', array_filter(['class' => $class->id, 'semester' => $selectedSemester])) }}"
                    title="Kembali ke Direktori Mata Pelajaran"
                    class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1 shrink-0">
                     <span>←</span>
@@ -115,6 +121,11 @@
                     <span class="px-2.5 py-0.5 rounded-full bg-white/10 text-white font-mono font-bold">
                         KODE: {{ $class->code }}
                     </span>
+                    @if($selectedSemester)
+                        <span class="px-2.5 py-0.5 rounded-full {{ $selectedSemester == '2' ? 'bg-cyan-500/20 text-cyan-300 border-cyan-400/30' : 'bg-amber-500/20 text-amber-300 border-amber-400/30' }} font-bold border">
+                            {{ $selectedSemester == '2' ? 'Semester 2 (Genap)' : 'Semester 1 (Ganjil)' }}
+                        </span>
+                    @endif
                 </div>
                 <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white">
                     Modul Pembelajaran: {{ $subject->name }}
@@ -272,9 +283,17 @@
                     <div class="space-y-3">
                         <div class="flex items-start justify-between gap-2">
                             <div class="min-w-0">
-                                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200 uppercase truncate inline-block">
-                                    {{ $mod['subject_name'] }}
-                                </span>
+                                <div class="flex items-center gap-1 flex-wrap">
+                                    <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200 uppercase truncate inline-block">
+                                        {{ $mod['subject_name'] }}
+                                    </span>
+                                    @if(!empty($mod['semester_badge']))
+                                        <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded-md border {{ $mod['semester_badge']['color'] }} inline-flex items-center gap-1">
+                                            <span>{{ $mod['semester_badge']['icon'] }}</span>
+                                            <span>{{ $mod['semester_badge']['short'] }}</span>
+                                        </span>
+                                    @endif
+                                </div>
                                 <span class="text-[10px] text-slate-400 mt-1 block">
                                     {{ !empty($mod['created_at']) ? \Carbon\Carbon::parse($mod['created_at'])->translatedFormat('d M Y') : 'Terbit' }}
                                 </span>
@@ -387,9 +406,17 @@
                             class="hover:bg-slate-50/80 transition-colors group">
                             <td class="py-3.5 px-4 font-bold text-slate-900">
                                 <div>
-                                    <a href="{{ route('student.modules.show', $mod['id']) }}" class="hover:text-emerald-600 font-extrabold block">
-                                        {{ $mod['title'] }}
-                                    </a>
+                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                        <a href="{{ route('student.modules.show', $mod['id']) }}" class="hover:text-emerald-600 font-extrabold">
+                                            {{ $mod['title'] }}
+                                        </a>
+                                        @if(!empty($mod['semester_badge']))
+                                            <span class="text-[9px] font-extrabold px-1.5 py-0.2 rounded border {{ $mod['semester_badge']['color'] }} inline-flex items-center gap-0.5">
+                                                <span>{{ $mod['semester_badge']['icon'] }}</span>
+                                                <span>{{ $mod['semester_badge']['short'] }}</span>
+                                            </span>
+                                        @endif
+                                    </div>
                                     @if($idx === 0 || !empty($mod['is_new']))
                                         <span class="text-[9px] font-black text-rose-600 uppercase">Baru Ditambahkan</span>
                                     @endif

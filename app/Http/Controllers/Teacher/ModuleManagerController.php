@@ -60,6 +60,12 @@ class ModuleManagerController extends Controller
             $query->where('subject_id', $selectedSubjectId);
         }
 
+        // Filter berdasarkan Semester (1: Ganjil, 2: Genap)
+        $selectedSemester = $request->filled('semester') && in_array($request->semester, ['1', '2']) ? $request->semester : null;
+        if ($selectedSemester) {
+            $query->where('semester', $selectedSemester);
+        }
+
         // Filter berdasarkan tab status jika ada
         if ($request->filled('status') && in_array($request->status, ['draft', 'published', 'closed'])) {
             $query->where('status', $request->status);
@@ -93,6 +99,9 @@ class ModuleManagerController extends Controller
         if ($selectedSubjectId) {
             $baseQuery->where('subject_id', $selectedSubjectId);
         }
+        if ($selectedSemester) {
+            $baseQuery->where('semester', $selectedSemester);
+        }
 
         $counts = [
             'all'       => (clone $baseQuery)->count(),
@@ -114,7 +123,8 @@ class ModuleManagerController extends Controller
             'teacherSubjects',
             'subjectCounts',
             'totalAllSubjects',
-            'selectedSubjectId'
+            'selectedSubjectId',
+            'selectedSemester'
         ));
     }
 
@@ -146,6 +156,7 @@ class ModuleManagerController extends Controller
             'title'      => ['required', 'string', 'max:255'],
             'class_id'   => ['required', 'exists:classes,id'],
             'subject_id' => ['required', 'exists:subjects,id'],
+            'semester'   => ['nullable', 'in:1,2'],
         ], [
             'title.required'      => 'Judul E-Modul wajib diisi.',
             'class_id.required'   => 'Pilih target kelas / jurusan.',
@@ -156,6 +167,7 @@ class ModuleManagerController extends Controller
         $module = Module::create([
             'teacher_id' => $this->teacher()->id,
             'subject_id' => $validated['subject_id'],
+            'semester'   => $validated['semester'] ?? '1',
             'title'      => $validated['title'],
             'class_id'   => $validated['class_id'],
             'status'     => 'draft',
@@ -190,7 +202,7 @@ class ModuleManagerController extends Controller
     }
 
     /**
-     * Memperbarui informasi nama dan identitas umum modul (Judul, Mapel, Kelas).
+     * Memperbarui informasi nama dan identitas umum modul (Judul, Mapel, Kelas, Semester).
      */
     public function update(Request $request, Module $module)
     {
@@ -200,6 +212,7 @@ class ModuleManagerController extends Controller
             'title'      => ['required', 'string', 'max:255'],
             'class_id'   => ['required', 'exists:classes,id'],
             'subject_id' => ['required', 'exists:subjects,id'],
+            'semester'   => ['nullable', 'in:1,2'],
         ], [
             'title.required'      => 'Judul E-Modul wajib diisi.',
             'class_id.required'   => 'Pilih target kelas / jurusan.',
@@ -211,6 +224,7 @@ class ModuleManagerController extends Controller
             'title'      => $validated['title'],
             'class_id'   => $validated['class_id'],
             'subject_id' => $validated['subject_id'],
+            'semester'   => $validated['semester'] ?? '1',
         ]);
 
         return redirect()->route('teacher.modules.show', $module)

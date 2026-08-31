@@ -129,194 +129,118 @@
     </div>
 </div>
 
-{{-- ══ 3. DUA KOLOM MONITORING: GURU & LOG AKTIVITAS SISWA ══ --}}
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+{{-- ══ 3. MONITORING: PRODUKTIVITAS GURU & DISTRIBUSI MODUL ══ --}}
+<div class="space-y-8 mb-8">
 
-    {{-- ── Kolom Kiri (2 Kolom): Monitoring Produktivitas Guru ── --}}
-    <div class="lg:col-span-2 space-y-8">
-        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
-            <div class="p-6 border-b border-slate-100 flex items-center justify-between flex-wrap gap-4">
-                <div>
-                    <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
-                        <span>Monitoring Produktivitas Guru</span>
-                        <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
-                            {{ $teachers->count() }} Guru Aktif
-                        </span>
-                    </h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Pemantauan penerbitan modul ajar dan mata pelajaran yang diampu.</p>
-                </div>
-                <a href="{{ route('admin.teachers.index') }}"
-                   class="text-xs font-bold text-indigo-600 hover:text-indigo-700 inline-flex items-center gap-1">
-                    <span>Semua Guru &rarr;</span>
-                </a>
+    {{-- Monitoring Produktivitas Guru --}}
+    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-slate-100 flex items-center justify-between flex-wrap gap-4">
+            <div>
+                <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
+                    <span>Monitoring Produktivitas Guru</span>
+                    <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                        {{ $teachers->count() }} Guru Aktif
+                    </span>
+                </h2>
+                <p class="text-xs text-slate-500 mt-0.5">Pemantauan penerbitan modul ajar dan mata pelajaran yang diampu.</p>
             </div>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm">
-                    <thead>
-                        <tr class="bg-slate-50/80 border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                            <th class="py-3.5 px-6">Nama & NIP Guru</th>
-                            <th class="py-3.5 px-4">Mata Pelajaran</th>
-                            <th class="py-3.5 px-4 text-center">Modul Terbit</th>
-                            <th class="py-3.5 px-4 text-center">Kelas Binaan</th>
-                            <th class="py-3.5 px-6 text-right">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        @forelse($teachers as $teacher)
-                            @php
-                                $assignedClassesCount = $teacher->assignedClasses()->count();
-                            @endphp
-                            <tr class="hover:bg-slate-50/60 transition-colors">
-                                <td class="py-4 px-6">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-700 font-bold text-xs flex items-center justify-center border border-indigo-100 shrink-0">
-                                            {{ strtoupper(substr($teacher->name, 0, 2)) }}
-                                        </div>
-                                        <div>
-                                            <p class="font-bold text-slate-900 text-xs">{{ $teacher->name }}</p>
-                                            <p class="text-[11px] text-slate-400 font-mono">NIP: {{ $teacher->identity_number }}</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-4 px-4">
-                                    <div class="flex flex-wrap gap-1 max-w-[200px]">
-                                        @forelse($teacher->subjects as $subj)
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                                                {{ $subj->name }}
-                                            </span>
-                                        @empty
-                                            <span class="text-[11px] text-slate-400 italic">Belum ada mapel</span>
-                                        @endforelse
-                                    </div>
-                                </td>
-                                <td class="py-4 px-4 text-center">
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                        {{ $teacher->published_modules_count }} Terbit
-                                    </span>
-                                </td>
-                                <td class="py-4 px-4 text-center">
-                                    <span class="text-xs font-bold text-slate-700">
-                                        {{ $assignedClassesCount }} Rombel
-                                    </span>
-                                </td>
-                                <td class="py-4 px-6 text-right">
-                                    <a href="{{ route('admin.teachers.index', ['search' => $teacher->identity_number]) }}"
-                                       class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors">
-                                        Detail
-                                    </a>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="py-8 text-center text-slate-400 text-xs">
-                                    Belum ada data guru terdaftar.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+            <a href="{{ route('admin.teachers.index') }}"
+               class="text-xs font-bold text-indigo-600 hover:text-indigo-700 inline-flex items-center gap-1">
+                <span>Semua Guru &rarr;</span>
+            </a>
         </div>
 
-        {{-- Distribusi Modul per Mata Pelajaran --}}
-        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6">
-            <h3 class="text-sm font-black text-slate-900 uppercase tracking-wider mb-4 flex items-center justify-between">
-                <span>Distribusi Modul per Mata Pelajaran</span>
-                <span class="text-xs text-slate-400 font-semibold">{{ $subjects->count() }} Mapel Aktif</span>
-            </h3>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                @foreach($subjects as $subj)
-                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/60 flex items-center justify-between gap-3">
-                        <div class="min-w-0">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold {{ $subj->badgeClasses() }} mb-1">
-                                {{ $subj->code }}
-                            </span>
-                            <h4 class="text-xs font-bold text-slate-800 truncate">{{ $subj->name }}</h4>
-                            <p class="text-[10px] text-slate-400">{{ $subj->teachers_count }} Guru Pengampu</p>
-                        </div>
-                        <div class="text-right shrink-0">
-                            <span class="text-xl font-black text-slate-900">{{ $subj->modules_count }}</span>
-                            <span class="text-[10px] text-slate-500 font-medium block">Modul</span>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead>
+                    <tr class="bg-slate-50/80 border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                        <th class="py-3.5 px-6">Nama & NIP Guru</th>
+                        <th class="py-3.5 px-4">Mata Pelajaran</th>
+                        <th class="py-3.5 px-4 text-center">Modul Terbit</th>
+                        <th class="py-3.5 px-4 text-center">Kelas Binaan</th>
+                        <th class="py-3.5 px-6 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @forelse($teachers as $teacher)
+                        @php
+                            $assignedClassesCount = $teacher->assignedClasses()->count();
+                        @endphp
+                        <tr class="hover:bg-slate-50/60 transition-colors">
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-700 font-bold text-xs flex items-center justify-center border border-indigo-100 shrink-0">
+                                        {{ strtoupper(substr($teacher->name, 0, 2)) }}
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-slate-900 text-xs">{{ $teacher->name }}</p>
+                                        <p class="text-[11px] text-slate-400 font-mono">NIP: {{ $teacher->identity_number }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-4 px-4">
+                                <div class="flex flex-wrap gap-1 max-w-[200px]">
+                                    @forelse($teacher->subjects as $subj)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                            {{ $subj->name }}
+                                        </span>
+                                    @empty
+                                        <span class="text-[11px] text-slate-400 italic">Belum ada mapel</span>
+                                    @endforelse
+                                </div>
+                            </td>
+                            <td class="py-4 px-4 text-center">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    {{ $teacher->published_modules_count }} Terbit
+                                </span>
+                            </td>
+                            <td class="py-4 px-4 text-center">
+                                <span class="text-xs font-bold text-slate-700">
+                                    {{ $assignedClassesCount }} Rombel
+                                </span>
+                            </td>
+                            <td class="py-4 px-6 text-right">
+                                <a href="{{ route('admin.teachers.index', ['search' => $teacher->identity_number]) }}"
+                                   class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors">
+                                    Detail
+                                </a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="py-8 text-center text-slate-400 text-xs">
+                                Belum ada data guru terdaftar.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 
-    {{-- ── Kolom Kanan (1 Kolom): Feed Aktivitas Siswa Terbaru (Real-Time Submissions) ── --}}
-    <div class="space-y-8">
-        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6">
-            <div class="flex items-center justify-between mb-5">
-                <div>
-                    <h3 class="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                        <span>Aktivitas Siswa Terbaru</span>
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                    </h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Log pengerjaan tugas & submisi modul.</p>
-                </div>
-                <a href="{{ route('admin.students.index') }}" class="text-xs font-bold text-indigo-600 hover:text-indigo-700">
-                    Master Siswa &rarr;
-                </a>
-            </div>
+    {{-- Distribusi Modul per Mata Pelajaran --}}
+    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6">
+        <h3 class="text-sm font-black text-slate-900 uppercase tracking-wider mb-4 flex items-center justify-between">
+            <span>Distribusi Modul per Mata Pelajaran</span>
+            <span class="text-xs text-slate-400 font-semibold">{{ $subjects->count() }} Mapel Aktif</span>
+        </h3>
 
-            <div class="space-y-3.5">
-                @forelse($recentActivities as $act)
-                    <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 hover:border-indigo-200 transition-all flex flex-col gap-2">
-                        <div class="flex items-center justify-between gap-2">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold border {{ $act['badge_class'] }}">
-                                {{ $act['badge'] }}
-                            </span>
-                            <span class="text-[10px] font-medium text-slate-400">
-                                {{ $act['time'] ? $act['time']->diffForHumans() : '-' }}
-                            </span>
-                        </div>
-                        <div>
-                            <p class="text-xs font-bold text-slate-900 leading-tight">
-                                {{ $act['student_name'] }}
-                                <span class="text-[10px] font-normal text-slate-500">({{ $act['class_name'] }})</span>
-                            </p>
-                            <p class="text-[11px] text-slate-500 truncate mt-0.5" title="{{ $act['module_title'] }}">
-                                Modul: <strong class="text-slate-700">{{ $act['module_title'] }}</strong>
-                            </p>
-                        </div>
-                        @if($act['score'] !== null)
-                            <div class="pt-1.5 border-t border-slate-200/50 flex items-center justify-between text-[11px]">
-                                <span class="text-slate-400 font-medium">Nilai Diperoleh:</span>
-                                <span class="font-black text-indigo-600">{{ $act['score'] }}/100</span>
-                            </div>
-                        @endif
-                    </div>
-                @empty
-                    <div class="py-8 text-center text-slate-400 text-xs">
-                        Belum ada riwayat aktivitas submisi siswa.
-                    </div>
-                @endforelse
-            </div>
-        </div>
-
-        {{-- Ringkasan Rombongan Belajar / Kelas --}}
-        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6">
-            <h3 class="text-sm font-black text-slate-900 uppercase tracking-wider mb-4 flex items-center justify-between">
-                <span>Rombongan Belajar (Kelas)</span>
-                <span class="text-xs font-bold text-slate-400">{{ $classes->count() }} Kelas</span>
-            </h3>
-
-            <div class="space-y-2.5 max-h-64 overflow-y-auto pr-1 [scrollbar-width:thin]">
-                @foreach($classes as $cls)
-                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs">
-                        <div>
-                            <span class="font-bold text-slate-800">{{ $cls->full_name }}</span>
-                            <span class="text-[10px] text-slate-400 block">{{ $cls->modules_count }} Modul Ditugaskan</span>
-                        </div>
-                        <span class="px-2.5 py-1 rounded-full text-[11px] font-black bg-white text-slate-700 border border-slate-200 shadow-2xs">
-                            {{ $cls->students_count }} Siswa
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            @foreach($subjects as $subj)
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/60 flex items-center justify-between gap-3">
+                    <div class="min-w-0">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold {{ $subj->badgeClasses() }} mb-1">
+                            {{ $subj->code }}
                         </span>
+                        <h4 class="text-xs font-bold text-slate-800 truncate">{{ $subj->name }}</h4>
+                        <p class="text-[10px] text-slate-400">{{ $subj->teachers_count }} Guru Pengampu</p>
                     </div>
-                @endforeach
-            </div>
+                    <div class="text-right shrink-0">
+                        <span class="text-xl font-black text-slate-900">{{ $subj->modules_count }}</span>
+                        <span class="text-[10px] text-slate-500 font-medium block">Modul</span>
+                    </div>
+                </div>
+            @endforeach
         </div>
     </div>
 </div>

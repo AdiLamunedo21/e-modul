@@ -20,10 +20,16 @@ class ModuleLibraryController extends Controller
         $subjectId = $request->query('subject_id');
         $grade = $request->query('grade');
         $teacherId = $request->query('teacher_id');
+        $semester = $request->query('semester');
         $sort = $request->query('sort', 'popular'); // 'popular', 'latest', 'title_asc'
 
         $query = Module::with(['teacher', 'schoolClass.major', 'subject', 'clonedFrom.teacher'])
             ->where('is_shared', true);
+
+        // Filter Semester
+        if ($semester && in_array($semester, ['1', '2'])) {
+            $query->where('semester', $semester);
+        }
 
         // Filter Pencarian
         if ($search) {
@@ -105,6 +111,7 @@ class ModuleLibraryController extends Controller
             'subjectId',
             'grade',
             'teacherId',
+            'semester',
             'sort'
         ));
     }

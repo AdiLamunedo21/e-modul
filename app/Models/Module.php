@@ -122,6 +122,40 @@ class Module extends Model
         };
     }
 
+    /** Label nama semester */
+    public function getSemesterLabelAttribute(): string
+    {
+        return (string) $this->semester === '2' ? 'Semester 2 (Genap)' : 'Semester 1 (Ganjil)';
+    }
+
+    /** Label singkatan semester */
+    public function getSemesterShortAttribute(): string
+    {
+        return (string) $this->semester === '2' ? 'S2 Genap' : 'S1 Ganjil';
+    }
+
+    /** Badge visual semester */
+    public function getSemesterBadgeAttribute(): array
+    {
+        if ((string) $this->semester === '2') {
+            return [
+                'label' => 'Semester 2 (Genap)',
+                'short' => 'S2 Genap',
+                'icon'  => '',
+                'color' => 'bg-cyan-50 text-cyan-800 border-cyan-200',
+                'pill'  => 'bg-cyan-600 text-white',
+            ];
+        }
+
+        return [
+            'label' => 'Semester 1 (Ganjil)',
+            'short' => 'S1 Ganjil',
+            'icon'  => '',
+            'color' => 'bg-amber-50 text-amber-800 border-amber-200',
+            'pill'  => 'bg-amber-600 text-white',
+        ];
+    }
+
     /** Daftar 7 Komponen Inti yang diaktifkan */
     public function activeComponents(): array
     {
@@ -869,6 +903,7 @@ class Module extends Model
             'teacher_id'          => $targetTeacher->id,
             'class_id'            => $targetClassId,
             'subject_id'          => $this->subject_id,
+            'semester'            => $this->semester ?? '1',
             'title'               => $newTitle,
             'informasi_umum_data' => $this->informasi_umum_data,
             'bagian_akhir_data'   => $this->bagian_akhir_data,

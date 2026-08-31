@@ -35,7 +35,7 @@ class AdminDashboardTest extends TestCase
         $response->assertSee('Total Peserta Didik', false);
         $response->assertSee('E-Modul Terbit', false);
         $response->assertSee('Monitoring Produktivitas Guru', false);
-        $response->assertSee('Aktivitas Siswa Terbaru', false);
+        $response->assertDontSee('Aktivitas Siswa Terbaru', false);
     }
 
     public function test_admin_dashboard_displays_kpi_metrics_and_curriculum_stats()
@@ -50,6 +50,6 @@ class AdminDashboardTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Distribusi Modul per Mata Pelajaran', false);
-        $response->assertSee('Rombongan Belajar (Kelas)', false);
+        $response->assertDontSee('Rombongan Belajar (Kelas)', false);
     }
 }

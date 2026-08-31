@@ -158,14 +158,24 @@ class StudentDashboardTest extends TestCase
             'has_materi' => true,
         ]);
 
+        // Buka halaman kelas -> Tampil 2 Kartu Semester
         $response = $this->actingAs($student, 'student')
             ->get(route('student.classes.show', $class->id));
 
         $response->assertStatus(200);
         $response->assertSee($class->full_name);
         $response->assertSee($class->code);
-        $response->assertSee($subject->name);
-        $response->assertSee('Daftar Mata Pelajaran', false);
+        $response->assertSee('Pilihan Semester Pembelajaran');
+        $response->assertSee('Semester 1 (Ganjil)');
+        $response->assertSee('Semester 2 (Genap)');
+
+        // Buka semester 1 -> Tampil Daftar Mata Pelajaran
+        $responseS1 = $this->actingAs($student, 'student')
+            ->get(route('student.classes.show', ['class' => $class->id, 'semester' => 1]));
+
+        $responseS1->assertStatus(200);
+        $responseS1->assertSee($subject->name);
+        $responseS1->assertSee('Daftar Mata Pelajaran', false);
 
         $module->delete();
     }
@@ -228,6 +238,67 @@ class StudentDashboardTest extends TestCase
         $responseSubj->assertStatus(403);
 
         $unjoinedClass->delete();
+    }
+
+    public function test_student_sees_two_semester_cards_and_can_filter_by_semester()
+    {
+        $student = Student::first();
+        $class = SchoolClass::first();
+        $teacher = Teacher::first();
+        $subject = Subject::first();
+        if (!$student || !$class || !$teacher || !$subject) {
+            $this->markTestSkipped('Seed data required.');
+        }
+
+        $student->joinClass($class);
+
+        $moduleS1 = Module::create([
+            'teacher_id' => $teacher->id,
+            'class_id'   => $class->id,
+            'subject_id' => $subject->id,
+            'semester'   => '1',
+            'title'      => 'Modul Semester 1 ' . uniqid(),
+            'status'     => 'published',
+            'has_materi' => true,
+        ]);
+
+        $moduleS2 = Module::create([
+            'teacher_id' => $teacher->id,
+            'class_id'   => $class->id,
+            'subject_id' => $subject->id,
+            'semester'   => '2',
+            'title'      => 'Modul Semester 2 ' . uniqid(),
+            'status'     => 'published',
+            'has_materi' => true,
+        ]);
+
+        // 1. Buka kelas tanpa filter semester -> Tampil 2 Kartu Semester
+        $response = $this->actingAs($student, 'student')
+            ->get(route('student.classes.show', $class->id));
+
+        $response->assertStatus(200);
+        $response->assertSee('Semester 1 (Ganjil)');
+        $response->assertSee('Semester 2 (Genap)');
+        $response->assertSee('Pilihan Semester Pembelajaran');
+
+        // 2. Filter ke Semester 1
+        $responseS1 = $this->actingAs($student, 'student')
+            ->get(route('student.classes.subject', ['class' => $class->id, 'subject' => $subject->id, 'semester' => 1]));
+
+        $responseS1->assertStatus(200);
+        $responseS1->assertSee($moduleS1->title);
+        $responseS1->assertDontSee($moduleS2->title);
+
+        // 3. Filter ke Semester 2
+        $responseS2 = $this->actingAs($student, 'student')
+            ->get(route('student.classes.subject', ['class' => $class->id, 'subject' => $subject->id, 'semester' => 2]));
+
+        $responseS2->assertStatus(200);
+        $responseS2->assertSee($moduleS2->title);
+        $responseS2->assertDontSee($moduleS1->title);
+
+        $moduleS1->delete();
+        $moduleS2->delete();
     }
 
     public function test_student_logout_works()

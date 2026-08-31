@@ -209,6 +209,10 @@
                         </span>
                     @endif
 
+                    <span class="px-3 py-1 rounded-full text-xs font-bold border {{ $module->semester_badge['color'] }}">
+                        {{ $module->semester_badge['label'] }}
+                    </span>
+
                     <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
                         🔥 {{ $module->clone_count }}x Dikloning
                     </span>

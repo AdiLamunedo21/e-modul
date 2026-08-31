@@ -18,6 +18,10 @@
             'subject_name' => $m->subject?->name ?? 'Mapel',
             'subject_code' => $m->subject?->code ?? '-',
             'class_name' => $m->schoolClass?->short_name ?? ($m->schoolClass ? ($m->schoolClass->grade . ' ' . $m->schoolClass->major_name) : 'Semua Kelas'),
+            'semester' => (string) ($m->semester ?? '1'),
+            'semester_label' => $m->semester_label,
+            'semester_short' => $m->semester_short,
+            'semester_badge' => $m->semester_badge,
             'clone_count' => (int) $m->clone_count,
             'shared_at' => $m->shared_at ? $m->shared_at->format('d M Y') : $m->created_at->format('d M Y'),
             'shared_timestamp' => $m->shared_at ? $m->shared_at->timestamp : $m->created_at->timestamp,
@@ -38,6 +42,7 @@
     searchKeyword: '{{ addslashes($search ?? '') }}',
     selectedSubject: '{{ addslashes($subjectId ?? 'all') }}',
     selectedTeacher: '{{ addslashes($teacherId ?? 'all') }}',
+    selectedSemester: '{{ addslashes($semester ?? 'all') }}',
     activeTab: 'all',
     explorerView: 'grid',
     perPage: 9,
@@ -56,7 +61,12 @@
             list = list.filter(m => String(m.teacher_id) === String(this.selectedTeacher));
         }
 
-        // 3. Keyword Search (Instan Tanpa Refresh)
+        // 3. Filter Semester (Instan Tanpa Refresh)
+        if (this.selectedSemester !== 'all') {
+            list = list.filter(m => String(m.semester) === String(this.selectedSemester));
+        }
+
+        // 4. Keyword Search (Instan Tanpa Refresh)
         if (this.searchKeyword.trim() !== '') {
             const kw = this.searchKeyword.toLowerCase();
             list = list.filter(m => {
@@ -68,7 +78,7 @@
             });
         }
 
-        // 4. Status Filter & Sorting Tabs (Instan Tanpa Refresh)
+        // 5. Status Filter & Sorting Tabs (Instan Tanpa Refresh)
         if (this.activeTab === 'cloned') {
             list = list.filter(m => m.clone_count > 0);
             list.sort((a, b) => b.clone_count - a.clone_count);
@@ -105,14 +115,15 @@
         this.searchKeyword = '';
         this.selectedSubject = 'all';
         this.selectedTeacher = 'all';
+        this.selectedSemester = 'all';
         this.activeTab = 'all';
         this.currentPage = 1;
     },
     get isFiltered() {
-        return this.searchKeyword.trim() !== '' || this.selectedSubject !== 'all' || this.selectedTeacher !== 'all' || this.activeTab !== 'all';
+        return this.searchKeyword.trim() !== '' || this.selectedSubject !== 'all' || this.selectedTeacher !== 'all' || this.selectedSemester !== 'all' || this.activeTab !== 'all';
     }
 }"
-x-init="$watch('searchKeyword', () => currentPage = 1); $watch('selectedSubject', () => currentPage = 1); $watch('selectedTeacher', () => currentPage = 1); $watch('activeTab', () => currentPage = 1)">
+x-init="$watch('searchKeyword', () => currentPage = 1); $watch('selectedSubject', () => currentPage = 1); $watch('selectedTeacher', () => currentPage = 1); $watch('selectedSemester', () => currentPage = 1); $watch('activeTab', () => currentPage = 1)">
 
     {{-- ══ 1. BREADCRUMB & HEADER ══ --}}
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
@@ -268,6 +279,16 @@ x-init="$watch('searchKeyword', () => currentPage = 1); $watch('selectedSubject'
                     </select>
                 </div>
 
+                {{-- Filter Semester (Instan Tanpa Refresh) --}}
+                <div class="w-full sm:w-auto sm:min-w-[140px]">
+                    <select x-model="selectedSemester"
+                            class="w-full text-xs rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-slate-700 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium cursor-pointer">
+                        <option value="all">-- Semua Semester --</option>
+                        <option value="1">Semester 1 (Ganjil)</option>
+                        <option value="2">Semester 2 (Genap)</option>
+                    </select>
+                </div>
+
                 {{-- Reset Filter Button (Instan Tanpa Refresh) --}}
                 <button type="button"
                         x-show="isFiltered"
@@ -389,9 +410,12 @@ x-init="$watch('searchKeyword', () => currentPage = 1); $watch('selectedSubject'
                             <span class="text-xs font-bold text-slate-700 truncate" x-text="m.teacher_name"></span>
                         </div>
 
-                        {{-- Meta: Mapel & Rombel Kelas --}}
-                        <div class="flex items-center gap-2 text-xs text-slate-500 mb-4 flex-wrap">
+                        {{-- Meta: Mapel, Semester & Rombel Kelas --}}
+                        <div class="flex items-center gap-1.5 text-xs text-slate-500 mb-4 flex-wrap">
                             <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100" x-text="m.subject_name"></span>
+                            <template x-if="m.semester_badge">
+                                <span class="px-2 py-0.5 rounded-md text-[10px] font-bold border" :class="m.semester_badge.color" x-text="m.semester_badge.short"></span>
+                            </template>
                             <span class="text-slate-300">•</span>
                             <span class="font-bold text-slate-700" x-text="m.class_name"></span>
                         </div>
@@ -466,10 +490,15 @@ x-init="$watch('searchKeyword', () => currentPage = 1); $watch('selectedSubject'
                                     </div>
                                 </td>
 
-                                {{-- Mapel & Kelas --}}
+                                {{-- Mapel, Semester & Kelas --}}
                                 <td class="py-4 px-4">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 block w-fit mb-1" x-text="m.subject_name"></span>
-                                    <span class="text-[11px] font-bold text-slate-700" x-text="m.class_name"></span>
+                                    <div class="flex items-center gap-1 flex-wrap mb-1">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100" x-text="m.subject_name"></span>
+                                        <template x-if="m.semester_badge">
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold border" :class="m.semester_badge.color" x-text="m.semester_badge.short"></span>
+                                        </template>
+                                    </div>
+                                    <span class="text-[11px] font-bold text-slate-700 block" x-text="m.class_name"></span>
                                 </td>
 
                                 {{-- Komponen --}}

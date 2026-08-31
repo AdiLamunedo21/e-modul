@@ -102,6 +102,37 @@
                 <p class="mt-1.5 text-xs text-slate-500">Modul yang dipublikasikan hanya bisa diakses oleh siswa dari kelas yang dipilih.</p>
             </div>
 
+            {{-- Pilihan Semester --}}
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-1.5">
+                    Semester Pembelajaran <span class="text-red-500">*</span>
+                </label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <label class="relative flex items-center p-3.5 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-all bg-white shadow-2xs">
+                        <input type="radio" name="semester" value="1" {{ old('semester', '1') == '1' ? 'checked' : '' }} class="text-blue-600 focus:ring-blue-500 h-4 w-4">
+                        <div class="ml-3">
+                            <span class="block text-xs font-bold text-slate-900">
+                                Semester 1 (Ganjil)
+                            </span>
+                            <span class="block text-[11px] text-slate-500 mt-0.5">Materi kurikulum periode semester gasal/ganjil</span>
+                        </div>
+                    </label>
+
+                    <label class="relative flex items-center p-3.5 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-all bg-white shadow-2xs">
+                        <input type="radio" name="semester" value="2" {{ old('semester') == '2' ? 'checked' : '' }} class="text-blue-600 focus:ring-blue-500 h-4 w-4">
+                        <div class="ml-3">
+                            <span class="block text-xs font-bold text-slate-900">
+                                Semester 2 (Genap)
+                            </span>
+                            <span class="block text-[11px] text-slate-500 mt-0.5">Materi kurikulum periode semester genap</span>
+                        </div>
+                    </label>
+                </div>
+                @error('semester')
+                    <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
             {{-- Info Banner 3 Bagian Modul --}}
             <div class="rounded-xl bg-blue-50 border border-blue-100 p-4">
                 <p class="text-xs font-bold text-blue-800 mb-2 flex items-center gap-1.5">

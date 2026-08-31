@@ -198,6 +198,7 @@ class ModuleLibraryTest extends TestCase
             'has_materi'          => true,
             'has_video'           => true,
             'has_post_test'       => true,
+            'semester'            => '2',
             'status'              => 'published',
             'is_shared'           => true,
             'shared_at'           => now(),
@@ -257,6 +258,7 @@ class ModuleLibraryTest extends TestCase
         $this->assertEquals($targetClass->id, $clonedModule->class_id);
         $this->assertEquals('draft', $clonedModule->status);
         $this->assertFalse($clonedModule->is_shared);
+        $this->assertEquals('2', $clonedModule->semester);
         $this->assertEquals($sourceModule->id, $clonedModule->cloned_from_id);
         $this->assertEquals('Topologi Jaringan Star & Mesh', $clonedModule->materi_data['notepad_content']);
 

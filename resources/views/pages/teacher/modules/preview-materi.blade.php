@@ -63,9 +63,6 @@
                 {{-- Header Materi --}}
                 <div class="p-6 sm:p-8 border-b border-slate-100">
                     <div class="flex flex-wrap items-center gap-2 mb-3">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold border border-blue-200/70">
-                            ⏱️ Estimasi Waktu: {{ $data['estimasi_waktu'] ?? 45 }} Menit
-                        </span>
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold">
                             📖 Uraian Materi Terstruktur
                         </span>

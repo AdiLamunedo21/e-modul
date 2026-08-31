@@ -77,33 +77,53 @@
     </div>
 @endif
 
-{{-- ══ Filter Tabs Status ══ --}}
-<div class="flex items-center gap-1 bg-white border border-slate-200 p-1 rounded-2xl shadow-sm mb-4 overflow-x-auto self-start">
-    @php
-        $activeStatus = request('status', '');
-        $tabs = [
-            ''          => "Semua ({$counts['all']})",
-            'published' => "Terbit ({$counts['published']})",
-            'draft'     => "Draf ({$counts['draft']})",
-            'closed'    => "Ditutup ({$counts['closed']})",
-        ];
-    @endphp
-    @foreach ($tabs as $value => $label)
+{{-- ══ Filter Tabs Status & Semester ══ --}}
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+    {{-- Status Tabs --}}
+    <div class="flex items-center gap-1 bg-white border border-slate-200 p-1 rounded-2xl shadow-sm overflow-x-auto self-start">
         @php
-            $params = array_filter([
-                'status'     => $value,
-                'subject_id' => $selectedSubjectId,
-                'search'     => request('search'),
-            ]);
+            $activeStatus = request('status', '');
+            $tabs = [
+                ''          => "Semua ({$counts['all']})",
+                'published' => "Terbit ({$counts['published']})",
+                'draft'     => "Draf ({$counts['draft']})",
+                'closed'    => "Ditutup ({$counts['closed']})",
+            ];
         @endphp
-        <a href="{{ route('teacher.modules.index', $params) }}"
-           class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap
-               {{ $activeStatus === $value
-                   ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30'
-                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-            {{ $label }}
+        @foreach ($tabs as $value => $label)
+            @php
+                $params = array_filter([
+                    'status'     => $value,
+                    'subject_id' => $selectedSubjectId,
+                    'semester'   => $selectedSemester,
+                    'search'     => request('search'),
+                ]);
+            @endphp
+            <a href="{{ route('teacher.modules.index', $params) }}"
+               class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap
+                   {{ $activeStatus === $value
+                       ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30'
+                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
+                {{ $label }}
+            </a>
+        @endforeach
+    </div>
+
+    {{-- Semester Filter Switcher --}}
+    <div class="flex items-center gap-1 bg-white border border-slate-200 p-1 rounded-2xl shadow-sm self-start sm:self-auto">
+        <a href="{{ route('teacher.modules.index', array_filter(['status' => request('status'), 'subject_id' => $selectedSubjectId, 'search' => request('search')])) }}"
+           class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all {{ empty($selectedSemester) ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900' }}">
+            Semua Semester
         </a>
-    @endforeach
+        <a href="{{ route('teacher.modules.index', array_filter(['status' => request('status'), 'subject_id' => $selectedSubjectId, 'semester' => '1', 'search' => request('search')])) }}"
+           class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all {{ $selectedSemester === '1' ? 'bg-amber-600 text-white shadow-sm' : 'text-amber-800 hover:bg-amber-50' }}">
+            S1 Ganjil
+        </a>
+        <a href="{{ route('teacher.modules.index', array_filter(['status' => request('status'), 'subject_id' => $selectedSubjectId, 'semester' => '2', 'search' => request('search')])) }}"
+           class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all {{ $selectedSemester === '2' ? 'bg-cyan-600 text-white shadow-sm' : 'text-cyan-800 hover:bg-cyan-50' }}">
+            S2 Genap
+        </a>
+    </div>
 </div>
 
 {{-- ══ Form Pencarian E-Modul (Di Bawah Filter Tabs) ══ --}}
@@ -114,6 +134,9 @@
         @endif
         @if($selectedSubjectId)
             <input type="hidden" name="subject_id" value="{{ $selectedSubjectId }}">
+        @endif
+        @if($selectedSemester)
+            <input type="hidden" name="semester" value="{{ $selectedSemester }}">
         @endif
         <div class="relative flex-1">
             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -222,6 +245,9 @@
                                         Kelas {{ $class->grade }} {{ $class->major_name }}
                                     </span>
                                 @endif
+                                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold border {{ $module->semester_badge['color'] }}">
+                                    {{ $module->semester_badge['short'] }}
+                                </span>
                                 <span class="text-xs text-slate-400">
                                     Dibuat {{ $module->created_at->diffForHumans() }}
                                 </span>

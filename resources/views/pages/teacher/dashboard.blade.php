@@ -319,6 +319,11 @@
                             <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
                                 {{ $item['class_name'] }}
                             </span>
+                            @if(isset($item['model']))
+                                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold border {{ $item['model']->semester_badge['color'] }}">
+                                    {{ $item['model']->semester_badge['short'] }}
+                                </span>
+                            @endif
                             <span class="text-xs text-slate-400">Diperbarui: {{ $item['updated_at_formatted'] }}</span>
                         </div>
 

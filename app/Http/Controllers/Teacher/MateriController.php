@@ -42,7 +42,6 @@ class MateriController extends Controller
 
         $data = array_merge([
             'judul_materi'     => 'Kegiatan Belajar: ' . $module->title,
-            'estimasi_waktu'   => 45,
             'uraian_materi'    => '',
             'ringkasan_materi' => '',
             'ppt_file_path'    => null,
@@ -66,7 +65,6 @@ class MateriController extends Controller
 
         $data = array_merge([
             'judul_materi'     => 'Kegiatan Belajar: ' . $module->title,
-            'estimasi_waktu'   => 45,
             'uraian_materi'    => '',
             'ringkasan_materi' => '',
             'ppt_file_path'    => null,
@@ -89,7 +87,6 @@ class MateriController extends Controller
 
         $rules = [
             'judul_materi'     => [$hasMateri ? 'required' : 'nullable', 'string', 'max:255'],
-            'estimasi_waktu'   => ['nullable', 'integer', 'min:5', 'max:300'],
             'uraian_materi'    => [$hasMateri ? 'required' : 'nullable', 'string', $hasMateri ? 'min:20' : 'nullable'],
             'ringkasan_materi' => ['nullable', 'string'],
             'poin_penting'     => ['nullable', 'array'],
@@ -141,7 +138,6 @@ class MateriController extends Controller
 
         $payload = [
             'judul_materi'     => $request->input('judul_materi', 'Materi Pembelajaran'),
-            'estimasi_waktu'   => (int) $request->input('estimasi_waktu', 45),
             'uraian_materi'    => $request->input('uraian_materi', ''),
             'ringkasan_materi' => $request->input('ringkasan_materi', ''),
             'poin_penting'     => $poinPenting,
