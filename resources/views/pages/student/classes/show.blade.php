@@ -33,6 +33,7 @@
         selectedSemester: 'all',
         selectedStatus: 'all',
         searchKeyword: '',
+        explorerView: 'grid',
         items: {{ json_encode($subjectsJson) }},
         matches(s) {
             // 1. Semester Filter (Dropdown)
@@ -205,6 +206,28 @@
                     </select>
                 </div>
 
+                {{-- View Toggle (Grid / List) --}}
+                <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0">
+                    <button type="button"
+                            @click="explorerView = 'grid'"
+                            :class="explorerView === 'grid' ? 'bg-white text-slate-900 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800'"
+                            title="Tampilan Grid Kartu"
+                            class="p-1.5 rounded-lg text-xs transition cursor-pointer flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                        </svg>
+                    </button>
+                    <button type="button"
+                            @click="explorerView = 'list'"
+                            :class="explorerView === 'list' ? 'bg-white text-slate-900 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800'"
+                            title="Tampilan Daftar Rinci"
+                            class="p-1.5 rounded-lg text-xs transition cursor-pointer flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                </div>
+
                 {{-- Reset Filter Button --}}
                 <button type="button"
                         x-show="isFiltered"
@@ -242,8 +265,8 @@
             </div>
         </div>
 
-        {{-- Grid Card Mata Pelajaran --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {{-- ═══ VIEW MODE 1: GRID TILES ═══ --}}
+        <div x-show="explorerView === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse($subjectsWithSummary as $idx => $subj)
                 <div x-show="matches(items[{{ $idx }}])"
                      x-transition:enter="transition ease-out duration-200"
@@ -285,31 +308,41 @@
                             <h3 class="text-xl font-extrabold text-slate-900 group-hover:text-emerald-700 transition-colors tracking-tight">
                                 {{ $subj['name'] }}
                             </h3>
-                            @if($subj['description'])
+                            @if(!empty($subj['description']))
                                 <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed">
                                     {{ $subj['description'] }}
+                                </p>
+                            @else
+                                <p class="text-xs text-slate-400 italic">
+                                    Kurikulum pembelajaran SMK Negeri 3 Yogyakarta
                                 </p>
                             @endif
                         </div>
 
                         {{-- Guru Pengampu Mapel --}}
-                        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
-                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Guru Pengampu</p>
-                            <p class="text-xs font-bold text-slate-800 truncate" title="{{ $subj['teacher_display'] }}">
-                                {{ $subj['teacher_display'] }}
-                            </p>
+                        <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
+                            <span class="text-slate-400 font-medium">Guru Pengampu:</span>
+                            <span class="font-bold text-slate-800 truncate max-w-[180px] flex items-center gap-1">
+                                <span>👨‍🏫</span>
+                                <span>{{ $subj['teacher_display'] }}</span>
+                            </span>
                         </div>
 
-                        {{-- Progres & Ringkasan Modul Belajar Mapel --}}
+                        {{-- Progres Belajar Siswa pada Mapel ini --}}
                         <div class="space-y-2 pt-1">
                             <div class="flex items-center justify-between text-xs font-bold">
-                                <span class="text-slate-500">Progres Belajar:</span>
-                                <span class="text-slate-900">{{ $subj['completed_count'] }}/{{ $subj['modules_count'] }} Modul ({{ $subj['avg_progress'] }}%)</span>
+                                <span class="text-slate-500">Progres Pembelajaran:</span>
+                                <span class="{{ $subj['avg_progress'] == 100 ? 'text-emerald-600' : ($subj['avg_progress'] > 0 ? 'text-amber-600' : 'text-slate-500') }}">
+                                    {{ $subj['avg_progress'] }}%
+                                </span>
                             </div>
+
                             <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                                <div class="h-2 rounded-full bg-emerald-500 transition-all duration-500" style="width: {{ $subj['avg_progress'] }}%"></div>
+                                <div class="h-2 rounded-full transition-all duration-500 {{ $subj['avg_progress'] == 100 ? 'bg-emerald-500' : ($subj['avg_progress'] > 0 ? 'bg-amber-500' : 'bg-slate-300') }}"
+                                     style="width: {{ $subj['avg_progress'] }}%"></div>
                             </div>
-                            <div class="flex items-center justify-between text-[11px] text-slate-400 pt-0.5 font-medium">
+
+                            <div class="flex items-center justify-between text-[11px] text-slate-500 pt-0.5">
                                 <span>Sedang Berjalan: <strong class="text-amber-600">{{ $subj['in_progress_count'] }}</strong></span>
                                 <span>Tuntas: <strong class="text-emerald-600">{{ $subj['completed_count'] }}</strong></span>
                             </div>
@@ -341,27 +374,120 @@
                     </div>
                 </div>
             @endforelse
+        </div>
 
-            {{-- Empty Filter State (Ketika pencarian/filter menghasilkan 0) --}}
-            <div x-show="totalVisible === 0 && items.length > 0"
-                 x-cloak
-                 class="col-span-full py-16 text-center bg-white rounded-3xl border border-slate-200/90 shadow-sm space-y-4">
-                <div class="w-16 h-16 rounded-2xl bg-amber-50 text-amber-500 border border-amber-200 flex items-center justify-center mx-auto text-3xl font-black">
-                    🔍
-                </div>
-                <div class="max-w-md mx-auto space-y-1">
-                    <h3 class="text-base font-extrabold text-slate-800">Tidak Ada Mata Pelajaran yang Cocok</h3>
-                    <p class="text-xs text-slate-500 leading-relaxed">
-                        Tidak ditemukan mata pelajaran dengan filter semester atau kata kunci yang Anda pilih.
-                    </p>
-                </div>
-                <div>
-                    <button type="button"
-                            @click="resetFilters()"
-                            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all">
-                        <span>Reset Filter & Pencarian</span>
-                    </button>
-                </div>
+        {{-- ═══ VIEW MODE 2: DETAILS LIST (TABLE) ═══ --}}
+        <div x-show="explorerView === 'list'" class="rounded-2xl bg-white border border-slate-200/90 shadow-sm overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
+                    <tr>
+                        <th class="py-3.5 px-4">Mata Pelajaran</th>
+                        <th class="py-3.5 px-4">Guru Pengampu</th>
+                        <th class="py-3.5 px-4 text-center">Semester</th>
+                        <th class="py-3.5 px-4 text-center">Total Modul</th>
+                        <th class="py-3.5 px-4 text-center">Kemajuan Belajar</th>
+                        <th class="py-3.5 px-4 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @forelse($subjectsWithSummary as $idx => $subj)
+                        <tr x-show="matches(items[{{ $idx }}])"
+                            class="hover:bg-slate-50/80 transition-colors group">
+                            <td class="py-3.5 px-4">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 font-mono font-black text-xs flex items-center justify-center shrink-0 border border-slate-200/80 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                                        {{ $subj['code'] ?: 'MP' }}
+                                    </span>
+                                    <div class="min-w-0">
+                                        <a href="{{ route('student.classes.subject', ['class' => $class->id, 'subject' => $subj['id']]) }}"
+                                           :href="'{{ route('student.classes.subject', ['class' => $class->id, 'subject' => $subj['id']]) }}' + (selectedSemester !== 'all' ? '?semester=' + selectedSemester : '')"
+                                           class="font-extrabold text-slate-900 group-hover:text-emerald-600 transition-colors text-xs sm:text-sm block truncate">
+                                            {{ $subj['name'] }}
+                                        </a>
+                                        @if(!empty($subj['description']))
+                                            <p class="text-[11px] text-slate-400 line-clamp-1 mt-0.5">{{ $subj['description'] }}</p>
+                                        @endif
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-3.5 px-4 text-slate-700 font-medium whitespace-nowrap">
+                                <span class="flex items-center gap-1.5">
+                                    <span class="w-6 h-6 rounded-full bg-emerald-50 text-emerald-700 font-bold text-[10px] flex items-center justify-center border border-emerald-200 shrink-0">
+                                        👨‍🏫
+                                    </span>
+                                    <span class="truncate max-w-[160px]">{{ $subj['teacher_display'] }}</span>
+                                </span>
+                            </td>
+                            <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                                <div class="flex items-center justify-center gap-1">
+                                    @if($subj['has_s1'])
+                                        <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-amber-50 text-amber-800 border border-amber-200" title="Tersedia Semester 1">
+                                            <span>📙</span><span>S1 ({{ $subj['s1_modules_count'] }})</span>
+                                        </span>
+                                    @endif
+                                    @if($subj['has_s2'])
+                                        <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-cyan-50 text-cyan-800 border border-cyan-200" title="Tersedia Semester 2">
+                                            <span>📘</span><span>S2 ({{ $subj['s2_modules_count'] }})</span>
+                                        </span>
+                                    @endif
+                                    @if(!$subj['has_s1'] && !$subj['has_s2'])
+                                        <span class="text-[10px] text-slate-400 italic">-</span>
+                                    @endif
+                                </div>
+                            </td>
+                            <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                    {{ $subj['modules_count'] }} Modul
+                                </span>
+                            </td>
+                            <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                                <div class="w-24 bg-slate-100 rounded-full h-1.5 overflow-hidden mx-auto">
+                                    <div class="h-1.5 rounded-full {{ $subj['avg_progress'] == 100 ? 'bg-emerald-500' : ($subj['avg_progress'] > 0 ? 'bg-amber-500' : 'bg-slate-300') }}"
+                                         style="width: {{ $subj['avg_progress'] }}%"></div>
+                                </div>
+                                <span class="text-[10px] font-bold text-slate-500 mt-1 block">
+                                    {{ $subj['completed_count'] }}/{{ $subj['modules_count'] }} ({{ $subj['avg_progress'] }}%)
+                                </span>
+                            </td>
+                            <td class="py-3.5 px-4 text-right whitespace-nowrap">
+                                <a href="{{ route('student.classes.subject', ['class' => $class->id, 'subject' => $subj['id']]) }}"
+                                   :href="'{{ route('student.classes.subject', ['class' => $class->id, 'subject' => $subj['id']]) }}' + (selectedSemester !== 'all' ? '?semester=' + selectedSemester : '')"
+                                   class="px-3.5 py-2 rounded-xl bg-slate-900 group-hover:bg-emerald-600 text-white font-bold text-xs transition inline-flex items-center gap-1.5 shadow-2xs">
+                                    <span>Buka Modul</span>
+                                    <span>→</span>
+                                </a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="py-8 text-center text-slate-400 text-xs">
+                                Belum ada mata pelajaran.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        {{-- Empty Filter State (Ketika pencarian/filter menghasilkan 0) --}}
+        <div x-show="totalVisible === 0 && items.length > 0"
+             x-cloak
+             class="py-16 text-center bg-white rounded-3xl border border-slate-200/90 shadow-sm space-y-4">
+            <div class="w-16 h-16 rounded-2xl bg-amber-50 text-amber-500 border border-amber-200 flex items-center justify-center mx-auto text-3xl font-black">
+                🔍
+            </div>
+            <div class="max-w-md mx-auto space-y-1">
+                <h3 class="text-base font-extrabold text-slate-800">Tidak Ada Mata Pelajaran yang Cocok</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Tidak ditemukan mata pelajaran dengan filter semester atau kata kunci yang Anda pilih.
+                </p>
+            </div>
+            <div>
+                <button type="button"
+                        @click="resetFilters()"
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all">
+                    <span>Reset Filter & Pencarian</span>
+                </button>
             </div>
         </div>
     </div>
