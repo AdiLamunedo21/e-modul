@@ -275,61 +275,53 @@
     {{-- ═══ VIEW 1: TAMPILAN AWAL DETAIL MODUL SISWA (FULL WIDTH CARD) ═══ --}}
     @include('pages.student.modules.partials.overview')
 
-    {{-- ═══ VIEW 2: MODE BELAJAR INTERAKTIF (ACCORDION SILABUS + WORKSPACE) ═══ --}}
-    <div x-show="viewMode === 'learn'" x-cloak class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full">
+    {{-- ═══ VIEW 2: MODE BELAJAR INTERAKTIF (WORKSPACE AKTIVITAS PEMBELAJARAN FULL WIDTH) ═══ --}}
+    <div x-show="viewMode === 'learn'" x-cloak class="w-full space-y-6">
 
-        {{-- ── LEFT COLUMN: ACCORDION SILABUS MODUL (4 Cols on Desktop) ── --}}
-        @include('pages.student.modules.partials.sidebar-syllabus')
+        {{-- 1. Kata Pengantar --}}
+        @include('pages.student.modules.partials.activities.kata-pengantar')
 
-        {{-- ── RIGHT COLUMN: WORKSPACE AKTIVITAS PEMBELAJARAN (8 Cols) ── --}}
-        <div class="lg:col-span-8 space-y-6 lg:px-8 w-full">
+        {{-- 2. Petunjuk Penggunaan --}}
+        @include('pages.student.modules.partials.activities.petunjuk-penggunaan')
 
-            {{-- 1. Kata Pengantar --}}
-            @include('pages.student.modules.partials.activities.kata-pengantar')
+        {{-- 3. Tujuan Pembelajaran --}}
+        @include('pages.student.modules.partials.activities.tujuan-pembelajaran')
 
-            {{-- 2. Petunjuk Penggunaan --}}
-            @include('pages.student.modules.partials.activities.petunjuk-penggunaan')
+        {{-- 4. Peta Konsep --}}
+        @include('pages.student.modules.partials.activities.peta-konsep')
 
-            {{-- 3. Tujuan Pembelajaran --}}
-            @include('pages.student.modules.partials.activities.tujuan-pembelajaran')
+        {{-- 5. Glosarium --}}
+        @include('pages.student.modules.partials.activities.glosarium')
 
-            {{-- 4. Peta Konsep --}}
-            @include('pages.student.modules.partials.activities.peta-konsep')
+        {{-- 6. Pre-test --}}
+        @include('pages.student.modules.partials.activities.pre-test')
 
-            {{-- 5. Glosarium --}}
-            @include('pages.student.modules.partials.activities.glosarium')
+        {{-- 7. Uraian Materi --}}
+        @include('pages.student.modules.partials.activities.materi')
 
-            {{-- 6. Pre-test --}}
-            @include('pages.student.modules.partials.activities.pre-test')
+        {{-- 8. Video YouTube & Resume --}}
+        @include('pages.student.modules.partials.activities.video')
 
-            {{-- 7. Uraian Materi --}}
-            @include('pages.student.modules.partials.activities.materi')
+        {{-- 9. Simulator Embed --}}
+        @include('pages.student.modules.partials.activities.embed')
 
-            {{-- 8. Video YouTube & Resume --}}
-            @include('pages.student.modules.partials.activities.video')
+        {{-- 10. Job Sheet Praktikum --}}
+        @include('pages.student.modules.partials.activities.job-sheet')
 
-            {{-- 9. Simulator Embed --}}
-            @include('pages.student.modules.partials.activities.embed')
+        {{-- 11. Tugas LKPD --}}
+        @include('pages.student.modules.partials.activities.lkpd')
 
-            {{-- 10. Job Sheet Praktikum --}}
-            @include('pages.student.modules.partials.activities.job-sheet')
+        {{-- 12. Post-test --}}
+        @include('pages.student.modules.partials.activities.post-test')
 
-            {{-- 11. Tugas LKPD --}}
-            @include('pages.student.modules.partials.activities.lkpd')
+        {{-- 13. Daftar Pustaka --}}
+        @include('pages.student.modules.partials.activities.daftar-pustaka')
 
-            {{-- 12. Post-test --}}
-            @include('pages.student.modules.partials.activities.post-test')
+        {{-- 14. Rekapitulasi Nilai Siswa --}}
+        @include('pages.student.modules.partials.activities.rekap-nilai')
 
-            {{-- 13. Daftar Pustaka --}}
-            @include('pages.student.modules.partials.activities.daftar-pustaka')
-
-            {{-- 14. Rekapitulasi Nilai Siswa --}}
-            @include('pages.student.modules.partials.activities.rekap-nilai')
-
-            {{-- 3. Bottom Sequential Navigation Bar --}}
-            @include('pages.student.modules.partials.bottom-nav')
-
-        </div>
+        {{-- 3. Bottom Sequential Navigation Bar --}}
+        @include('pages.student.modules.partials.bottom-nav')
 
     </div>
 
