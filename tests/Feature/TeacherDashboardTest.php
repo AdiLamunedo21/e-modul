@@ -72,9 +72,9 @@ class TeacherDashboardTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Total E-Modul Saya', false);
-        $response->assertSee('Siswa Binaan', false);
+        $response->assertSee('Siswa & Kelas Binaan', false);
         $response->assertSee('Perlu Dinilai (Grading)', false);
-        $response->assertSee('Rata-rata Skor Sumatif', false);
+        $response->assertSee('Laporan Excel', false);
         $response->assertSee('Arsitektur E-Modul 5 Bagian Pedagogis', false);
     }
 

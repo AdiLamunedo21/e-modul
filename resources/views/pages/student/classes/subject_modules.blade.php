@@ -9,8 +9,10 @@
      x-data="{
         searchKeyword: '',
         activeFilter: '{{ $filterStatus }}',
+        selectedSemester: '{{ $selectedSemester ?? 'all' }}',
         explorerView: 'grid',
         matchesFilter(module) {
+            if (this.selectedSemester !== 'all' && String(module.semester) !== String(this.selectedSemester)) return false;
             if (this.activeFilter === 'in_progress' && module.progress_status !== 'in_progress') return false;
             if (this.activeFilter === 'completed' && module.progress_status !== 'completed') return false;
             if (this.activeFilter === 'not_started' && module.progress_status !== 'not_started') return false;
@@ -40,12 +42,6 @@
                 <a href="{{ route('student.classes.show', $class->id) }}" class="hover:text-emerald-700 font-bold shrink-0">
                     {{ $class->full_name }}
                 </a>
-                @if($selectedSemester)
-                    <span class="text-slate-400 font-mono">›</span>
-                    <a href="{{ route('student.classes.show', ['class' => $class->id, 'semester' => $selectedSemester]) }}" class="hover:text-emerald-700 font-bold shrink-0">
-                        {{ $selectedSemester == '2' ? 'Semester 2 (Genap)' : 'Semester 1 (Ganjil)' }}
-                    </a>
-                @endif
                 <span class="text-slate-400 font-mono">›</span>
                 <span class="text-slate-900 font-extrabold shrink-0">
                     {{ $subject->name }}
@@ -99,11 +95,11 @@
                 </div>
 
                 {{-- Back to Class Subjects --}}
-                <a href="{{ route('student.classes.show', array_filter(['class' => $class->id, 'semester' => $selectedSemester])) }}"
+                <a href="{{ route('student.classes.show', $class->id) }}"
                    title="Kembali ke Direktori Mata Pelajaran"
-                   class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1 shrink-0">
+                   class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5 shrink-0">
                     <span>←</span>
-                    <span class="hidden sm:inline">Kembali</span>
+                    <span class="hidden sm:inline">Kembali ke Mapel</span>
                 </a>
             </div>
         </div>
@@ -121,11 +117,16 @@
                     <span class="px-2.5 py-0.5 rounded-full bg-white/10 text-white font-mono font-bold">
                         KODE: {{ $class->code }}
                     </span>
-                    @if($selectedSemester)
-                        <span class="px-2.5 py-0.5 rounded-full {{ $selectedSemester == '2' ? 'bg-cyan-500/20 text-cyan-300 border-cyan-400/30' : 'bg-amber-500/20 text-amber-300 border-amber-400/30' }} font-bold border">
-                            {{ $selectedSemester == '2' ? 'Semester 2 (Genap)' : 'Semester 1 (Ganjil)' }}
+                    <template x-if="selectedSemester === '1'">
+                        <span class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30 font-bold">
+                            Semester 1 (Ganjil)
                         </span>
-                    @endif
+                    </template>
+                    <template x-if="selectedSemester === '2'">
+                        <span class="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 font-bold">
+                            Semester 2 (Genap)
+                        </span>
+                    </template>
                 </div>
                 <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white">
                     Modul Pembelajaran: {{ $subject->name }}
@@ -244,32 +245,57 @@
                 </div>
             </div>
 
-            {{-- Filter Status Tabs --}}
-            <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0 overflow-x-auto self-start sm:self-auto">
-                <button type="button"
-                        @click="activeFilter = 'all'"
-                        :class="activeFilter === 'all' ? 'bg-white text-slate-900 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
-                        class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
-                    Semua ({{ $stats['total_modules'] }})
-                </button>
-                <button type="button"
-                        @click="activeFilter = 'in_progress'"
-                        :class="activeFilter === 'in_progress' ? 'bg-amber-500 text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
-                        class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
-                    Sedang Dipelajari ({{ $stats['in_progress'] }})
-                </button>
-                <button type="button"
-                        @click="activeFilter = 'completed'"
-                        :class="activeFilter === 'completed' ? 'bg-emerald-600 text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
-                        class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
-                    Tuntas ({{ $stats['completed_modules'] }})
-                </button>
-                <button type="button"
-                        @click="activeFilter = 'not_started'"
-                        :class="activeFilter === 'not_started' ? 'bg-slate-700 text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
-                        class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
-                    Belum Mulai ({{ $stats['not_started'] }})
-                </button>
+            {{-- Filter Semester & Status Tabs --}}
+            <div class="flex items-center gap-2 flex-wrap self-start sm:self-auto">
+                {{-- Semester Filter Tabs --}}
+                <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0">
+                    <button type="button"
+                            @click="selectedSemester = 'all'"
+                            :class="selectedSemester === 'all' ? 'bg-white text-slate-900 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+                            class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
+                        Semua Semester
+                    </button>
+                    <button type="button"
+                            @click="selectedSemester = '1'"
+                            :class="selectedSemester === '1' ? 'bg-amber-600 text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+                            class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
+                        📙 S1 Ganjil
+                    </button>
+                    <button type="button"
+                            @click="selectedSemester = '2'"
+                            :class="selectedSemester === '2' ? 'bg-cyan-600 text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+                            class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
+                        📘 S2 Genap
+                    </button>
+                </div>
+
+                {{-- Status Filter Tabs --}}
+                <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0 overflow-x-auto">
+                    <button type="button"
+                            @click="activeFilter = 'all'"
+                            :class="activeFilter === 'all' ? 'bg-white text-slate-900 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+                            class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
+                        Semua Status
+                    </button>
+                    <button type="button"
+                            @click="activeFilter = 'in_progress'"
+                            :class="activeFilter === 'in_progress' ? 'bg-amber-500 text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+                            class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
+                        Sedang Dipelajari
+                    </button>
+                    <button type="button"
+                            @click="activeFilter = 'completed'"
+                            :class="activeFilter === 'completed' ? 'bg-emerald-600 text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+                            class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
+                        Tuntas
+                    </button>
+                    <button type="button"
+                            @click="activeFilter = 'not_started'"
+                            :class="activeFilter === 'not_started' ? 'bg-slate-700 text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+                            class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
+                        Belum Mulai
+                    </button>
+                </div>
             </div>
         </div>
 

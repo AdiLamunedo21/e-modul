@@ -474,39 +474,8 @@ class DashboardController extends Controller
         // Olah data modul
         $processedModules = $this->processStudentModules($allModules, $student);
 
-        // Statistik Semester 1 (Ganjil)
-        $s1Modules = $processedModules->where('semester', '1')->values();
-        $s1Total = $s1Modules->count();
-        $s1Completed = $s1Modules->where('progress_status', 'completed')->count();
-        $s1Stats = [
-            'total_modules'     => $s1Total,
-            'completed_modules' => $s1Completed,
-            'active_subjects'   => $s1Modules->pluck('subject_id')->unique()->count(),
-            'avg_progress'      => $s1Total > 0 ? (int) round($s1Modules->avg('progress_percent')) : 0,
-        ];
-
-        // Statistik Semester 2 (Genap)
-        $s2Modules = $processedModules->where('semester', '2')->values();
-        $s2Total = $s2Modules->count();
-        $s2Completed = $s2Modules->where('progress_status', 'completed')->count();
-        $s2Stats = [
-            'total_modules'     => $s2Total,
-            'completed_modules' => $s2Completed,
-            'active_subjects'   => $s2Modules->pluck('subject_id')->unique()->count(),
-            'avg_progress'      => $s2Total > 0 ? (int) round($s2Modules->avg('progress_percent')) : 0,
-        ];
-
-        // Pilihan Semester yang sedang aktif dilihat siswa ('1', '2', atau null)
-        $selectedSemester = $request->query('semester');
-        if (!in_array($selectedSemester, ['1', '2'])) {
-            $selectedSemester = null;
-        }
-
-        // Tentukan ruang lingkup modul yang dipetakan ke Mapel
-        $scopedModules = $selectedSemester ? $processedModules->where('semester', $selectedSemester)->values() : $processedModules;
-
         // Ambil daftar mata pelajaran terkait kelas ini
-        $subjectIds = $scopedModules->pluck('subject_id')->unique()->filter()->values()->toArray();
+        $subjectIds = $processedModules->pluck('subject_id')->unique()->filter()->values()->toArray();
         if (empty($subjectIds)) {
             $classSubjectsList = Subject::with('teachers')->get();
         } else {
@@ -514,8 +483,10 @@ class DashboardController extends Controller
         }
 
         // Susun data Mapel
-        $subjectsWithSummary = $classSubjectsList->map(function (Subject $subj) use ($scopedModules) {
-            $subjModules = $scopedModules->where('subject_id', $subj->id)->values();
+        $subjectsWithSummary = $classSubjectsList->map(function (Subject $subj) use ($processedModules) {
+            $subjModules = $processedModules->where('subject_id', $subj->id)->values();
+            $s1SubjModules = $subjModules->where('semester', '1')->values();
+            $s2SubjModules = $subjModules->where('semester', '2')->values();
 
             $teacherNames = $subjModules->pluck('teacher_name')->unique()->filter()->values();
             if ($teacherNames->isEmpty()) {
@@ -527,6 +498,17 @@ class DashboardController extends Controller
             $inProgressCount = $subjModules->where('progress_status', 'in_progress')->count();
             $notStartedCount = $subjModules->where('progress_status', 'not_started')->count();
             $avgProgress = $modulesCount > 0 ? (int) round($subjModules->avg('progress_percent')) : 0;
+
+            $hasS1 = $s1SubjModules->isNotEmpty();
+            $hasS2 = $s2SubjModules->isNotEmpty();
+
+            // Status progres agregat mapel
+            $overallStatus = 'not_started';
+            if ($modulesCount > 0 && $completedCount === $modulesCount) {
+                $overallStatus = 'completed';
+            } elseif ($inProgressCount > 0 || $completedCount > 0) {
+                $overallStatus = 'in_progress';
+            }
 
             return [
                 'id'                => $subj->id,
@@ -541,13 +523,25 @@ class DashboardController extends Controller
                 'in_progress_count' => $inProgressCount,
                 'not_started_count' => $notStartedCount,
                 'avg_progress'      => $avgProgress,
+                'status'            => $overallStatus,
+                'has_s1'            => $hasS1,
+                'has_s2'            => $hasS2,
+                's1_modules_count'  => $s1SubjModules->count(),
+                's2_modules_count'  => $s2SubjModules->count(),
+                'semesters'         => array_values(array_filter([
+                    $hasS1 ? '1' : null,
+                    $hasS2 ? '2' : null,
+                ])),
             ];
         });
 
         // Statistik Keseluruhan Kelas
-        $totalModules = $scopedModules->count();
-        $completedModules = $scopedModules->where('progress_status', 'completed')->count();
-        $classAvgProgress = $totalModules > 0 ? (int) round($scopedModules->avg('progress_percent')) : 0;
+        $totalModules = $processedModules->count();
+        $completedModules = $processedModules->where('progress_status', 'completed')->count();
+        $classAvgProgress = $totalModules > 0 ? (int) round($processedModules->avg('progress_percent')) : 0;
+
+        $s1Modules = $processedModules->where('semester', '1');
+        $s2Modules = $processedModules->where('semester', '2');
 
         $classStats = [
             'total_subjects'    => $subjectsWithSummary->count(),
@@ -555,16 +549,17 @@ class DashboardController extends Controller
             'total_modules'     => $totalModules,
             'completed_modules' => $completedModules,
             'avg_progress'      => $classAvgProgress,
+            's1_total_subjects' => $subjectsWithSummary->where('has_s1', true)->count(),
+            's2_total_subjects' => $subjectsWithSummary->where('has_s2', true)->count(),
+            's1_total_modules'  => $s1Modules->count(),
+            's2_total_modules'  => $s2Modules->count(),
         ];
 
         return view('pages.student.classes.show', compact(
             'student',
             'class',
             'subjectsWithSummary',
-            'classStats',
-            's1Stats',
-            's2Stats',
-            'selectedSemester'
+            'classStats'
         ));
     }
 
@@ -584,18 +579,18 @@ class DashboardController extends Controller
         $class->load('major');
 
         // Semester filter jika ada
-        $selectedSemester = $request->query('semester');
+        $selectedSemester = $request->query('semester', 'all');
         if (!in_array($selectedSemester, ['1', '2'])) {
-            $selectedSemester = null;
+            $selectedSemester = 'all';
         }
 
-        // Query modul terbit khusus untuk kelas dan mapel ini
+        // Query seluruh modul terbit khusus untuk kelas dan mapel ini
         $modulesQuery = Module::query()
             ->where('class_id', $class->id)
             ->where('subject_id', $subject->id)
             ->where('status', 'published');
 
-        if ($selectedSemester) {
+        if ($selectedSemester !== 'all') {
             $modulesQuery->where('semester', $selectedSemester);
         }
 
@@ -779,6 +774,14 @@ class DashboardController extends Controller
                 'has_embed'         => $module->embed_active,
                 'has_job_sheet'     => $module->job_sheet_active,
                 'has_lkpd'          => $module->lkpd_active,
+                'semester'          => (string) ($module->semester ?? ''),
+                'semester_badge'    => $module->semester ? [
+                    'number' => (string) $module->semester,
+                    'label'  => $module->semester == '2' ? 'Semester 2 (Genap)' : 'Semester 1 (Ganjil)',
+                    'short'  => $module->semester == '2' ? 'S2 Genap' : 'S1 Ganjil',
+                    'color'  => $module->semester == '2' ? 'bg-cyan-50 text-cyan-700 border-cyan-200' : 'bg-amber-50 text-amber-700 border-amber-200',
+                    'icon'   => $module->semester == '2' ? '📘' : '📙',
+                ] : null,
             ];
         });
     }

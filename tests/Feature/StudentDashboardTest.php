@@ -158,24 +158,18 @@ class StudentDashboardTest extends TestCase
             'has_materi' => true,
         ]);
 
-        // Buka halaman kelas -> Tampil 2 Kartu Semester
+        // Buka halaman kelas -> Langsung tampil Daftar Mata Pelajaran dan filter semester
         $response = $this->actingAs($student, 'student')
             ->get(route('student.classes.show', $class->id));
 
         $response->assertStatus(200);
         $response->assertSee($class->full_name);
         $response->assertSee($class->code);
-        $response->assertSee('Pilihan Semester Pembelajaran');
+        $response->assertSee('Daftar Mata Pelajaran');
+        $response->assertSee('Semua Semester');
         $response->assertSee('Semester 1 (Ganjil)');
         $response->assertSee('Semester 2 (Genap)');
-
-        // Buka semester 1 -> Tampil Daftar Mata Pelajaran
-        $responseS1 = $this->actingAs($student, 'student')
-            ->get(route('student.classes.show', ['class' => $class->id, 'semester' => 1]));
-
-        $responseS1->assertStatus(200);
-        $responseS1->assertSee($subject->name);
-        $responseS1->assertSee('Daftar Mata Pelajaran', false);
+        $response->assertSee($subject->name);
 
         $module->delete();
     }
@@ -272,14 +266,15 @@ class StudentDashboardTest extends TestCase
             'has_materi' => true,
         ]);
 
-        // 1. Buka kelas tanpa filter semester -> Tampil 2 Kartu Semester
+        // 1. Buka kelas tanpa filter semester -> Langsung tampil daftar mapel dan filter semester
         $response = $this->actingAs($student, 'student')
             ->get(route('student.classes.show', $class->id));
 
         $response->assertStatus(200);
+        $response->assertSee('Daftar Mata Pelajaran');
+        $response->assertSee('Semua Semester');
         $response->assertSee('Semester 1 (Ganjil)');
         $response->assertSee('Semester 2 (Genap)');
-        $response->assertSee('Pilihan Semester Pembelajaran');
 
         // 2. Filter ke Semester 1
         $responseS1 = $this->actingAs($student, 'student')
