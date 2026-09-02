@@ -245,57 +245,32 @@
                 </div>
             </div>
 
-            {{-- Filter Semester & Status Tabs --}}
-            <div class="flex items-center gap-2 flex-wrap self-start sm:self-auto">
-                {{-- Semester Filter Tabs --}}
-                <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0">
-                    <button type="button"
-                            @click="selectedSemester = 'all'"
-                            :class="selectedSemester === 'all' ? 'bg-white text-slate-900 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
-                            class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
-                        Semua Semester
-                    </button>
-                    <button type="button"
-                            @click="selectedSemester = '1'"
-                            :class="selectedSemester === '1' ? 'bg-amber-600 text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
-                            class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
-                        📙 S1 Ganjil
-                    </button>
-                    <button type="button"
-                            @click="selectedSemester = '2'"
-                            :class="selectedSemester === '2' ? 'bg-cyan-600 text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
-                            class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
-                        📘 S2 Genap
-                    </button>
-                </div>
-
-                {{-- Status Filter Tabs --}}
-                <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0 overflow-x-auto">
-                    <button type="button"
-                            @click="activeFilter = 'all'"
-                            :class="activeFilter === 'all' ? 'bg-white text-slate-900 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
-                            class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
-                        Semua Status
-                    </button>
-                    <button type="button"
-                            @click="activeFilter = 'in_progress'"
-                            :class="activeFilter === 'in_progress' ? 'bg-amber-500 text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
-                            class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
-                        Sedang Dipelajari
-                    </button>
-                    <button type="button"
-                            @click="activeFilter = 'completed'"
-                            :class="activeFilter === 'completed' ? 'bg-emerald-600 text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
-                            class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
-                        Tuntas
-                    </button>
-                    <button type="button"
-                            @click="activeFilter = 'not_started'"
-                            :class="activeFilter === 'not_started' ? 'bg-slate-700 text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
-                            class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
-                        Belum Mulai
-                    </button>
-                </div>
+            {{-- Filter Status Tabs --}}
+            <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0 overflow-x-auto self-start sm:self-auto">
+                <button type="button"
+                        @click="activeFilter = 'all'"
+                        :class="activeFilter === 'all' ? 'bg-white text-slate-900 shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+                        class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
+                    Semua ({{ $stats['total_modules'] }})
+                </button>
+                <button type="button"
+                        @click="activeFilter = 'in_progress'"
+                        :class="activeFilter === 'in_progress' ? 'bg-amber-500 text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+                        class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
+                    Sedang Dipelajari ({{ $stats['in_progress'] }})
+                </button>
+                <button type="button"
+                        @click="activeFilter = 'completed'"
+                        :class="activeFilter === 'completed' ? 'bg-emerald-600 text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+                        class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
+                    Tuntas ({{ $stats['completed_modules'] }})
+                </button>
+                <button type="button"
+                        @click="activeFilter = 'not_started'"
+                        :class="activeFilter === 'not_started' ? 'bg-slate-700 text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+                        class="px-2.5 py-1 rounded-lg text-xs transition cursor-pointer">
+                    Belum Mulai ({{ $stats['not_started'] }})
+                </button>
             </div>
         </div>
 
