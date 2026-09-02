@@ -333,21 +333,30 @@ class ModuleController extends Controller
         if ($finalScore > 100) $finalScore = 100;
         if ($finalScore < 0) $finalScore = 0;
 
-        // Catat ke model StudentResult
+        // Catat ke model StudentResult (Nilai awal terkunci, retake dicatat sebagai perbandingan)
         $result = StudentResult::firstOrNew([
             'student_id' => $student->id,
             'module_id'  => $module->id,
         ]);
 
-        $result->pre_test_score = $finalScore;
+        $attemptInfo = $result->recordTestAttempt('pre_test', $finalScore, $correctCount, $totalQuestions);
         $result->summative_score = $result->calculateSummativeScore($module);
         if (!$result->grading_status) {
             $result->grading_status = 'pending';
         }
         $result->save();
 
+        if ($attemptInfo['is_initial']) {
+            $msg = "Kuis Pre-test berhasil diselesaikan! Skor awal resmi Anda: {$finalScore}/100 ({$correctCount} dari {$totalQuestions} soal benar).";
+        } else {
+            $initial = $result->pre_test_score;
+            $delta = $finalScore - $initial;
+            $deltaText = $delta > 0 ? "+{$delta}" : "{$delta}";
+            $msg = "Latihan ulang Pre-test selesai! Skor latihan Anda: {$finalScore}/100 ({$correctCount} dari {$totalQuestions} soal benar). Nilai awal resmi tetap: {$initial}/100 (Perbandingan: {$deltaText} poin).";
+        }
+
         return redirect()->route('student.modules.show', ['module' => $module->id, 'page' => 'pre_test'])
-            ->with('success', "Kuis Pre-test berhasil diselesaikan! Skor Anda: {$finalScore}/100 ({$correctCount} dari {$totalQuestions} soal benar).");
+            ->with('success', $msg);
     }
 
     /**
@@ -549,21 +558,30 @@ class ModuleController extends Controller
         if ($finalScore > 100) $finalScore = 100;
         if ($finalScore < 0) $finalScore = 0;
 
-        // Catat ke model StudentResult
+        // Catat ke model StudentResult (Nilai awal terkunci, retake dicatat sebagai perbandingan)
         $result = StudentResult::firstOrNew([
             'student_id' => $student->id,
             'module_id'  => $module->id,
         ]);
 
-        $result->post_test_score = $finalScore;
+        $attemptInfo = $result->recordTestAttempt('post_test', $finalScore, $correctCount, $totalQuestions);
         $result->summative_score = $result->calculateSummativeScore($module);
         if (!$result->grading_status) {
             $result->grading_status = 'pending';
         }
         $result->save();
 
+        if ($attemptInfo['is_initial']) {
+            $msg = "Evaluasi Post-test berhasil diselesaikan! Skor awal resmi Anda: {$finalScore}/100 ({$correctCount} dari {$totalQuestions} soal benar).";
+        } else {
+            $initial = $result->post_test_score;
+            $delta = $finalScore - $initial;
+            $deltaText = $delta > 0 ? "+{$delta}" : "{$delta}";
+            $msg = "Latihan ulang Post-test selesai! Skor latihan Anda: {$finalScore}/100 ({$correctCount} dari {$totalQuestions} soal benar). Nilai awal resmi tetap: {$initial}/100 (Perbandingan: {$deltaText} poin).";
+        }
+
         return redirect()->route('student.modules.show', ['module' => $module->id, 'page' => 'post_test'])
-            ->with('success', "Evaluasi Post-test berhasil diselesaikan! Skor akhir Anda: {$finalScore}/100 ({$correctCount} dari {$totalQuestions} soal benar).");
+            ->with('success', $msg);
     }
 
     /**

@@ -206,6 +206,21 @@ class StudentInteractiveLearningTest extends TestCase
         $this->assertNotNull($result);
         $this->assertEquals(50, $result->pre_test_score);
 
+        // Student retakes test with 100% correct answers (A & B)
+        $responseRetake = $this->actingAs($student, 'student')
+            ->post(route('student.modules.pre-test.submit', $module), [
+                'answers' => [
+                    $q1->id => 'A',
+                    $q2->id => 'B',
+                ],
+            ]);
+
+        $responseRetake->assertRedirect(route('student.modules.show', ['module' => $module->id, 'page' => 'pre_test']));
+        $result->refresh();
+        $this->assertEquals(50, $result->pre_test_score, 'Nilai awal resmi harus tetap terkunci di 50!');
+        $this->assertEquals(100, $result->getLatestRetakeScore('pre_test'), 'Nilai latihan ulang terbaru harus tercatat 100!');
+        $this->assertEquals(2, $result->getTestAttemptCount('pre_test'), 'Jumlah percobaan harus 2!');
+
         $module->delete();
     }
 
