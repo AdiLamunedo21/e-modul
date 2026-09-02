@@ -134,6 +134,10 @@ class PendahuluanController extends Controller
         $updatedData = array_merge($existingData, [
             'tujuan_pembelajaran' => $request->tujuan_pembelajaran ?? '',
             'peta_konsep_text'    => $request->peta_konsep_text ?? '',
+            'peta_konsep'         => [
+                'peta_konsep_text'       => $request->peta_konsep_text ?? '',
+                'peta_konsep_image_path' => $existingData['peta_konsep']['peta_konsep_image_path'] ?? ($existingData['peta_konsep_image_path'] ?? null),
+            ],
             'glosarium'           => $glosarium,
         ]);
 

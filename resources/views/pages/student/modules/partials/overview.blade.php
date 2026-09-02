@@ -151,7 +151,13 @@
                 @endif
 
                 {{-- Item: Peta Konsep --}}
-                @if($module->isInfoComponentActive('peta_konsep') && (!empty($informasiUmum['peta_konsep']['peta_konsep_image_path']) || !empty($informasiUmum['peta_konsep']['peta_konsep_text'])))
+                @php
+                    $hasPetaKonsep = !empty($informasiUmum['peta_konsep_text'])
+                        || !empty($informasiUmum['peta_konsep']['peta_konsep_text'])
+                        || !empty($informasiUmum['peta_konsep']['peta_konsep_image_path'])
+                        || (!empty($informasiUmum['peta_konsep']) && is_string($informasiUmum['peta_konsep']));
+                @endphp
+                @if($module->isInfoComponentActive('peta_konsep') && $hasPetaKonsep)
                     <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition">
                         <div class="flex items-center gap-3">
                             <span class="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center text-sm font-bold">🗺️</span>
@@ -187,7 +193,13 @@
                 @endif
 
                 {{-- Item: Glosarium --}}
-                @if($module->isInfoComponentActive('glosarium') && !empty($informasiUmum['glosarium']['glosarium']))
+                @php
+                    $hasGlosarium = !empty($informasiUmum['glosarium']) && (
+                        (is_array($informasiUmum['glosarium']) && count($informasiUmum['glosarium']) > 0)
+                        || (is_string($informasiUmum['glosarium']) && trim($informasiUmum['glosarium']) !== '')
+                    );
+                @endphp
+                @if($module->isInfoComponentActive('glosarium') && $hasGlosarium)
                     <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition">
                         <div class="flex items-center gap-3">
                             <span class="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center text-sm font-bold">📖</span>
@@ -213,7 +225,7 @@
                                 </button>
                             </template>
                             <template x-if="!isUnlocked('glosarium')">
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed opacity-75">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed opacity-75">
                                     <span>🔒</span>
                                     <span>Terkunci</span>
                                 </span>

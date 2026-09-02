@@ -52,10 +52,18 @@
     if ($module->isInfoComponentActive('tujuan_pembelajaran')) {
         $pagesList[] = ['id' => 'tujuan_pembelajaran', 'type' => 'read', 'sec' => 2, 'sec_name' => '2. Pendahuluan', 'title' => 'Tujuan & Capaian', 'icon' => '🎯', 'badge' => 'Capaian', 'desc' => 'Target kompetensi pembelajaran (CP & TP)'];
     }
-    if ($module->isInfoComponentActive('peta_konsep') && (!empty($informasiUmum['peta_konsep']['peta_konsep_image_path']) || !empty($informasiUmum['peta_konsep']['peta_konsep_text']))) {
+    $hasPetaKonsep = !empty($informasiUmum['peta_konsep_text'])
+        || !empty($informasiUmum['peta_konsep']['peta_konsep_text'])
+        || !empty($informasiUmum['peta_konsep']['peta_konsep_image_path'])
+        || (!empty($informasiUmum['peta_konsep']) && is_string($informasiUmum['peta_konsep']));
+    if ($module->isInfoComponentActive('peta_konsep') && $hasPetaKonsep) {
         $pagesList[] = ['id' => 'peta_konsep', 'type' => 'read', 'sec' => 2, 'sec_name' => '2. Pendahuluan', 'title' => 'Peta Konsep Materi', 'icon' => '🗺️', 'badge' => 'Alur Materi', 'desc' => 'Diagram hierarki konsep materi kejuruan'];
     }
-    if ($module->isInfoComponentActive('glosarium') && !empty($informasiUmum['glosarium']['glosarium'])) {
+    $hasGlosarium = !empty($informasiUmum['glosarium']) && (
+        (is_array($informasiUmum['glosarium']) && count($informasiUmum['glosarium']) > 0)
+        || (is_string($informasiUmum['glosarium']) && trim($informasiUmum['glosarium']) !== '')
+    );
+    if ($module->isInfoComponentActive('glosarium') && $hasGlosarium) {
         $pagesList[] = ['id' => 'glosarium', 'type' => 'read', 'sec' => 2, 'sec_name' => '2. Pendahuluan', 'title' => 'Glosarium Istilah', 'icon' => '📖', 'badge' => 'Kamus', 'desc' => 'Kamus istilah teknis & konsep penting'];
     }
     if ($module->has_pre_test && $module->preTest) {

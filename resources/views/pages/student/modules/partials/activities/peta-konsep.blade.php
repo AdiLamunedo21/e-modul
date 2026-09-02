@@ -19,21 +19,25 @@
             </template>
         </div>
 
-        @if(!empty($informasiUmum['peta_konsep']['peta_konsep_image_path']))
+        @php
+            $petaKonsepImagePath = $informasiUmum['peta_konsep']['peta_konsep_image_path'] ?? ($informasiUmum['peta_konsep_image_path'] ?? null);
+            $petaKonsepText = $informasiUmum['peta_konsep_text']
+                ?? ($informasiUmum['peta_konsep']['peta_konsep_text']
+                ?? ($informasiUmum['peta_konsep']['text']
+                ?? (is_string($informasiUmum['peta_konsep'] ?? null) ? $informasiUmum['peta_konsep'] : '')));
+        @endphp
+
+        @if(!empty($petaKonsepImagePath))
             <div class="text-center p-4 bg-slate-50 rounded-2xl border border-slate-200/70">
-                <img src="{{ asset('storage/' . $informasiUmum['peta_konsep']['peta_konsep_image_path']) }}"
+                <img src="{{ asset('storage/' . $petaKonsepImagePath) }}"
                      alt="Peta Konsep"
                      class="max-h-96 mx-auto rounded-xl border border-slate-200 shadow-sm object-contain">
             </div>
         @endif
 
-        @if(!empty($informasiUmum['peta_konsep']['peta_konsep_text']))
+        @if(!empty($petaKonsepText))
             <div class="p-5 rounded-2xl bg-slate-50 text-xs sm:text-sm text-slate-700 leading-relaxed border border-slate-200/70 font-mono">
-                {!! nl2br(e($informasiUmum['peta_konsep']['peta_konsep_text'])) !!}
-            </div>
-        @elseif(!empty($informasiUmum['peta_konsep']) && is_string($informasiUmum['peta_konsep']))
-            <div class="p-5 rounded-2xl bg-slate-50 text-xs sm:text-sm text-slate-700 leading-relaxed border border-slate-200/70">
-                {!! nl2br(e($informasiUmum['peta_konsep'])) !!}
+                {!! nl2br(e($petaKonsepText)) !!}
             </div>
         @endif
 

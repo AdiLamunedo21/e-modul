@@ -45,10 +45,18 @@
     if ($module->isInfoComponentActive('tujuan_pembelajaran')) {
         $pagesList[] = ['id' => 'tujuan_pembelajaran', 'sec' => 2, 'sec_name' => '2. Pendahuluan', 'title' => 'Tujuan & Capaian', 'icon' => '🎯', 'badge' => 'Capaian', 'desc' => 'Target kompetensi pembelajaran (CP & TP)'];
     }
-    if ($module->isInfoComponentActive('peta_konsep') && (!empty($informasiUmum['peta_konsep']['peta_konsep_image_path']) || !empty($informasiUmum['peta_konsep']['peta_konsep_text']))) {
+    $hasPetaKonsep = !empty($informasiUmum['peta_konsep_text'])
+        || !empty($informasiUmum['peta_konsep']['peta_konsep_text'])
+        || !empty($informasiUmum['peta_konsep']['peta_konsep_image_path'])
+        || (!empty($informasiUmum['peta_konsep']) && is_string($informasiUmum['peta_konsep']));
+    if ($module->isInfoComponentActive('peta_konsep') && $hasPetaKonsep) {
         $pagesList[] = ['id' => 'peta_konsep', 'sec' => 2, 'sec_name' => '2. Pendahuluan', 'title' => 'Peta Konsep Materi', 'icon' => '🗺️', 'badge' => 'Alur Materi', 'desc' => 'Diagram hierarki konsep materi kejuruan'];
     }
-    if ($module->isInfoComponentActive('glosarium') && !empty($informasiUmum['glosarium']['glosarium'])) {
+    $hasGlosarium = !empty($informasiUmum['glosarium']) && (
+        (is_array($informasiUmum['glosarium']) && count($informasiUmum['glosarium']) > 0)
+        || (is_string($informasiUmum['glosarium']) && trim($informasiUmum['glosarium']) !== '')
+    );
+    if ($module->isInfoComponentActive('glosarium') && $hasGlosarium) {
         $pagesList[] = ['id' => 'glosarium', 'sec' => 2, 'sec_name' => '2. Pendahuluan', 'title' => 'Glosarium Istilah', 'icon' => '📖', 'badge' => 'Kamus', 'desc' => 'Kamus istilah teknis & konsep penting'];
     }
     if ($module->has_pre_test && $module->preTest) {
@@ -575,15 +583,22 @@
                         </div>
                     </div>
 
-                    @if(!empty($informasiUmum['peta_konsep']['peta_konsep_image_path']))
+                    @php
+                        $adminPetaText = $informasiUmum['peta_konsep_text']
+                            ?? ($informasiUmum['peta_konsep']['peta_konsep_text']
+                            ?? (is_string($informasiUmum['peta_konsep'] ?? null) ? $informasiUmum['peta_konsep'] : ''));
+                        $adminPetaImage = $informasiUmum['peta_konsep']['peta_konsep_image_path'] ?? ($informasiUmum['peta_konsep_image_path'] ?? null);
+                    @endphp
+
+                    @if(!empty($adminPetaImage))
                         <div class="rounded-2xl border border-slate-200 overflow-hidden bg-slate-50 p-4 text-center">
-                            <img src="{{ Storage::url($informasiUmum['peta_konsep']['peta_konsep_image_path']) }}" alt="Peta Konsep" class="max-w-full h-auto mx-auto rounded-xl shadow-xs">
+                            <img src="{{ Storage::url($adminPetaImage) }}" alt="Peta Konsep" class="max-w-full h-auto mx-auto rounded-xl shadow-xs">
                         </div>
                     @endif
 
-                    @if(!empty($informasiUmum['peta_konsep']['peta_konsep_text']))
+                    @if(!empty($adminPetaText))
                         <div class="prose prose-slate text-sm text-slate-700 bg-slate-50 p-5 rounded-2xl border border-slate-200">
-                            {!! nl2br(e($informasiUmum['peta_konsep']['peta_konsep_text'])) !!}
+                            {!! nl2br(e($adminPetaText)) !!}
                         </div>
                     @endif
                 </div>
@@ -602,13 +617,38 @@
                         </div>
                     </div>
 
-                    <div class="prose prose-slate text-sm text-slate-700 bg-slate-50 p-5 rounded-2xl border border-slate-200 leading-relaxed">
-                        @if(!empty($informasiUmum['glosarium']['glosarium']))
-                            {!! nl2br(e($informasiUmum['glosarium']['glosarium'])) !!}
-                        @else
-                            <p class="italic text-slate-400">Belum ada glosarium yang ditambahkan.</p>
-                        @endif
-                    </div>
+                    @php
+                        $adminGlosarium = [];
+                        if (isset($informasiUmum['glosarium'])) {
+                            $adminGlosarium = is_array($informasiUmum['glosarium']) && isset($informasiUmum['glosarium']['glosarium'])
+                                ? $informasiUmum['glosarium']['glosarium']
+                                : (array) $informasiUmum['glosarium'];
+                        }
+                    @endphp
+
+                    @if(!empty($adminGlosarium) && is_array($adminGlosarium))
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                            @foreach($adminGlosarium as $gItem)
+                                @php
+                                    $gIstilah = is_array($gItem) ? ($gItem['istilah'] ?? '') : '';
+                                    $gDefinisi = is_array($gItem) ? ($gItem['definisi'] ?? '') : $gItem;
+                                @endphp
+                                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/70">
+                                    <h5 class="text-xs font-bold text-teal-900 mb-1 flex items-center gap-1.5">
+                                        <span class="w-2 h-2 rounded-full bg-teal-500"></span>
+                                        <span>{{ $gIstilah ?: 'Istilah' }}</span>
+                                    </h5>
+                                    <p class="text-xs text-slate-600 leading-relaxed">{{ $gDefinisi }}</p>
+                                </div>
+                            @endforeach
+                        </div>
+                    @elseif(!empty($adminGlosarium) && is_string($adminGlosarium))
+                        <div class="prose prose-slate text-sm text-slate-700 bg-slate-50 p-5 rounded-2xl border border-slate-200 leading-relaxed">
+                            {!! nl2br(e($adminGlosarium)) !!}
+                        </div>
+                    @else
+                        <p class="italic text-slate-400">Belum ada glosarium yang ditambahkan.</p>
+                    @endif
                 </div>
             </div>
 
