@@ -947,8 +947,30 @@
                     </div>
 
                     <div class="prose prose-slate text-sm text-slate-700 bg-slate-50 p-5 rounded-2xl border border-slate-200 leading-relaxed">
-                        @if(!empty($informasiUmum['daftar_pustaka']['daftar_pustaka']))
-                            {!! nl2br(e($informasiUmum['daftar_pustaka']['daftar_pustaka'])) !!}
+                        @php
+                            $pustakaRaw = $informasiUmum['daftar_pustaka']['daftar_pustaka'] ?? ($informasiUmum['daftar_pustaka'] ?? []);
+                        @endphp
+                        @if(is_array($pustakaRaw) && !empty($pustakaRaw))
+                            <ol class="list-decimal pl-5 space-y-2">
+                                @foreach($pustakaRaw as $pItem)
+                                    @php
+                                        $pj = is_array($pItem) ? ($pItem['judul'] ?? '') : $pItem;
+                                        $pp = is_array($pItem) ? ($pItem['penulis'] ?? '') : '';
+                                        $pt = is_array($pItem) ? ($pItem['tahun'] ?? '') : '';
+                                        $pu = is_array($pItem) ? ($pItem['tautan'] ?? '') : '';
+                                    @endphp
+                                    <li>
+                                        @if($pp)<strong>{{ $pp }}</strong>. @endif
+                                        @if($pt)({{ $pt }}). @endif
+                                        <em>{{ $pj }}</em>.
+                                        @if($pu)
+                                            <a href="{{ $pu }}" target="_blank" rel="noopener" class="text-indigo-600 underline text-xs break-all block mt-0.5">{{ $pu }}</a>
+                                        @endif
+                                    </li>
+                                @endforeach
+                            </ol>
+                        @elseif(is_string($pustakaRaw) && !empty(trim($pustakaRaw)))
+                            {!! nl2br(e($pustakaRaw)) !!}
                         @else
                             <p class="italic text-slate-400">Daftar pustaka belum ditambahkan.</p>
                         @endif

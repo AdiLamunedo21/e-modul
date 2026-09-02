@@ -172,6 +172,15 @@ class Module extends Model
         return array_values(array_filter($map, fn($_, $key) => $this->$key, ARRAY_FILTER_USE_BOTH));
     }
 
+    /* ─── Komponen Aktif Aliases / Accessors ─────── */
+    public function getPreTestActiveAttribute(): bool { return (bool) $this->has_pre_test; }
+    public function getMateriActiveAttribute(): bool { return (bool) $this->has_materi; }
+    public function getVideoActiveAttribute(): bool { return (bool) $this->has_video; }
+    public function getEmbedActiveAttribute(): bool { return (bool) $this->has_embed; }
+    public function getJobSheetActiveAttribute(): bool { return (bool) $this->has_job_sheet; }
+    public function getLkpdActiveAttribute(): bool { return (bool) $this->has_lkpd; }
+    public function getPostTestActiveAttribute(): bool { return (bool) $this->has_post_test; }
+
     /** Memeriksa apakah sub-komponen Informasi Umum aktif (default true) */
     public function isInfoComponentActive(string $key): bool
     {
