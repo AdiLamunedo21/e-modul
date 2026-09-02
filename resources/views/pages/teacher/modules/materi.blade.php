@@ -188,7 +188,22 @@
     <span class="font-semibold text-slate-800">Komponen Inti: Materi & PPT</span>
 </nav>
 
-{{-- Flash Messages --}}
+{{-- Floating Toast Notification --}}
+<div id="materi-toast" class="fixed bottom-6 right-6 z-[99999] pointer-events-none transition-all duration-300 transform translate-y-8 opacity-0 hidden">
+    <div id="materi-toast-card" class="pointer-events-auto flex items-center gap-3 px-5 py-4 rounded-2xl shadow-2xl border backdrop-blur-md text-sm font-semibold max-w-md bg-white border-slate-200 text-slate-800">
+        <div id="materi-toast-icon" class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"></div>
+        <div class="flex-1">
+            <h4 id="materi-toast-title" class="font-bold text-xs uppercase tracking-wider"></h4>
+            <p id="materi-toast-msg" class="text-xs text-slate-600 mt-0.5 font-normal leading-relaxed"></p>
+        </div>
+        <button type="button" onclick="hideMateriToast()" class="p-1 hover:bg-black/5 rounded-lg text-slate-400 hover:text-slate-600 transition-colors ml-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+    </div>
+</div>
+
+{{-- Flash & Dynamic Alert Container --}}
+<div id="in-page-alert-container">
 @if(session('success'))
 <div class="mb-6 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-800 shadow-sm">
     <svg class="w-5 h-5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -216,6 +231,7 @@
     </ul>
 </div>
 @endif
+</div>
 
 {{-- ══ Header Banner ══ --}}
 <div class="bg-gradient-to-r from-blue-800 via-indigo-800 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-blue-950/20 mb-8 relative overflow-hidden border border-blue-700/40">
@@ -257,7 +273,7 @@
       action="{{ route('teacher.modules.materi.update', $module) }}"
       method="POST"
       enctype="multipart/form-data"
-      onsubmit="syncEditorContent()">
+      onsubmit="return handleMateriSubmit(event)">
     @csrf
     @method('PATCH')
 
@@ -308,12 +324,13 @@
                         <label class="block text-xs font-bold text-slate-700 mb-1.5">
                             Judul Kegiatan Belajar / Materi <span class="text-rose-500">*</span>
                         </label>
-                        <input type="text" name="judul_materi"
+                        <input type="text" name="judul_materi" id="judul_materi_input"
                                value="{{ old('judul_materi', $data['judul_materi'] ?? 'Kegiatan Belajar: ' . $module->title) }}"
                                placeholder="Contoh: Kegiatan Belajar 1: Konsep & Implementasi Basis Data Relasional"
                                class="w-full rounded-xl border @error('judul_materi') border-rose-300 bg-rose-50/50 @else border-slate-300 bg-slate-50 @enderror px-4 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
+                        <p id="error-judul_materi" class="text-xs text-rose-600 mt-1 hidden"></p>
                         @error('judul_materi')
-                            <p class="text-xs text-rose-600 mt-1">{{ $message }}</p>
+                            <p class="text-xs text-rose-600 mt-1 server-error">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
@@ -459,6 +476,10 @@
                         <span class="text-slate-400">Editor Visual Aktif &bull; Format HTML Otomatis</span>
                     </div>
                 </div>
+                <p id="error-uraian_materi" class="text-xs text-rose-600 mt-2 hidden"></p>
+                @error('uraian_materi')
+                    <p class="text-xs text-rose-600 mt-2 server-error">{{ $message }}</p>
+                @enderror
             </div>
 
             {{-- 3. Upload Berkas Slide Presentasi (PDF / PPT / PPTX) --}}
@@ -479,8 +500,9 @@
                 </div>
 
                 {{-- Status Berkas Saat Ini --}}
+                <div id="ppt-current-file-container">
                 @if(!empty($data['ppt_file_path']))
-                    <div class="p-4 rounded-2xl bg-gradient-to-r from-violet-50 to-indigo-50 border border-violet-200/80 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div id="ppt-current-file-card" class="p-4 rounded-2xl bg-gradient-to-r from-violet-50 to-indigo-50 border border-violet-200/80 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all duration-300">
                         <div class="flex items-center gap-3.5">
                             <div class="w-12 h-12 rounded-xl bg-violet-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-md shadow-violet-500/20">
                                 @if(str_ends_with(strtolower($data['ppt_file_name'] ?? ''), '.pdf'))
@@ -520,6 +542,7 @@
                         </div>
                     </div>
                 @endif
+                </div>
 
                 {{-- Drag & Drop Upload Zone --}}
                 <div id="ppt-drop-zone"
@@ -530,12 +553,17 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12l-3-3m0 0l-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
                         </svg>
                     </div>
-                    <p class="text-sm font-bold text-slate-700">
+                    <p id="ppt-drop-title" class="text-sm font-bold text-slate-700">
                         {{ !empty($data['ppt_file_path']) ? 'Klik atau seret untuk mengganti berkas PPT/PDF' : 'Klik atau seret berkas PPT/PDF ke sini' }}
                     </p>
                     <p class="text-xs text-slate-500 mt-1">Mendukung format .PDF, .PPT, .PPTX — Ukuran maksimal 15 MB</p>
                     <p id="ppt-file-selected-name" class="text-xs font-bold text-violet-700 mt-3 hidden bg-violet-100 px-3 py-1 rounded-full"></p>
                 </div>
+
+                <p id="error-ppt_file" class="text-xs text-rose-600 mt-2 hidden"></p>
+                @error('ppt_file')
+                    <p class="text-xs text-rose-600 mt-2 server-error">{{ $message }}</p>
+                @enderror
 
                 <input type="file" id="ppt_file_input" name="ppt_file"
                        accept=".pdf,.ppt,.pptx,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation"
@@ -643,12 +671,24 @@
                 </div>
 
                 {{-- Action Buttons --}}
-                <div class="pt-4 border-t border-slate-100 space-y-2">
-                    <button type="submit"
-                            class="w-full py-3 px-4 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 active:scale-95 rounded-xl shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        Simpan Materi & PPT
+                <div class="pt-4 border-t border-slate-100 space-y-2.5">
+                    <button type="submit" id="btn-submit-materi"
+                            class="w-full py-3 px-4 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 active:scale-95 rounded-xl shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2 select-none">
+                        <span id="btn-submit-spinner" class="hidden">
+                            <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </span>
+                        <span id="btn-submit-icon">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </span>
+                        <span id="btn-submit-text">Simpan Materi & PPT</span>
                     </button>
+                    <div class="flex items-center justify-center gap-1.5 text-[11px] text-slate-400 font-medium py-0.5 select-none">
+                        <kbd class="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 font-mono text-[10px] text-slate-600 font-semibold shadow-xs">Ctrl</kbd> + <kbd class="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 font-mono text-[10px] text-slate-600 font-semibold shadow-xs">S</kbd>
+                        <span>untuk simpan instan</span>
+                    </div>
                     <a href="{{ route('teacher.modules.materi.preview', $module) }}" target="_blank"
                        class="w-full py-2.5 px-4 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all text-center flex items-center justify-center gap-2">
                         <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -656,7 +696,7 @@
                     </a>
                     <a href="{{ route('teacher.modules.show', $module) }}"
                        class="w-full py-2.5 px-4 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-transparent hover:bg-slate-50 rounded-xl transition-all text-center block">
-                        Batal
+                        Kembali ke Detail Modul
                     </a>
                 </div>
             </div>
@@ -794,6 +834,11 @@
 
     // Toggle switch status
     function toggleMateriStatus(isChecked) {
+        const toggleCheckbox = document.getElementById('has_materi_toggle');
+        if (toggleCheckbox && toggleCheckbox.checked !== Boolean(isChecked)) {
+            toggleCheckbox.checked = Boolean(isChecked);
+        }
+
         const track = document.getElementById('materi-toggle-track');
         const thumb = document.getElementById('materi-toggle-thumb');
         const badge = document.getElementById('toggle-status-badge');
@@ -1146,6 +1191,353 @@
             if (badge) badge.textContent = i + 1;
         });
     }
+
+    // ── AJAX SUBMIT & AUTO-UPDATE LOGIC ──────────────────
+    let isSubmitting = false;
+    let toastTimeout = null;
+
+    function showMateriToast(type, title, message) {
+        const toast = document.getElementById('materi-toast');
+        const card = document.getElementById('materi-toast-card');
+        const icon = document.getElementById('materi-toast-icon');
+        const titleEl = document.getElementById('materi-toast-title');
+        const msgEl = document.getElementById('materi-toast-msg');
+
+        if (!toast) return;
+
+        if (toastTimeout) clearTimeout(toastTimeout);
+
+        if (type === 'success') {
+            card.className = 'pointer-events-auto flex items-center gap-3 px-5 py-4 rounded-2xl shadow-2xl border backdrop-blur-md text-sm font-semibold max-w-md bg-emerald-900/95 text-white border-emerald-500/50 shadow-emerald-950/40';
+            icon.className = 'w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center shrink-0';
+            icon.innerHTML = '<svg class="w-5 h-5 text-emerald-300" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>';
+            titleEl.className = 'font-bold text-xs uppercase tracking-wider text-emerald-300';
+            msgEl.className = 'text-xs text-emerald-100/90 mt-0.5 font-normal leading-relaxed';
+        } else {
+            card.className = 'pointer-events-auto flex items-center gap-3 px-5 py-4 rounded-2xl shadow-2xl border backdrop-blur-md text-sm font-semibold max-w-md bg-rose-900/95 text-white border-rose-500/50 shadow-rose-950/40';
+            icon.className = 'w-9 h-9 rounded-xl bg-rose-500/20 text-rose-300 flex items-center justify-center shrink-0';
+            icon.innerHTML = '<svg class="w-5 h-5 text-rose-300" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>';
+            titleEl.className = 'font-bold text-xs uppercase tracking-wider text-rose-300';
+            msgEl.className = 'text-xs text-rose-100/90 mt-0.5 font-normal leading-relaxed';
+        }
+
+        titleEl.textContent = title;
+        msgEl.textContent = message;
+
+        toast.classList.remove('hidden');
+        requestAnimationFrame(() => {
+            toast.classList.remove('translate-y-8', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+        });
+
+        toastTimeout = setTimeout(() => {
+            hideMateriToast();
+        }, 4000);
+    }
+
+    function hideMateriToast() {
+        const toast = document.getElementById('materi-toast');
+        if (!toast) return;
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-8', 'opacity-0');
+        setTimeout(() => {
+            toast.classList.add('hidden');
+        }, 300);
+    }
+
+    function clearErrors() {
+        document.querySelectorAll('.server-error').forEach(el => el.remove());
+        document.querySelectorAll('[id^="error-"]').forEach(el => {
+            el.textContent = '';
+            el.classList.add('hidden');
+        });
+        const alertBox = document.getElementById('dynamic-alert-box');
+        if (alertBox) alertBox.remove();
+
+        const judulInput = document.getElementById('judul_materi_input');
+        if (judulInput) {
+            judulInput.classList.remove('border-rose-300', 'bg-rose-50/50');
+            judulInput.classList.add('border-slate-300', 'bg-slate-50');
+        }
+
+        const notepadBox = document.getElementById('notepad-main-container');
+        if (notepadBox) {
+            notepadBox.classList.remove('border-rose-400', 'ring-2', 'ring-rose-200');
+        }
+    }
+
+    function showErrors(errors, mainMessage) {
+        clearErrors();
+
+        const alertContainer = document.getElementById('in-page-alert-container');
+        if (alertContainer) {
+            let errorItemsHtml = '';
+            for (const key in errors) {
+                if (Array.isArray(errors[key])) {
+                    errors[key].forEach(msg => {
+                        errorItemsHtml += `<li>${msg}</li>`;
+                    });
+                }
+            }
+
+            const alertEl = document.createElement('div');
+            alertEl.id = 'dynamic-alert-box';
+            alertEl.className = 'mb-6 rounded-2xl border border-rose-200 bg-rose-50 p-5 text-sm text-rose-800 shadow-sm transition-all duration-300 animate-fadeIn';
+            alertEl.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-rose-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd"/></svg>
+                    <div>
+                        <p class="font-bold mb-1">${mainMessage || 'Terdapat kesalahan input:'}</p>
+                        <ul class="list-disc list-inside space-y-1 text-xs text-rose-700">
+                            ${errorItemsHtml}
+                        </ul>
+                    </div>
+                </div>
+            `;
+            alertContainer.prepend(alertEl);
+            alertEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        if (errors.judul_materi) {
+            const errEl = document.getElementById('error-judul_materi');
+            const inputEl = document.getElementById('judul_materi_input');
+            if (errEl) {
+                errEl.textContent = errors.judul_materi[0];
+                errEl.classList.remove('hidden');
+            }
+            if (inputEl) {
+                inputEl.classList.remove('border-slate-300', 'bg-slate-50');
+                inputEl.classList.add('border-rose-300', 'bg-rose-50/50');
+            }
+        }
+
+        if (errors.uraian_materi) {
+            const errEl = document.getElementById('error-uraian_materi');
+            const notepadBox = document.getElementById('notepad-main-container');
+            if (errEl) {
+                errEl.textContent = errors.uraian_materi[0];
+                errEl.classList.remove('hidden');
+            }
+            if (notepadBox) {
+                notepadBox.classList.add('border-rose-400', 'ring-2', 'ring-rose-200');
+            }
+        }
+
+        if (errors.ppt_file) {
+            const errEl = document.getElementById('error-ppt_file');
+            if (errEl) {
+                errEl.textContent = errors.ppt_file[0];
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        showMateriToast('error', 'Gagal Menyimpan', mainMessage || 'Periksa kembali data yang Anda isi.');
+    }
+
+    async function handleMateriSubmit(e) {
+        if (e) e.preventDefault();
+        if (isSubmitting) return false;
+
+        syncEditorContent();
+
+        const form = document.getElementById('materi-form');
+        const submitBtn = document.getElementById('btn-submit-materi');
+        const submitText = document.getElementById('btn-submit-text');
+        const submitSpinner = document.getElementById('btn-submit-spinner');
+        const submitIcon = document.getElementById('btn-submit-icon');
+
+        isSubmitting = true;
+        clearErrors();
+
+        // Loading state
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-emerald-600', 'hover:bg-emerald-700');
+            submitBtn.classList.add('bg-blue-700', 'cursor-not-allowed', 'opacity-90');
+            if (submitSpinner) submitSpinner.classList.remove('hidden');
+            if (submitIcon) submitIcon.classList.add('hidden');
+            if (submitText) submitText.textContent = 'Menyimpan Materi...';
+        }
+
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                }
+            });
+
+            if (response.ok) {
+                const resData = await response.json();
+
+                // 1. Toast Notification
+                showMateriToast('success', 'Berhasil Disimpan! ✅', resData.message || 'Materi & Berkas Presentasi berhasil disimpan.');
+
+                // 2. In-Page Success Alert
+                const alertContainer = document.getElementById('in-page-alert-container');
+                if (alertContainer) {
+                    const existingSuccess = document.getElementById('dynamic-success-box');
+                    if (existingSuccess) existingSuccess.remove();
+
+                    const successEl = document.createElement('div');
+                    successEl.id = 'dynamic-success-box';
+                    successEl.className = 'mb-6 flex items-center justify-between gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-800 shadow-sm transition-all duration-300 animate-fadeIn';
+                    successEl.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <svg class="w-5 h-5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span>${resData.message}</span>
+                        </div>
+                        <span class="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full shrink-0">Auto-Saved</span>
+                    `;
+                    alertContainer.prepend(successEl);
+                }
+
+                // 3. Update PPT Component Card in DOM
+                const pptContainer = document.getElementById('ppt-current-file-container');
+                const pptDropTitle = document.getElementById('ppt-drop-title');
+                const pptSelectedName = document.getElementById('ppt-file-selected-name');
+                const summaryPpt = document.getElementById('summary-ppt');
+
+                if (resData.data && resData.data.ppt_file_path) {
+                    if (pptContainer) {
+                        pptContainer.innerHTML = `
+                            <div id="ppt-current-file-card" class="p-4 rounded-2xl bg-gradient-to-r from-violet-50 to-indigo-50 border border-violet-200/80 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all duration-300 animate-fadeIn">
+                                <div class="flex items-center gap-3.5">
+                                    <div class="w-12 h-12 rounded-xl bg-violet-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-md shadow-violet-500/20">
+                                        ${resData.data.ppt_file_is_pdf ? 'PDF' : 'PPT'}
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="text-sm font-bold text-slate-900 truncate max-w-sm">
+                                                ${resData.data.ppt_file_name || 'Berkas Presentasi'}
+                                            </h4>
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">
+                                                Tersedia
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 mt-0.5">
+                                            ${resData.data.ppt_file_size_formatted ? 'Ukuran: ' + resData.data.ppt_file_size_formatted + ' &bull; ' : ''}
+                                            Disimpan di penyimpanan aman sistem
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <a href="${resData.data.ppt_download_url}"
+                                       class="px-3.5 py-2 text-xs font-bold text-violet-700 bg-white hover:bg-violet-100 border border-violet-300 rounded-xl transition-all flex items-center gap-1.5 shadow-sm">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                                        Unduh Berkas
+                                    </a>
+                                    <label class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl cursor-pointer transition-colors border border-rose-200">
+                                        <input type="checkbox" name="remove_ppt_file" value="1" class="w-3.5 h-3.5 accent-rose-500">
+                                        Hapus Berkas
+                                    </label>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    if (pptDropTitle) pptDropTitle.textContent = 'Klik atau seret untuk mengganti berkas PPT/PDF';
+                    if (summaryPpt) {
+                        summaryPpt.textContent = 'Terlampir';
+                        summaryPpt.className = 'text-xs font-extrabold text-violet-700';
+                    }
+                } else {
+                    if (pptContainer) pptContainer.innerHTML = '';
+                    if (pptDropTitle) pptDropTitle.textContent = 'Klik atau seret berkas PPT/PDF ke sini';
+                    if (summaryPpt) {
+                        summaryPpt.textContent = 'Tidak Ada';
+                        summaryPpt.className = 'text-xs font-extrabold text-slate-500';
+                    }
+                }
+
+                // Reset file input & label
+                const pptInput = document.getElementById('ppt_file_input');
+                if (pptInput) pptInput.value = '';
+                if (pptSelectedName) {
+                    pptSelectedName.textContent = '';
+                    pptSelectedName.classList.add('hidden');
+                }
+
+                // 4. Update Toggle Status & Badges
+                toggleMateriStatus(resData.data.has_materi);
+
+                // 5. Update Metrics
+                updateWordCount();
+
+                // 6. Success Button Animation
+                if (submitBtn) {
+                    submitBtn.classList.remove('bg-blue-700', 'opacity-90');
+                    submitBtn.classList.add('bg-emerald-600', 'hover:bg-emerald-700');
+                    if (submitSpinner) submitSpinner.classList.add('hidden');
+                    if (submitIcon) {
+                        submitIcon.innerHTML = '<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>';
+                        submitIcon.classList.remove('hidden');
+                    }
+                    if (submitText) submitText.textContent = 'Tersimpan! ✅';
+
+                    setTimeout(() => {
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('cursor-not-allowed', 'bg-emerald-600', 'hover:bg-emerald-700');
+                        submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                        if (submitIcon) {
+                            submitIcon.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+                        }
+                        if (submitText) submitText.textContent = 'Simpan Materi & PPT';
+                        isSubmitting = false;
+                    }, 2200);
+                } else {
+                    isSubmitting = false;
+                }
+
+            } else if (response.status === 422) {
+                // Validation error
+                const errData = await response.json();
+                showErrors(errData.errors || {}, errData.message || 'Terdapat kesalahan input:');
+                resetSubmitButton();
+            } else {
+                showMateriToast('error', 'Gagal Menyimpan', 'Terjadi kesalahan sistem (' + response.status + ').');
+                resetSubmitButton();
+            }
+        } catch (err) {
+            console.error(err);
+            showMateriToast('error', 'Gagal Terhubung', 'Gagal mengirim data ke server. Pastikan koneksi server aktif.');
+            resetSubmitButton();
+        }
+
+        return false;
+    }
+
+    function resetSubmitButton() {
+        const submitBtn = document.getElementById('btn-submit-materi');
+        const submitText = document.getElementById('btn-submit-text');
+        const submitSpinner = document.getElementById('btn-submit-spinner');
+        const submitIcon = document.getElementById('btn-submit-icon');
+
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('cursor-not-allowed', 'bg-blue-700', 'opacity-90', 'bg-emerald-600', 'hover:bg-emerald-700');
+            submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            if (submitSpinner) submitSpinner.classList.add('hidden');
+            if (submitIcon) {
+                submitIcon.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+                submitIcon.classList.remove('hidden');
+            }
+            if (submitText) submitText.textContent = 'Simpan Materi & PPT';
+        }
+        isSubmitting = false;
+    }
+
+    // ── KEYBOARD SHORTCUT (Ctrl+S / Cmd+S) ─────────────────
+    window.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
+            e.preventDefault();
+            handleMateriSubmit();
+        }
+    });
 
     // Init on page load
     document.addEventListener('DOMContentLoaded', function() {

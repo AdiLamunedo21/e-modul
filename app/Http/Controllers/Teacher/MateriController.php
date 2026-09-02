@@ -152,6 +152,32 @@ class MateriController extends Controller
         ]);
 
         $statusText = $hasMateri ? 'diaktifkan & disimpan' : 'disimpan (status Non-Aktif)';
+
+        if ($request->expectsJson() || $request->ajax()) {
+            $formattedSize = null;
+            if ($pptSize) {
+                $formattedSize = number_format($pptSize / (1024 * 1024), 2) . ' MB';
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => "Materi & Berkas Presentasi berhasil {$statusText}! ✅",
+                'data'    => [
+                    'has_materi'              => $hasMateri,
+                    'judul_materi'            => $payload['judul_materi'],
+                    'uraian_materi'           => $payload['uraian_materi'],
+                    'ringkasan_materi'        => $payload['ringkasan_materi'],
+                    'poin_penting'            => $payload['poin_penting'],
+                    'ppt_file_path'           => $pptPath,
+                    'ppt_file_name'           => $pptName,
+                    'ppt_file_size'           => $pptSize,
+                    'ppt_file_size_formatted' => $formattedSize,
+                    'ppt_file_is_pdf'         => $pptName ? str_ends_with(strtolower($pptName), '.pdf') : false,
+                    'ppt_download_url'        => $pptPath ? route('teacher.modules.materi.download-ppt', $module) : null,
+                ],
+            ]);
+        }
+
         return redirect()
             ->route('teacher.modules.show', $module)
             ->with('success', "Materi & Berkas Presentasi berhasil {$statusText}! ✅");
@@ -187,6 +213,14 @@ class MateriController extends Controller
         ]);
 
         $status = $module->has_materi ? 'diaktifkan' : 'dinonaktifkan';
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success'    => true,
+                'has_materi' => $module->has_materi,
+                'message'    => "Komponen Materi & PPT berhasil {$status}! ✅",
+            ]);
+        }
 
         return back()->with('success', "Komponen Materi & PPT berhasil {$status}! ✅");
     }
