@@ -186,7 +186,8 @@
                         {{-- Kolom Dinamis Berdasarkan Komponen Aktif --}}
                         @if($module->has_pre_test)
                             <th class="py-4 px-3 text-center min-w-[110px] bg-blue-50/50 text-blue-900">
-                                Pre-test
+                                <div>Pre-test</div>
+                                <div class="text-[9px] font-semibold normal-case text-blue-600 tracking-normal">(Diagnostik)*</div>
                             </th>
                         @endif
 
@@ -405,6 +406,12 @@
                     @endforelse
                 </tbody>
             </table>
+            @if($module->has_pre_test)
+                <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 text-xs text-slate-500 flex items-center gap-2">
+                    <span class="text-blue-600 font-bold">*Catatan Pedagogis:</span>
+                    <span>Pre-test merupakan asesmen diagnostik awal dan tidak diikutsertakan dalam pembobotan Nilai Akhir Sumatif.</span>
+                </div>
+            @endif
         </div>
     </div>
 </form>
@@ -551,6 +558,7 @@
                                         ${data.result && data.result.pre_test_score !== null ? data.result.pre_test_score + ' / 100 Poin' : '<span class="text-xs text-slate-400 font-normal italic">Belum Dikerjakan</span>'}
                                     </span>
                                 </div>
+                                <div class="text-[10px] text-slate-400 mt-1 italic">*Asesmen diagnostik awal, tidak memengaruhi Nilai Akhir Sumatif</div>
                             </div>
                             <input type="hidden" name="pre_test_score" value="${data.result && data.result.pre_test_score !== null ? data.result.pre_test_score : ''}">
                         </div>

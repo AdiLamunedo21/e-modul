@@ -57,9 +57,8 @@ class StudentResult extends Model
 
         $scores = [];
 
-        if ($targetModule->has_pre_test && $this->pre_test_score !== null) {
-            $scores[] = (int) $this->pre_test_score;
-        }
+        // Catatan: Pre-test sengaja tidak diikutsertakan dalam akumulasi nilai akhir,
+        // karena murni berfungsi sebagai asesmen diagnostik awal untuk memetakan pemahaman materi.
         if ($targetModule->has_video && $this->video_score !== null) {
             $scores[] = (int) $this->video_score;
         }

@@ -29,8 +29,16 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @if($module->has_pre_test)
-                        <tr>
-                            <td class="py-3 px-4 font-semibold text-slate-800">1. Kuis Awal (Pre-test)</td>
+                        <tr class="bg-blue-50/20">
+                            <td class="py-3 px-4 font-semibold text-slate-800">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span>1. Kuis Awal (Pre-test)</span>
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-blue-100 text-blue-800 border border-blue-200 uppercase tracking-wide">
+                                        Diagnostik Awal
+                                    </span>
+                                </div>
+                                <span class="text-[11px] text-slate-400 font-normal block mt-0.5">*Asesmen awal pemetaan materi (tidak dihitung ke Nilai Akhir)</span>
+                            </td>
                             <td class="py-3 px-4 text-center">
                                 @if($studentResult && $studentResult->pre_test_score !== null)
                                     <span class="text-xs font-bold text-emerald-600">✓ Selesai</span>
@@ -38,7 +46,7 @@
                                     <span class="text-xs text-slate-400">Belum</span>
                                 @endif
                             </td>
-                            <td class="py-3 px-4 text-center font-bold">
+                            <td class="py-3 px-4 text-center font-bold text-slate-700">
                                 {{ $studentResult?->pre_test_score !== null ? $studentResult->pre_test_score : '-' }}
                             </td>
                         </tr>
@@ -124,8 +132,13 @@
                         </tr>
                     @endif
 
-                    <tr class="bg-slate-50/80 font-black text-slate-900">
-                        <td class="py-4 px-4 text-sm uppercase">NILAI AKHIR SUMATIF</td>
+                    <tr class="bg-slate-50/90 font-black text-slate-900 border-t-2 border-slate-200">
+                        <td class="py-4 px-4 text-sm uppercase">
+                            <div class="flex items-center gap-2">
+                                <span>NILAI AKHIR SUMATIF</span>
+                            </div>
+                            <span class="text-[11px] text-slate-500 font-normal normal-case block mt-0.5">Rata-rata penilaian aktivitas belajar & evaluasi akhir (tanpa pembobotan Pre-test)</span>
+                        </td>
                         <td class="py-4 px-4 text-center">
                             <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold {{ ($studentResult?->summative_score ?? 0) >= 75 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' }}">
                                 {{ ($studentResult?->summative_score ?? 0) >= 75 ? 'TUNTAS' : 'BELUM TUNTAS' }}

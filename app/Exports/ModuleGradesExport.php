@@ -226,7 +226,9 @@ class ModuleGradesExport
                 if ($val !== null && $val !== '') {
                     $scoreInt = (int) $val;
                     $sheet->setCellValueExplicit("{$colLetter}{$currentRow}", $scoreInt, DataType::TYPE_NUMERIC);
-                    $componentScores[] = $scoreInt;
+                    if ($compKey !== 'pre_test') {
+                        $componentScores[] = $scoreInt;
+                    }
                 } else {
                     $sheet->setCellValue("{$colLetter}{$currentRow}", '-');
                 }
