@@ -13,9 +13,6 @@
                 <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold {{ $module->subject?->badgeClasses() ?? 'bg-blue-100 text-blue-800' }}">
                     <span>{{ $module->subject->code ?? 'MAPEL' }}</span>
                 </span>
-                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold bg-slate-100 text-slate-700">
-                    <span>{{ $module->schoolClass->full_name ?? 'Kelas' }}</span>
-                </span>
                 <span class="px-2.5 py-1 rounded-xl text-xs font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase tracking-wide">
                     ✓ Terbit & Aktif
                 </span>
@@ -60,14 +57,8 @@
                 </div>
             @endif
 
-            {{-- Switch View Mode & Back to Module List Buttons --}}
+            {{-- Switch View Mode Buttons --}}
             <div class="flex items-center gap-1.5 pl-2 border-l border-slate-200">
-                <a href="{{ $classSubjectModulesUrl }}"
-                   title="Kembali ke Daftar Modul untuk Kelas {{ $classNameText }}"
-                   class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 transition flex items-center gap-1.5 cursor-pointer shadow-2xs">
-                    <span>←</span>
-                    <span>Daftar Modul</span>
-                </a>
                 <button type="button"
                         @click="viewMode = 'overview'"
                         :class="viewMode === 'overview' ? 'bg-white text-indigo-700 shadow-sm border border-slate-200 font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'"
