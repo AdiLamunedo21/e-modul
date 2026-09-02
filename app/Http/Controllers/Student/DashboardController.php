@@ -100,6 +100,20 @@ class DashboardController extends Controller
                 }
             }
 
+            // 2. Materi & PPT
+            if ($module->materi_active) {
+                if ($result && $result->isComponentRead('materi')) {
+                    $completedTasks++;
+                } else {
+                    $pendingTasksList[] = [
+                        'type' => 'Materi',
+                        'title' => 'Pelajari Uraian Materi & PPT',
+                        'icon' => '📖',
+                        'badge' => 'Materi Inti',
+                    ];
+                }
+            }
+
             // 2. Ringkasan Video
             if ($module->video_active) {
                 $videoSummary = $module->videoSummaries->first();
@@ -684,6 +698,15 @@ class DashboardController extends Controller
                     $completedTasks++;
                 } else {
                     $pendingTasksList[] = ['type' => 'pre_test', 'label' => 'Pre-Test'];
+                }
+            }
+
+            // 2. Materi & PPT
+            if ($module->materi_active) {
+                if ($result && $result->isComponentRead('materi')) {
+                    $completedTasks++;
+                } else {
+                    $pendingTasksList[] = ['type' => 'materi', 'label' => 'Materi & PPT'];
                 }
             }
 

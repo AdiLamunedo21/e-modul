@@ -212,6 +212,9 @@ class ModuleController extends Controller
         if ($module->pre_test_active && $studentResult && $studentResult->pre_test_score !== null) {
             $completedTasks++;
         }
+        if ($module->materi_active && $studentResult && $studentResult->isComponentRead('materi')) {
+            $completedTasks++;
+        }
         if ($module->video_active && $videoSummary) {
             $completedTasks++;
         }
@@ -665,6 +668,20 @@ class ModuleController extends Controller
                         'title' => 'Kuis Awal (Pre-test)',
                         'icon'  => '📝',
                         'badge' => 'Kuis',
+                    ];
+                }
+            }
+
+            // 2. Materi & PPT
+            if ($module->materi_active) {
+                if ($result && $result->isComponentRead('materi')) {
+                    $completedTasks++;
+                } else {
+                    $pendingTasksList[] = [
+                        'type'  => 'Materi',
+                        'title' => 'Pelajari Uraian Materi & PPT',
+                        'icon'  => '📖',
+                        'badge' => 'Materi Inti',
                     ];
                 }
             }

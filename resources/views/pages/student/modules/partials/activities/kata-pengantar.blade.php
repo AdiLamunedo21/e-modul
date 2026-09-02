@@ -37,19 +37,29 @@
             <p class="text-[11px] text-slate-400">Guru Pengampu Mata Pelajaran</p>
         </div>
 
-        {{-- Tombol Tandai Selesai Dibaca & Lanjut ke Halaman Baru --}}
+        {{-- Tombol Tandai Selesai Dibaca --}}
         <div class="mt-8 pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
                 <p class="text-xs text-slate-500">
-                    💡 Klik tombol di samping setelah selesai membaca untuk membuka langkah pembelajaran berikutnya.
+                    💡 Klik tombol di samping setelah selesai membaca untuk membuka langkah berikutnya pada navigasi bawah.
                 </p>
             </div>
-            <button type="button"
-                    @click="markAsReadAndGoNext('kata_pengantar', nextPage ? nextPage.id : null)"
-                    class="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs sm:text-sm shadow-md shadow-indigo-600/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
-                <span>Tandai Selesai Dibaca & Lanjut</span>
-                <span>→</span>
-            </button>
+            <div>
+                <template x-if="!isCompleted('kata_pengantar')">
+                    <button type="button"
+                            @click="markAsRead('kata_pengantar')"
+                            class="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs sm:text-sm shadow-md shadow-indigo-600/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
+                        <span>✓</span>
+                        <span>Tandai Selesai Dibaca</span>
+                    </button>
+                </template>
+                <template x-if="isCompleted('kata_pengantar')">
+                    <div class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs sm:text-sm font-bold">
+                        <span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-black">✓</span>
+                        <span>Sudah Selesai Dibaca</span>
+                    </div>
+                </template>
+            </div>
         </div>
     </div>
 </div>

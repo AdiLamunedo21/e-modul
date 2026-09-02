@@ -58,16 +58,26 @@
         </div>
     </div>
 
-    {{-- Tombol Tandai Selesai Dibaca & Lanjut --}}
+    {{-- Tombol Tandai Selesai Dibaca --}}
     <div class="rounded-3xl bg-white border border-slate-200/90 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
         <p class="text-xs text-slate-500">
-            💡 Tandai sudah membaca petunjuk untuk membuka tahap Pendahuluan & Capaian Pembelajaran.
+            💡 Tandai sudah membaca petunjuk untuk membuka langkah berikutnya pada navigasi bawah.
         </p>
-        <button type="button"
-                @click="markAsReadAndGoNext('petunjuk_penggunaan', nextPage ? nextPage.id : null)"
-                class="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-black text-xs sm:text-sm shadow-md shadow-teal-600/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
-            <span>Tandai Selesai Dibaca & Lanjut</span>
-            <span>→</span>
-        </button>
+        <div>
+            <template x-if="!isCompleted('petunjuk_penggunaan')">
+                <button type="button"
+                        @click="markAsRead('petunjuk_penggunaan')"
+                        class="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-black text-xs sm:text-sm shadow-md shadow-teal-600/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
+                    <span>✓</span>
+                    <span>Tandai Selesai Dibaca</span>
+                </button>
+            </template>
+            <template x-if="isCompleted('petunjuk_penggunaan')">
+                <div class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs sm:text-sm font-bold">
+                    <span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-black">✓</span>
+                    <span>Sudah Selesai Dibaca</span>
+                </div>
+            </template>
+        </div>
     </div>
 </div>

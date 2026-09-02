@@ -105,6 +105,7 @@
 
     // Status pengerjaan backend
     $isPreTestDone = (bool) ($studentResult && $studentResult->pre_test_score !== null);
+    $isMateriDone = (bool) ($studentResult && $studentResult->isComponentRead('materi'));
     $isVideoDone = (bool) $videoSummary;
     $isEmbedDone = (bool) $embedSubmission;
     $isJobSheetDone = (bool) $jobSheetSubmission;
@@ -131,11 +132,45 @@
         pages: {{ json_encode($pagesList) }},
         serverStatus: {
             pre_test: {{ $isPreTestDone ? 'true' : 'false' }},
+            materi: {{ $isMateriDone ? 'true' : 'false' }},
             video: {{ $isVideoDone ? 'true' : 'false' }},
             embed: {{ $isEmbedDone ? 'true' : 'false' }},
             job_sheet: {{ $isJobSheetDone ? 'true' : 'false' }},
             lkpd: {{ $isLkpdDone ? 'true' : 'false' }},
             post_test: {{ $isPostTestDone ? 'true' : 'false' }}
+        },
+        
+        get totalActiveComps() {
+            return {{ $totalActive }};
+        },
+        get computedCompletedTasks() {
+            let count = 0;
+            @if($module->pre_test_active)
+                if (this.isCompleted('pre_test')) count++;
+            @endif
+            @if($module->materi_active)
+                if (this.isCompleted('materi')) count++;
+            @endif
+            @if($module->video_active)
+                if (this.isCompleted('video')) count++;
+            @endif
+            @if($module->embed_active)
+                if (this.isCompleted('embed')) count++;
+            @endif
+            @if($module->job_sheet_active)
+                if (this.isCompleted('job_sheet')) count++;
+            @endif
+            @if($module->lkpd_active)
+                if (this.isCompleted('lkpd')) count++;
+            @endif
+            @if($module->post_test_active)
+                if (this.isCompleted('post_test')) count++;
+            @endif
+            return count;
+        },
+        get computedProgressPercent() {
+            if (this.totalActiveComps <= 0) return 100;
+            return Math.min(100, Math.round((this.computedCompletedTasks / this.totalActiveComps) * 100));
         },
         
         get currentIndex() {
@@ -154,6 +189,7 @@
         // Memeriksa apakah suatu halaman sudah selesai dikerjakan / dibaca
         isCompleted(pageId) {
             if (pageId === 'pre_test') return this.serverStatus.pre_test;
+            if (pageId === 'materi') return this.serverStatus.materi || this.readComponents.includes('materi');
             if (pageId === 'video') return this.serverStatus.video;
             if (pageId === 'embed') return this.serverStatus.embed;
             if (pageId === 'job_sheet') return this.serverStatus.job_sheet;
@@ -210,6 +246,24 @@
             this.viewMode = 'learn';
             this.mobileDrawerOpen = false;
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        },
+
+        // Menandai halaman selesai dibaca tanpa berpindah halaman
+        markAsRead(currentCompId) {
+            if (!this.readComponents.includes(currentCompId)) {
+                this.readComponents.push(currentCompId);
+            }
+
+            // Kirim status baca ke server secara asinkron (AJAX)
+            fetch(this.markReadUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': this.csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ component: currentCompId })
+            }).catch(err => console.error('Error marking read:', err));
         },
 
         // Tombol lompat ke halaman baru setelah membaca: Menandai selesai dibaca dan buka langkah selanjutnya

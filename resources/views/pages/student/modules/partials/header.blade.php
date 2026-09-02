@@ -36,12 +36,16 @@
             <div class="min-w-[140px]">
                 <div class="flex justify-between items-center text-xs font-bold mb-1.5">
                     <span class="text-slate-500 uppercase tracking-wider text-[10px]">Aktivitas Selesai</span>
-                    <span class="{{ $progressPercent >= 100 ? 'text-emerald-600' : 'text-indigo-600' }}">
+                    <span :class="computedProgressPercent >= 100 ? 'text-emerald-600' : 'text-indigo-600'"
+                          class="{{ $progressPercent >= 100 ? 'text-emerald-600' : 'text-indigo-600' }}"
+                          x-text="computedCompletedTasks + '/' + totalActiveComps + ' (' + computedProgressPercent + '%)'">
                         {{ $completedTasks }}/{{ $totalActive }} ({{ $progressPercent }}%)
                     </span>
                 </div>
                 <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
                     <div class="h-2 rounded-full transition-all duration-500 {{ $progressPercent >= 100 ? 'bg-emerald-500' : 'bg-gradient-to-r from-indigo-500 to-teal-500' }}"
+                         :class="computedProgressPercent >= 100 ? 'bg-emerald-500' : 'bg-gradient-to-r from-indigo-500 to-teal-500'"
+                         :style="'width: ' + computedProgressPercent + '%'"
                          style="width: {{ $progressPercent }}%"></div>
                 </div>
             </div>
