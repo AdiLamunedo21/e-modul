@@ -220,11 +220,6 @@
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <button type="button" onclick="loadSampleQuestions()"
-                                class="px-3.5 py-2 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all flex items-center gap-1.5">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
-                            Muat Contoh Soal
-                        </button>
                         <button type="button" onclick="addNewQuestion()"
                                 class="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow shadow-blue-600/20 transition-all flex items-center gap-1.5">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
@@ -246,7 +241,7 @@
                                 <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/></svg>
                             </div>
                             <h3 class="text-sm font-bold text-slate-800">Belum ada soal tersimpan di database</h3>
-                            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Klik tombol <strong>"Tambah Soal Baru"</strong> atau gunakan <strong>"Muat Contoh Soal"</strong> untuk menyusun butir soal.</p>
+                            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Klik tombol <strong>"Tambah Soal Baru"</strong> untuk menyusun butir soal.</p>
                             <button type="button" onclick="addNewQuestion()" class="mt-4 px-4 py-2 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-all">
                                 + Tambah Soal Pertama
                             </button>
@@ -618,85 +613,7 @@
         }
     }
 
-    // Load Contoh Soal
-    function loadSampleQuestions() {
-        if (!confirm('Muat contoh butir soal pre-test Sistem Basis Data? Soal saat ini tidak akan dihapus.')) return;
 
-        const samples = [
-            {
-                question_text: 'Perangkat lunak yang digunakan untuk mengelola, membuat, dan memanipulasi database disebut...',
-                options: {
-                    A: 'DBMS (Database Management System)',
-                    B: 'Operating System (OS)',
-                    C: 'Spreadsheet Application',
-                    D: 'Web Browser',
-                    E: 'Compiler'
-                },
-                correct_answer: 'A',
-                score_weight: 20,
-                time_limit_seconds: 20,
-                explanation: 'DBMS (Database Management System) adalah software pengelola basis data seperti MySQL, PostgreSQL, dan Oracle.'
-            },
-            {
-                question_text: 'Perintah SQL yang digunakan untuk mengambil dan menampilkan data dari tabel adalah...',
-                options: {
-                    A: 'INSERT INTO',
-                    B: 'SELECT',
-                    C: 'UPDATE',
-                    D: 'DROP TABLE',
-                    E: 'ALTER TABLE'
-                },
-                correct_answer: 'B',
-                score_weight: 20,
-                time_limit_seconds: 25,
-                explanation: 'Perintah SELECT adalah bagian dari DML (Data Manipulation Language) yang digunakan untuk query pengambilan data.'
-            },
-            {
-                question_text: 'Kunci (key) dalam sebuah tabel yang nilainya harus unik dan tidak boleh bernilai NULL disebut...',
-                options: {
-                    A: 'Foreign Key',
-                    B: 'Primary Key',
-                    C: 'Candidate Key',
-                    D: 'Composite Key',
-                    E: 'Alternate Key'
-                },
-                correct_answer: 'B',
-                score_weight: 20,
-                time_limit_seconds: 15,
-                explanation: 'Primary Key secara mutlak harus unik pada setiap baris dan tidak boleh kosong (NOT NULL).'
-            },
-            {
-                question_text: 'Kelompok perintah SQL yang digunakan untuk mendefinisikan struktur database (seperti CREATE, ALTER, DROP) tergolong ke dalam...',
-                options: {
-                    A: 'DML (Data Manipulation Language)',
-                    B: 'DDL (Data Definition Language)',
-                    C: 'DCL (Data Control Language)',
-                    D: 'TCL (Transaction Control Language)',
-                    E: 'DQL (Data Query Language)'
-                },
-                correct_answer: 'B',
-                score_weight: 20,
-                time_limit_seconds: 30,
-                explanation: 'DDL (Data Definition Language) mengurus struktur skema database.'
-            },
-            {
-                question_text: 'Proses pengelompokan atribut-atribut data untuk mencegah duplikasi (redundansi) dan anomali disebut...',
-                options: {
-                    A: 'Normalisasi',
-                    B: 'Denormalisasi',
-                    C: 'Indexing',
-                    D: 'Query Optimization',
-                    E: 'Backup & Restore'
-                },
-                correct_answer: 'A',
-                score_weight: 20,
-                time_limit_seconds: 20,
-                explanation: 'Normalisasi adalah teknik perancangan basis data untuk mengeliminasi redundansi data.'
-            }
-        ];
-
-        samples.forEach(s => addNewQuestion(s));
-    }
 
     // Toggle switch status handler
     function togglePreTestStatus(isChecked) {

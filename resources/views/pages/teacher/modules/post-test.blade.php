@@ -216,11 +216,6 @@
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <button type="button" onclick="loadSamplePostTestQuestions()"
-                                class="px-3.5 py-2 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all flex items-center gap-1.5">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
-                            Muat Contoh
-                        </button>
                         <button type="button" onclick="addNewQuestion()"
                                 class="px-4 py-2 text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-xl shadow shadow-teal-600/20 transition-all flex items-center gap-1.5">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
@@ -606,19 +601,6 @@
         }
     }
 
-    function loadSamplePostTestQuestions() {
-        if (!confirm('Muat 5 contoh soal?')) return;
-
-        const samples = [
-            { question_text: 'Perintah SQL untuk menggabungkan dua tabel?', options: { A: 'JOIN', B: 'UNION', C: 'SELECT', D: 'GROUP', E: 'HAVING' }, correct_answer: 'A', score_weight: 20, explanation: 'JOIN digunakan untuk menggabungkan data.' },
-            { question_text: 'Bentuk Normal 3NF?', options: { A: '1NF', B: '2NF', C: '3NF', D: '4NF', E: '5NF' }, correct_answer: 'C', score_weight: 20, explanation: '3NF adalah bentuk normal ketiga.' },
-            { question_text: 'Perintah untuk membatalkan transaksi?', options: { A: 'COMMIT', B: 'ROLLBACK', C: 'SAVE', D: 'TRUNCATE', E: 'DELETE' }, correct_answer: 'B', score_weight: 20, explanation: 'ROLLBACK membatalkan perubahan.' },
-            { question_text: 'Struktur data untuk mempercepat pencarian?', options: { A: 'Trigger', B: 'Index', C: 'Procedure', D: 'View', E: 'Cursor' }, correct_answer: 'B', score_weight: 20, explanation: 'Index mempercepat lookup.' },
-            { question_text: 'Blok SQL otomatis?', options: { A: 'Trigger', B: 'Transaction', C: 'Constraint', D: 'Foreign Key', E: 'Sequence' }, correct_answer: 'A', score_weight: 20, explanation: 'Trigger otomatis tereksekusi.' }
-        ];
-
-        samples.forEach(s => addNewQuestion(s));
-    }
 
     function togglePostTestStatus(isChecked) {
         const track = document.getElementById('post-test-toggle-track');
