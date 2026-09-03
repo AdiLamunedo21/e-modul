@@ -216,7 +216,7 @@
                             </span>
                             <a href="{{ route('student.modules.show', $recMod['id']) }}"
                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition">
-                                <span>{{ $recMod['progress_status'] === 'completed' ? 'Review Modul' : ($recMod['progress_status'] === 'in_progress' ? 'Lanjutkan Belajar' : 'Mulai Belajar') }}</span>
+                                <span>{{ $recMod['progress_status'] === 'completed' ? 'Mulai Belajar' : ($recMod['progress_status'] === 'in_progress' ? 'Lanjutkan Belajar' : 'Mulai Belajar') }}</span>
                                 <span>→</span>
                             </a>
                         </div>
@@ -375,7 +375,7 @@
                                : ($mod['progress_status'] === 'in_progress'
                                    ? 'bg-amber-600 hover:bg-amber-700 text-white'
                                    : 'bg-emerald-600 hover:bg-emerald-700 text-white') }}">
-                            <span>{{ $mod['progress_status'] === 'completed' ? 'Review Modul' : ($mod['progress_status'] === 'in_progress' ? 'Lanjutkan Belajar' : 'Mulai Belajar') }}</span>
+                            <span>{{ $mod['progress_status'] === 'completed' ? 'Mulai Belajar' : ($mod['progress_status'] === 'in_progress' ? 'Lanjutkan Belajar' : 'Mulai Belajar') }}</span>
                             <span>→</span>
                         </a>
                     </div>
