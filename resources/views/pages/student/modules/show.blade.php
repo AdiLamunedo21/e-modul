@@ -139,6 +139,42 @@
             lkpd: {{ $isLkpdDone ? 'true' : 'false' }},
             post_test: {{ $isPostTestDone ? 'true' : 'false' }}
         },
+
+        showPreRetakeForm: false,
+        showPreHistory: false,
+        showPostRetakeForm: false,
+        showPostHistory: false,
+
+        get isTakingPreTest() {
+            @if($module->has_pre_test && $module->preTest)
+                return !{{ $isPreTestDone ? 'true' : 'false' }} || this.showPreRetakeForm;
+            @else
+                return false;
+            @endif
+        },
+        get isTakingPostTest() {
+            @if($module->has_post_test && $module->postTest)
+                return !{{ $isPostTestDone ? 'true' : 'false' }} || this.showPostRetakeForm;
+            @else
+                return false;
+            @endif
+        },
+        get isTakingTest() {
+            if (this.viewMode !== 'learn') return false;
+            if (this.activePage === 'pre_test') return this.isTakingPreTest;
+            if (this.activePage === 'post_test') return this.isTakingPostTest;
+            return false;
+        },
+        init() {
+            this.$watch('isTakingTest', val => {
+                window.dispatchEvent(new CustomEvent('set-sidebar-open', { detail: !val && window.innerWidth >= 1024 }));
+            });
+            this.$nextTick(() => {
+                if (this.isTakingTest) {
+                    window.dispatchEvent(new CustomEvent('set-sidebar-open', { detail: false }));
+                }
+            });
+        },
         
         get totalActiveComps() {
             return {{ $totalActive }};
@@ -332,7 +368,9 @@
      }">
 
     {{-- ═══ 1. STICKY TOP HEADER & BREADCRUMB ═══ --}}
-    @include('pages.student.modules.partials.header')
+    <div x-show="!isTakingTest">
+        @include('pages.student.modules.partials.header')
+    </div>
 
     {{-- ═══ VIEW 1: TAMPILAN AWAL DETAIL MODUL SISWA (FULL WIDTH CARD) ═══ --}}
     @include('pages.student.modules.partials.overview')
@@ -383,7 +421,9 @@
         @include('pages.student.modules.partials.activities.rekap-nilai')
 
         {{-- 3. Bottom Sequential Navigation Bar --}}
-        @include('pages.student.modules.partials.bottom-nav')
+        <div x-show="!isTakingTest">
+            @include('pages.student.modules.partials.bottom-nav')
+        </div>
 
     </div>
 

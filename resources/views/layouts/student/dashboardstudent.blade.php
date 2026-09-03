@@ -44,6 +44,7 @@
         leaveClassModalOpen: false,
         leaveClassTarget: { id: null, name: '' }
     }"
+    @set-sidebar-open.window="sidebarOpen = $event.detail"
 >
     {{--
         BACKDROP — hanya di mobile (lg:hidden), mulai dari top-16 agar header tetap bisa diakses.

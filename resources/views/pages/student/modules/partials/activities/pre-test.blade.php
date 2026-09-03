@@ -10,10 +10,10 @@
     $hasRetake = $latestPreRetakeScore !== null;
 @endphp
 
-<div x-show="activePage === 'pre_test'" x-cloak class="w-full space-y-6 text-left"
-     x-data="{ showRetakeForm: false, showHistory: false }">
+<div x-show="activePage === 'pre_test'" x-cloak class="w-full space-y-6 text-left">
     <div class="rounded-3xl bg-white border border-teal-200/90 shadow-sm overflow-hidden" id="section-pre-test">
-        <div class="p-6 sm:p-7 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        {{-- Sembunyikan Header Informasi ini saat sedang mengerjakan soal agar fokus --}}
+        <div x-show="!isTakingPreTest" class="p-6 sm:p-7 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="flex items-center gap-3.5">
                 <span class="w-12 h-12 rounded-2xl bg-teal-100 text-teal-700 flex items-center justify-center text-2xl font-bold shrink-0">⚡</span>
                 <div>
@@ -42,10 +42,10 @@
             @endif
         </div>
 
-        <div class="p-6 sm:p-8">
+        <div :class="isTakingPreTest ? 'p-3 sm:p-5' : 'p-6 sm:p-8'">
             @if($initialPreScore !== null)
                 {{-- ═══ 1. CARD HASIL & PERBANDINGAN NILAI (TAMPIL JIKA TIDAK SEDANG RETAKE) ═══ --}}
-                <div x-show="!showRetakeForm" class="space-y-6">
+                <div x-show="!showPreRetakeForm" class="space-y-6">
                     <div class="rounded-3xl bg-gradient-to-br from-teal-50/60 via-emerald-50/40 to-slate-50 border border-teal-200/90 p-6 sm:p-8 space-y-6">
                         
                         {{-- Header Status --}}
@@ -137,12 +137,12 @@
                         @if(count($preTestAttempts) > 1)
                             <div class="pt-2">
                                 <button type="button"
-                                        @click="showHistory = !showHistory"
+                                        @click="showPreHistory = !showPreHistory"
                                         class="text-xs font-bold text-teal-700 hover:text-teal-900 inline-flex items-center gap-1.5 cursor-pointer">
-                                    <span x-text="showHistory ? '▼ Sembunyikan Riwayat Percobaan' : '▶ Tampilkan Riwayat Percobaan (' + {{ count($preTestAttempts) }} + 'x pengerjaan)'"></span>
+                                    <span x-text="showPreHistory ? '▼ Sembunyikan Riwayat Percobaan' : '▶ Tampilkan Riwayat Percobaan (' + {{ count($preTestAttempts) }} + 'x pengerjaan)'"></span>
                                 </button>
                                 
-                                <div x-show="showHistory" x-cloak class="mt-3 rounded-2xl bg-white border border-slate-200 overflow-hidden">
+                                <div x-show="showPreHistory" x-cloak class="mt-3 rounded-2xl bg-white border border-slate-200 overflow-hidden">
                                     <table class="w-full text-xs text-left">
                                         <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
                                             <tr>
@@ -184,7 +184,7 @@
                         {{-- Action Buttons: Latihan Ulang & Lanjut Halaman --}}
                         <div class="pt-4 border-t border-teal-100 flex flex-col sm:flex-row items-center justify-between gap-3">
                             <button type="button"
-                                    @click="showRetakeForm = true"
+                                    @click="showPreRetakeForm = true"
                                     class="w-full sm:w-auto px-6 py-3 rounded-2xl bg-white hover:bg-teal-50 text-teal-700 border border-teal-300 font-bold text-xs sm:text-sm shadow-2xs transition flex items-center justify-center gap-2 cursor-pointer">
                                 <span>🔄</span>
                                 <span>Kerjakan Ulang Soal (Latihan Mandiri)</span>
@@ -199,25 +199,8 @@
                 </div>
             @endif
 
-            {{-- ═══ 2. FORM PENGERJAAN SOAL (TAMPIL JIKA BELUM PERNAH ATAU SEDANG RETAKE) ═══ --}}
-            <div x-show="showRetakeForm || {{ $initialPreScore === null ? 'true' : 'false' }}">
-                @if($initialPreScore !== null)
-                    <div class="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-start justify-between gap-4">
-                        <div class="flex items-start gap-3">
-                            <span class="text-xl">💡</span>
-                            <div class="text-xs text-amber-900 leading-relaxed">
-                                <strong class="font-bold block text-sm mb-0.5">Mode Latihan Ulang Soal Pre-Test</strong>
-                                Anda sedang mengerjakan ulang soal sebagai latihan penguatan konsep. 
-                                <strong>Nilai awal resmi Anda ({{ $initialPreScore }}/100) tetap terkunci</strong> dan tidak akan berubah. Skor baru akan dicatat sebagai perbandingan latihan.
-                            </div>
-                        </div>
-                        <button type="button"
-                                @click="showRetakeForm = false"
-                                class="px-3 py-1.5 rounded-xl bg-white text-slate-700 hover:bg-slate-100 border border-amber-300 text-xs font-bold shrink-0 transition cursor-pointer">
-                            ✕ Batal
-                        </button>
-                    </div>
-                @endif
+            {{-- ═══ 2. FORM PENGERJAAN SOAL (TAMPIL SAAT MENGERJAKAN SOAL) ═══ --}}
+            <div x-show="isTakingPreTest">
 
                 @if($module->preTest->questions->isEmpty())
                     <div class="py-12 text-center bg-slate-50 rounded-3xl border border-dashed border-slate-300 space-y-2">
@@ -437,14 +420,29 @@
                                         <span>🔒</span>
                                         <span>Anti-Copy Aktif</span>
                                     </span>
+                                    @if($initialPreScore !== null)
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-100 border border-amber-300 text-[11px] font-bold text-amber-900 shadow-2xs">
+                                            <span>🔄</span>
+                                            <span>Mode Latihan</span>
+                                        </span>
+                                    @endif
                                 </div>
 
-                                <div class="flex items-center gap-2 shrink-0">
-                                    <span class="text-xs font-bold text-slate-500">Kemajuan Menjawab:</span>
-                                    <span class="px-2.5 py-1 rounded-xl text-xs font-black transition-colors"
-                                          :class="answeredCount === totalQuestions ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-teal-100/80 text-teal-900 border border-teal-200'">
-                                        <span x-text="answeredCount"></span> / <span x-text="totalQuestions"></span> Terjawab
-                                    </span>
+                                <div class="flex items-center gap-3 shrink-0">
+                                    @if($initialPreScore !== null)
+                                        <button type="button"
+                                                @click="showPreRetakeForm = false"
+                                                class="text-xs font-bold text-slate-500 hover:text-rose-600 underline cursor-pointer transition">
+                                            ✕ Batalkan Latihan
+                                        </button>
+                                    @endif
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-bold text-slate-500">Kemajuan Menjawab:</span>
+                                        <span class="px-2.5 py-1 rounded-xl text-xs font-black transition-colors"
+                                              :class="answeredCount === totalQuestions ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-teal-100/80 text-teal-900 border border-teal-200'">
+                                            <span x-text="answeredCount"></span> / <span x-text="totalQuestions"></span> Terjawab
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -635,7 +633,7 @@
                                 <div class="w-full sm:w-auto flex items-center gap-2 justify-end">
                                     @if($initialPreScore !== null)
                                         <button type="button"
-                                                @click="showRetakeForm = false"
+                                                @click="showPreRetakeForm = false"
                                                 class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs transition cursor-pointer">
                                             Batal
                                         </button>
