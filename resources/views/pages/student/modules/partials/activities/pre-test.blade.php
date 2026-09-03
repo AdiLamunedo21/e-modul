@@ -42,7 +42,7 @@
             @endif
         </div>
 
-        <div :class="isTakingPreTest ? 'p-3 sm:p-5' : 'p-6 sm:p-8'">
+        <div :class="isTakingPreTest ? 'p-2 sm:p-6' : 'p-6 sm:p-8'">
             @if($initialPreScore !== null)
                 {{-- ═══ 1. CARD HASIL & PERBANDINGAN NILAI (TAMPIL JIKA TIDAK SEDANG RETAKE) ═══ --}}
                 <div x-show="!showPreRetakeForm" class="space-y-6">
@@ -403,7 +403,7 @@
                         </div>
 
                         {{-- Top Examination Status & Progress Bar --}}
-                        <div class="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-teal-50/80 to-slate-50 border border-teal-200/80 shadow-2xs space-y-3">
+                        <div class="p-3 sm:p-4 rounded-2xl bg-teal-50/60 border border-teal-200/60 space-y-3">
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                 <div class="flex items-center gap-2.5 flex-wrap">
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-teal-600 text-white text-xs font-black tracking-wide uppercase">
@@ -459,47 +459,6 @@
                             </div>
                         </div>
 
-                        {{-- Indikator Kemajuan Nomor Soal (Strict Sequential Stepper) --}}
-                        <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-2.5">
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                                <span class="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                                    <span>🧭</span>
-                                    <span>Indikator Alur Soal (Sekuensial):</span>
-                                </span>
-                                <div class="flex items-center gap-3 text-[11px] text-slate-500 flex-wrap">
-                                    <span class="inline-flex items-center gap-1">
-                                        <span class="w-2.5 h-2.5 rounded bg-emerald-600"></span>
-                                        <span>Selesai & Terkunci</span>
-                                    </span>
-                                    <span class="inline-flex items-center gap-1">
-                                        <span class="w-2.5 h-2.5 rounded bg-teal-500 animate-pulse"></span>
-                                        <span>Aktif Dikerjakan</span>
-                                    </span>
-                                    <span class="inline-flex items-center gap-1">
-                                        <span class="w-2.5 h-2.5 rounded bg-slate-200 border border-slate-300"></span>
-                                        <span>Belum Terbuka</span>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="flex flex-wrap gap-2 pt-1">
-                                @foreach($module->preTest->questions as $idx => $q)
-                                    <div :class="{
-                                             'ring-2 ring-teal-500 ring-offset-2 border-teal-600 bg-teal-600 text-white font-black shadow-sm scale-105': currentQuestion === {{ $idx }},
-                                             'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold': {{ $idx }} < currentQuestion && !expiredQuestions[{{ $idx }}],
-                                             'bg-rose-100 text-rose-800 border-rose-300 font-bold': {{ $idx }} < currentQuestion && expiredQuestions[{{ $idx }}],
-                                             'bg-slate-100 text-slate-400 border-slate-200 opacity-60': {{ $idx }} > currentQuestion
-                                         }"
-                                         class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border text-xs font-bold transition-all duration-150 flex items-center justify-center select-none relative"
-                                         :title="{{ $idx }} === currentQuestion ? 'Soal ini sedang aktif dikerjakan' : ({{ $idx }} < currentQuestion ? 'Soal nomor ini telah selesai dan terkunci' : 'Soal nomor ini belum terbuka')">
-                                        <span>{{ $idx + 1 }}</span>
-                                        <span x-show="{{ $idx }} < currentQuestion && !expiredQuestions[{{ $idx }}]" class="absolute -top-1 -right-1 text-[9px]">✓</span>
-                                        <span x-show="{{ $idx }} < currentQuestion && expiredQuestions[{{ $idx }}]" class="absolute -top-1 -right-1 text-[9px]">⏰</span>
-                                        <span x-show="{{ $idx }} > currentQuestion" class="absolute -top-1 -right-1 text-[8px]">🔒</span>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
 
                         {{-- Form Utama dengan Kontainer Soal Satu per Satu --}}
                         <form action="{{ route('student.modules.pre-test.submit', $module) }}" method="POST" class="space-y-6">
@@ -511,7 +470,7 @@
                                      x-transition:enter-start="opacity-0 translate-y-1"
                                      x-transition:enter-end="opacity-100 translate-y-0"
                                      x-cloak
-                                     class="p-6 sm:p-7 rounded-3xl bg-slate-50 border border-slate-200/90 shadow-2xs space-y-6">
+                                     class="p-3 sm:p-6 rounded-2xl sm:rounded-3xl bg-slate-50/60 border-0 sm:border sm:border-slate-200/70 space-y-5 sm:space-y-6">
                                     
                                     {{-- Header Butir Soal --}}
                                     <div class="flex flex-wrap items-center justify-between pb-3 border-b border-slate-200/80 gap-2 sm:gap-3">
@@ -570,8 +529,8 @@
                                         </div>
                                     </template>
 
-                                    {{-- Teks Soal (Dilindungi Anti-Copy & Anti-Drag) --}}
-                                    <div class="p-5 sm:p-6 rounded-2xl bg-white border border-slate-200/80 shadow-2xs">
+                                    {{-- Teks Soal (Tanpa border dalam agar teks mobile leluasa) --}}
+                                    <div class="py-1 px-1 sm:px-2">
                                         <p class="text-sm sm:text-base font-bold text-slate-900 leading-relaxed select-none pointer-events-none"
                                            style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">
                                             {{ $q->question_text }}
@@ -593,7 +552,7 @@
                                                                     ? 'border-teal-500 bg-teal-50/70 ring-2 ring-teal-500/25 shadow-xs'
                                                                     : 'border-slate-200 bg-white hover:border-teal-300 hover:bg-slate-50/80'
                                                            ]"
-                                                           class="flex items-center gap-3.5 p-3.5 sm:p-4 rounded-2xl border-2 cursor-pointer transition-all duration-150 select-none group">
+                                                           class="flex items-center gap-2.5 sm:gap-3.5 p-3 sm:p-4 rounded-2xl border cursor-pointer transition-all duration-150 select-none group">
                                                         <input type="radio"
                                                                name="answers[{{ $q->id }}]"
                                                                value="{{ $optKey }}"
