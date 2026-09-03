@@ -42,7 +42,6 @@ class PreTestController extends Controller
 
         $preTest = $module->preTest()->firstOrCreate([], [
             'title'               => 'Pre-test Pembuka',
-            'duration_minutes'    => 15,
             'kktp'                => 75,
             'instructions'        => 'Kerjakan soal pre-test berikut secara mandiri untuk mengukur pemahaman awal Anda sebelum memulai materi.',
             'randomize_questions' => false,
@@ -63,7 +62,6 @@ class PreTestController extends Controller
 
         $preTest = $module->preTest()->with('questions')->firstOrCreate([], [
             'title'               => 'Pre-test Pembuka',
-            'duration_minutes'    => 15,
             'kktp'                => 75,
             'instructions'        => '',
             'randomize_questions' => false,
@@ -83,7 +81,6 @@ class PreTestController extends Controller
 
         $rules = [
             'title'               => ['nullable', 'string', 'max:255'],
-            'duration_minutes'    => ['nullable', 'integer', 'min:1', 'max:300'],
             'kktp'                => ['nullable', 'integer', 'min:0', 'max:100'],
             'instructions'        => ['nullable', 'string'],
             'randomize_questions' => ['nullable'],
@@ -91,13 +88,14 @@ class PreTestController extends Controller
 
         // Validasi butir soal jika pre-test diaktifkan
         if ($hasPreTest) {
-            $rules['questions']                    = ['required', 'array', 'min:1'];
-            $rules['questions.*.question_text']    = ['required', 'string', 'min:3'];
-            $rules['questions.*.correct_answer']   = ['required', 'string', 'in:A,B,C,D,E'];
-            $rules['questions.*.options.A']        = ['required', 'string'];
-            $rules['questions.*.options.B']        = ['required', 'string'];
-            $rules['questions.*.score_weight']     = ['nullable', 'integer', 'min:1'];
-            $rules['questions.*.explanation']      = ['nullable', 'string'];
+            $rules['questions']                         = ['required', 'array', 'min:1'];
+            $rules['questions.*.question_text']         = ['required', 'string', 'min:3'];
+            $rules['questions.*.correct_answer']        = ['required', 'string', 'in:A,B,C,D,E'];
+            $rules['questions.*.options.A']             = ['required', 'string'];
+            $rules['questions.*.options.B']             = ['required', 'string'];
+            $rules['questions.*.score_weight']          = ['nullable', 'integer', 'min:1'];
+            $rules['questions.*.time_limit_seconds']     = ['nullable', 'integer', 'min:0', 'max:3600'];
+            $rules['questions.*.explanation']           = ['nullable', 'string'];
         }
 
         $request->validate($rules, [
@@ -117,7 +115,6 @@ class PreTestController extends Controller
             $preTest = $module->preTest()->firstOrCreate([]);
             $preTest->update([
                 'title'               => $request->input('title', 'Pre-test Pembuka'),
-                'duration_minutes'    => (int) $request->input('duration_minutes', 15),
                 'kktp'                => (int) $request->input('kktp', 75),
                 'instructions'        => $request->input('instructions', ''),
                 'randomize_questions' => $request->boolean('randomize_questions'),
@@ -143,13 +140,16 @@ class PreTestController extends Controller
                         }
                     }
 
+                    $qTimeLimit = !empty($q['time_limit_seconds']) ? (int) $q['time_limit_seconds'] : null;
+
                     $preTest->questions()->create([
-                        'question_text'  => $qText,
-                        'options'        => $options,
-                        'correct_answer' => strtoupper($q['correct_answer'] ?? $q['kunci_jawaban'] ?? 'A'),
-                        'score_weight'   => !empty($q['score_weight'] ?? $q['bobot'] ?? null) ? (int) ($q['score_weight'] ?? $q['bobot']) : 10,
-                        'explanation'    => trim($q['explanation'] ?? $q['pembahasan'] ?? ''),
-                        'order_num'      => $order++,
+                        'question_text'      => $qText,
+                        'options'            => $options,
+                        'correct_answer'     => strtoupper($q['correct_answer'] ?? $q['kunci_jawaban'] ?? 'A'),
+                        'score_weight'       => !empty($q['score_weight'] ?? $q['bobot'] ?? null) ? (int) ($q['score_weight'] ?? $q['bobot']) : 10,
+                        'time_limit_seconds' => ($qTimeLimit > 0) ? $qTimeLimit : null,
+                        'explanation'        => trim($q['explanation'] ?? $q['pembahasan'] ?? ''),
+                        'order_num'          => $order++,
                     ]);
                 }
             }

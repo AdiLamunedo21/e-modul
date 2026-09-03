@@ -20,14 +20,29 @@ class StudentResult extends Model
         'test_attempts'    => 'array',
     ];
 
-    /** Mendapatkan daftar riwayat pengerjaan tes ('pre_test' atau 'post_test') */
+    /** Batas maksimal riwayat pengerjaan yang disimpan di database */
+    public const MAX_STORED_ATTEMPTS = 3;
+
+    /** Mendapatkan daftar riwayat pengerjaan tes ('pre_test' atau 'post_test') dibatasi maksimal 3 */
     public function getTestAttempts(string $testType): array
     {
         $attempts = $this->test_attempts ?? [];
-        return $attempts[$testType] ?? [];
+        $list = $attempts[$testType] ?? [];
+
+        if (count($list) > self::MAX_STORED_ATTEMPTS) {
+            $hasInitial = !empty($list[0]['is_initial']);
+            if ($hasInitial) {
+                $initialAttempt = $list[0];
+                $recentAttempts = array_slice($list, -(self::MAX_STORED_ATTEMPTS - 1));
+                return array_values(array_merge([$initialAttempt], $recentAttempts));
+            }
+            return array_values(array_slice($list, -self::MAX_STORED_ATTEMPTS));
+        }
+
+        return $list;
     }
 
-    /** Jumlah total percobaan pengerjaan tes */
+    /** Jumlah total percobaan pengerjaan tes (maksimal 3) */
     public function getTestAttemptCount(string $testType): int
     {
         $attempts = $this->getTestAttempts($testType);
@@ -49,7 +64,7 @@ class StudentResult extends Model
         return null;
     }
 
-    /** Mencatat percobaan pengerjaan tes baru dengan mengunci nilai awal tes */
+    /** Mencatat percobaan pengerjaan tes baru dengan mengunci nilai awal tes dan membatasi maksimal 3 riwayat */
     public function recordTestAttempt(string $testType, int $score, int $correctCount, int $totalQuestions): array
     {
         $attemptsData = $this->test_attempts ?? [];
@@ -92,6 +107,19 @@ class StudentResult extends Model
             'timestamp'     => now()->toIso8601String(),
             'is_initial'    => $isFirst,
         ];
+
+        // Batasi riwayat maksimal 3 pengerjaan agar hemat database.
+        // Pertahankan percobaan awal resmi (is_initial) dan 2 percobaan terbaru.
+        if (count($typeAttempts) > self::MAX_STORED_ATTEMPTS) {
+            $hasInitial = !empty($typeAttempts[0]['is_initial']);
+            if ($hasInitial) {
+                $initialAttempt = $typeAttempts[0];
+                $recentAttempts = array_slice($typeAttempts, -(self::MAX_STORED_ATTEMPTS - 1));
+                $typeAttempts = array_values(array_merge([$initialAttempt], $recentAttempts));
+            } else {
+                $typeAttempts = array_values(array_slice($typeAttempts, -self::MAX_STORED_ATTEMPTS));
+            }
+        }
 
         $attemptsData[$testType] = $typeAttempts;
         $this->test_attempts = $attemptsData;

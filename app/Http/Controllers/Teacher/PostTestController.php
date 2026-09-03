@@ -42,7 +42,6 @@ class PostTestController extends Controller
 
         $postTest = $module->postTest()->firstOrCreate([], [
             'title'               => 'Post-test: Evaluasi Pemahaman Materi',
-            'duration_minutes'    => 20,
             'kktp'                => 75,
             'instructions'        => 'Kerjakan soal post-test berikut secara mandiri dan teliti untuk mengukur penguasaan materi setelah menyelesaikan seluruh tahapan pembelajaran.',
             'randomize_questions' => false,
@@ -63,7 +62,6 @@ class PostTestController extends Controller
 
         $postTest = $module->postTest()->with('questions')->firstOrCreate([], [
             'title'               => 'Post-test: Evaluasi Pemahaman Materi',
-            'duration_minutes'    => 20,
             'kktp'                => 75,
             'instructions'        => '',
             'randomize_questions' => false,
@@ -83,7 +81,6 @@ class PostTestController extends Controller
 
         $rules = [
             'title'               => ['nullable', 'string', 'max:255'],
-            'duration_minutes'    => ['nullable', 'integer', 'min:1', 'max:300'],
             'kktp'                => ['nullable', 'integer', 'min:0', 'max:100'],
             'instructions'        => ['nullable', 'string'],
             'randomize_questions' => ['nullable'],
@@ -91,13 +88,14 @@ class PostTestController extends Controller
 
         // Validasi butir soal jika post-test diaktifkan
         if ($hasPostTest) {
-            $rules['questions']                    = ['required', 'array', 'min:1'];
-            $rules['questions.*.question_text']    = ['required', 'string', 'min:3'];
-            $rules['questions.*.correct_answer']   = ['required', 'string', 'in:A,B,C,D,E'];
-            $rules['questions.*.options.A']        = ['required', 'string'];
-            $rules['questions.*.options.B']        = ['required', 'string'];
-            $rules['questions.*.score_weight']     = ['nullable', 'integer', 'min:1'];
-            $rules['questions.*.explanation']      = ['nullable', 'string'];
+            $rules['questions']                         = ['required', 'array', 'min:1'];
+            $rules['questions.*.question_text']         = ['required', 'string', 'min:3'];
+            $rules['questions.*.correct_answer']        = ['required', 'string', 'in:A,B,C,D,E'];
+            $rules['questions.*.options.A']             = ['required', 'string'];
+            $rules['questions.*.options.B']             = ['required', 'string'];
+            $rules['questions.*.score_weight']          = ['nullable', 'integer', 'min:1'];
+            $rules['questions.*.time_limit_seconds']     = ['nullable', 'integer', 'min:0', 'max:3600'];
+            $rules['questions.*.explanation']           = ['nullable', 'string'];
         }
 
         $request->validate($rules, [
@@ -117,7 +115,6 @@ class PostTestController extends Controller
             $postTest = $module->postTest()->firstOrCreate([]);
             $postTest->update([
                 'title'               => $request->input('title', 'Post-test: Evaluasi Pemahaman Materi'),
-                'duration_minutes'    => (int) $request->input('duration_minutes', 20),
                 'kktp'                => (int) $request->input('kktp', 75),
                 'instructions'        => $request->input('instructions', ''),
                 'randomize_questions' => $request->boolean('randomize_questions'),
@@ -143,13 +140,16 @@ class PostTestController extends Controller
                         }
                     }
 
+                    $qTimeLimit = !empty($q['time_limit_seconds']) ? (int) $q['time_limit_seconds'] : null;
+
                     $postTest->questions()->create([
-                        'question_text'  => $qText,
-                        'options'        => $options,
-                        'correct_answer' => strtoupper($q['correct_answer'] ?? $q['kunci_jawaban'] ?? 'A'),
-                        'score_weight'   => !empty($q['score_weight'] ?? $q['bobot'] ?? null) ? (int) ($q['score_weight'] ?? $q['bobot']) : 10,
-                        'explanation'    => trim($q['explanation'] ?? $q['pembahasan'] ?? ''),
-                        'order_num'      => $order++,
+                        'question_text'      => $qText,
+                        'options'            => $options,
+                        'correct_answer'     => strtoupper($q['correct_answer'] ?? $q['kunci_jawaban'] ?? 'A'),
+                        'score_weight'       => !empty($q['score_weight'] ?? $q['bobot'] ?? null) ? (int) ($q['score_weight'] ?? $q['bobot']) : 10,
+                        'time_limit_seconds' => ($qTimeLimit > 0) ? $qTimeLimit : null,
+                        'explanation'        => trim($q['explanation'] ?? $q['pembahasan'] ?? ''),
+                        'order_num'          => $order++,
                     ]);
                 }
             }

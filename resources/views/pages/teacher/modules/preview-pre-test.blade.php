@@ -48,8 +48,13 @@
                 <div class="p-6 sm:p-8 bg-gradient-to-br from-blue-50 to-indigo-50 border-b border-slate-200/70">
                     <div class="flex flex-wrap items-center gap-2 mb-3">
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-bold border border-blue-200/70">
-                            ⏱️ Durasi: {{ $preTest->duration_minutes ?? 15 }} Menit
+                            📝 {{ $preTest->questionCount() }} Butir Soal
                         </span>
+                        @if($preTest->totalDurationSeconds() > 0)
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold border border-emerald-200/70">
+                            ⏱️ Total Akumulasi: {{ $preTest->totalDurationSeconds() }} Detik
+                        </span>
+                        @endif
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold border border-amber-200/70">
                             🎯 Batas Nilai: {{ $preTest->kktp ?? 75 }} Poin
                         </span>
@@ -91,7 +96,10 @@
                             <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3 hover:shadow-md transition-shadow">
                                 <div class="flex items-center justify-between text-xs">
                                     <span class="font-extrabold text-blue-600">Soal #{{ $idx + 1 }}</span>
-                                    <div class="flex items-center gap-3">
+                                    <div class="flex items-center gap-2">
+                                        @if(!empty($q->time_limit_seconds))
+                                            <span class="text-blue-700 font-bold bg-blue-50 border border-blue-200/70 px-2.5 py-0.5 rounded-md">⏱️ {{ $q->time_limit_seconds }} Detik</span>
+                                        @endif
                                         <span class="text-slate-500 font-bold bg-slate-100 px-2.5 py-0.5 rounded-md">Bobot: {{ $q->score_weight }} Poin</span>
                                         <span class="text-slate-400 font-medium">
                                             Kunci Guru: <strong class="text-emerald-600 font-black">{{ $q->correct_answer }}</strong>

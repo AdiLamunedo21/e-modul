@@ -48,8 +48,13 @@
                 <div class="p-6 sm:p-8 bg-gradient-to-br from-teal-50 via-emerald-50 to-slate-50 border-b border-slate-200/70">
                     <div class="flex flex-wrap items-center gap-2 mb-3">
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-100 text-teal-800 text-xs font-bold border border-teal-200/70">
-                            ⏱️ Durasi: {{ $postTest->duration_minutes ?? 20 }} Menit
+                            📝 {{ $postTest->questionCount() }} Butir Soal
                         </span>
+                        @if($postTest->totalDurationSeconds() > 0)
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold border border-emerald-200/70">
+                            ⏱️ Total Akumulasi: {{ $postTest->totalDurationSeconds() }} Detik
+                        </span>
+                        @endif
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold border border-amber-200/70">
                             🎯 Batas Nilai: {{ $postTest->kktp ?? 75 }} Poin
                         </span>
@@ -105,6 +110,9 @@
                                         <span class="font-extrabold text-teal-800">Soal Evaluasi #{{ $idx + 1 }}</span>
                                     </div>
                                     <div class="flex items-center gap-2">
+                                        @if(!empty($q->time_limit_seconds))
+                                            <span class="text-teal-700 font-bold bg-teal-50 border border-teal-200/70 px-2.5 py-0.5 rounded-md">⏱️ {{ $q->time_limit_seconds }} Detik</span>
+                                        @endif
                                         <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 font-semibold text-[11px]">
                                             Bobot: {{ $q->score_weight }} Poin
                                         </span>

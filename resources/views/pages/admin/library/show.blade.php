@@ -662,7 +662,7 @@
                                 <div>
                                     <span class="text-[10px] font-extrabold uppercase tracking-widest text-teal-600">Bagian 2 • Latihan Diagnostik</span>
                                     <h2 class="text-xl sm:text-2xl font-black text-slate-900">{{ $module->preTest->title ?? 'Pre-test Pembuka' }}</h2>
-                                    <p class="text-xs text-slate-500 font-medium mt-0.5">Durasi: {{ $module->preTest->duration_minutes ?? 15 }} Menit • Target KKTP: {{ $module->preTest->kktp ?? 75 }} • Total: {{ $module->preTest->questions->count() }} Soal</p>
+                                    <p class="text-xs text-slate-500 font-medium mt-0.5">Target KKTP: {{ $module->preTest->kktp ?? 75 }} • Total: {{ $module->preTest->questions->count() }} Soal</p>
                                 </div>
                             </div>
                             <span class="px-3 py-1 rounded-full bg-teal-50 text-teal-700 border border-teal-200 text-xs font-bold self-start sm:self-center">
@@ -922,7 +922,7 @@
                                 <div>
                                     <span class="text-[10px] font-extrabold uppercase tracking-widest text-purple-600">Bagian 5 • Asesmen Sumatif</span>
                                     <h2 class="text-xl sm:text-2xl font-black text-slate-900">{{ $module->postTest->title ?? 'Post-test Evaluasi Akhir' }}</h2>
-                                    <p class="text-xs text-slate-500 font-medium mt-0.5">Durasi: {{ $module->postTest->duration_minutes ?? 30 }} Menit • Target KKTP: {{ $module->postTest->kktp ?? 75 }} • Total: {{ $module->postTest->questions->count() }} Soal</p>
+                                    <p class="text-xs text-slate-500 font-medium mt-0.5">Target KKTP: {{ $module->postTest->kktp ?? 75 }} • Total: {{ $module->postTest->questions->count() }} Soal</p>
                                 </div>
                             </div>
                             <span class="px-3 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200 text-xs font-bold self-start sm:self-center">

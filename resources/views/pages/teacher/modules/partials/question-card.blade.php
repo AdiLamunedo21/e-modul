@@ -5,12 +5,14 @@
         $pilihan = $question->options ?? ['A' => '', 'B' => '', 'C' => '', 'D' => '', 'E' => ''];
         $kunci = $question->correct_answer ?? 'A';
         $bobot = $question->score_weight ?? 10;
+        $waktu = $question->time_limit_seconds ?? null;
         $pembahasan = $question->explanation ?? '';
     } else {
         $pertanyaan = $question['question_text'] ?? $question['pertanyaan'] ?? '';
         $pilihan = $question['options'] ?? $question['pilihan'] ?? ['A' => '', 'B' => '', 'C' => '', 'D' => '', 'E' => ''];
         $kunci = $question['correct_answer'] ?? $question['kunci_jawaban'] ?? 'A';
         $bobot = $question['score_weight'] ?? $question['bobot'] ?? 10;
+        $waktu = $question['time_limit_seconds'] ?? $question['waktu'] ?? null;
         $pembahasan = $question['explanation'] ?? $question['pembahasan'] ?? '';
     }
     $accent = $accent ?? 'blue';
@@ -24,14 +26,24 @@
 @endphp
 
 <div class="question-card fade-in-item bg-white border border-slate-200 rounded-2xl p-6 shadow-sm relative" id="question-card-{{ $qId }}">
-    <div class="flex items-center justify-between gap-4 mb-4 pb-3 border-b border-slate-100">
+    <div class="flex items-center justify-between gap-4 mb-4 pb-3 border-b border-slate-100 flex-wrap sm:flex-nowrap">
         <div class="flex items-center gap-2.5">
             <span class="q-number-badge w-7 h-7 rounded-xl {{ $badgeBg }} text-white flex items-center justify-center text-xs font-black shadow-sm">
                 {{ $qId + 1 }}
             </span>
             <span class="text-xs font-bold text-slate-800">Pertanyaan Soal #{{ $qId + 1 }}</span>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+            {{-- Waktu Butir Soal Ini (Detik) --}}
+            <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1 hover:border-slate-300 transition-colors" title="Batas waktu pengerjaan butir soal ini dalam detik (contoh: 20 untuk 20 detik, 15 untuk 15 detik)">
+                <label class="text-[11px] font-bold text-slate-600">⏱️ Waktu:</label>
+                <input type="number" name="questions[{{ $qId }}][time_limit_seconds]" value="{{ $waktu }}" min="0" max="3600"
+                       placeholder="Detik"
+                       class="w-14 text-center text-xs font-bold text-slate-800 bg-transparent focus:outline-none">
+                <span class="text-[10px] text-slate-400 font-bold select-none">dtk</span>
+            </div>
+
+            {{-- Bobot Poin --}}
             <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1">
                 <label class="text-[11px] font-semibold text-slate-500">Bobot Poin:</label>
                 <input type="number" name="questions[{{ $qId }}][score_weight]" value="{{ $bobot }}" min="1" max="100"

@@ -231,7 +231,7 @@
         <div class="p-5 rounded-2xl bg-emerald-50/50 border border-emerald-200">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-xs font-bold text-emerald-800 uppercase tracking-wide">📝 Kuis Pre-test Diagnostik</span>
-                <span class="text-xs font-bold text-emerald-700">{{ $module->preTest->questionCount() }} Butir Soal • Durasi {{ $module->preTest->duration_minutes }} Menit • KKTP {{ $module->preTest->kktp }}</span>
+                <span class="text-xs font-bold text-emerald-700">{{ $module->preTest->questionCount() }} Butir Soal • KKTP {{ $module->preTest->kktp }}</span>
             </div>
             <p class="text-xs text-emerald-900 font-medium">{{ $module->preTest->title }}</p>
         </div>
@@ -242,7 +242,7 @@
         <div class="p-5 rounded-2xl bg-teal-50/50 border border-teal-200">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-xs font-bold text-teal-800 uppercase tracking-wide">🎯 Kuis Post-test Evaluasi</span>
-                <span class="text-xs font-bold text-teal-700">{{ $module->postTest->questionCount() }} Butir Soal • Durasi {{ $module->postTest->duration_minutes }} Menit • KKTP {{ $module->postTest->kktp }}</span>
+                <span class="text-xs font-bold text-teal-700">{{ $module->postTest->questionCount() }} Butir Soal • KKTP {{ $module->postTest->kktp }}</span>
             </div>
             <p class="text-xs text-teal-900 font-medium">{{ $module->postTest->title }}</p>
         </div>

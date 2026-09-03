@@ -510,10 +510,10 @@ class Module extends Model
         return $this->preTest?->title ?? ($this->pre_test_data['judul'] ?? 'Pre-test Pembuka');
     }
 
-    /** Durasi Pre-test */
+    /** Durasi estimasi total Pre-test dalam detik */
     public function preTestDuration(): int
     {
-        return $this->preTest?->duration_minutes ?? (int)($this->pre_test_data['durasi_menit'] ?? 15);
+        return $this->preTest?->totalDurationSeconds() ?? 0;
     }
 
     /** KKTP Pre-test */
@@ -789,10 +789,10 @@ class Module extends Model
         return $this->postTest?->title ?? ($this->post_test_data['judul'] ?? 'Post-test: Evaluasi Pemahaman Materi');
     }
 
-    /** Mendapatkan durasi pengerjaan post-test dalam menit */
+    /** Mendapatkan total estimasi durasi pengerjaan post-test dalam detik */
     public function postTestDuration(): int
     {
-        return $this->postTest?->duration_minutes ?? (int) ($this->post_test_data['durasi_menit'] ?? 20);
+        return $this->postTest?->totalDurationSeconds() ?? 0;
     }
 
     /** Mendapatkan nilai ambang batas KKTP post-test */
@@ -942,7 +942,6 @@ class Module extends Model
             $newPreTest = PreTest::create([
                 'module_id'           => $cloned->id,
                 'title'               => $this->preTest->title,
-                'duration_minutes'    => $this->preTest->duration_minutes,
                 'kktp'                => $this->preTest->kktp,
                 'instructions'        => $this->preTest->instructions,
                 'randomize_questions' => $this->preTest->randomize_questions,
@@ -950,13 +949,14 @@ class Module extends Model
 
             foreach ($this->preTest->questions as $q) {
                 PreTestQuestion::create([
-                    'pre_test_id'    => $newPreTest->id,
-                    'question_text'  => $q->question_text,
-                    'options'        => $q->options,
-                    'correct_answer' => $q->correct_answer,
-                    'score_weight'   => $q->score_weight,
-                    'explanation'    => $q->explanation,
-                    'order_num'      => $q->order_num,
+                    'pre_test_id'        => $newPreTest->id,
+                    'question_text'      => $q->question_text,
+                    'options'            => $q->options,
+                    'correct_answer'     => $q->correct_answer,
+                    'score_weight'       => $q->score_weight,
+                    'time_limit_seconds' => $q->time_limit_seconds,
+                    'explanation'        => $q->explanation,
+                    'order_num'          => $q->order_num,
                 ]);
             }
         }
@@ -966,7 +966,6 @@ class Module extends Model
             $newPostTest = PostTest::create([
                 'module_id'           => $cloned->id,
                 'title'               => $this->postTest->title,
-                'duration_minutes'    => $this->postTest->duration_minutes,
                 'kktp'                => $this->postTest->kktp,
                 'instructions'        => $this->postTest->instructions,
                 'randomize_questions' => $this->postTest->randomize_questions,
@@ -974,13 +973,14 @@ class Module extends Model
 
             foreach ($this->postTest->questions as $q) {
                 PostTestQuestion::create([
-                    'post_test_id'   => $newPostTest->id,
-                    'question_text'  => $q->question_text,
-                    'options'        => $q->options,
-                    'correct_answer' => $q->correct_answer,
-                    'score_weight'   => $q->score_weight,
-                    'explanation'    => $q->explanation,
-                    'order_num'      => $q->order_num,
+                    'post_test_id'       => $newPostTest->id,
+                    'question_text'      => $q->question_text,
+                    'options'            => $q->options,
+                    'correct_answer'     => $q->correct_answer,
+                    'score_weight'       => $q->score_weight,
+                    'time_limit_seconds' => $q->time_limit_seconds,
+                    'explanation'        => $q->explanation,
+                    'order_num'          => $q->order_num,
                 ]);
             }
         }

@@ -13,10 +13,15 @@ class PreTest extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'duration_minutes'    => 'integer',
         'kktp'                => 'integer',
         'randomize_questions' => 'boolean',
     ];
+
+    /** Total estimasi durasi soal dalam detik */
+    public function totalDurationSeconds(): int
+    {
+        return (int) $this->questions()->sum('time_limit_seconds');
+    }
 
     /** Relasi ke modul */
     public function module(): BelongsTo

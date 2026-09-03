@@ -208,24 +208,23 @@ class ModuleLibraryTest extends TestCase
         $preTest = PreTest::create([
             'module_id'           => $sourceModule->id,
             'title'               => 'Pre-test Diagnostik Jaringan',
-            'duration_minutes'    => 15,
             'kktp'                => 75,
             'randomize_questions' => true,
         ]);
 
         PreTestQuestion::create([
-            'pre_test_id'    => $preTest->id,
-            'question_text'  => 'Apa kepanjangan dari LAN?',
-            'options'        => ['A' => 'Local Area Network', 'B' => 'Large Area Node'],
-            'correct_answer' => 'A',
-            'score_weight'   => 10,
-            'order_num'      => 1,
+            'pre_test_id'        => $preTest->id,
+            'question_text'      => 'Apa kepanjangan dari LAN?',
+            'options'            => ['A' => 'Local Area Network', 'B' => 'Large Area Node'],
+            'correct_answer'     => 'A',
+            'score_weight'       => 10,
+            'time_limit_seconds' => 20,
+            'order_num'          => 1,
         ]);
 
         $postTest = PostTest::create([
             'module_id'           => $sourceModule->id,
             'title'               => 'Post-test Sumatif Jaringan',
-            'duration_minutes'    => 20,
             'kktp'                => 80,
             'randomize_questions' => false,
         ]);

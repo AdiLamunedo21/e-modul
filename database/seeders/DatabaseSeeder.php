@@ -295,7 +295,6 @@ class DatabaseSeeder extends Seeder
         $preTestModel = PreTest::create([
             'module_id'           => $module->id,
             'title'               => "Pre-test: Pemahaman Awal {$moduleTitle}",
-            'duration_minutes'    => 15,
             'kktp'                => 75,
             'instructions'        => 'Kerjakan soal pre-test ini untuk mengukur pemahaman awal Anda.',
             'randomize_questions' => false,
@@ -303,13 +302,14 @@ class DatabaseSeeder extends Seeder
 
         foreach ($preTestQ as $idx => $q) {
             PreTestQuestion::create([
-                'pre_test_id'    => $preTestModel->id,
-                'question_text'  => $q['pertanyaan'],
-                'options'        => $q['pilihan'],
-                'correct_answer' => $q['kunci_jawaban'],
-                'score_weight'   => $q['bobot'],
-                'explanation'    => $q['pembahasan'],
-                'order_num'      => $idx + 1,
+                'pre_test_id'        => $preTestModel->id,
+                'question_text'      => $q['pertanyaan'],
+                'options'            => $q['pilihan'],
+                'correct_answer'     => $q['kunci_jawaban'],
+                'score_weight'       => $q['bobot'],
+                'time_limit_seconds' => ($idx % 2 === 0 ? 20 : 15),
+                'explanation'        => $q['pembahasan'],
+                'order_num'          => $idx + 1,
             ]);
         }
 
@@ -317,7 +317,6 @@ class DatabaseSeeder extends Seeder
         $postTestModel = PostTest::create([
             'module_id'           => $module->id,
             'title'               => "Post-test: Evaluasi Akhir {$moduleTitle}",
-            'duration_minutes'    => 20,
             'kktp'                => 75,
             'instructions'        => 'Kerjakan soal evaluasi post-test berikut.',
             'randomize_questions' => false,
@@ -325,13 +324,14 @@ class DatabaseSeeder extends Seeder
 
         foreach ($postTestQ as $idx => $q) {
             PostTestQuestion::create([
-                'post_test_id'   => $postTestModel->id,
-                'question_text'  => $q['pertanyaan'],
-                'options'        => $q['pilihan'],
-                'correct_answer' => $q['kunci_jawaban'],
-                'score_weight'   => $q['bobot'],
-                'explanation'    => $q['pembahasan'],
-                'order_num'      => $idx + 1,
+                'post_test_id'       => $postTestModel->id,
+                'question_text'      => $q['pertanyaan'],
+                'options'            => $q['pilihan'],
+                'correct_answer'     => $q['kunci_jawaban'],
+                'score_weight'       => $q['bobot'],
+                'time_limit_seconds' => ($idx % 2 === 0 ? 25 : 20),
+                'explanation'        => $q['pembahasan'],
+                'order_num'          => $idx + 1,
             ]);
         }
 

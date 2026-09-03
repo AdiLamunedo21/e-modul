@@ -22,7 +22,7 @@
                         <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">Post-test Sumatif</span>
                     </div>
                     <h2 class="text-xl sm:text-2xl font-black text-slate-900 leading-tight mt-0.5">{{ $module->postTest->title ?? 'Post-test: Evaluasi Pemahaman' }}</h2>
-                    <p class="text-xs text-slate-500 font-medium mt-0.5">Durasi: {{ $module->postTest->duration_minutes ?? 20 }} Menit • Target KKTP: {{ $module->postTest->kktp ?? 75 }}</p>
+                    <p class="text-xs text-slate-500 font-medium mt-0.5">{{ $module->postTest->questionCount() }} Butir Soal • Target KKTP: {{ $module->postTest->kktp ?? 75 }}</p>
                 </div>
             </div>
 
@@ -180,6 +180,10 @@
                                             @endforeach
                                         </tbody>
                                     </table>
+                                    <div class="px-4 py-2 bg-slate-50 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between">
+                                        <span>💾 Riwayat dibatasi maksimal 3 percobaan pengerjaan</span>
+                                        <span class="font-bold text-rose-700">Tersimpan: {{ count($postTestAttempts) }}/3</span>
+                                    </div>
                                 </div>
                             </div>
                         @endif
@@ -229,14 +233,33 @@
                         <p class="text-xs text-slate-500">Guru belum menambahkan butir soal untuk sesi evaluasi akhir modul ini.</p>
                     </div>
                 @else
-                    @php $postQuestionsCount = $module->postTest->questions->count(); @endphp
+                    @php
+                        $postQuestionsCount = $module->postTest->questions->count();
+                        $postQuestionsTimeLimits = [];
+                        $postQuestionsIds = [];
+                        foreach ($module->postTest->questions as $qIdx => $qItem) {
+                            $postQuestionsTimeLimits[$qIdx] = (int) ($qItem->time_limit_seconds ?: 0);
+                            $postQuestionsIds[$qIdx] = (string) $qItem->id;
+                        }
+                    @endphp
 
                     <div x-data="{
                             currentQuestion: 0,
                             totalQuestions: {{ $postQuestionsCount }},
+                            questionIds: {{ json_encode($postQuestionsIds) }},
                             answers: {},
                             showWarningToast: false,
                             warningToastTimer: null,
+
+                            // Per-question timer state
+                            timeLimits: {{ json_encode($postQuestionsTimeLimits) }},
+                            timeLeft: 0,
+                            initialTime: 0,
+                            timerInterval: null,
+                            isPaused: false,
+                            timeExpiredToast: false,
+                            timeExpiredTimer: null,
+                            expiredQuestions: {},
                             
                             init() {
                                 this.$nextTick(() => {
@@ -246,30 +269,86 @@
                                             this.answers[match[1]] = radio.value;
                                         }
                                     });
+                                    this.startQuestionTimer();
+                                });
+                                this.$watch('submitModal.open', val => {
+                                    this.isPaused = !!val;
                                 });
                             },
-                            selectOption(questionId, optKey) {
+                            getCurrentAllottedTime() {
+                                return this.timeLimits[this.currentQuestion] || 0;
+                            },
+                            startQuestionTimer() {
+                                if (this.timerInterval) clearInterval(this.timerInterval);
+                                const allotted = this.getCurrentAllottedTime();
+                                if (allotted > 0 && !this.expiredQuestions[this.currentQuestion]) {
+                                    this.initialTime = allotted;
+                                    this.timeLeft = allotted;
+                                    this.isPaused = false;
+                                    this.timerInterval = setInterval(() => {
+                                        if (this.isPaused) return;
+                                        if (this.timeLeft > 1) {
+                                            this.timeLeft--;
+                                        } else {
+                                            this.timeLeft = 0;
+                                            clearInterval(this.timerInterval);
+                                            this.onQuestionTimeExpired();
+                                        }
+                                    }, 1000);
+                                } else {
+                                    this.timeLeft = 0;
+                                    this.initialTime = 0;
+                                }
+                            },
+                            onQuestionTimeExpired() {
+                                this.expiredQuestions[this.currentQuestion] = true;
+                                this.timeExpiredToast = true;
+                                if (this.timeExpiredTimer) clearTimeout(this.timeExpiredTimer);
+                                this.timeExpiredTimer = setTimeout(() => {
+                                    this.timeExpiredToast = false;
+                                }, 3500);
+
+                                if (this.currentQuestion < this.totalQuestions - 1) {
+                                    this.next(true);
+                                } else {
+                                    // Auto submit on last question
+                                    const formEl = this.$el.querySelector('form');
+                                    if (formEl) {
+                                        formEl.submit();
+                                    }
+                                }
+                            },
+                            formatTime(seconds) {
+                                const m = Math.floor(seconds / 60);
+                                const s = seconds % 60;
+                                return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+                            },
+                            get timerPercentage() {
+                                if (!this.initialTime || this.initialTime <= 0) return 100;
+                                return Math.max(0, Math.min(100, Math.round((this.timeLeft / this.initialTime) * 100)));
+                            },
+                            selectOption(questionId, optKey, qIndex) {
+                                if (this.expiredQuestions[qIndex]) return;
+                                if (qIndex !== this.currentQuestion) return;
                                 this.answers[questionId] = optKey;
                             },
                             isAnswered(questionId) {
                                 return !!this.answers[questionId];
                             },
+                            isCurrentQuestionAnswered() {
+                                const qId = this.questionIds[this.currentQuestion];
+                                return !!(qId && this.answers[qId]);
+                            },
                             get answeredCount() {
                                 return Object.keys(this.answers).length;
                             },
-                            jumpTo(index) {
-                                if (index >= 0 && index < this.totalQuestions) {
-                                    this.currentQuestion = index;
+                            next(force = false) {
+                                if (!force && !this.isCurrentQuestionAnswered()) {
+                                    return;
                                 }
-                            },
-                            next() {
                                 if (this.currentQuestion < this.totalQuestions - 1) {
                                     this.currentQuestion++;
-                                }
-                            },
-                            prev() {
-                                if (this.currentQuestion > 0) {
-                                    this.currentQuestion--;
+                                    this.startQuestionTimer();
                                 }
                             },
                             triggerAntiCopyWarning() {
@@ -286,6 +365,7 @@
                                 }
                             },
                             attemptSubmit(formEl) {
+                                this.isPaused = true;
                                 const missing = this.totalQuestions - this.answeredCount;
                                 let warningMsg = '{{ $initialPostScore !== null ? 'Nilai awal resmi Anda tetap terkunci (' . $initialPostScore . '/100). Skor kali ini dicatat sebagai perbandingan latihan.' : 'Post-test ini menentukan nilai akhir modul Anda.' }}';
                                 
@@ -311,6 +391,23 @@
                         @dragstart.prevent="triggerAntiCopyWarning()"
                         class="protected-exam-card relative space-y-6 select-none"
                         style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none;">
+
+                        {{-- Floating Toast Waktu Habis Per Soal --}}
+                        <div x-show="timeExpiredToast"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 -translate-y-3 scale-95"
+                             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                             x-transition:leave-end="opacity-0 -translate-y-3 scale-95"
+                             x-cloak
+                             class="fixed top-6 left-1/2 -translate-x-1/2 z-[9999] max-w-md w-[92%] bg-amber-950/95 text-white backdrop-blur-md px-4 py-3 rounded-2xl shadow-2xl border border-amber-500/40 flex items-center gap-3">
+                            <span class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center text-lg shrink-0 border border-amber-400/30">⏰</span>
+                            <div class="text-xs leading-relaxed">
+                                <strong class="font-bold text-amber-300 block">Waktu Soal Telah Habis!</strong>
+                                Waktu pengerjaan butir soal ini telah selesai. Anda otomatis dialihkan ke butir soal berikutnya.
+                            </div>
+                        </div>
 
                         {{-- Floating Toast Anti-Cheat Warning --}}
                         <div x-show="showWarningToast"
@@ -371,38 +468,44 @@
                             </div>
                         </div>
 
-                        {{-- Peta Navigasi Nomor Soal (Interactive Quick-Jump Grid) --}}
+                        {{-- Indikator Kemajuan Nomor Soal (Strict Sequential Stepper) --}}
                         <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-2.5">
-                            <div class="flex items-center justify-between gap-2">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                                 <span class="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
                                     <span>🧭</span>
-                                    <span>Peta Nomor Soal:</span>
+                                    <span>Indikator Alur Soal (Sekuensial):</span>
                                 </span>
-                                <div class="flex items-center gap-3 text-[11px] text-slate-500">
+                                <div class="flex items-center gap-3 text-[11px] text-slate-500 flex-wrap">
                                     <span class="inline-flex items-center gap-1">
-                                        <span class="w-2.5 h-2.5 rounded bg-rose-600"></span>
-                                        <span>Terjawab</span>
+                                        <span class="w-2.5 h-2.5 rounded bg-emerald-600"></span>
+                                        <span>Selesai & Terkunci</span>
                                     </span>
                                     <span class="inline-flex items-center gap-1">
-                                        <span class="w-2.5 h-2.5 rounded bg-white border border-slate-300"></span>
-                                        <span>Belum</span>
+                                        <span class="w-2.5 h-2.5 rounded bg-rose-500 animate-pulse"></span>
+                                        <span>Aktif Dikerjakan</span>
+                                    </span>
+                                    <span class="inline-flex items-center gap-1">
+                                        <span class="w-2.5 h-2.5 rounded bg-slate-200 border border-slate-300"></span>
+                                        <span>Belum Terbuka</span>
                                     </span>
                                 </div>
                             </div>
 
                             <div class="flex flex-wrap gap-2 pt-1">
                                 @foreach($module->postTest->questions as $idx => $q)
-                                    <button type="button"
-                                            @click="jumpTo({{ $idx }})"
-                                            :class="{
-                                                'ring-2 ring-rose-500 ring-offset-2 border-rose-600 scale-105 font-black shadow-sm': currentQuestion === {{ $idx }},
-                                                'bg-rose-600 text-white border-rose-600': isAnswered('{{ $q->id }}') && currentQuestion !== {{ $idx }},
-                                                'bg-white text-slate-700 border-slate-200 hover:border-rose-300 hover:bg-rose-50/30': !isAnswered('{{ $q->id }}') && currentQuestion !== {{ $idx }},
-                                                'bg-rose-600 text-white': isAnswered('{{ $q->id }}') && currentQuestion === {{ $idx }}
-                                            }"
-                                            class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border text-xs font-bold transition-all duration-150 flex items-center justify-center cursor-pointer select-none">
+                                    <div :class="{
+                                             'ring-2 ring-rose-500 ring-offset-2 border-rose-600 bg-rose-600 text-white font-black shadow-sm scale-105': currentQuestion === {{ $idx }},
+                                             'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold': {{ $idx }} < currentQuestion && !expiredQuestions[{{ $idx }}],
+                                             'bg-rose-100 text-rose-800 border-rose-300 font-bold': {{ $idx }} < currentQuestion && expiredQuestions[{{ $idx }}],
+                                             'bg-slate-100 text-slate-400 border-slate-200 opacity-60': {{ $idx }} > currentQuestion
+                                         }"
+                                         class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border text-xs font-bold transition-all duration-150 flex items-center justify-center select-none relative"
+                                         :title="{{ $idx }} === currentQuestion ? 'Soal ini sedang aktif dikerjakan' : ({{ $idx }} < currentQuestion ? 'Soal nomor ini telah selesai dan terkunci' : 'Soal nomor ini belum terbuka')">
                                         <span>{{ $idx + 1 }}</span>
-                                    </button>
+                                        <span x-show="{{ $idx }} < currentQuestion && !expiredQuestions[{{ $idx }}]" class="absolute -top-1 -right-1 text-[9px]">✓</span>
+                                        <span x-show="{{ $idx }} < currentQuestion && expiredQuestions[{{ $idx }}]" class="absolute -top-1 -right-1 text-[9px]">⏰</span>
+                                        <span x-show="{{ $idx }} > currentQuestion" class="absolute -top-1 -right-1 text-[8px]">🔒</span>
+                                    </div>
                                 @endforeach
                             </div>
                         </div>
@@ -420,9 +523,9 @@
                                      class="p-6 sm:p-7 rounded-3xl bg-slate-50 border border-slate-200/90 shadow-2xs space-y-6">
                                     
                                     {{-- Header Butir Soal --}}
-                                    <div class="flex items-center justify-between pb-3 border-b border-slate-200/80 gap-3">
+                                    <div class="flex flex-wrap items-center justify-between pb-3 border-b border-slate-200/80 gap-2 sm:gap-3">
                                         <div class="flex items-center gap-2">
-                                            <span class="w-8 h-8 rounded-xl bg-rose-600 text-white text-xs font-black flex items-center justify-center shadow-xs">
+                                            <span class="w-8 h-8 rounded-xl bg-rose-600 text-white text-xs font-black flex items-center justify-center shadow-xs shrink-0">
                                                 {{ $idx + 1 }}
                                             </span>
                                             <div>
@@ -431,16 +534,50 @@
                                             </div>
                                         </div>
 
-                                        <div class="flex items-center gap-2">
+                                        <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                                            {{-- Countdown Timer Soal Ini --}}
+                                            <template x-if="getCurrentAllottedTime() > 0">
+                                                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black border transition-all duration-200 shadow-2xs"
+                                                     :class="{
+                                                         'bg-red-50 text-red-600 border-red-300 animate-pulse ring-2 ring-red-500/20': timeLeft <= 5,
+                                                         'bg-amber-50 text-amber-700 border-amber-300': timeLeft > 5 && timeLeft <= 15,
+                                                         'bg-rose-50 text-rose-800 border-rose-200': timeLeft > 15
+                                                     }"
+                                                     title="Sisa waktu untuk mengerjakan butir soal ini">
+                                                    <svg class="w-3.5 h-3.5 shrink-0" :class="timeLeft <= 5 ? 'animate-bounce text-red-600' : 'text-current'" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    <span class="text-[11px] font-semibold hidden sm:inline">Sisa:</span>
+                                                    <span class="font-mono text-xs font-extrabold" x-text="formatTime(timeLeft)"></span>
+                                                </div>
+                                            </template>
+
                                             <span class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-[11px] font-bold text-slate-600">
                                                 Bobot: {{ $q->score_weight ?: 10 }} Poin
                                             </span>
-                                            <span x-show="isAnswered('{{ $q->id }}')"
+                                            <span x-show="expiredQuestions[{{ $idx }}]"
+                                                  class="px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-200 text-[11px] font-bold text-rose-700">
+                                                ⏰ Waktu Habis
+                                            </span>
+                                            <span x-show="isAnswered('{{ $q->id }}') && !expiredQuestions[{{ $idx }}]"
                                                   class="px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-[11px] font-bold text-emerald-700">
                                                 ✓ Terjawab
                                             </span>
                                         </div>
                                     </div>
+
+                                    {{-- Countdown Timer Slim Progress Bar --}}
+                                    <template x-if="getCurrentAllottedTime() > 0">
+                                        <div class="w-full bg-slate-200/70 rounded-full h-1.5 overflow-hidden -mt-3">
+                                            <div class="h-1.5 rounded-full transition-all duration-1000 ease-linear"
+                                                 :class="{
+                                                     'bg-red-500 animate-pulse': timeLeft <= 5,
+                                                     'bg-amber-500': timeLeft > 5 && timeLeft <= 15,
+                                                     'bg-rose-500': timeLeft > 15
+                                                 }"
+                                                 :style="'width: ' + timerPercentage + '%'"></div>
+                                        </div>
+                                    </template>
 
                                     {{-- Teks Soal (Dilindungi Anti-Copy & Anti-Drag) --}}
                                     <div class="p-5 sm:p-6 rounded-2xl bg-white border border-slate-200/80 shadow-2xs">
@@ -458,14 +595,18 @@
                                         <div class="grid grid-cols-1 gap-2.5">
                                             @foreach(['A', 'B', 'C', 'D', 'E'] as $optKey)
                                                 @if(!empty($q->options[$optKey]))
-                                                    <label @click="selectOption('{{ $q->id }}', '{{ $optKey }}')"
-                                                           :class="answers['{{ $q->id }}'] === '{{ $optKey }}'
-                                                                ? 'border-rose-500 bg-rose-50/70 ring-2 ring-rose-500/25 shadow-xs'
-                                                                : 'border-slate-200 bg-white hover:border-rose-300 hover:bg-slate-50/80'"
+                                                    <label @click="selectOption('{{ $q->id }}', '{{ $optKey }}', {{ $idx }})"
+                                                           :class="[
+                                                                expiredQuestions[{{ $idx }}] ? 'opacity-60 cursor-not-allowed pointer-events-none bg-slate-100 border-slate-200' : '',
+                                                                answers['{{ $q->id }}'] === '{{ $optKey }}'
+                                                                    ? 'border-rose-500 bg-rose-50/70 ring-2 ring-rose-500/25 shadow-xs'
+                                                                    : 'border-slate-200 bg-white hover:border-rose-300 hover:bg-slate-50/80'
+                                                           ]"
                                                            class="flex items-center gap-3.5 p-3.5 sm:p-4 rounded-2xl border-2 cursor-pointer transition-all duration-150 select-none group">
                                                         <input type="radio"
                                                                name="answers[{{ $q->id }}]"
                                                                value="{{ $optKey }}"
+                                                               :disabled="expiredQuestions[{{ $idx }}]"
                                                                x-model="answers['{{ $q->id }}']"
                                                                class="w-4 h-4 text-rose-600 focus:ring-rose-500 border-slate-300">
                                                         <span :class="answers['{{ $q->id }}'] === '{{ $optKey }}'
@@ -489,25 +630,13 @@
                                 </div>
                             @endforeach
 
-                            {{-- Bottom Navigation Bar (Prev, Next, Finish) --}}
-                            <div class="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-200">
-                                <div class="w-full sm:w-auto flex items-center gap-2">
-                                    <button type="button"
-                                            @click="prev()"
-                                            :disabled="currentQuestion === 0"
-                                            :class="currentQuestion === 0 ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400' : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 cursor-pointer shadow-2xs'"
-                                            class="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5">
-                                        <span>←</span>
-                                        <span>Soal Sebelumnya</span>
-                                    </button>
-
-                                    <button type="button"
-                                            @click="next()"
-                                            x-show="currentQuestion < totalQuestions - 1"
-                                            class="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
-                                        <span>Soal Berikutnya</span>
-                                        <span>→</span>
-                                    </button>
+                            {{-- Bottom Navigation Bar (Sequential Progression) --}}
+                            <div class="pt-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-200">
+                                <div class="w-full sm:w-auto flex items-center gap-2 text-xs text-slate-500 font-medium">
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-[11px] text-slate-600 font-semibold">
+                                        <span>🔒</span>
+                                        <span>Alur Satu Arah: Soal tidak dapat diulang setelah dijawab</span>
+                                    </span>
                                 </div>
 
                                 <div class="w-full sm:w-auto flex items-center gap-2 justify-end">
@@ -519,13 +648,43 @@
                                         </button>
                                     @endif
 
-                                    <button type="button"
-                                            @click="attemptSubmit($el.closest('form'))"
-                                            :class="currentQuestion === totalQuestions - 1 ? 'ring-4 ring-rose-500/20' : ''"
-                                            class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white font-black text-xs shadow-md shadow-rose-600/25 transition flex items-center justify-center gap-2 cursor-pointer">
-                                        <span>🏁</span>
-                                        <span>{{ $initialPostScore !== null ? 'Kirim Jawaban Latihan' : 'Kirim Jawaban Post-test' }}</span>
-                                    </button>
+                                    {{-- Tombol Lanjut ke Soal Berikutnya (Hanya jika belum di soal terakhir) --}}
+                                    <template x-if="currentQuestion < totalQuestions - 1">
+                                        <button type="button"
+                                                @click="next()"
+                                                :disabled="!isCurrentQuestionAnswered()"
+                                                :style="isCurrentQuestionAnswered()
+                                                    ? 'background: linear-gradient(135deg, #e11d48 0%, #be123c 100%) !important; color: #ffffff !important;'
+                                                    : 'background-color: #f1f5f9 !important; color: #64748b !important; border: 1px solid #cbd5e1 !important;'"
+                                                :class="isCurrentQuestionAnswered()
+                                                    ? 'shadow-md shadow-rose-600/25 cursor-pointer hover:opacity-95'
+                                                    : 'cursor-not-allowed opacity-80'"
+                                                class="w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2">
+                                            <span x-show="!isCurrentQuestionAnswered()" style="color: #64748b !important;">⚠️ Pilih Jawaban untuk Lanjut</span>
+                                            <span x-show="isCurrentQuestionAnswered()" style="color: #ffffff !important;" class="flex items-center gap-1.5 font-bold">
+                                                <span>Simpan & Lanjut ke Soal Berikutnya</span>
+                                                <span>→</span>
+                                            </span>
+                                        </button>
+                                    </template>
+
+                                    {{-- Tombol Selesai & Kirim Ujian (Hanya muncul di soal terakhir) --}}
+                                    <template x-if="currentQuestion === totalQuestions - 1">
+                                        <button type="button"
+                                                @click="attemptSubmit($el.closest('form'))"
+                                                :disabled="!isCurrentQuestionAnswered()"
+                                                :style="isCurrentQuestionAnswered()
+                                                    ? 'background: linear-gradient(135deg, #e11d48 0%, #be123c 100%) !important; color: #ffffff !important;'
+                                                    : 'background-color: #f1f5f9 !important; color: #64748b !important; border: 1px solid #cbd5e1 !important;'"
+                                                :class="isCurrentQuestionAnswered()
+                                                    ? 'shadow-md shadow-rose-600/25 cursor-pointer ring-4 ring-rose-500/20 hover:opacity-95'
+                                                    : 'cursor-not-allowed opacity-80'"
+                                                class="w-full sm:w-auto px-6 py-2.5 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-2">
+                                            <span>🏁</span>
+                                            <span x-show="!isCurrentQuestionAnswered()" style="color: #64748b !important;">Pilih Jawaban Terakhir</span>
+                                            <span x-show="isCurrentQuestionAnswered()" style="color: #ffffff !important;" class="font-black">{{ $initialPostScore !== null ? 'Kirim Jawaban Latihan' : 'Kirim Jawaban Post-test' }}</span>
+                                        </button>
+                                    </template>
                                 </div>
                             </div>
                         </form>

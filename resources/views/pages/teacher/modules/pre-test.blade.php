@@ -159,23 +159,10 @@
                                class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
                     </div>
 
-                    {{-- Row 2: Durasi & KKTP --}}
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {{-- Row 2: Batas Nilai & Info Batas Waktu per Soal --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Durasi Pengerjaan</label>
-                            <div class="flex rounded-xl border border-slate-300 bg-slate-50 overflow-hidden focus-within:border-blue-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500/20 transition-all shadow-sm">
-                                <input type="number" name="duration_minutes" min="1" max="180"
-                                       value="{{ old('duration_minutes', $preTest->duration_minutes ?? 15) }}"
-                                       class="w-full bg-transparent px-4 py-2.5 text-sm text-slate-900 focus:outline-none">
-                                <span class="inline-flex items-center px-3.5 bg-slate-100 text-xs font-bold text-slate-500 border-l border-slate-200 select-none shrink-0">
-                                    Menit
-                                </span>
-                            </div>
-                            <p class="text-[11px] text-slate-400 mt-1">Timer otomatis berjalan saat siswa mulai.</p>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Batas Nilai Kelulusan</label>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Batas Nilai Kelulusan (KKTP)</label>
                             <div class="flex rounded-xl border border-slate-300 bg-slate-50 overflow-hidden focus-within:border-blue-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500/20 transition-all shadow-sm">
                                 <input type="number" name="kktp" min="0" max="100"
                                        value="{{ old('kktp', $preTest->kktp ?? 75) }}"
@@ -185,6 +172,14 @@
                                 </span>
                             </div>
                             <p class="text-[11px] text-slate-400 mt-1">Standar nilai minimum pemahaman awal.</p>
+                        </div>
+
+                        <div class="rounded-2xl border border-blue-200/80 bg-blue-50/70 p-4 flex items-start gap-3 shadow-2xs">
+                            <span class="text-xl shrink-0">⏱️</span>
+                            <div class="text-xs text-blue-900 leading-relaxed">
+                                <span class="font-bold block text-blue-950 mb-0.5">Pengaturan Waktu Mandiri per Butir Soal</span>
+                                Durasi total kuis ditiadakan. Anda dapat menentukan batas waktu yang berbeda-beda untuk tiap butir soal secara leluasa langsung pada kartu soal di bawah (misalnya: Soal 1 = 20 detik, Soal 3 = 15 detik).
+                            </div>
                         </div>
                     </div>
 
@@ -372,18 +367,26 @@
         const pilihan = data.options || data.pilihan || { A: '', B: '', C: '', D: '', E: '' };
         const kunci = data.correct_answer || data.kunci_jawaban || 'A';
         const bobot = data.score_weight || data.bobot || 10;
+        const waktu = data.time_limit_seconds || data.waktu || '';
         const pembahasan = data.explanation || data.pembahasan || '';
 
         return `
         <div class="question-card fade-in-item bg-white border border-slate-200 rounded-2xl p-6 shadow-sm relative" id="question-card-${index}">
-            <div class="flex items-center justify-between gap-4 mb-4 pb-3 border-b border-slate-100">
+            <div class="flex items-center justify-between gap-4 mb-4 pb-3 border-b border-slate-100 flex-wrap sm:flex-nowrap">
                 <div class="flex items-center gap-2.5">
                     <span class="q-number-badge w-7 h-7 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xs font-black shadow-sm shadow-blue-500/30">
                         ${index + 1}
                     </span>
                     <span class="text-xs font-bold text-slate-800">Pertanyaan Soal #${index + 1}</span>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                    <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1 hover:border-slate-300 transition-colors" title="Batas waktu pengerjaan butir soal ini dalam detik (contoh: 20 untuk 20 detik, 15 untuk 15 detik)">
+                        <label class="text-[11px] font-bold text-slate-600">⏱️ Waktu:</label>
+                        <input type="number" name="questions[${index}][time_limit_seconds]" value="${waktu}" min="0" max="3600"
+                               placeholder="Detik"
+                               class="w-14 text-center text-xs font-bold text-slate-800 bg-transparent focus:outline-none">
+                        <span class="text-[10px] text-slate-400 font-bold select-none">dtk</span>
+                    </div>
                     <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1">
                         <label class="text-[11px] font-semibold text-slate-500">Bobot Poin:</label>
                         <input type="number" name="questions[${index}][score_weight]" value="${bobot}" min="1" max="100"
@@ -512,6 +515,7 @@
             || card.querySelector(`input[name="questions[${index}][kunci_jawaban]"]:checked`)?.value || 'A';
         const bobot = card.querySelector(`input[name="questions[${index}][score_weight]"]`)?.value
             || card.querySelector(`input[name="questions[${index}][bobot]"]`)?.value || 10;
+        const waktu = card.querySelector(`input[name="questions[${index}][time_limit_seconds]"]`)?.value || '';
         const pembahasan = card.querySelector(`textarea[name="questions[${index}][explanation]"]`)?.value
             || card.querySelector(`textarea[name="questions[${index}][pembahasan]"]`)?.value || '';
 
@@ -526,6 +530,7 @@
             options: pilihan,
             correct_answer: kunci,
             score_weight: bobot,
+            time_limit_seconds: waktu,
             explanation: pembahasan
         });
     }
@@ -560,6 +565,9 @@
 
             const bobotInput = card.querySelector('input[name^="questions"][name*="score_weight"], input[name^="questions"][name*="bobot"]');
             if (bobotInput) bobotInput.name = `questions[${idx}][score_weight]`;
+
+            const waktuInput = card.querySelector('input[name^="questions"][name*="time_limit_seconds"]');
+            if (waktuInput) waktuInput.name = `questions[${idx}][time_limit_seconds]`;
 
             const pembahasanTA = card.querySelector('textarea[name^="questions"][name*="explanation"], textarea[name^="questions"][name*="pembahasan"]');
             if (pembahasanTA) pembahasanTA.name = `questions[${idx}][explanation]`;
@@ -626,6 +634,7 @@
                 },
                 correct_answer: 'A',
                 score_weight: 20,
+                time_limit_seconds: 20,
                 explanation: 'DBMS (Database Management System) adalah software pengelola basis data seperti MySQL, PostgreSQL, dan Oracle.'
             },
             {
@@ -639,6 +648,7 @@
                 },
                 correct_answer: 'B',
                 score_weight: 20,
+                time_limit_seconds: 25,
                 explanation: 'Perintah SELECT adalah bagian dari DML (Data Manipulation Language) yang digunakan untuk query pengambilan data.'
             },
             {
@@ -652,6 +662,7 @@
                 },
                 correct_answer: 'B',
                 score_weight: 20,
+                time_limit_seconds: 15,
                 explanation: 'Primary Key secara mutlak harus unik pada setiap baris dan tidak boleh kosong (NOT NULL).'
             },
             {
@@ -665,6 +676,7 @@
                 },
                 correct_answer: 'B',
                 score_weight: 20,
+                time_limit_seconds: 30,
                 explanation: 'DDL (Data Definition Language) mengurus struktur skema database.'
             },
             {
@@ -678,6 +690,7 @@
                 },
                 correct_answer: 'A',
                 score_weight: 20,
+                time_limit_seconds: 20,
                 explanation: 'Normalisasi adalah teknik perancangan basis data untuk mengeliminasi redundansi data.'
             }
         ];

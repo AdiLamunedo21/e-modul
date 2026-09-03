@@ -160,7 +160,6 @@ class StudentInteractiveLearningTest extends TestCase
         $preTest = PreTest::create([
             'module_id'        => $module->id,
             'title'            => 'Pre-test Diagnostik',
-            'duration_minutes' => 15,
             'kktp'             => 75,
         ]);
 
@@ -402,6 +401,53 @@ class StudentInteractiveLearningTest extends TestCase
         $result = StudentResult::where('module_id', $module->id)->where('student_id', $student->id)->first();
         $this->assertNotNull($result);
         $this->assertTrue($result->isComponentRead('kata_pengantar'));
+
+        $module->delete();
+    }
+
+    public function test_student_test_attempts_are_pruned_to_maximum_three()
+    {
+        $student = Student::first();
+        $teacher = Teacher::first();
+        $subject = Subject::first();
+
+        if (!$student || !$teacher || !$subject) {
+            $this->markTestSkipped('Student, teacher, subject required.');
+        }
+
+        $module = Module::create([
+            'teacher_id'   => $teacher->id,
+            'class_id'     => $student->class_id,
+            'subject_id'   => $subject->id,
+            'title'        => 'Modul Test Attempts Cap ' . uniqid(),
+            'status'       => 'published',
+            'has_pre_test' => true,
+        ]);
+
+        $result = StudentResult::create([
+            'module_id'       => $module->id,
+            'student_id'      => $student->id,
+            'summative_score' => 0,
+        ]);
+
+        // Simulasikan 6 kali pengerjaan
+        for ($i = 1; $i <= 6; $i++) {
+            $result->recordTestAttempt('pre_test', $i * 15, $i, 10);
+            $result->save();
+        }
+
+        $attempts = $result->getTestAttempts('pre_test');
+
+        // Pastikan dibatasi maksimal 3 riwayat
+        $this->assertCount(3, $attempts);
+
+        // Pastikan nilai awal resmi pertama (attempt 1) tetap terjaga
+        $this->assertTrue($attempts[0]['is_initial']);
+        $this->assertEquals(15, $attempts[0]['score']);
+
+        // Pastikan 2 percobaan terakhir adalah percobaan ke-5 dan ke-6
+        $this->assertEquals(75, $attempts[1]['score']); // 5 * 15
+        $this->assertEquals(90, $attempts[2]['score']); // 6 * 15
 
         $module->delete();
     }

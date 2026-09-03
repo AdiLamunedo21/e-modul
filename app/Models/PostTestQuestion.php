@@ -12,9 +12,10 @@ class PostTestQuestion extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'options'      => 'array',
-        'score_weight' => 'integer',
-        'order_num'    => 'integer',
+        'options'            => 'array',
+        'score_weight'       => 'integer',
+        'time_limit_seconds' => 'integer',
+        'order_num'          => 'integer',
     ];
 
     /** Relasi ke PostTest induk */
