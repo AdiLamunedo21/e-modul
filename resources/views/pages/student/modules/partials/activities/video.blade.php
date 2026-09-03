@@ -124,14 +124,10 @@
                             </div>
                         @endif
                         <div class="pt-3 border-t border-slate-200 flex justify-end">
-                            <template x-if="nextPage">
-                                <button type="button"
-                                        @click="goToPage(nextPage.id)"
-                                        class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer">
-                                    <span>Lanjut ke <strong x-text="nextPage.title"></strong></span>
-                                    <span>→</span>
-                                </button>
-                            </template>
+                            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
+                                <span class="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                <span>Sudah Selesai Dikerjakan</span>
+                            </div>
                         </div>
                     </div>
                 @else

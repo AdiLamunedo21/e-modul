@@ -186,14 +186,10 @@
                                 <span>Kerjakan Ulang Soal (Latihan Mandiri)</span>
                             </button>
 
-                            <template x-if="nextPage">
-                                <button type="button"
-                                        @click="goToPage(nextPage.id)"
-                                        class="w-full sm:w-auto px-8 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-indigo-600/25 transition flex items-center justify-center gap-2 cursor-pointer">
-                                    <span>Lanjut ke <strong x-text="nextPage.title"></strong></span>
-                                    <span>→</span>
-                                </button>
-                            </template>
+                            <div class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs sm:text-sm font-bold">
+                                <span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-black">✓</span>
+                                <span>Sudah Selesai Dikerjakan</span>
+                            </div>
                         </div>
                     </div>
                 </div>
