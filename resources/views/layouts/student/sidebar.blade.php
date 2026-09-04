@@ -43,7 +43,15 @@
 
         {{-- ══ Navigasi Menu Siswa ══ --}}
         @php
-            $isDashboardActive = (request()->routeIs('student.dashboard') || request()->routeIs('dashboard.student')) && !request()->routeIs('student.modules.*');
+            $currentStatus = request()->query('status');
+            $isDashboardActive = (request()->routeIs('student.dashboard') || request()->routeIs('dashboard.student')) 
+                && !request()->routeIs('student.modules.*') 
+                && (empty($currentStatus) || $currentStatus === 'all');
+            $isInProgressActive = (request()->routeIs('student.dashboard') || request()->routeIs('dashboard.student')) 
+                && $currentStatus === 'in_progress';
+            $isCompletedActive = (request()->routeIs('student.dashboard') || request()->routeIs('dashboard.student')) 
+                && $currentStatus === 'completed';
+
             $isModulesRoute = request()->routeIs('student.modules.*');
             $currentSubjectParam = request()->route('subject');
             $activeSubjectId = null;
@@ -54,6 +62,10 @@
             } elseif (isset($subject) && $subject instanceof \App\Models\Subject) {
                 $activeSubjectId = $subject->id;
             }
+
+            // Hitung jumlah modul untuk badge sidebar
+            $inProgressBadge = isset($stats['in_progress']) ? $stats['in_progress'] : ($sidebarStats['in_progress'] ?? null);
+            $completedBadge = isset($stats['completed_modules']) ? $stats['completed_modules'] : ($sidebarStats['completed'] ?? null);
         @endphp
 
         <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
@@ -137,31 +149,31 @@
 
             {{-- Shortcut Filter: Sedang Dikerjakan --}}
             <a href="{{ route('student.dashboard', ['status' => 'in_progress']) }}"
-               class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors group
-                   {{ (request()->routeIs('student.dashboard') && request()->query('status') === 'in_progress') ? 'bg-slate-800 text-amber-300 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+               class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all group
+                   {{ $isInProgressActive ? 'bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40 shadow-md shadow-amber-500/10' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
                 <div class="flex items-center gap-3">
-                    <svg class="w-5 h-5 shrink-0 text-amber-400 group-hover:text-amber-300 transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 shrink-0 {{ $isInProgressActive ? 'text-amber-300' : 'text-amber-400 group-hover:text-amber-300' }} transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <span>Sedang Dikerjakan</span>
                 </div>
-                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                    Proses
+                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold {{ $isInProgressActive ? 'bg-amber-400 text-slate-900 shadow-sm' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30' }}">
+                    {{ is_null($inProgressBadge) ? 'Proses' : $inProgressBadge . ' Modul' }}
                 </span>
             </a>
 
             {{-- Shortcut Filter: Riwayat Selesai --}}
             <a href="{{ route('student.dashboard', ['status' => 'completed']) }}"
-               class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors group
-                   {{ (request()->routeIs('student.dashboard') && request()->query('status') === 'completed') ? 'bg-slate-800 text-emerald-300 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+               class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all group
+                   {{ $isCompletedActive ? 'bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40 shadow-md shadow-emerald-600/10' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
                 <div class="flex items-center gap-3">
-                    <svg class="w-5 h-5 shrink-0 text-emerald-400 group-hover:text-emerald-300 transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 shrink-0 {{ $isCompletedActive ? 'text-emerald-300' : 'text-emerald-400 group-hover:text-emerald-300' }} transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <span>Riwayat Selesai</span>
                 </div>
-                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                    Lulus
+                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold {{ $isCompletedActive ? 'bg-emerald-400 text-slate-900 shadow-sm' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' }}">
+                    {{ is_null($completedBadge) ? 'Lulus' : $completedBadge . ' Modul' }}
                 </span>
             </a>
 

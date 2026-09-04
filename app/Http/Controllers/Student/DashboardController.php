@@ -207,6 +207,9 @@ class DashboardController extends Controller
                 'description'       => $module->description,
                 'class_id'          => $module->class_id,
                 'class_name'        => $module->schoolClass?->full_name ?? 'Rombel Kelas',
+                'class_short_name'  => $module->schoolClass?->short_name ?? 'Kelas',
+                'class_code'        => $module->schoolClass?->code ?? '',
+                'major_name'        => $module->schoolClass?->major?->name ?? $module->schoolClass?->major_name ?? '',
                 'subject_id'        => $module->subject_id,
                 'semester'          => (string) ($module->semester ?? '1'),
                 'semester_label'    => $module->semester_label,
@@ -214,8 +217,11 @@ class DashboardController extends Controller
                 'semester_badge'    => $module->semester_badge,
                 'subject'           => $module->subject,
                 'subject_name'      => $module->subject?->name ?? 'Mata Pelajaran',
+                'subject_code'      => $module->subject?->code ?? '',
                 'teacher_name'      => $module->teacher->name ?? 'Guru Pengampu',
+                'created_at'        => $module->created_at,
                 'updated_at'        => $module->updated_at,
+                'is_new'            => $module->created_at && $module->created_at->diffInDays(now()) <= 7,
                 'active_components' => $activeComps,
                 'total_components'  => $totalActive,
                 'completed_tasks'   => $completedTasks,
@@ -378,6 +384,10 @@ class DashboardController extends Controller
 
         $displayedClasses = $classesWithModules;
 
+        // Kategori modul terpisah untuk akses cepat tab dashboard
+        $inProgressModules = $processedModules->where('progress_status', 'in_progress')->values();
+        $completedModules = $processedModules->where('progress_status', 'completed')->values();
+
         // Ekstrak daftar tingkat/jenjang kelas yang diikuti siswa untuk chip filter cepat
         $availableGrades = $joinedClasses->pluck('grade')->unique()->filter()->values()->toArray();
 
@@ -395,6 +405,8 @@ class DashboardController extends Controller
             'subjects',
             'processedModules',
             'filteredModules',
+            'inProgressModules',
+            'completedModules',
             'stats',
             'filterStatus',
             'filterSubject',

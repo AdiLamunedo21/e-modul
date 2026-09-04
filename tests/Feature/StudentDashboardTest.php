@@ -309,4 +309,89 @@ class StudentDashboardTest extends TestCase
         $response->assertRedirect(route('login.student'));
         $this->assertFalse(auth()->guard('student')->check());
     }
+
+    public function test_student_dashboard_in_progress_and_completed_views_display_modules_with_class_and_subject_info()
+    {
+        $student = Student::first();
+        $class = SchoolClass::first();
+        $teacher = Teacher::first();
+        $subject = Subject::first();
+        if (!$student || !$class || !$teacher || !$subject) {
+            $this->markTestSkipped('Seed data required.');
+        }
+
+        $student->joinClass($class);
+
+        // Modul 1: Sedang dikerjakan (Pre-test selesai, komponen lain belum)
+        $moduleInProgress = Module::create([
+            'teacher_id'    => $teacher->id,
+            'class_id'      => $class->id,
+            'subject_id'    => $subject->id,
+            'title'         => 'Modul Progress ' . uniqid(),
+            'status'        => 'published',
+            'has_pre_test'  => true,
+            'has_materi'    => true,
+        ]);
+
+        StudentResult::create([
+            'student_id'      => $student->id,
+            'module_id'       => $moduleInProgress->id,
+            'pre_test_score'  => 80,
+            'summative_score' => 80,
+            'grading_status'  => 'pending',
+        ]);
+
+        // Modul 2: Selesai (Materi dibaca, 100%)
+        $moduleCompleted = Module::create([
+            'teacher_id'    => $teacher->id,
+            'class_id'      => $class->id,
+            'subject_id'    => $subject->id,
+            'title'         => 'Modul Completed ' . uniqid(),
+            'status'        => 'published',
+            'has_materi'    => true,
+        ]);
+
+        StudentResult::create([
+            'student_id'      => $student->id,
+            'module_id'       => $moduleCompleted->id,
+            'read_components' => ['materi'],
+            'summative_score' => 95,
+            'grading_status'  => 'graded',
+        ]);
+
+        // 1. Akses menu 'Sedang Dikerjakan' (?status=in_progress)
+        $respProgress = $this->actingAs($student, 'student')
+            ->get(route('student.dashboard', ['status' => 'in_progress']));
+
+        $respProgress->assertStatus(200);
+        $respProgress->assertSee('Modul Sedang Dikerjakan');
+        $respProgress->assertSee($moduleInProgress->title);
+        $respProgress->assertSee($class->full_name);
+        $respProgress->assertSee($subject->name);
+        $respProgress->assertSee($teacher->name);
+        $respProgress->assertSee('Lanjutkan Belajar Modul');
+
+        // Pastikan KPI stats card disembunyikan (style="display: none;")
+        $respProgress->assertSee('style="display: none;"', false);
+
+        // 2. Akses menu 'Riwayat Selesai' (?status=completed)
+        $respCompleted = $this->actingAs($student, 'student')
+            ->get(route('student.dashboard', ['status' => 'completed']));
+
+        $respCompleted->assertStatus(200);
+        $respCompleted->assertSee('Riwayat Modul Selesai');
+        $respCompleted->assertSee($moduleCompleted->title);
+        $respCompleted->assertSee($class->full_name);
+        $respCompleted->assertSee($subject->name);
+        $respCompleted->assertSee('95 / 100');
+        $respCompleted->assertSee('Pelajari Ulang Modul');
+        // Pastikan KPI stats card disembunyikan (style="display: none;")
+        $respCompleted->assertSee('style="display: none;"', false);
+
+        // Cleanup
+        $moduleInProgress->studentResults()->delete();
+        $moduleInProgress->delete();
+        $moduleCompleted->studentResults()->delete();
+        $moduleCompleted->delete();
+    }
 }

@@ -139,18 +139,20 @@ class Module extends Model
     {
         if ((string) $this->semester === '2') {
             return [
+                'number' => '2',
                 'label' => 'Semester 2 (Genap)',
                 'short' => 'S2 Genap',
-                'icon'  => '',
+                'icon'  => '📘',
                 'color' => 'bg-cyan-50 text-cyan-800 border-cyan-200',
                 'pill'  => 'bg-cyan-600 text-white',
             ];
         }
 
         return [
+            'number' => '1',
             'label' => 'Semester 1 (Ganjil)',
             'short' => 'S1 Ganjil',
-            'icon'  => '',
+            'icon'  => '📙',
             'color' => 'bg-amber-50 text-amber-800 border-amber-200',
             'pill'  => 'bg-amber-600 text-white',
         ];
