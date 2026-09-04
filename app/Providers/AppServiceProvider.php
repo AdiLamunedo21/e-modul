@@ -34,20 +34,32 @@ class AppServiceProvider extends ServiceProvider
             if ($student) {
                 $joinedClassIds = $student->joinedClassIds();
                 if (!empty($joinedClassIds)) {
-                    $query = $student->subjects()->exists() ? $student->subjects() : Subject::query();
-                    $subjects = $query->withCount(['modules' => function ($q) use ($joinedClassIds) {
-                        $q->whereIn('class_id', $joinedClassIds)->where('status', 'published');
-                    }])->get();
+                    $hasCustomSubjects = $student->relationLoaded('subjects')
+                        ? $student->subjects->isNotEmpty()
+                        : $student->subjects()->exists();
 
-                    // Hitung jumlah modul dalam progres dan selesai untuk badge sidebar
-                    $modules = Module::whereIn('class_id', $joinedClassIds)
+                    $query = $hasCustomSubjects ? $student->subjects() : Subject::query();
+                    $subjects = $query->select(['subjects.id', 'subjects.name', 'subjects.code', 'subjects.icon', 'subjects.color'])
+                        ->withCount(['modules' => function ($q) use ($joinedClassIds) {
+                            $q->whereIn('class_id', $joinedClassIds)->where('status', 'published');
+                        }])->get();
+
+                    // Hitung jumlah modul dalam progres dan selesai untuk badge sidebar (hanya kolom metadata penting)
+                    $modules = Module::select([
+                            'id', 'class_id', 'is_active',
+                            'has_pre_test', 'has_materi', 'has_video', 'has_embed',
+                            'has_job_sheet', 'has_lkpd', 'has_post_test'
+                        ])
+                        ->whereIn('class_id', $joinedClassIds)
                         ->where('status', 'published')
                         ->with([
-                            'studentResults'        => fn($q) => $q->where('student_id', $student->id),
-                            'jobSheets.submissions' => fn($q) => $q->where('student_id', $student->id),
-                            'lkpds.submissions'     => fn($q) => $q->where('student_id', $student->id),
-                            'videoSummaries'        => fn($q) => $q->where('student_id', $student->id),
-                            'embedSubmissions'      => fn($q) => $q->where('student_id', $student->id),
+                            'studentResults'        => fn($q) => $q->select(['id', 'module_id', 'student_id', 'pre_test_score', 'post_test_score', 'read_components'])->where('student_id', $student->id),
+                            'jobSheets'             => fn($q) => $q->select(['id', 'module_id']),
+                            'jobSheets.submissions' => fn($q) => $q->select(['id', 'job_sheet_id', 'student_id'])->where('student_id', $student->id),
+                            'lkpds'                 => fn($q) => $q->select(['id', 'module_id']),
+                            'lkpds.submissions'     => fn($q) => $q->select(['id', 'lkpd_id', 'student_id'])->where('student_id', $student->id),
+                            'videoSummaries'        => fn($q) => $q->select(['id', 'module_id', 'student_id'])->where('student_id', $student->id),
+                            'embedSubmissions'      => fn($q) => $q->select(['id', 'module_id', 'student_id'])->where('student_id', $student->id),
                         ])->get();
 
                     $inProgressCount = 0;

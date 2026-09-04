@@ -35,17 +35,32 @@ class Student extends Authenticatable
     }
 
     /**
+     * Cache ID kelas yang diikuti siswa untuk siklus request aktif.
+     */
+    protected ?array $memoizedJoinedClassIds = null;
+
+    /**
      * Mengambil seluruh array ID kelas yang diikuti oleh siswa ini.
      *
      * @return int[]
      */
     public function joinedClassIds(): array
     {
-        $ids = $this->classes()->pluck('classes.id')->map(fn($id) => (int)$id)->toArray();
+        if ($this->memoizedJoinedClassIds !== null) {
+            return $this->memoizedJoinedClassIds;
+        }
+
+        if ($this->relationLoaded('classes')) {
+            $ids = $this->classes->pluck('id')->map(fn($id) => (int)$id)->toArray();
+        } else {
+            $ids = $this->classes()->pluck('classes.id')->map(fn($id) => (int)$id)->toArray();
+        }
+
         if (empty($ids) && $this->class_id) {
             $ids = [(int) $this->class_id];
         }
-        return array_values(array_unique(array_filter($ids)));
+
+        return $this->memoizedJoinedClassIds = array_values(array_unique(array_filter($ids)));
     }
 
     /**
@@ -53,6 +68,8 @@ class Student extends Authenticatable
      */
     public function joinClass(SchoolClass $schoolClass): void
     {
+        $this->memoizedJoinedClassIds = null;
+
         // 1. Daftarkan siswa ke rombel kelas di tabel pivot class_student (banyak kelas)
         $this->classes()->syncWithoutDetaching([$schoolClass->id]);
 
@@ -78,6 +95,8 @@ class Student extends Authenticatable
      */
     public function leaveClass(SchoolClass $schoolClass): void
     {
+        $this->memoizedJoinedClassIds = null;
+
         // 1. Dapatkan seluruh ID modul di kelas ini
         $moduleIds = $schoolClass->modules()->pluck('id')->toArray();
 

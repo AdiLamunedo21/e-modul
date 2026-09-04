@@ -884,20 +884,33 @@ class Module extends Model
         return $components;
     }
 
+    /** Cache instance statistik penilaian untuk mencegah kalkulasi berulang dalam satu request */
+    protected ?array $gradingStatsCache = null;
+
     /** Statistik penilaian modul */
     public function gradingStats(): array
     {
-        $totalStudents = $this->schoolClass ? $this->schoolClass->students()->count() : 0;
+        if ($this->gradingStatsCache !== null) {
+            return $this->gradingStatsCache;
+        }
+
+        $totalStudents = 0;
+        if ($this->schoolClass) {
+            $totalStudents = $this->schoolClass->students_count
+                ?? ($this->schoolClass->relationLoaded('students') ? $this->schoolClass->students->count() : $this->schoolClass->students()->count());
+        }
+
         $results = $this->studentResults;
 
         $submittedCount = $results->count();
-        $gradedCount    = $results->where('grading_status', 'graded')->count();
+        $gradedResults  = $results->where('grading_status', 'graded');
+        $gradedCount    = $gradedResults->count();
         $pendingCount   = $results->where('grading_status', 'pending')->count();
 
-        $avgScore = $gradedCount > 0 ? (int) round($results->where('grading_status', 'graded')->avg('summative_score')) : 0;
+        $avgScore = $gradedCount > 0 ? (int) round($gradedResults->avg('summative_score')) : 0;
         $progressPct = $totalStudents > 0 ? (int) round(($gradedCount / $totalStudents) * 100) : 0;
 
-        return [
+        return $this->gradingStatsCache = [
             'total_students'  => $totalStudents,
             'submitted_count' => $submittedCount,
             'graded_count'    => $gradedCount,

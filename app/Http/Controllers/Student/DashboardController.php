@@ -52,18 +52,26 @@ class DashboardController extends Controller
         $studentSubjectIds = $student->subjects()->pluck('subjects.id')->toArray();
 
         if (!empty($joinedClassIds)) {
-            $modulesQuery = Module::query()
+            $modulesQuery = Module::select([
+                    'id', 'teacher_id', 'class_id', 'subject_id', 'title',
+                    'semester', 'status', 'is_active', 'created_at', 'updated_at',
+                    'has_pre_test', 'has_materi', 'has_video', 'has_embed',
+                    'has_job_sheet', 'has_lkpd', 'has_post_test'
+                ])
                 ->whereIn('class_id', $joinedClassIds)
                 ->where('status', 'published')
                 ->with([
-                    'teacher',
-                    'subject',
-                    'schoolClass.major',
-                    'jobSheets.submissions' => fn($q) => $q->where('student_id', $student->id),
-                    'lkpds.submissions' => fn($q) => $q->where('student_id', $student->id),
-                    'studentResults' => fn($q) => $q->where('student_id', $student->id),
-                    'videoSummaries' => fn($q) => $q->where('student_id', $student->id),
-                    'embedSubmissions' => fn($q) => $q->where('student_id', $student->id),
+                    'teacher:id,name',
+                    'subject:id,name,code,icon,color',
+                    'schoolClass:id,major_name,grade,section,code,major_id',
+                    'schoolClass.major:id,name,code',
+                    'jobSheets'             => fn($q) => $q->select(['id', 'module_id']),
+                    'jobSheets.submissions' => fn($q) => $q->select(['id', 'job_sheet_id', 'student_id'])->where('student_id', $student->id),
+                    'lkpds'                 => fn($q) => $q->select(['id', 'module_id']),
+                    'lkpds.submissions'     => fn($q) => $q->select(['id', 'lkpd_id', 'student_id'])->where('student_id', $student->id),
+                    'studentResults'        => fn($q) => $q->select(['id', 'module_id', 'student_id', 'pre_test_score', 'post_test_score', 'read_components', 'summative_score', 'grading_status', 'updated_at'])->where('student_id', $student->id),
+                    'videoSummaries'        => fn($q) => $q->select(['id', 'module_id', 'student_id'])->where('student_id', $student->id),
+                    'embedSubmissions'      => fn($q) => $q->select(['id', 'module_id', 'student_id'])->where('student_id', $student->id),
                 ])
                 ->latest('updated_at');
 
@@ -484,18 +492,25 @@ class DashboardController extends Controller
 
         $class->load('major');
 
-        // Query modul terbit di kelas ini untuk menghitung statistik per mapel
-        $allModules = Module::query()
+        // Query modul terbit di kelas ini untuk menghitung statistik per mapel (hanya kolom metadata)
+        $allModules = Module::select([
+                'id', 'teacher_id', 'class_id', 'subject_id', 'title',
+                'semester', 'status', 'is_active', 'created_at', 'updated_at',
+                'has_pre_test', 'has_materi', 'has_video', 'has_embed',
+                'has_job_sheet', 'has_lkpd', 'has_post_test'
+            ])
             ->where('class_id', $class->id)
             ->where('status', 'published')
             ->with([
-                'teacher',
-                'subject',
-                'jobSheets.submissions' => fn($q) => $q->where('student_id', $student->id),
-                'lkpds.submissions'     => fn($q) => $q->where('student_id', $student->id),
-                'studentResults'        => fn($q) => $q->where('student_id', $student->id),
-                'videoSummaries'        => fn($q) => $q->where('student_id', $student->id),
-                'embedSubmissions'      => fn($q) => $q->where('student_id', $student->id),
+                'teacher:id,name',
+                'subject:id,name,code,icon,color',
+                'jobSheets'             => fn($q) => $q->select(['id', 'module_id']),
+                'jobSheets.submissions' => fn($q) => $q->select(['id', 'job_sheet_id', 'student_id'])->where('student_id', $student->id),
+                'lkpds'                 => fn($q) => $q->select(['id', 'module_id']),
+                'lkpds.submissions'     => fn($q) => $q->select(['id', 'lkpd_id', 'student_id'])->where('student_id', $student->id),
+                'studentResults'        => fn($q) => $q->select(['id', 'module_id', 'student_id', 'pre_test_score', 'post_test_score', 'read_components', 'summative_score', 'grading_status', 'updated_at'])->where('student_id', $student->id),
+                'videoSummaries'        => fn($q) => $q->select(['id', 'module_id', 'student_id'])->where('student_id', $student->id),
+                'embedSubmissions'      => fn($q) => $q->select(['id', 'module_id', 'student_id'])->where('student_id', $student->id),
             ])
             ->get();
 
@@ -612,8 +627,13 @@ class DashboardController extends Controller
             $selectedSemester = 'all';
         }
 
-        // Query seluruh modul terbit khusus untuk kelas dan mapel ini
-        $modulesQuery = Module::query()
+        // Query seluruh modul terbit khusus untuk kelas dan mapel ini (hanya kolom metadata)
+        $modulesQuery = Module::select([
+                'id', 'teacher_id', 'class_id', 'subject_id', 'title',
+                'semester', 'status', 'is_active', 'created_at', 'updated_at',
+                'has_pre_test', 'has_materi', 'has_video', 'has_embed',
+                'has_job_sheet', 'has_lkpd', 'has_post_test'
+            ])
             ->where('class_id', $class->id)
             ->where('subject_id', $subject->id)
             ->where('status', 'published');
@@ -623,13 +643,15 @@ class DashboardController extends Controller
         }
 
         $modulesQuery->with([
-            'teacher',
-            'subject',
-            'jobSheets.submissions' => fn($q) => $q->where('student_id', $student->id),
-            'lkpds.submissions'     => fn($q) => $q->where('student_id', $student->id),
-            'studentResults'        => fn($q) => $q->where('student_id', $student->id),
-            'videoSummaries'        => fn($q) => $q->where('student_id', $student->id),
-            'embedSubmissions'      => fn($q) => $q->where('student_id', $student->id),
+            'teacher:id,name',
+            'subject:id,name,code,icon,color',
+            'jobSheets'             => fn($q) => $q->select(['id', 'module_id']),
+            'jobSheets.submissions' => fn($q) => $q->select(['id', 'job_sheet_id', 'student_id'])->where('student_id', $student->id),
+            'lkpds'                 => fn($q) => $q->select(['id', 'module_id']),
+            'lkpds.submissions'     => fn($q) => $q->select(['id', 'lkpd_id', 'student_id'])->where('student_id', $student->id),
+            'studentResults'        => fn($q) => $q->select(['id', 'module_id', 'student_id', 'pre_test_score', 'post_test_score', 'read_components', 'summative_score', 'grading_status', 'updated_at'])->where('student_id', $student->id),
+            'videoSummaries'        => fn($q) => $q->select(['id', 'module_id', 'student_id'])->where('student_id', $student->id),
+            'embedSubmissions'      => fn($q) => $q->select(['id', 'module_id', 'student_id'])->where('student_id', $student->id),
         ])->orderByDesc('is_active')->latest('updated_at');
 
         $allModules = $modulesQuery->get();

@@ -50,12 +50,26 @@ class ClassController extends Controller
         $assignedClassIds = $teacher->classes()->pluck('classes.id')->toArray();
 
         $query = SchoolClass::whereIn('id', $assignedClassIds)
-            ->with(['major', 'students', 'modules' => function ($q) use ($teacher, $selectedSubjectId) {
-                $q->where('teacher_id', $teacher->id)->with(['studentResults', 'subject'])->orderByDesc('is_active')->latest();
-                if ($selectedSubjectId) {
-                    $q->where('subject_id', $selectedSubjectId);
+            ->with([
+                'major',
+                'modules' => function ($q) use ($teacher, $selectedSubjectId) {
+                    $q->select([
+                        'id', 'teacher_id', 'class_id', 'subject_id', 'title',
+                        'semester', 'status', 'is_active', 'created_at'
+                    ])
+                    ->where('teacher_id', $teacher->id)
+                    ->with([
+                        'studentResults' => fn($sq) => $sq->select(['id', 'module_id', 'student_id', 'grading_status', 'summative_score']),
+                        'subject' => fn($sq) => $sq->select(['id', 'name', 'code', 'icon', 'color'])
+                    ])
+                    ->orderByDesc('is_active')
+                    ->latest();
+                    if ($selectedSubjectId) {
+                        $q->where('subject_id', $selectedSubjectId);
+                    }
                 }
-            }])->withCount(['students']);
+            ])
+            ->withCount('students');
 
         // Filter Tingkat Kelas (X, XI, XII, XIII)
         if ($request->filled('grade') && $request->grade !== 'all') {
@@ -98,7 +112,9 @@ class ClassController extends Controller
         if ($selectedSubjectId) {
             $baseModulesQuery->where('subject_id', $selectedSubjectId);
         }
-        $allTeacherModules = $baseModulesQuery->with('studentResults')->get();
+        $allTeacherModules = $baseModulesQuery->select(['id', 'teacher_id', 'class_id', 'subject_id', 'status'])
+            ->with(['studentResults' => fn($sq) => $sq->select(['id', 'module_id', 'student_id', 'grading_status', 'summative_score'])])
+            ->get();
         $assignedClassIds = $allTeacherModules->pluck('class_id')->filter()->unique();
         $totalStudentsInAssignedClasses = Student::whereIn('class_id', $assignedClassIds)->count();
         $allResults = $allTeacherModules->pluck('studentResults')->flatten();
@@ -113,9 +129,13 @@ class ClassController extends Controller
             'overall_avg_score'      => $overallAvgScore,
         ];
 
-        // Daftar modul guru yang tersedia untuk diimpor ke kelas lain
-        $myModules = Module::where('teacher_id', $teacher->id)
-            ->with(['schoolClass', 'subject'])
+        // Daftar modul guru yang tersedia untuk diimpor ke kelas lain (kolom ringkas)
+        $myModules = Module::select(['id', 'teacher_id', 'class_id', 'subject_id', 'title'])
+            ->where('teacher_id', $teacher->id)
+            ->with([
+                'schoolClass' => fn($q) => $q->select(['id', 'major_name', 'grade', 'section']),
+                'subject'     => fn($q) => $q->select(['id', 'name', 'code', 'icon', 'color'])
+            ])
             ->orderBy('title')
             ->get();
 
@@ -180,28 +200,52 @@ class ClassController extends Controller
     public function show(SchoolClass $class, Request $request)
     {
         $teacher = $this->teacher();
-        $class->loadMissing(['major', 'students']);
+        $class->loadMissing('major');
+        $class->loadCount('students');
 
-        // Modul guru pada kelas ini
-        $teacherModules = Module::where('teacher_id', $teacher->id)
+        // Modul guru pada kelas ini (pilih kolom metadata untuk performa kilat)
+        $teacherModules = Module::select([
+                'id', 'teacher_id', 'class_id', 'subject_id', 'title',
+                'semester', 'status', 'is_active',
+                'has_pre_test', 'has_materi', 'has_video', 'has_embed',
+                'has_job_sheet', 'has_lkpd', 'has_post_test',
+                'created_at', 'updated_at'
+            ])
+            ->where('teacher_id', $teacher->id)
             ->where('class_id', $class->id)
-            ->with(['studentResults', 'subject', 'schoolClass'])
+            ->with([
+                'studentResults' => fn($q) => $q->select(['id', 'module_id', 'student_id', 'grading_status', 'summative_score']),
+                'subject'        => fn($q) => $q->select(['id', 'name', 'code', 'icon', 'color'])
+            ])
             ->orderByDesc('is_active')
             ->latest()
             ->get();
 
-        // Modul guru dari kelas LAIN yang siap diimpor ke kelas ini
-        $otherClassModules = Module::where('teacher_id', $teacher->id)
+        // Kaitkan relasi agar statsForTeacher dan gradingStats tidak mengeksekusi query N+1 berulang
+        $teacherModules->each(fn($m) => $m->setRelation('schoolClass', $class));
+        $class->setRelation('modules', $teacherModules);
+
+        // Modul guru dari kelas LAIN yang siap diimpor ke kelas ini (kolom ringkas untuk modal)
+        $otherClassModules = Module::select([
+                'id', 'teacher_id', 'class_id', 'subject_id', 'title', 'created_at'
+            ])
+            ->where('teacher_id', $teacher->id)
             ->where('class_id', '!=', $class->id)
-            ->with(['schoolClass', 'subject'])
+            ->with([
+                'schoolClass' => fn($q) => $q->select(['id', 'major_name', 'grade', 'section']),
+                'subject'     => fn($q) => $q->select(['id', 'name', 'code', 'icon', 'color'])
+            ])
             ->latest()
             ->get();
 
-        // Statistik Kelas Khusus Guru Ini
+        // Statistik Kelas Khusus Guru Ini (in-memory dari relasi modules yang sudah diset)
         $classStats = $class->statsForTeacher($teacher->id);
 
         // Ambil daftar siswa di kelas ini
-        $studentsQuery = $class->students()->with('subjects')->orderBy('name');
+        $studentsQuery = $class->students()
+            ->select(['students.id', 'students.name', 'students.identity_number', 'students.class_id'])
+            ->with(['subjects:id,name,code'])
+            ->orderBy('name');
 
         if ($request->filled('search_student')) {
             $search = $request->search_student;
@@ -374,14 +418,21 @@ class ClassController extends Controller
             return response()->json(['success' => false, 'message' => 'Siswa tidak terdaftar di kelas ini.'], 404);
         }
 
-        $teacherModules = Module::where('teacher_id', $teacher->id)
+        $teacherModules = Module::select([
+                'id', 'teacher_id', 'class_id', 'title', 'status',
+                'has_pre_test', 'has_materi', 'has_video', 'has_embed',
+                'has_job_sheet', 'has_lkpd', 'has_post_test'
+            ])
+            ->where('teacher_id', $teacher->id)
             ->where('class_id', $class->id)
             ->with([
-                'studentResults' => fn ($q) => $q->where('student_id', $student->id),
-                'videoSummaries' => fn ($q) => $q->where('student_id', $student->id),
-                'embedSubmissions' => fn ($q) => $q->where('student_id', $student->id),
-                'jobSheets.submissions' => fn ($q) => $q->where('student_id', $student->id),
-                'lkpds.submissions' => fn ($q) => $q->where('student_id', $student->id),
+                'studentResults'        => fn ($q) => $q->select(['id', 'module_id', 'student_id', 'pre_test_score', 'video_score', 'embed_score', 'job_sheet_score', 'lkpd_score', 'post_test_score', 'summative_score', 'grading_status'])->where('student_id', $student->id),
+                'videoSummaries'        => fn ($q) => $q->select(['id', 'module_id', 'student_id', 'manual_score'])->where('student_id', $student->id),
+                'embedSubmissions'      => fn ($q) => $q->select(['id', 'module_id', 'student_id', 'manual_score'])->where('student_id', $student->id),
+                'jobSheets'             => fn ($q) => $q->select(['id', 'module_id']),
+                'jobSheets.submissions' => fn ($q) => $q->select(['id', 'job_sheet_id', 'student_id', 'manual_score'])->where('student_id', $student->id),
+                'lkpds'                 => fn ($q) => $q->select(['id', 'module_id']),
+                'lkpds.submissions'     => fn ($q) => $q->select(['id', 'lkpd_id', 'student_id', 'manual_score'])->where('student_id', $student->id),
             ])
             ->latest()
             ->get();
