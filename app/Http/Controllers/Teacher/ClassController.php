@@ -51,7 +51,7 @@ class ClassController extends Controller
 
         $query = SchoolClass::whereIn('id', $assignedClassIds)
             ->with(['major', 'students', 'modules' => function ($q) use ($teacher, $selectedSubjectId) {
-                $q->where('teacher_id', $teacher->id)->with(['studentResults', 'subject']);
+                $q->where('teacher_id', $teacher->id)->with(['studentResults', 'subject'])->orderByDesc('is_active')->latest();
                 if ($selectedSubjectId) {
                     $q->where('subject_id', $selectedSubjectId);
                 }
@@ -186,6 +186,7 @@ class ClassController extends Controller
         $teacherModules = Module::where('teacher_id', $teacher->id)
             ->where('class_id', $class->id)
             ->with(['studentResults', 'subject', 'schoolClass'])
+            ->orderByDesc('is_active')
             ->latest()
             ->get();
 

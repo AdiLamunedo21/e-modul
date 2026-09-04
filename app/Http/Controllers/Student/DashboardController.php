@@ -341,7 +341,7 @@ class DashboardController extends Controller
 
         // Kelompokkan Modul Belajar Berdasarkan Rombel Kelas yang Diikuti Siswa
         $classesWithModules = $joinedClasses->map(function (SchoolClass $cls) use ($processedModules, $filterStatus, $filterSubject) {
-            $classModules = $processedModules->where('class_id', $cls->id)->values();
+            $classModules = $processedModules->where('class_id', $cls->id)->sortByDesc('is_active_in_class')->values();
 
             $filteredClassModules = $classModules;
             if ($filterSubject !== 'all') {
@@ -350,9 +350,9 @@ class DashboardController extends Controller
             if ($filterStatus === 'in_progress') {
                 $filteredClassModules = $filteredClassModules->filter(fn($m) => $m['is_active_in_class'] || $m['progress_status'] === 'in_progress')->sortByDesc('is_active_in_class')->values();
             } elseif ($filterStatus === 'completed') {
-                $filteredClassModules = $filteredClassModules->where('progress_status', 'completed')->values();
+                $filteredClassModules = $filteredClassModules->where('progress_status', 'completed')->sortByDesc('is_active_in_class')->values();
             } elseif ($filterStatus === 'not_started') {
-                $filteredClassModules = $filteredClassModules->where('progress_status', 'not_started')->values();
+                $filteredClassModules = $filteredClassModules->where('progress_status', 'not_started')->sortByDesc('is_active_in_class')->values();
             }
 
             $modulesCount = $classModules->count();
@@ -630,7 +630,7 @@ class DashboardController extends Controller
             'studentResults'        => fn($q) => $q->where('student_id', $student->id),
             'videoSummaries'        => fn($q) => $q->where('student_id', $student->id),
             'embedSubmissions'      => fn($q) => $q->where('student_id', $student->id),
-        ])->latest('updated_at');
+        ])->orderByDesc('is_active')->latest('updated_at');
 
         $allModules = $modulesQuery->get();
         // Seluruh modul diproses
@@ -639,12 +639,14 @@ class DashboardController extends Controller
         // 1. Modul yang baru dibuka / terakhir diakses siswa (Recent Opened Modules - Bagian Teratas, maks 3)
         $recentOpenedModules = $processedModules
             ->filter(fn($m) => !empty($m['last_accessed_at']) || $m['progress_percent'] > 0)
-            ->sortByDesc(fn($m) => $m['last_accessed_at'] ?? $m['updated_at'])
+            ->sortByDesc(fn($m) => [($m['is_active_in_class'] ?? false) ? 1 : 0, $m['last_accessed_at'] ?? $m['updated_at']])
             ->take(3)
             ->values();
 
         // 2. Modul yang baru dibuat / ditambahkan oleh guru (Newest Added Modules - Di Bawahnya)
-        $newlyAddedModules = $processedModules->sortByDesc('created_at')->values();
+        $newlyAddedModules = $processedModules
+            ->sortByDesc(fn($m) => [($m['is_active_in_class'] ?? false) ? 1 : 0, $m['created_at']])
+            ->values();
 
         // Filter status belajar
         $filterStatus = $request->query('status', 'all');
@@ -819,6 +821,7 @@ class DashboardController extends Controller
                     'color'  => $module->semester == '2' ? 'bg-cyan-50 text-cyan-700 border-cyan-200' : 'bg-amber-50 text-amber-700 border-amber-200',
                     'icon'   => $module->semester == '2' ? '📘' : '📙',
                 ] : null,
+                'is_active_in_class'=> (bool) $module->is_active,
             ];
         });
     }

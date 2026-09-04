@@ -294,4 +294,48 @@ class TeacherClassTest extends TestCase
         $module1->delete();
         $module2->delete();
     }
+
+    public function test_active_module_appears_at_the_very_top_of_modules_list()
+    {
+        $teacher = Teacher::first();
+        $class = SchoolClass::first();
+        $subject = Subject::first();
+        if (!$teacher || !$class || !$subject) {
+            $this->markTestSkipped('Seed data required.');
+        }
+
+        // Buat modul lama tapi aktif
+        $olderActiveModule = Module::create([
+            'title'      => 'Modul Lama Tapi Aktif ' . uniqid(),
+            'teacher_id' => $teacher->id,
+            'class_id'   => $class->id,
+            'subject_id' => $subject->id,
+            'status'     => 'published',
+            'is_active'  => true,
+            'created_at' => now()->subDays(10),
+        ]);
+
+        // Buat modul baru tapi tidak aktif
+        $newerInactiveModule = Module::create([
+            'title'      => 'Modul Baru Tidak Aktif ' . uniqid(),
+            'teacher_id' => $teacher->id,
+            'class_id'   => $class->id,
+            'subject_id' => $subject->id,
+            'status'     => 'published',
+            'is_active'  => false,
+            'created_at' => now(),
+        ]);
+
+        $response = $this->actingAs($teacher, 'teacher')
+            ->get(route('teacher.classes.show', ['class' => $class->id, 'tab' => 'modules']));
+
+        $response->assertOk();
+        $teacherModules = $response->viewData('teacherModules');
+        $this->assertNotNull($teacherModules);
+        $this->assertEquals($olderActiveModule->id, $teacherModules->first()->id);
+
+        // Cleanup
+        $olderActiveModule->delete();
+        $newerInactiveModule->delete();
+    }
 }
