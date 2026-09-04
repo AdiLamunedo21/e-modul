@@ -246,12 +246,22 @@
             },
 
             matchesModule(item, requiredStatus = null) {
-                if (requiredStatus && item.progress_status !== requiredStatus) {
+                if (!item) return false;
+
+                if (requiredStatus === 'in_progress') {
+                    if (!item.is_active_in_class && item.progress_status !== 'in_progress') {
+                        return false;
+                    }
+                } else if (requiredStatus && item.progress_status !== requiredStatus) {
                     return false;
                 }
 
                 if (!requiredStatus && this.selectedStatus !== 'all') {
-                    if (item.progress_status !== this.selectedStatus) {
+                    if (this.selectedStatus === 'in_progress') {
+                        if (!item.is_active_in_class && item.progress_status !== 'in_progress') {
+                            return false;
+                        }
+                    } else if (item.progress_status !== this.selectedStatus) {
                         return false;
                     }
                 }
@@ -575,6 +585,17 @@
                                         <span>Total Modul: <strong class="text-slate-700">{{ $classItem['modules_count'] }}</strong></span>
                                         <span>Tuntas: <strong class="text-emerald-600">{{ $classItem['completed_count'] }}</strong></span>
                                     </div>
+                                    @php
+                                        $activeInThisClass = $classItem['modules']->where('is_active_in_class', true)->count();
+                                    @endphp
+                                    @if($activeInThisClass > 0)
+                                        <div class="pt-1">
+                                            <span class="inline-flex items-center gap-1.5 text-[11px] font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-200 shadow-2xs">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                                <span>{{ $activeInThisClass }} Modul Sedang Dibahas di Kelas</span>
+                                            </span>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
 
@@ -693,13 +714,27 @@
 
                 {{-- Grid Card Modul Sedang Dikerjakan --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @forelse($processedModules->where('progress_status', 'in_progress') as $modIndex => $mod)
-                        <div x-show="matchesModule(moduleItems[{{ $modIndex }}], 'in_progress')"
+                    @forelse($inProgressModules as $mod)
+                        <div x-show="matchesModule(moduleItems.find(m => m.id === {{ $mod['id'] }}), 'in_progress')"
                              x-transition:enter="transition ease-out duration-200"
                              x-transition:enter-start="opacity-0 scale-95"
                              x-transition:enter-end="opacity-100 scale-100"
-                             class="group bg-white rounded-3xl border border-slate-200/90 hover:border-amber-400 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden">
+                             class="group bg-white rounded-3xl border {{ !empty($mod['is_active_in_class']) ? 'border-emerald-400 ring-2 ring-emerald-500/25 shadow-emerald-500/10' : 'border-slate-200/90 hover:border-amber-400' }} shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden">
                             
+                            {{-- Top Banner jika modul sedang aktif dibahas di kelas oleh guru --}}
+                            @if(!empty($mod['is_active_in_class']))
+                                <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white px-4 py-2 text-xs font-black flex items-center justify-between shadow-xs">
+                                    <div class="flex items-center gap-2">
+                                        <span class="relative flex h-2.5 w-2.5">
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-200 opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+                                        </span>
+                                        <span class="uppercase tracking-wider text-[11px] font-black">Sedang Dibahas di Kelas</span>
+                                    </div>
+                                    <span class="text-[10px] font-extrabold bg-white/20 px-2 py-0.5 rounded-full backdrop-blur-xs">Materi Aktif</span>
+                                </div>
+                            @endif
+
                             <div class="p-6 space-y-4">
                                 {{-- Top Header: Info Kelas, Info Mapel, Semester, & Status Badge --}}
                                 <div class="flex flex-col gap-2.5">
@@ -727,8 +762,8 @@
                                         </span>
 
                                         {{-- Status Progress Badge --}}
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold {{ $mod['progress_percent'] >= 100 ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-amber-50 text-amber-800 border border-amber-200' }} shrink-0">
+                                            <span class="w-1.5 h-1.5 rounded-full {{ $mod['progress_percent'] >= 100 ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse' }}"></span>
                                             <span>{{ $mod['progress_percent'] }}%</span>
                                         </span>
                                     </div>
@@ -774,7 +809,7 @@
                                 <div class="space-y-1.5 pt-1">
                                     <div class="flex items-center justify-between text-[11px] font-bold">
                                         <span class="text-slate-500">Kemajuan Belajar:</span>
-                                        <span class="text-amber-800">{{ $mod['completed_tasks'] }}/{{ $mod['total_components'] }} Komponen ({{ $mod['progress_percent'] }}%)</span>
+                                        <span class="{{ $mod['progress_percent'] >= 100 ? 'text-emerald-700 font-black' : 'text-amber-800' }}">{{ $mod['completed_tasks'] }}/{{ $mod['total_components'] }} Komponen ({{ $mod['progress_percent'] }}%)</span>
                                     </div>
                                     <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
                                         <div class="h-2 rounded-full bg-gradient-to-r from-amber-500 to-emerald-500 transition-all duration-500" style="width: {{ $mod['progress_percent'] }}%"></div>
@@ -785,8 +820,9 @@
                             {{-- Card Footer Action --}}
                             <div class="p-6 pt-0">
                                 <a href="{{ route('student.modules.show', $mod['id']) }}"
-                                   class="w-full py-3 px-4 rounded-2xl bg-amber-600 hover:bg-amber-500 text-white font-extrabold text-xs transition-all shadow-md shadow-amber-600/20 hover:shadow-lg flex items-center justify-center gap-2 group-hover:scale-[1.01]">
-                                    <span>Lanjutkan Belajar Modul</span>
+                                   class="w-full py-3 px-4 rounded-2xl text-white font-extrabold text-xs transition-all shadow-md flex items-center justify-center gap-2 group-hover:scale-[1.01]
+                                   {{ !empty($mod['is_active_in_class']) ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-emerald-600/25' : 'bg-amber-600 hover:bg-amber-500 shadow-amber-600/20' }}">
+                                    <span>{{ !empty($mod['is_active_in_class']) && $mod['progress_percent'] == 0 ? 'Mulai Belajar (Sedang Dibahas di Kelas)' : ($mod['progress_percent'] >= 100 ? 'Buka & Pelajari Ulang Modul' : 'Lanjutkan Belajar Modul') }}</span>
                                     <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
                                     </svg>
@@ -802,7 +838,7 @@
                             <div class="max-w-md mx-auto space-y-1">
                                 <h3 class="text-base font-extrabold text-slate-800">Belum Ada Modul yang Sedang Dikerjakan</h3>
                                 <p class="text-xs text-slate-500 leading-relaxed">
-                                    Anda belum memulai pengerjaan modul. Silakan pilih modul dari kelas yang Anda ikuti untuk memulai aktivitas belajar.
+                                    Guru Anda belum mengaktifkan modul untuk dibahas di kelas atau Anda belum memulai aktivitas belajar.
                                 </p>
                             </div>
                             <div>
@@ -816,7 +852,7 @@
                     @endforelse
 
                     {{-- Empty State jika hasil filter/pencarian in_progress nihil --}}
-                    @if($processedModules->where('progress_status', 'in_progress')->isNotEmpty())
+                    @if($inProgressModules->isNotEmpty())
                         <div x-show="countVisibleModules('in_progress') === 0"
                              x-cloak
                              class="col-span-full py-16 text-center bg-white rounded-3xl border border-slate-200/90 shadow-sm space-y-4">
@@ -918,13 +954,26 @@
 
                 {{-- Grid Card Modul Riwayat Selesai --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @forelse($processedModules->where('progress_status', 'completed') as $modIndex => $mod)
-                        <div x-show="matchesModule(moduleItems[{{ $modIndex }}], 'completed')"
+                    @forelse($processedModules->where('progress_status', 'completed') as $mod)
+                        <div x-show="matchesModule(moduleItems.find(m => m.id === {{ $mod['id'] }}), 'completed')"
                              x-transition:enter="transition ease-out duration-200"
                              x-transition:enter-start="opacity-0 scale-95"
                              x-transition:enter-end="opacity-100 scale-100"
-                             class="group bg-white rounded-3xl border border-slate-200/90 hover:border-emerald-400 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden">
+                             class="group bg-white rounded-3xl border {{ !empty($mod['is_active_in_class']) ? 'border-emerald-400 ring-2 ring-emerald-500/25 shadow-emerald-500/10' : 'border-slate-200/90 hover:border-emerald-400' }} shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden">
                             
+                            @if(!empty($mod['is_active_in_class']))
+                                <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white px-4 py-2 text-xs font-black flex items-center justify-between shadow-xs">
+                                    <div class="flex items-center gap-2">
+                                        <span class="relative flex h-2.5 w-2.5">
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-200 opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+                                        </span>
+                                        <span class="uppercase tracking-wider text-[11px] font-black">Sedang Dibahas di Kelas</span>
+                                    </div>
+                                    <span class="text-[10px] font-extrabold bg-white/20 px-2 py-0.5 rounded-full backdrop-blur-xs">Materi Aktif</span>
+                                </div>
+                            @endif
+
                             <div class="p-6 space-y-4">
                                 {{-- Top Header: Info Kelas, Info Mapel, Semester, & Status Tuntas --}}
                                 <div class="flex flex-col gap-2.5">
@@ -1156,13 +1205,26 @@
 
                 {{-- Grid Card Semua Modul --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @forelse($processedModules as $modIndex => $mod)
-                        <div x-show="matchesModule(moduleItems[{{ $modIndex }}])"
+                    @forelse($processedModules as $mod)
+                        <div x-show="matchesModule(moduleItems.find(m => m.id === {{ $mod['id'] }}))"
                              x-transition:enter="transition ease-out duration-200"
                              x-transition:enter-start="opacity-0 scale-95"
                              x-transition:enter-end="opacity-100 scale-100"
-                             class="group bg-white rounded-3xl border border-slate-200/90 hover:border-blue-400 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden">
+                             class="group bg-white rounded-3xl border {{ !empty($mod['is_active_in_class']) ? 'border-emerald-400 ring-2 ring-emerald-500/25 shadow-emerald-500/10' : 'border-slate-200/90 hover:border-blue-400' }} shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden">
                             
+                            @if(!empty($mod['is_active_in_class']))
+                                <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white px-4 py-2 text-xs font-black flex items-center justify-between shadow-xs">
+                                    <div class="flex items-center gap-2">
+                                        <span class="relative flex h-2.5 w-2.5">
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-200 opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+                                        </span>
+                                        <span class="uppercase tracking-wider text-[11px] font-black">Sedang Dibahas di Kelas</span>
+                                    </div>
+                                    <span class="text-[10px] font-extrabold bg-white/20 px-2 py-0.5 rounded-full backdrop-blur-xs">Materi Aktif</span>
+                                </div>
+                            @endif
+
                             <div class="p-6 space-y-4">
                                 <div class="flex flex-col gap-2.5">
                                     <div class="flex items-center justify-between gap-2 flex-wrap">

@@ -394,4 +394,45 @@ class StudentDashboardTest extends TestCase
         $moduleCompleted->studentResults()->delete();
         $moduleCompleted->delete();
     }
+
+    public function test_student_sees_active_learning_module_in_sedang_dikerjakan_with_badge()
+    {
+        $student = Student::first();
+        $class = SchoolClass::find($student->class_id) ?? SchoolClass::first();
+        $subject = Subject::first();
+        $teacher = Teacher::first();
+
+        if (!$student || !$class || !$subject || !$teacher) {
+            $this->markTestSkipped('Seed data required.');
+        }
+
+        // Modul diaktifkan oleh guru di kelas siswa (is_active = true) meskipun siswa belum mulai mengerjakan (0%)
+        $activeModule = Module::create([
+            'teacher_id'    => $teacher->id,
+            'class_id'      => $class->id,
+            'subject_id'    => $subject->id,
+            'title'         => 'Modul Tatap Muka Aktif ' . uniqid(),
+            'status'        => 'published',
+            'is_active'     => true,
+            'has_materi'    => true,
+        ]);
+
+        // Akses menu 'Sedang Dikerjakan' (?status=in_progress)
+        $response = $this->actingAs($student, 'student')
+            ->get(route('student.dashboard', ['status' => 'in_progress']));
+
+        $response->assertStatus(200);
+        $response->assertSee($activeModule->title);
+        $response->assertSee('Sedang Dibahas di Kelas');
+        $response->assertSee('Mulai Belajar (Sedang Dibahas di Kelas)');
+
+        // Akses dashboard utama (Kelas Saya), pastikan card kelas menampilkan badge modul aktif
+        $respDashboard = $this->actingAs($student, 'student')
+            ->get(route('student.dashboard'));
+        $respDashboard->assertStatus(200);
+        $respDashboard->assertSee('Modul Sedang Dibahas di Kelas');
+
+        // Cleanup
+        $activeModule->delete();
+    }
 }

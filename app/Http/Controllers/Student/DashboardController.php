@@ -238,6 +238,7 @@ class DashboardController extends Controller
                 'has_embed'         => $module->embed_active,
                 'has_job_sheet'     => $module->job_sheet_active,
                 'has_lkpd'          => $module->lkpd_active,
+                'is_active_in_class'=> (bool) $module->is_active,
             ];
         });
 
@@ -294,7 +295,7 @@ class DashboardController extends Controller
         }
 
         if ($filterStatus === 'in_progress') {
-            $filteredModules = $filteredModules->where('progress_status', 'in_progress');
+            $filteredModules = $filteredModules->filter(fn($m) => $m['is_active_in_class'] || $m['progress_status'] === 'in_progress')->sortByDesc('is_active_in_class')->values();
         } elseif ($filterStatus === 'completed') {
             $filteredModules = $filteredModules->where('progress_status', 'completed');
         } elseif ($filterStatus === 'not_started') {
@@ -304,7 +305,7 @@ class DashboardController extends Controller
         // Metrik KPI Statistik Siswa
         $totalModulesCount = $processedModules->count();
         $completedModulesCount = $processedModules->where('progress_status', 'completed')->count();
-        $inProgressModulesCount = $processedModules->where('progress_status', 'in_progress')->count();
+        $inProgressModulesCount = $processedModules->filter(fn($m) => $m['is_active_in_class'] || $m['progress_status'] === 'in_progress')->count();
         $notStartedModulesCount = $processedModules->where('progress_status', 'not_started')->count();
 
         // Kumpulan tugas belum selesai (To-Do List 5 Teratas)
@@ -347,7 +348,7 @@ class DashboardController extends Controller
                 $filteredClassModules = $filteredClassModules->where('subject_id', (int) $filterSubject)->values();
             }
             if ($filterStatus === 'in_progress') {
-                $filteredClassModules = $filteredClassModules->where('progress_status', 'in_progress')->values();
+                $filteredClassModules = $filteredClassModules->filter(fn($m) => $m['is_active_in_class'] || $m['progress_status'] === 'in_progress')->sortByDesc('is_active_in_class')->values();
             } elseif ($filterStatus === 'completed') {
                 $filteredClassModules = $filteredClassModules->where('progress_status', 'completed')->values();
             } elseif ($filterStatus === 'not_started') {
@@ -356,7 +357,7 @@ class DashboardController extends Controller
 
             $modulesCount = $classModules->count();
             $completedCount = $classModules->where('progress_status', 'completed')->count();
-            $inProgressCount = $classModules->where('progress_status', 'in_progress')->count();
+            $inProgressCount = $classModules->filter(fn($m) => $m['is_active_in_class'] || $m['progress_status'] === 'in_progress')->count();
             $notStartedCount = $classModules->where('progress_status', 'not_started')->count();
             $avgProgress = $modulesCount > 0 ? (int) round($classModules->avg('progress_percent')) : 0;
             $teacherNames = $classModules->pluck('teacher_name')->unique()->filter()->values();
@@ -384,8 +385,9 @@ class DashboardController extends Controller
 
         $displayedClasses = $classesWithModules;
 
-        // Kategori modul terpisah untuk akses cepat tab dashboard
-        $inProgressModules = $processedModules->where('progress_status', 'in_progress')->values();
+        // Kategori modul terpisah untuk akses cepat tab dashboard:
+        // Sedang Dikerjakan memprioritaskan modul yang aktif diajarkan oleh guru di kelas!
+        $inProgressModules = $processedModules->filter(fn($m) => $m['is_active_in_class'] || $m['progress_status'] === 'in_progress')->sortByDesc('is_active_in_class')->values();
         $completedModules = $processedModules->where('progress_status', 'completed')->values();
 
         // Ekstrak daftar tingkat/jenjang kelas yang diikuti siswa untuk chip filter cepat

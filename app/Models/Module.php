@@ -28,7 +28,13 @@ class Module extends Model
         'is_shared'         => 'boolean',
         'shared_at'         => 'datetime',
         'clone_count'       => 'integer',
+        'is_active'         => 'boolean',
     ];
+
+    public function scopeActiveInClass($query)
+    {
+        return $query->where('is_active', true);
+    }
 
     /* ─── Relationships ─────────────────────────── */
 

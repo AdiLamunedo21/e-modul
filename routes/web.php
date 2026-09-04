@@ -197,6 +197,7 @@ Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(fu
     Route::get('/classes/{class}',                                          [ClassController::class, 'show'])->name('classes.show');
     Route::post('/classes/{class}/regenerate-code',                          [ClassController::class, 'regenerateCode'])->name('classes.regenerate-code');
     Route::post('/classes/{class}/import-modules',                          [ClassController::class, 'importModules'])->name('classes.import-modules');
+    Route::post('/classes/{class}/modules/{module}/toggle-active',           [ClassController::class, 'toggleActiveModule'])->name('classes.modules.toggle-active');
     Route::delete('/classes/{class}',                                       [ClassController::class, 'destroy'])->name('classes.destroy');
     Route::get('/classes/{class}/students/{student}/summary',               [ClassController::class, 'getStudentAcademicSummary'])->name('classes.student.summary');
 });

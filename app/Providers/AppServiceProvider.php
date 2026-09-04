@@ -70,7 +70,7 @@ class AppServiceProvider extends ServiceProvider
                         $pct = (int) round(($doneCount / $activeCount) * 100);
                         if ($pct >= 100) {
                             $completedCount++;
-                        } elseif ($pct > 0) {
+                        } elseif ($pct > 0 || (bool) $mod->is_active) {
                             $inProgressCount++;
                         }
                     }

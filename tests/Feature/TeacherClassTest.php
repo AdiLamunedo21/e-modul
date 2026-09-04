@@ -217,4 +217,81 @@ class TeacherClassTest extends TestCase
         $response = $this->get(route('teacher.classes.index'));
         $response->assertRedirect(route('login.teacher'));
     }
+
+    public function test_teacher_can_toggle_module_active_learning_status_in_class()
+    {
+        $teacher = Teacher::first();
+        $class = SchoolClass::first();
+        $subject = Subject::first();
+        if (!$teacher || !$class || !$subject) {
+            $this->markTestSkipped('Seed data required.');
+        }
+
+        $module = Module::create([
+            'title'      => 'Modul Uji Aktif ' . uniqid(),
+            'teacher_id' => $teacher->id,
+            'class_id'   => $class->id,
+            'subject_id' => $subject->id,
+            'status'     => 'published',
+            'is_active'  => false,
+        ]);
+
+        // 1. Guru mengaktifkan modul
+        $response = $this->actingAs($teacher, 'teacher')
+            ->post(route('teacher.classes.modules.toggle-active', [$class, $module]));
+
+        $response->assertRedirect(route('teacher.classes.show', ['class' => $class->id, 'tab' => 'modules']));
+        $response->assertSessionHas('success');
+        $this->assertTrue($module->fresh()->is_active);
+
+        // 2. Guru menonaktifkan modul kembali
+        $responseDeactivate = $this->actingAs($teacher, 'teacher')
+            ->post(route('teacher.classes.modules.toggle-active', [$class, $module]));
+
+        $responseDeactivate->assertRedirect(route('teacher.classes.show', ['class' => $class->id, 'tab' => 'modules']));
+        $responseDeactivate->assertSessionHas('info');
+        $this->assertFalse($module->fresh()->is_active);
+
+        // Cleanup
+        $module->delete();
+    }
+
+    public function test_activating_module_deactivates_other_modules_in_same_class_and_subject()
+    {
+        $teacher = Teacher::first();
+        $class = SchoolClass::first();
+        $subject = Subject::first();
+        if (!$teacher || !$class || !$subject) {
+            $this->markTestSkipped('Seed data required.');
+        }
+
+        $module1 = Module::create([
+            'title'      => 'Modul 1 ' . uniqid(),
+            'teacher_id' => $teacher->id,
+            'class_id'   => $class->id,
+            'subject_id' => $subject->id,
+            'status'     => 'published',
+            'is_active'  => true,
+        ]);
+
+        $module2 = Module::create([
+            'title'      => 'Modul 2 ' . uniqid(),
+            'teacher_id' => $teacher->id,
+            'class_id'   => $class->id,
+            'subject_id' => $subject->id,
+            'status'     => 'published',
+            'is_active'  => false,
+        ]);
+
+        // Aktifkan modul 2
+        $this->actingAs($teacher, 'teacher')
+            ->post(route('teacher.classes.modules.toggle-active', [$class, $module2]));
+
+        $this->assertTrue($module2->fresh()->is_active);
+        $this->assertFalse($module1->fresh()->is_active);
+
+        // Cleanup
+        $module1->delete();
+        $module2->delete();
+    }
 }

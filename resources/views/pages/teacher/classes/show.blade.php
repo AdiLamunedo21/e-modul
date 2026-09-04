@@ -12,6 +12,12 @@
             <span>{{ session('success') }}</span>
         </div>
     @endif
+    @if(session('info'))
+        <div class="flex items-center gap-3 rounded-2xl border border-blue-200 bg-blue-50 px-5 py-4 text-sm font-medium text-blue-800 shadow-sm animate-fade-in">
+            <svg class="w-5 h-5 text-blue-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>
+            <span>{{ session('info') }}</span>
+        </div>
+    @endif
 
     {{-- ══ 1. HEADER & BREADCRUMB ══ --}}
     <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-800 via-indigo-800 to-slate-900 p-6 sm:p-8 text-white shadow-xl shadow-blue-950/20 border border-blue-700/40 mb-8">
@@ -356,41 +362,75 @@
             @endif
         </div>
 
-        {{-- ── TAB CONTENT 2: PORTOFOLIO MODUL GURU ──────────────────────── --}}
-        <div x-show="activeTab === 'modules'" class="p-6 space-y-6">
-            <div class="flex items-center justify-between gap-4 flex-wrap pb-2 border-b border-slate-100">
-                <div>
-                    <h3 class="text-base font-black text-slate-900">Daftar Modul Pembelajaran di Kelas Ini</h3>
-                    <p class="text-xs text-slate-500">Modul yang didistribusikan untuk siswa rombel {{ $class->full_name }}</p>
+        {{-- ── TAB CONTENT 2: PORTOFOLIO MODUL GURU (GRID KARTU & FITUR AKTIFKAN MODUL) ── --}}
+        <div x-show="activeTab === 'modules'"
+             x-data="{ moduleSearch: '' }"
+             class="p-6 space-y-6">
+            
+            {{-- Header & Toolbar Modul --}}
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2.5">
+                        <h3 class="text-base font-black text-slate-900">Modul Pembelajaran di Kelas Ini</h3>
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
+                            {{ $teacherModules->count() }} Modul
+                        </span>
+                        @php
+                            $activeCountInClass = $teacherModules->where('is_active', true)->count();
+                        @endphp
+                        @if($activeCountInClass > 0)
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300 animate-pulse">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                                <span>{{ $activeCountInClass }} Sedang Dibahas di Kelas</span>
+                            </span>
+                        @endif
+                    </div>
+                    <p class="text-xs text-slate-500">
+                        Kelola materi dan aktifkan modul yang sedang diajarkan di kelas agar siswa langsung mengetahuinya di menu <strong>Sedang Dikerjakan</strong>.
+                    </p>
                 </div>
-                <div class="flex items-center gap-2">
+
+                <div class="flex flex-wrap items-center gap-2.5">
+                    {{-- Search Input Cepat Modul --}}
+                    @if($teacherModules->isNotEmpty())
+                        <div class="relative">
+                            <input type="text"
+                                   x-model="moduleSearch"
+                                   placeholder="Cari judul modul atau mapel..."
+                                   class="pl-8 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400 w-48 sm:w-60">
+                            <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
+                            </svg>
+                        </div>
+                    @endif
+
                     <button @click="importModalOpen = true"
                             type="button"
                             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm transition-all">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                         </svg>
-                        <span>Import Modul dari Kelas Lain</span>
+                        <span>Import dari Kelas Lain</span>
                     </button>
                     <a href="{{ route('teacher.modules.create') }}"
                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm transition-all">
-                        <span>Buat Modul Baru</span>
+                        <span>+ Buat Modul Baru</span>
                     </a>
                 </div>
             </div>
 
             @if($teacherModules->isEmpty())
-                <div class="rounded-2xl bg-slate-50 p-12 text-center border border-slate-200">
-                    <div class="w-16 h-16 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0118 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-                        </svg>
+                <div class="rounded-3xl bg-slate-50 p-12 text-center border border-slate-200 space-y-4">
+                    <div class="w-16 h-16 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center mx-auto text-3xl font-black">
+                        📚
                     </div>
-                    <h3 class="text-base font-bold text-slate-800 mb-1">Belum Ada Modul untuk Kelas Ini</h3>
-                    <p class="text-xs text-slate-500 max-w-sm mx-auto mb-6">
-                        Anda dapat mengimpor modul yang sudah pernah dibuat di kelas lain atau membuat modul baru dari awal.
-                    </p>
-                    <div class="flex items-center justify-center gap-3">
+                    <div class="max-w-md mx-auto space-y-1">
+                        <h3 class="text-base font-extrabold text-slate-800">Belum Ada Modul untuk Kelas Ini</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">
+                            Anda dapat mengimpor modul yang sudah pernah dibuat di kelas lain atau membuat modul baru dari awal untuk rombel <strong>{{ $class->full_name }}</strong>.
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-center gap-3 pt-2">
                         <button @click="importModalOpen = true"
                                 class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition-all">
                             <span>📥 Import dari Kelas Lain</span>
@@ -402,67 +442,144 @@
                     </div>
                 </div>
             @else
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {{-- ══ GRID KARTU MODUL DI KELAS INI ══ --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     @foreach($teacherModules as $mod)
                         @php
                             $activeComps = $mod->activeComponents();
                             $stats = $mod->gradingStats();
+                            $searchKey = strtolower($mod->title . ' ' . ($mod->subject?->name ?? '') . ' ' . $mod->status);
                         @endphp
-                        <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
-                            <div class="space-y-3">
-                                {{-- Status Badges --}}
-                                <div class="flex items-center justify-between gap-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold
+                        <div x-show="!moduleSearch || '{{ addslashes($searchKey) }}'.includes(moduleSearch.toLowerCase().trim())"
+                             class="group relative bg-white rounded-3xl border transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-xs hover:shadow-xl hover:-translate-y-1
+                                    {{ $mod->is_active ? 'border-emerald-400 ring-2 ring-emerald-500/25 shadow-emerald-500/10' : 'border-slate-200/90 hover:border-slate-300' }}">
+
+                            {{-- Banner Status Aktif Pembelajaran di Kelas --}}
+                            @if($mod->is_active)
+                                <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white px-4 py-2 text-xs font-black flex items-center justify-between shadow-xs">
+                                    <div class="flex items-center gap-2">
+                                        <span class="relative flex h-2.5 w-2.5">
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-200 opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+                                        </span>
+                                        <span class="uppercase tracking-wider text-[11px] font-black">Sedang Dibahas di Kelas</span>
+                                    </div>
+                                    <span class="text-[10px] font-extrabold bg-white/20 px-2 py-0.5 rounded-full backdrop-blur-xs">Aktif Siswa</span>
+                                </div>
+                            @else
+                                <div class="bg-slate-50 border-b border-slate-100 px-4 py-1.5 text-[11px] font-medium text-slate-400 flex items-center justify-between">
+                                    <span class="flex items-center gap-1.5">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                                        <span>Modul Pembelajaran</span>
+                                    </span>
+                                    <span class="text-[10px] text-slate-400 font-semibold">Siap Diajarkan</span>
+                                </div>
+                            @endif
+
+                            {{-- Bagian Isi Kartu Modul --}}
+                            <div class="p-5 sm:p-6 space-y-4 flex-1">
+                                {{-- Baris Pill Badges: Mapel, Semester, Status Publikasi --}}
+                                <div class="flex items-center justify-between gap-2 flex-wrap">
+                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                        @if($mod->subject)
+                                            <span class="px-2.5 py-1 rounded-xl text-[11px] font-black {{ $mod->subject->badgeClasses() }} border shadow-2xs">
+                                                {{ $mod->subject->name }}
+                                            </span>
+                                        @endif
+                                        <span class="px-2 py-1 rounded-xl text-[11px] font-extrabold bg-slate-100 text-slate-700 border border-slate-200">
+                                            {{ $mod->semester_badge['icon'] }} {{ $mod->semester_badge['label'] }}
+                                        </span>
+                                    </div>
+
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold
                                         {{ $mod->status === 'published' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : ($mod->status === 'draft' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-slate-100 text-slate-700') }}">
                                         {{ ucfirst($mod->status) }}
                                     </span>
-                                    @if($mod->subject)
-                                        <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold {{ $mod->subject->badgeClasses() }}">
-                                            {{ $mod->subject->name }}
-                                        </span>
+                                </div>
+
+                                {{-- Judul & Deskripsi --}}
+                                <div>
+                                    <a href="{{ route('teacher.modules.show', $mod) }}"
+                                       class="text-base sm:text-lg font-black text-slate-900 group-hover:text-blue-700 transition-colors line-clamp-2 leading-snug">
+                                        {{ $mod->title }}
+                                    </a>
+                                    @if(!empty($mod->description))
+                                        <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed mt-1.5">
+                                            {{ $mod->description }}
+                                        </p>
                                     @endif
                                 </div>
 
-                                <h4 class="text-base font-bold text-slate-900 leading-snug">
-                                    {{ $mod->title }}
-                                </h4>
-
-                                {{-- Komponen Penilaian Aktif --}}
-                                <div class="flex flex-wrap gap-1 pt-1">
-                                    @foreach($activeComps as $comp)
-                                        <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-600">
-                                            {{ $comp }}
-                                        </span>
-                                    @endforeach
+                                {{-- Komponen Penilaian & Aktivitas Aktif --}}
+                                <div class="space-y-1.5 pt-1">
+                                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Komponen Aktif ({{ count($activeComps) }})</p>
+                                    <div class="flex flex-wrap gap-1">
+                                        @forelse($activeComps as $comp)
+                                            <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200/60">
+                                                {{ $comp }}
+                                            </span>
+                                        @empty
+                                            <span class="text-[11px] text-slate-400 italic">Belum ada komponen aktif</span>
+                                        @endforelse
+                                    </div>
                                 </div>
 
-                                {{-- Metrik Modul --}}
+                                {{-- Metrik Respon Siswa --}}
                                 <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center">
-                                    <div class="p-2 rounded-xl bg-slate-50">
-                                        <p class="text-[10px] text-slate-400 font-bold uppercase">Submisi</p>
-                                        <p class="text-sm font-black text-slate-800">{{ $stats['submitted_count'] }}</p>
+                                    <div class="p-2.5 rounded-2xl bg-slate-50 border border-slate-100">
+                                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Submisi</p>
+                                        <p class="text-base font-black text-slate-800 mt-0.5">{{ $stats['submitted_count'] }}</p>
                                     </div>
-                                    <div class="p-2 rounded-xl bg-slate-50">
-                                        <p class="text-[10px] text-slate-400 font-bold uppercase">Dinilai</p>
-                                        <p class="text-sm font-black text-emerald-600">{{ $stats['graded_count'] }}</p>
+                                    <div class="p-2.5 rounded-2xl bg-emerald-50/50 border border-emerald-100/60">
+                                        <p class="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">Dinilai</p>
+                                        <p class="text-base font-black text-emerald-700 mt-0.5">{{ $stats['graded_count'] }}</p>
                                     </div>
-                                    <div class="p-2 rounded-xl bg-slate-50">
-                                        <p class="text-[10px] text-slate-400 font-bold uppercase">Rata-rata</p>
-                                        <p class="text-sm font-black text-blue-600">{{ $stats['avg_score'] > 0 ? $stats['avg_score'] : '-' }}</p>
+                                    <div class="p-2.5 rounded-2xl bg-blue-50/50 border border-blue-100/60">
+                                        <p class="text-[10px] text-blue-600 font-bold uppercase tracking-wider">Rata-rata</p>
+                                        <p class="text-base font-black text-blue-700 mt-0.5">{{ $stats['avg_score'] > 0 ? $stats['avg_score'] : '-' }}</p>
                                     </div>
                                 </div>
                             </div>
 
-                            {{-- Aksi Modul --}}
-                            <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-2 mt-4">
-                                <a href="{{ route('teacher.modules.show', $mod) }}"
-                                   class="flex-1 text-center py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
-                                    Buka Builder Modul
-                                </a>
-                                <a href="{{ route('teacher.grading.show', $mod) }}"
-                                   class="flex-1 text-center py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-colors shadow-xs">
-                                    Beri Nilai
-                                </a>
+                            {{-- Footer Kartu: Fitur Aktifkan Modul & Action Buttons --}}
+                            <div class="p-5 sm:p-6 pt-0 space-y-2.5 border-t border-slate-100 bg-slate-50/50">
+                                {{-- ══ TOMBOL UTAMA: FITUR AKTIFKAN / NONAKTIFKAN MODUL DI KELAS ══ --}}
+                                @if($mod->is_active)
+                                    <form action="{{ route('teacher.classes.modules.toggle-active', [$class, $mod]) }}" method="POST" class="w-full">
+                                        @csrf
+                                        <button type="submit"
+                                                class="w-full py-2.5 px-4 rounded-2xl bg-emerald-100 hover:bg-rose-100 text-emerald-800 hover:text-rose-800 border border-emerald-300 hover:border-rose-300 font-extrabold text-xs transition-all flex items-center justify-center gap-2 group/btn shadow-xs">
+                                            <svg class="w-4 h-4 text-emerald-600 group-hover/btn:text-rose-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <span class="group-hover/btn:hidden">✓ Modul Aktif di Kelas Ini</span>
+                                            <span class="hidden group-hover/btn:inline">✕ Klik untuk Nonaktifkan</span>
+                                        </button>
+                                    </form>
+                                @else
+                                    <form action="{{ route('teacher.classes.modules.toggle-active', [$class, $mod]) }}" method="POST" class="w-full">
+                                        @csrf
+                                        <button type="submit"
+                                                class="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-extrabold text-xs transition-all shadow-md shadow-blue-600/20 hover:shadow-lg flex items-center justify-center gap-2">
+                                            <svg class="w-4 h-4 text-blue-200 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                                            </svg>
+                                            <span>Aktifkan Modul untuk Kelas Ini</span>
+                                        </button>
+                                    </form>
+                                @endif
+
+                                {{-- Tombol Cepat: Builder & Beri Nilai --}}
+                                <div class="flex items-center gap-2">
+                                    <a href="{{ route('teacher.modules.show', $mod) }}"
+                                       class="flex-1 text-center py-2 px-3 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold transition-all shadow-2xs">
+                                        Builder Modul
+                                    </a>
+                                    <a href="{{ route('teacher.grading.show', $mod) }}"
+                                       class="flex-1 text-center py-2 px-3 rounded-xl bg-slate-900 hover:bg-blue-600 text-white text-xs font-bold transition-all shadow-2xs">
+                                        Beri Nilai
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     @endforeach

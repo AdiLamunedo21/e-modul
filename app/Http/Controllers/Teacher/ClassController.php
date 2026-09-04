@@ -293,6 +293,46 @@ class ClassController extends Controller
     }
 
     /**
+     * Mengaktifkan atau menonaktifkan modul sebagai materi pembelajaran aktif yang sedang dibahas di kelas.
+     */
+    public function toggleActiveModule(SchoolClass $class, Module $module)
+    {
+        $teacher = $this->teacher();
+
+        // Validasi kepemilikan / relasi modul dengan kelas dan guru
+        if ((int) $module->class_id !== (int) $class->id || (int) $module->teacher_id !== (int) $teacher->id) {
+            abort(403, 'Anda tidak memiliki hak akses untuk mengelola modul pada kelas ini.');
+        }
+
+        if ($module->is_active) {
+            $module->update(['is_active' => false]);
+            $message = "Modul '{$module->title}' berhasil dinonaktifkan dari pembelajaran aktif di kelas {$class->full_name}.";
+            $type = 'info';
+        } else {
+            // Nonaktifkan modul lain di kelas & mapel yang sama (jika ada) agar fokus 1 modul utama aktif
+            Module::where('class_id', $class->id)
+                ->where('subject_id', $module->subject_id)
+                ->where('id', '!=', $module->id)
+                ->update(['is_active' => false]);
+
+            $module->update(['is_active' => true]);
+            $message = "Modul '{$module->title}' berhasil DIAKTIFKAN untuk pembelajaran di kelas {$class->full_name}! Siswa sekarang dapat melihatnya di menu Sedang Dikerjakan.";
+            $type = 'success';
+        }
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success'   => true,
+                'is_active' => (bool) $module->is_active,
+                'message'   => $message,
+            ]);
+        }
+
+        return redirect()->route('teacher.classes.show', ['class' => $class->id, 'tab' => 'modules'])
+            ->with($type, $message);
+    }
+
+    /**
      * Menghapus kelas rombel dan modulnya, serta melepaskan siswa (unassign) tanpa menghapus akun siswa.
      */
     public function destroy(SchoolClass $class)
