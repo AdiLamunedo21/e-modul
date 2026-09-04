@@ -338,4 +338,60 @@ class TeacherClassTest extends TestCase
         $olderActiveModule->delete();
         $newerInactiveModule->delete();
     }
+
+    public function test_teacher_class_students_directory_is_paginated_to_15_per_page()
+    {
+        $teacher = Teacher::first();
+        $class = SchoolClass::first();
+        if (!$teacher || !$class) {
+            $this->markTestSkipped('Seed data required.');
+        }
+
+        // Attach enough dummy students to the class to exceed 15
+        $currentCount = $class->students()->count();
+        $needed = max(0, 18 - $currentCount);
+        $createdStudents = [];
+
+        for ($i = 0; $i < $needed; $i++) {
+            $student = Student::create([
+                'name' => 'Siswa Test Paginate ' . uniqid(),
+                'identity_number' => '999' . rand(1000000, 9999999),
+                'password' => bcrypt('password'),
+                'class_id' => $class->id,
+            ]);
+            $class->students()->attach($student->id);
+            $createdStudents[] = $student;
+        }
+
+        $response = $this->actingAs($teacher, 'teacher')
+            ->get(route('teacher.classes.show', ['class' => $class->id, 'tab' => 'students']));
+
+        $response->assertOk();
+        $students = $response->viewData('students');
+        $this->assertInstanceOf(\Illuminate\Contracts\Pagination\LengthAwarePaginator::class, $students);
+        $this->assertEquals(15, $students->perPage());
+        $this->assertCount(15, $students->items());
+        $this->assertGreaterThanOrEqual(18, $students->total());
+
+        // Check academic_summary is present on students
+        $firstStudent = $students->first();
+        $this->assertNotNull($firstStudent->academic_summary);
+        $this->assertArrayHasKey('kktp_status', $firstStudent->academic_summary);
+        $this->assertArrayHasKey('total_modules', $firstStudent->academic_summary);
+
+        // Check page 2
+        $responsePage2 = $this->actingAs($teacher, 'teacher')
+            ->get(route('teacher.classes.show', ['class' => $class->id, 'tab' => 'students', 'page' => 2]));
+
+        $responsePage2->assertOk();
+        $studentsPage2 = $responsePage2->viewData('students');
+        $this->assertEquals(2, $studentsPage2->currentPage());
+
+        // Cleanup
+        foreach ($createdStudents as $s) {
+            $class->students()->detach($s->id);
+            $s->delete();
+        }
+    }
 }
+

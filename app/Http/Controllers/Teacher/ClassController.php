@@ -211,10 +211,11 @@ class ClassController extends Controller
             });
         }
 
-        $students = $studentsQuery->get();
+        $students = $studentsQuery->paginate(15)->withQueryString();
+        $students->appends(['tab' => 'students']);
 
         // Hitung ringkasan performa per siswa untuk modul-modul guru ini
-        $students->transform(function ($student) use ($teacherModules) {
+        $students->through(function ($student) use ($teacherModules) {
             $moduleCount = $teacherModules->count();
             $submittedCount = 0;
             $gradedCount = 0;

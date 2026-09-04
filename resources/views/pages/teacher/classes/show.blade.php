@@ -200,7 +200,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
                     </svg>
-                    <span>Direktori Siswa ({{ $students->count() }})</span>
+                    <span>Direktori Siswa ({{ $students->total() }})</span>
                 </button>
 
                 <button type="button" @click="activeTab = 'modules'"
@@ -237,6 +237,7 @@
             {{-- Search Bar Siswa --}}
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <form action="{{ route('teacher.classes.show', $class) }}" method="GET" class="relative flex-1 max-w-md">
+                    <input type="hidden" name="tab" value="students">
                     <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -247,8 +248,12 @@
                            class="w-full pl-10 pr-4 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400">
                 </form>
 
-                <p class="text-xs text-slate-400">
-                    Menampilkan <strong class="text-slate-700">{{ $students->count() }}</strong> Siswa
+                <p class="text-xs text-slate-500">
+                    @if($students->hasPages())
+                        Menampilkan <strong class="text-slate-800">{{ $students->firstItem() }}–{{ $students->lastItem() }}</strong> dari <strong class="text-slate-800">{{ $students->total() }}</strong> Siswa
+                    @else
+                        Menampilkan <strong class="text-slate-800">{{ $students->total() }}</strong> Siswa
+                    @endif
                 </p>
             </div>
 
@@ -280,7 +285,7 @@
                                 <tr class="hover:bg-slate-50/80 transition-colors {{ $index % 2 === 1 ? 'bg-slate-50/30' : '' }}">
                                     {{-- No --}}
                                     <td class="py-3.5 px-4 text-center font-bold text-slate-400">
-                                        {{ $index + 1 }}
+                                        {{ $students->firstItem() + $index }}
                                     </td>
 
                                     {{-- Nama Siswa & Avatar --}}
@@ -358,6 +363,13 @@
                             @endforeach
                         </tbody>
                     </table>
+
+                    {{-- Pagination Direktori Siswa --}}
+                    @if($students->hasPages())
+                        <div class="p-4 border-t border-slate-100 bg-slate-50/50">
+                            {{ $students->links() }}
+                        </div>
+                    @endif
                 </div>
             @endif
         </div>
