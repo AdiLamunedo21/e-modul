@@ -7,7 +7,7 @@
             <div class="flex items-center gap-3">
                 <span class="w-10 h-10 rounded-2xl bg-teal-100 text-teal-700 flex items-center justify-center text-lg font-bold">🎯</span>
                 <div>
-                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-teal-600">Bagian 2: Pendahuluan</span>
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-teal-600">Bagian {{ $secMap[2] ?? 2 }}: Pendahuluan</span>
                     <h2 class="text-xl sm:text-2xl font-black text-slate-900">Tujuan Pembelajaran & Capaian</h2>
                 </div>
             </div>

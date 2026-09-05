@@ -8,7 +8,7 @@
             <div class="flex items-center gap-3">
                 <span class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg font-bold shadow-xs">👥</span>
                 <div>
-                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-amber-600">Bagian 4 • Lembar Kerja Peserta Didik</span>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-amber-600">Bagian {{ $secMap[4] ?? 4 }} • Lembar Kerja Peserta Didik</span>
                     <h2 class="text-lg sm:text-xl font-black text-slate-900">{{ $lkpdData['judul_lkpd'] ?? 'Tugas Lembar Kerja (LKPD)' }}</h2>
                 </div>
             </div>

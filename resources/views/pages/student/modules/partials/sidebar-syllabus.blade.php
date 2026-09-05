@@ -41,7 +41,7 @@
                             @click="toggleSection(1)"
                             class="w-full px-3.5 py-3 text-left flex items-center justify-between text-xs font-extrabold text-slate-800 hover:bg-slate-100/60 transition cursor-pointer">
                         <span class="flex items-center gap-2">
-                            <span class="w-5 h-5 rounded-lg bg-indigo-100 text-indigo-700 text-[10px] font-black flex items-center justify-center">1</span>
+                            <span class="w-5 h-5 rounded-lg bg-indigo-100 text-indigo-700 text-[10px] font-black flex items-center justify-center">{{ $secMap[1] ?? 1 }}</span>
                             <span>Bagian Awal</span>
                         </span>
                         <svg class="w-4 h-4 text-slate-400 transition-transform duration-200"
@@ -84,7 +84,7 @@
                             @click="toggleSection(2)"
                             class="w-full px-3.5 py-3 text-left flex items-center justify-between text-xs font-extrabold text-slate-800 hover:bg-slate-100/60 transition cursor-pointer">
                         <span class="flex items-center gap-2">
-                            <span class="w-5 h-5 rounded-lg bg-teal-100 text-teal-700 text-[10px] font-black flex items-center justify-center">2</span>
+                            <span class="w-5 h-5 rounded-lg bg-teal-100 text-teal-700 text-[10px] font-black flex items-center justify-center">{{ $secMap[2] ?? 2 }}</span>
                             <span>Pendahuluan</span>
                         </span>
                         <svg class="w-4 h-4 text-slate-400 transition-transform duration-200"
@@ -127,7 +127,7 @@
                             @click="toggleSection(3)"
                             class="w-full px-3.5 py-3 text-left flex items-center justify-between text-xs font-extrabold text-slate-800 hover:bg-slate-100/60 transition cursor-pointer">
                         <span class="flex items-center gap-2">
-                            <span class="w-5 h-5 rounded-lg bg-blue-100 text-blue-700 text-[10px] font-black flex items-center justify-center">3</span>
+                            <span class="w-5 h-5 rounded-lg bg-blue-100 text-blue-700 text-[10px] font-black flex items-center justify-center">{{ $secMap[3] ?? 3 }}</span>
                             <span>Kegiatan Belajar</span>
                         </span>
                         <svg class="w-4 h-4 text-slate-400 transition-transform duration-200"
@@ -170,7 +170,7 @@
                             @click="toggleSection(4)"
                             class="w-full px-3.5 py-3 text-left flex items-center justify-between text-xs font-extrabold text-slate-800 hover:bg-slate-100/60 transition cursor-pointer">
                         <span class="flex items-center gap-2">
-                            <span class="w-5 h-5 rounded-lg bg-violet-100 text-violet-700 text-[10px] font-black flex items-center justify-center">4</span>
+                            <span class="w-5 h-5 rounded-lg bg-violet-100 text-violet-700 text-[10px] font-black flex items-center justify-center">{{ $secMap[4] ?? 4 }}</span>
                             <span>Evaluasi & Praktik</span>
                         </span>
                         <svg class="w-4 h-4 text-slate-400 transition-transform duration-200"
@@ -213,7 +213,7 @@
                             @click="toggleSection(5)"
                             class="w-full px-3.5 py-3 text-left flex items-center justify-between text-xs font-extrabold text-slate-800 hover:bg-slate-100/60 transition cursor-pointer">
                         <span class="flex items-center gap-2">
-                            <span class="w-5 h-5 rounded-lg bg-rose-100 text-rose-700 text-[10px] font-black flex items-center justify-center">5</span>
+                            <span class="w-5 h-5 rounded-lg bg-rose-100 text-rose-700 text-[10px] font-black flex items-center justify-center">{{ $secMap[5] ?? 5 }}</span>
                             <span>Bagian Akhir</span>
                         </span>
                         <svg class="w-4 h-4 text-slate-400 transition-transform duration-200"

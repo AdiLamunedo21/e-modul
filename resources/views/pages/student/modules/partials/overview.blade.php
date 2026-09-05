@@ -9,11 +9,12 @@
     <div class="space-y-6">
 
         {{-- ── 1. BAGIAN AWAL ── --}}
+        @if($hasSec1)
         <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm p-6 sm:p-7 hover:shadow-md transition">
             <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 flex items-center justify-center font-black text-2xl text-indigo-600 shrink-0">
-                        1
+                        {{ $secMap[1] ?? 1 }}
                     </div>
                     <div>
                         <h3 class="text-base sm:text-lg font-bold text-slate-900">Bagian Awal</h3>
@@ -95,13 +96,15 @@
                 @endif
             </div>
         </div>
+        @endif
 
         {{-- ── 2. PENDAHULUAN ── --}}
+        @if($hasSec2)
         <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm p-6 sm:p-7 hover:shadow-md transition">
             <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 flex items-center justify-center font-black text-2xl text-teal-600 shrink-0">
-                        2
+                        {{ $secMap[2] ?? 2 }}
                     </div>
                     <div>
                         <h3 class="text-base sm:text-lg font-bold text-slate-900">Pendahuluan</h3>
@@ -272,13 +275,15 @@
                 @endif
             </div>
         </div>
+        @endif
 
         {{-- ── 3. KEGIATAN BELAJAR ── --}}
+        @if($hasSec3)
         <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm p-6 sm:p-7 hover:shadow-md transition">
             <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 flex items-center justify-center font-black text-2xl text-blue-600 shrink-0">
-                        3
+                        {{ $secMap[3] ?? 3 }}
                     </div>
                     <div>
                         <h3 class="text-base sm:text-lg font-bold text-slate-900">Kegiatan Belajar</h3>
@@ -365,13 +370,15 @@
                 @endif
             </div>
         </div>
+        @endif
 
         {{-- ── 4. EVALUASI & PRAKTIK ── --}}
+        @if($hasSec4)
         <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm p-6 sm:p-7 hover:shadow-md transition">
             <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 flex items-center justify-center font-black text-2xl text-violet-600 shrink-0">
-                        4
+                        {{ $secMap[4] ?? 4 }}
                     </div>
                     <div>
                         <h3 class="text-base sm:text-lg font-bold text-slate-900">Evaluasi & Praktik</h3>
@@ -496,13 +503,15 @@
                 @endif
             </div>
         </div>
+        @endif
 
         {{-- ── 5. BAGIAN AKHIR ── --}}
+        @if($hasSec5)
         <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm p-6 sm:p-7 hover:shadow-md transition">
             <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 flex items-center justify-center font-black text-2xl text-rose-600 shrink-0">
-                        5
+                        {{ $secMap[5] ?? 5 }}
                     </div>
                     <div>
                         <h3 class="text-base sm:text-lg font-bold text-slate-900">Bagian Akhir & Evaluasi Sumatif</h3>
@@ -553,7 +562,7 @@
                 @endif
 
                 {{-- Item: Daftar Pustaka --}}
-                @if($module->isInfoComponentActive('daftar_pustaka'))
+                @if($hasDaftarPustaka)
                     <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition">
                         <div class="flex items-center gap-3">
                             <span class="w-8 h-8 flex items-center justify-center text-lg shrink-0">📚</span>
@@ -589,22 +598,38 @@
                 @endif
 
                 {{-- Item: Rekap Nilai --}}
-                <div class="flex items-center justify-between p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200 hover:bg-emerald-100/50 transition">
-                    <div class="flex items-center gap-3">
-                        <span class="w-8 h-8 flex items-center justify-center text-lg shrink-0">📊</span>
-                        <div>
-                            <h4 class="text-xs font-bold text-emerald-950">Rekapitulasi Nilai</h4>
-                            <p class="text-[11px] text-emerald-800">Transparansi skor perolehan tugas mandiri & kuis evaluasi</p>
+                @if($hasScoredTasks)
+                    <div class="flex items-center justify-between p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200 hover:bg-emerald-100/50 transition">
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 flex items-center justify-center text-lg shrink-0">📊</span>
+                            <div>
+                                <h4 class="text-xs font-bold text-emerald-950">Rekapitulasi Nilai</h4>
+                                <p class="text-[11px] text-emerald-800">Transparansi skor perolehan tugas mandiri & kuis evaluasi</p>
+                            </div>
                         </div>
+                        <button type="button"
+                                @click="goToPage('rekap_nilai')"
+                                class="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition cursor-pointer">
+                            Lihat Rekap →
+                        </button>
                     </div>
-                    <button type="button"
-                            @click="goToPage('rekap_nilai')"
-                            class="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition cursor-pointer">
-                        Lihat Rekap →
-                    </button>
-                </div>
+                @endif
             </div>
         </div>
+        @endif
+
+        {{-- Pesan jika seluruh tahap dinonaktifkan guru --}}
+        @if(!$hasSec1 && !$hasSec2 && !$hasSec3 && !$hasSec4 && !$hasSec5)
+            <div class="p-8 sm:p-12 text-center rounded-3xl bg-white border border-slate-200 shadow-sm space-y-3">
+                <div class="w-14 h-14 mx-auto rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center text-2xl">
+                    📦
+                </div>
+                <h4 class="text-base font-bold text-slate-800">Tahap Pembelajaran Belum Tersedia</h4>
+                <p class="text-xs text-slate-500 max-w-md mx-auto">
+                    Guru pengampu belum mengaktifkan materi atau aktivitas pada modul pembelajaran ini. Silakan hubungi guru untuk informasi lebih lanjut.
+                </p>
+            </div>
+        @endif
 
     </div>
 

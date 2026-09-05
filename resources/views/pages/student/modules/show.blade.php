@@ -40,63 +40,103 @@
     // Definisikan seluruh halaman aktivitas yang aktif secara berurutan
     $pagesList = [];
 
+    // Evaluasi status keaktifan masing-masing tahap (1 s/d 5)
+    $hasKataPengantar = (bool) $module->isInfoComponentActive('kata_pengantar');
+    $hasPetunjuk = (bool) $module->isInfoComponentActive('petunjuk_penggunaan');
+    $hasSec1 = $hasKataPengantar || $hasPetunjuk;
+
+    $hasTujuan = (bool) $module->isInfoComponentActive('tujuan_pembelajaran');
+    $hasPetaKonsep = (bool) ($module->isInfoComponentActive('peta_konsep') && (
+        !empty($informasiUmum['peta_konsep_text']) ||
+        !empty($informasiUmum['peta_konsep']['peta_konsep_text']) ||
+        !empty($informasiUmum['peta_konsep']['peta_konsep_image_path']) ||
+        (!empty($informasiUmum['peta_konsep']) && is_string($informasiUmum['peta_konsep']))
+    ));
+    $hasGlosarium = (bool) ($module->isInfoComponentActive('glosarium') && (
+        (!empty($informasiUmum['glosarium']) && is_array($informasiUmum['glosarium']) && count($informasiUmum['glosarium']) > 0) ||
+        (!empty($informasiUmum['glosarium']) && is_string($informasiUmum['glosarium']) && trim($informasiUmum['glosarium']) !== '')
+    ));
+    $hasPreTest = (bool) ($module->has_pre_test && $module->preTest);
+    $hasSec2 = $hasTujuan || $hasPetaKonsep || $hasGlosarium || $hasPreTest;
+
+    $hasMateri = (bool) $module->has_materi;
+    $hasVideo = (bool) $module->has_video;
+    $hasSec3 = $hasMateri || $hasVideo;
+
+    $hasEmbed = (bool) $module->has_embed;
+    $hasJobSheet = (bool) $module->has_job_sheet;
+    $hasLkpd = (bool) $module->has_lkpd;
+    $hasSec4 = $hasEmbed || $hasJobSheet || $hasLkpd;
+
+    $hasPostTest = (bool) ($module->has_post_test && $module->postTest);
+    $hasDaftarPustaka = (bool) ($module->isInfoComponentActive('daftar_pustaka') && (
+        !empty($informasiUmum['daftar_pustaka']['daftar_pustaka']) ||
+        (!empty($informasiUmum['daftar_pustaka']) && is_array($informasiUmum['daftar_pustaka']) && count(array_filter($informasiUmum['daftar_pustaka'])) > 0) ||
+        (!empty($informasiUmum['daftar_pustaka']) && is_string($informasiUmum['daftar_pustaka']) && trim($informasiUmum['daftar_pustaka']) !== '')
+    ));
+    $hasSec5 = $hasPostTest || $hasDaftarPustaka;
+
+    // Hitung nomor urut tahap secara dinamis dan sekuensial (1, 2, 3, dst.) sesuai tahap yang aktif
+    $secMap = [];
+    $secCounter = 1;
+    if ($hasSec1) { $secMap[1] = $secCounter++; }
+    if ($hasSec2) { $secMap[2] = $secCounter++; }
+    if ($hasSec3) { $secMap[3] = $secCounter++; }
+    if ($hasSec4) { $secMap[4] = $secCounter++; }
+    if ($hasSec5) { $secMap[5] = $secCounter++; }
+
     // Bagian 1: Bagian Awal
-    if ($module->isInfoComponentActive('kata_pengantar')) {
-        $pagesList[] = ['id' => 'kata_pengantar', 'type' => 'read', 'sec' => 1, 'sec_name' => '1. Bagian Awal', 'title' => 'Kata Pengantar', 'icon' => '✏️', 'badge' => 'Pengantar', 'desc' => 'Prakata dan sambutan motivasi guru pengampu'];
+    if ($hasKataPengantar) {
+        $pagesList[] = ['id' => 'kata_pengantar', 'type' => 'read', 'sec' => 1, 'sec_name' => ($secMap[1] ?? 1) . '. Bagian Awal', 'title' => 'Kata Pengantar', 'icon' => '✏️', 'badge' => 'Pengantar', 'desc' => 'Prakata dan sambutan motivasi guru pengampu'];
     }
-    if ($module->isInfoComponentActive('petunjuk_penggunaan')) {
-        $pagesList[] = ['id' => 'petunjuk_penggunaan', 'type' => 'read', 'sec' => 1, 'sec_name' => '1. Bagian Awal', 'title' => 'Petunjuk Penggunaan', 'icon' => '💡', 'badge' => 'Panduan', 'desc' => 'Panduan langkah belajar mandiri peserta didik'];
+    if ($hasPetunjuk) {
+        $pagesList[] = ['id' => 'petunjuk_penggunaan', 'type' => 'read', 'sec' => 1, 'sec_name' => ($secMap[1] ?? 1) . '. Bagian Awal', 'title' => 'Petunjuk Penggunaan', 'icon' => '💡', 'badge' => 'Panduan', 'desc' => 'Panduan langkah belajar mandiri peserta didik'];
     }
 
     // Bagian 2: Pendahuluan
-    if ($module->isInfoComponentActive('tujuan_pembelajaran')) {
-        $pagesList[] = ['id' => 'tujuan_pembelajaran', 'type' => 'read', 'sec' => 2, 'sec_name' => '2. Pendahuluan', 'title' => 'Tujuan & Capaian', 'icon' => '🎯', 'badge' => 'Capaian', 'desc' => 'Target kompetensi pembelajaran (CP & TP)'];
+    if ($hasTujuan) {
+        $pagesList[] = ['id' => 'tujuan_pembelajaran', 'type' => 'read', 'sec' => 2, 'sec_name' => ($secMap[2] ?? 2) . '. Pendahuluan', 'title' => 'Tujuan & Capaian', 'icon' => '🎯', 'badge' => 'Capaian', 'desc' => 'Target kompetensi pembelajaran (CP & TP)'];
     }
-    $hasPetaKonsep = !empty($informasiUmum['peta_konsep_text'])
-        || !empty($informasiUmum['peta_konsep']['peta_konsep_text'])
-        || !empty($informasiUmum['peta_konsep']['peta_konsep_image_path'])
-        || (!empty($informasiUmum['peta_konsep']) && is_string($informasiUmum['peta_konsep']));
-    if ($module->isInfoComponentActive('peta_konsep') && $hasPetaKonsep) {
-        $pagesList[] = ['id' => 'peta_konsep', 'type' => 'read', 'sec' => 2, 'sec_name' => '2. Pendahuluan', 'title' => 'Peta Konsep Materi', 'icon' => '🗺️', 'badge' => 'Alur Materi', 'desc' => 'Diagram hierarki konsep materi kejuruan'];
+    if ($hasPetaKonsep) {
+        $pagesList[] = ['id' => 'peta_konsep', 'type' => 'read', 'sec' => 2, 'sec_name' => ($secMap[2] ?? 2) . '. Pendahuluan', 'title' => 'Peta Konsep Materi', 'icon' => '🗺️', 'badge' => 'Alur Materi', 'desc' => 'Diagram hierarki konsep materi kejuruan'];
     }
-    $hasGlosarium = !empty($informasiUmum['glosarium']) && (
-        (is_array($informasiUmum['glosarium']) && count($informasiUmum['glosarium']) > 0)
-        || (is_string($informasiUmum['glosarium']) && trim($informasiUmum['glosarium']) !== '')
-    );
-    if ($module->isInfoComponentActive('glosarium') && $hasGlosarium) {
-        $pagesList[] = ['id' => 'glosarium', 'type' => 'read', 'sec' => 2, 'sec_name' => '2. Pendahuluan', 'title' => 'Glosarium Istilah', 'icon' => '📖', 'badge' => 'Kamus', 'desc' => 'Kamus istilah teknis & konsep penting'];
+    if ($hasGlosarium) {
+        $pagesList[] = ['id' => 'glosarium', 'type' => 'read', 'sec' => 2, 'sec_name' => ($secMap[2] ?? 2) . '. Pendahuluan', 'title' => 'Glosarium Istilah', 'icon' => '📖', 'badge' => 'Kamus', 'desc' => 'Kamus istilah teknis & konsep penting'];
     }
-    if ($module->has_pre_test && $module->preTest) {
-        $pagesList[] = ['id' => 'pre_test', 'type' => 'quiz', 'sec' => 2, 'sec_name' => '2. Pendahuluan', 'title' => 'Pre-test (Diagnostik)', 'icon' => '⚡', 'badge' => 'Kuis Awal', 'desc' => 'Tes diagnostik awal kemampuan siswa'];
+    if ($hasPreTest) {
+        $pagesList[] = ['id' => 'pre_test', 'type' => 'quiz', 'sec' => 2, 'sec_name' => ($secMap[2] ?? 2) . '. Pendahuluan', 'title' => 'Pre-test (Diagnostik)', 'icon' => '⚡', 'badge' => 'Kuis Awal', 'desc' => 'Tes diagnostik awal kemampuan siswa'];
     }
 
     // Bagian 3: Kegiatan Belajar
-    if ($module->has_materi) {
-        $pagesList[] = ['id' => 'materi', 'type' => 'read', 'sec' => 3, 'sec_name' => '3. Kegiatan Belajar', 'title' => 'Uraian Materi & PPT', 'icon' => '📖', 'badge' => 'Materi Inti', 'desc' => 'Uraian teori mendalam & slide presentasi'];
+    if ($hasMateri) {
+        $pagesList[] = ['id' => 'materi', 'type' => 'read', 'sec' => 3, 'sec_name' => ($secMap[3] ?? 3) . '. Kegiatan Belajar', 'title' => 'Uraian Materi & PPT', 'icon' => '📖', 'badge' => 'Materi Inti', 'desc' => 'Uraian teori mendalam & slide presentasi'];
     }
-    if ($module->has_video) {
-        $pagesList[] = ['id' => 'video', 'type' => 'submission', 'sec' => 3, 'sec_name' => '3. Kegiatan Belajar', 'title' => 'Video & Resume YouTube', 'icon' => '▶️', 'badge' => 'Multimedia', 'desc' => 'Video interaktif & penulisan resume intisari'];
+    if ($hasVideo) {
+        $pagesList[] = ['id' => 'video', 'type' => 'submission', 'sec' => 3, 'sec_name' => ($secMap[3] ?? 3) . '. Kegiatan Belajar', 'title' => 'Video & Resume YouTube', 'icon' => '▶️', 'badge' => 'Multimedia', 'desc' => 'Video interaktif & penulisan resume intisari'];
     }
 
     // Bagian 4: Evaluasi & Praktik
-    if ($module->has_embed) {
-        $pagesList[] = ['id' => 'embed', 'type' => 'submission', 'sec' => 4, 'sec_name' => '4. Evaluasi & Praktik', 'title' => 'Simulator Embed Interaktif', 'icon' => '🎮', 'badge' => 'Praktik', 'desc' => 'Eksplorasi simulator & upload screenshot'];
+    if ($hasEmbed) {
+        $pagesList[] = ['id' => 'embed', 'type' => 'submission', 'sec' => 4, 'sec_name' => ($secMap[4] ?? 4) . '. Evaluasi & Praktik', 'title' => 'Simulator Embed Interaktif', 'icon' => '🎮', 'badge' => 'Praktik', 'desc' => 'Eksplorasi simulator & upload screenshot'];
     }
-    if ($module->has_job_sheet) {
-        $pagesList[] = ['id' => 'job_sheet', 'type' => 'submission', 'sec' => 4, 'sec_name' => '4. Evaluasi & Praktik', 'title' => 'Job Sheet Praktikum', 'icon' => '📑', 'badge' => 'Laboratorium', 'desc' => 'Panduan instruksi kerja & laporan PDF'];
+    if ($hasJobSheet) {
+        $pagesList[] = ['id' => 'job_sheet', 'type' => 'submission', 'sec' => 4, 'sec_name' => ($secMap[4] ?? 4) . '. Evaluasi & Praktik', 'title' => 'Job Sheet Praktikum', 'icon' => '📑', 'badge' => 'Laboratorium', 'desc' => 'Panduan instruksi kerja & laporan PDF'];
     }
-    if ($module->has_lkpd) {
-        $pagesList[] = ['id' => 'lkpd', 'type' => 'submission', 'sec' => 4, 'sec_name' => '4. Evaluasi & Praktik', 'title' => 'Tugas LKPD Siswa', 'icon' => '📋', 'badge' => 'Penugasan', 'desc' => 'Lembar kerja peserta didik berbasis proyek'];
+    if ($hasLkpd) {
+        $pagesList[] = ['id' => 'lkpd', 'type' => 'submission', 'sec' => 4, 'sec_name' => ($secMap[4] ?? 4) . '. Evaluasi & Praktik', 'title' => 'Tugas LKPD Siswa', 'icon' => '📋', 'badge' => 'Penugasan', 'desc' => 'Lembar kerja peserta didik berbasis proyek'];
     }
 
     // Bagian 5: Bagian Akhir
-    if ($module->has_post_test && $module->postTest) {
-        $pagesList[] = ['id' => 'post_test', 'type' => 'quiz', 'sec' => 5, 'sec_name' => '5. Bagian Akhir', 'title' => 'Post-test (Evaluasi Akhir)', 'icon' => '🏆', 'badge' => 'Uji Akhir', 'desc' => 'Evaluasi ketuntasan belajar akhir modul'];
+    if ($hasPostTest) {
+        $pagesList[] = ['id' => 'post_test', 'type' => 'quiz', 'sec' => 5, 'sec_name' => ($secMap[5] ?? 5) . '. Bagian Akhir', 'title' => 'Post-test (Evaluasi Akhir)', 'icon' => '🏆', 'badge' => 'Uji Akhir', 'desc' => 'Evaluasi ketuntasan belajar akhir modul'];
     }
-    if ($module->isInfoComponentActive('daftar_pustaka') && !empty($informasiUmum['daftar_pustaka']['daftar_pustaka'])) {
-        $pagesList[] = ['id' => 'daftar_pustaka', 'type' => 'read', 'sec' => 5, 'sec_name' => '5. Bagian Akhir', 'title' => 'Daftar Pustaka', 'icon' => '📚', 'badge' => 'Rujukan', 'desc' => 'Daftar referensi buku dan sumber materi'];
+    if ($hasDaftarPustaka) {
+        $pagesList[] = ['id' => 'daftar_pustaka', 'type' => 'read', 'sec' => 5, 'sec_name' => ($secMap[5] ?? 5) . '. Bagian Akhir', 'title' => 'Daftar Pustaka', 'icon' => '📚', 'badge' => 'Rujukan', 'desc' => 'Daftar referensi buku dan sumber materi'];
     }
-    $pagesList[] = ['id' => 'rekap_nilai', 'type' => 'rekap', 'sec' => 5, 'sec_name' => '5. Bagian Akhir', 'title' => 'Rekapitulasi Nilai', 'icon' => '📊', 'badge' => 'Transparansi', 'desc' => 'Matriks transparansi skor evaluasi siswa'];
+    $hasScoredTasks = (bool) ($module->has_pre_test || $module->has_video || $module->has_embed || $module->has_job_sheet || $module->has_lkpd || $module->has_post_test);
+    if ($hasSec5 && $hasScoredTasks) {
+        $pagesList[] = ['id' => 'rekap_nilai', 'type' => 'rekap', 'sec' => 5, 'sec_name' => ($secMap[5] ?? 5) . '. Bagian Akhir', 'title' => 'Rekapitulasi Nilai', 'icon' => '📊', 'badge' => 'Transparansi', 'desc' => 'Matriks transparansi skor evaluasi siswa'];
+    }
 
     // Status penyelesaian awal untuk tombol Mulai/Lanjut
     $hasPageParam = request()->has('page') || session('success') || session('error');

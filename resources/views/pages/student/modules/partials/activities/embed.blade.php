@@ -8,7 +8,7 @@
             <div class="flex items-center gap-3">
                 <span class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg font-bold shadow-xs">⚡</span>
                 <div>
-                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-emerald-600">Bagian 4 • Praktik Interaktif</span>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-emerald-600">Bagian {{ $secMap[4] ?? 4 }} • Praktik Interaktif</span>
                     <h2 class="text-lg sm:text-xl font-black text-slate-900">{{ $embedData['judul_embed'] ?? 'Eksplorasi Simulator / Embed Media' }}</h2>
                 </div>
             </div>

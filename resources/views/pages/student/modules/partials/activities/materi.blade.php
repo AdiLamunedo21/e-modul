@@ -8,7 +8,7 @@
             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                 <div class="flex items-center gap-2">
                     <span class="px-3 py-1 rounded-full bg-slate-200/80 text-slate-800 text-xs font-bold">
-                        📖 Bagian 3: Kegiatan Belajar
+                        📖 Bagian {{ $secMap[3] ?? 3 }}: Kegiatan Belajar
                     </span>
                 </div>
                 <template x-if="isCompleted('materi')">

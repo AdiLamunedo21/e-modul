@@ -7,7 +7,7 @@
             <div class="flex items-center gap-3">
                 <span class="w-10 h-10 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center text-lg font-bold shrink-0">📚</span>
                 <div>
-                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-rose-600">Bagian 5 • Bagian Akhir</span>
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-rose-600">Bagian {{ $secMap[5] ?? 5 }} • Bagian Akhir</span>
                     <h2 class="text-xl sm:text-2xl font-black text-slate-900">Daftar Pustaka & Rujukan</h2>
                 </div>
             </div>

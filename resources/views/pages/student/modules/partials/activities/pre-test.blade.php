@@ -18,7 +18,7 @@
                 <span class="w-12 h-12 rounded-2xl bg-teal-100 text-teal-700 flex items-center justify-center text-2xl font-bold shrink-0">⚡</span>
                 <div>
                     <div class="flex items-center gap-2">
-                        <span class="text-[10px] font-extrabold uppercase tracking-widest text-teal-600">Bagian 2 • Latihan Diagnostik</span>
+                        <span class="text-[10px] font-extrabold uppercase tracking-widest text-teal-600">Bagian {{ $secMap[2] ?? 2 }} • Latihan Diagnostik</span>
                         <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200">Pre-test Diagnostik</span>
                     </div>
                     <h2 class="text-xl sm:text-2xl font-black text-slate-900 leading-tight mt-0.5">{{ $module->preTest->title ?? 'Pre-test Pembuka' }}</h2>

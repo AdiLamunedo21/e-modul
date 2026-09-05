@@ -18,7 +18,7 @@
                 <span class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-2xl font-bold shrink-0">🏆</span>
                 <div>
                     <div class="flex items-center gap-2">
-                        <span class="text-[10px] font-extrabold uppercase tracking-widest text-rose-600">Bagian 5 • Evaluasi Akhir</span>
+                        <span class="text-[10px] font-extrabold uppercase tracking-widest text-rose-600">Bagian {{ $secMap[5] ?? 5 }} • Evaluasi Akhir</span>
                         <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">Post-test Sumatif</span>
                     </div>
                     <h2 class="text-xl sm:text-2xl font-black text-slate-900 leading-tight mt-0.5">{{ $module->postTest->title ?? 'Post-test: Evaluasi Pemahaman' }}</h2>

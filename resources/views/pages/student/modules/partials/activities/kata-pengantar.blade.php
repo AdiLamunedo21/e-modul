@@ -7,7 +7,7 @@
             <div class="flex items-center gap-3">
                 <span class="w-10 h-10 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-lg font-bold">✏️</span>
                 <div>
-                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600">Bagian Awal • Langkah 1</span>
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600">Bagian {{ $secMap[1] ?? 1 }} • Bagian Awal</span>
                     <h2 class="text-xl sm:text-2xl font-black text-slate-900">Kata Pengantar</h2>
                 </div>
             </div>

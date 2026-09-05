@@ -8,7 +8,7 @@
             <div class="flex items-center gap-3">
                 <span class="w-10 h-10 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-lg font-bold shadow-xs">📋</span>
                 <div>
-                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-rose-600">Bagian 4 • Lembar Kerja Praktik</span>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-rose-600">Bagian {{ $secMap[4] ?? 4 }} • Lembar Kerja Praktik</span>
                     <h2 class="text-lg sm:text-xl font-black text-slate-900">{{ $jobSheetData['judul_jobsheet'] ?? 'Job Sheet Praktikum Bengkel/Lab' }}</h2>
                 </div>
             </div>
