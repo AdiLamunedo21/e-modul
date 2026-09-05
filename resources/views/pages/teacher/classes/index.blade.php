@@ -249,23 +249,91 @@
                                     <span class="font-mono text-base font-black text-slate-900 tracking-wider select-all">{{ $class->code }}</span>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-1.5 shrink-0" x-data="{ copied: false, shared: false }">
+                            @php
+                                $cardTeacherName = auth('teacher')->user()?->name ?? 'Guru Pengampu';
+                                $cardMajorName = $class->major ? $class->major->name : $class->major_name;
+                                $cardRegisterUrl = route('register.student') . '?code=' . $class->code;
+                                $cardInviteMsg = "*UNDANGAN BERGABUNG KELAS E-MODUL*\n"
+                                    . "SMK Negeri 3 Yogyakarta\n\n"
+                                    . "Halo siswa-siswi *{$class->full_name}*,\n"
+                                    . "Silakan bergabung ke kelas pembelajaran kita di platform E-Modul menggunakan kode kelas berikut:\n\n"
+                                    . "🔑 *Kode Kelas:* {$class->code}\n"
+                                    . "👨‍🏫 *Guru Pengampu:* {$cardTeacherName}\n"
+                                    . "📚 *Rombel / Jurusan:* {$cardMajorName}\n\n"
+                                    . "🔗 *Link Pendaftaran Siswa (Kode Otomatis Terpasang):*\n"
+                                    . "{$cardRegisterUrl}\n\n"
+                                    . "💡 *Petunjuk:*\n"
+                                    . "• *Siswa Baru:* Klik link di atas untuk mendaftar. Kode kelas sudah otomatis terisi.\n"
+                                    . "• *Sudah Punya Akun:* Masuk ke dashboard siswa, klik 'Gabung Kelas', lalu masukkan kode: *{$class->code}*\n\n"
+                                    . "Selamat belajar dan sukses selalu!";
+                                $cardWaUrl = 'https://api.whatsapp.com/send?text=' . rawurlencode($cardInviteMsg);
+                            @endphp
+                            <div class="flex items-center gap-1.5 shrink-0"
+                                 x-data="{
+                                     copied: false,
+                                     shared: false,
+                                     copyText(text, isCode) {
+                                         const markDone = () => {
+                                             if (isCode) {
+                                                 this.copied = true;
+                                                 setTimeout(() => this.copied = false, 2000);
+                                             } else {
+                                                 this.shared = true;
+                                                 setTimeout(() => this.shared = false, 2000);
+                                             }
+                                         };
+                                         if (navigator.clipboard && window.isSecureContext) {
+                                             navigator.clipboard.writeText(text).then(markDone).catch(() => {
+                                                 this.fallbackCopy(text);
+                                                 markDone();
+                                             });
+                                         } else {
+                                             this.fallbackCopy(text);
+                                             markDone();
+                                         }
+                                     },
+                                     fallbackCopy(text) {
+                                         const ta = document.createElement('textarea');
+                                         ta.value = text;
+                                         ta.style.position = 'fixed';
+                                         ta.style.left = '-9999px';
+                                         ta.style.top = '-9999px';
+                                         document.body.appendChild(ta);
+                                         ta.select();
+                                         try { document.execCommand('copy'); } catch(e) {}
+                                         ta.remove();
+                                     }
+                                 }">
+                                {{-- Tombol Salin Kode --}}
                                 <button type="button"
-                                        @click="navigator.clipboard.writeText('{{ $class->code }}'); copied = true; setTimeout(() => copied = false, 2000)"
+                                        @click="copyText('{{ $class->code }}', true)"
                                         :class="copied ? 'bg-emerald-600 text-white' : 'bg-white text-blue-700 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-2xs'"
-                                        class="px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
-                                        title="Salin Kode Kelas">
+                                        class="px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                                        title="Salin Kode Kelas Saja">
                                     <svg x-show="!copied" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184"/></svg>
-                                    <svg x-show="copied" x-cloak class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                                    <svg x-show="copied" x-cloak class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
                                     <span x-text="copied ? 'Disalin!' : 'Salin'"></span>
                                 </button>
+
+                                {{-- Tombol Bagikan ke WhatsApp --}}
+                                <a href="{{ $cardWaUrl }}"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   class="p-1.5 rounded-xl text-xs font-bold transition-all bg-white hover:bg-emerald-600 text-emerald-600 hover:text-white border border-emerald-200 shadow-2xs flex items-center justify-center cursor-pointer"
+                                   title="Buka WhatsApp untuk bagikan undangan ke grup kelas">
+                                    <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                                        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+                                    </svg>
+                                </a>
+
+                                {{-- Tombol Salin Pesan Lengkap --}}
                                 <button type="button"
-                                        @click="navigator.clipboard.writeText('Silakan bergabung ke kelas {{ addslashes($class->full_name) }} di E-Modul SMKN 3 Yogyakarta menggunakan Kode Kelas: {{ $class->code }} (Link: {{ url('/register/student') }}?code={{ $class->code }})'); shared = true; setTimeout(() => shared = false, 2000)"
-                                        :class="shared ? 'bg-emerald-600 text-white' : 'bg-white text-indigo-700 hover:bg-indigo-600 hover:text-white border border-indigo-200 shadow-2xs'"
-                                        class="p-1.5 rounded-xl text-xs font-bold transition-all"
-                                        title="Bagikan Teks Undangan Siswa">
+                                        @click="copyText(@js($cardInviteMsg), false)"
+                                        :class="shared ? 'bg-indigo-600 text-white' : 'bg-white text-indigo-700 hover:bg-indigo-600 hover:text-white border border-indigo-200 shadow-2xs'"
+                                        class="p-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                                        title="Salin Teks Undangan Siswa Lengkap">
                                     <svg x-show="!shared" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"/></svg>
-                                    <svg x-show="shared" x-cloak class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                                    <svg x-show="shared" x-cloak class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
                                 </button>
                             </div>
                         </div>
