@@ -62,27 +62,20 @@
                 <div class="pt-2 flex flex-wrap items-center gap-3"
                      x-data="{
                          copiedCode: false,
-                         copiedInvite: false,
                          classCode: '{{ $class->code }}',
-                         inviteText: @js($invitationMessage),
-                         copyText(text, type) {
+                         copyCode() {
                              const setFeedback = () => {
-                                 if (type === 'code') {
-                                     this.copiedCode = true;
-                                     setTimeout(() => this.copiedCode = false, 2500);
-                                 } else {
-                                     this.copiedInvite = true;
-                                     setTimeout(() => this.copiedInvite = false, 2500);
-                                 }
+                                 this.copiedCode = true;
+                                 setTimeout(() => this.copiedCode = false, 2500);
                              };
 
                              if (navigator.clipboard && window.isSecureContext) {
-                                 navigator.clipboard.writeText(text).then(setFeedback).catch(() => {
-                                     this.fallbackCopy(text);
+                                 navigator.clipboard.writeText(this.classCode).then(setFeedback).catch(() => {
+                                     this.fallbackCopy(this.classCode);
                                      setFeedback();
                                  });
                              } else {
-                                 this.fallbackCopy(text);
+                                 this.fallbackCopy(this.classCode);
                                  setFeedback();
                              }
                          },
@@ -112,7 +105,7 @@
                         </div>
                         <div class="h-4 w-px bg-white/20"></div>
                         <button type="button"
-                                @click="copyText(classCode, 'code')"
+                                @click="copyCode()"
                                 class="inline-flex items-center gap-1.5 text-xs font-extrabold text-white hover:text-blue-300 transition-colors cursor-pointer"
                                 title="Salin Kode Kelas Saja">
                             <svg x-show="!copiedCode" class="w-3.5 h-3.5 text-blue-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -136,20 +129,6 @@
                         </svg>
                         <span>Bagikan ke WhatsApp</span>
                     </a>
-
-                    {{-- 3. Tombol Salin Teks Undangan Lengkap --}}
-                    <button type="button"
-                            @click="copyText(inviteText, 'invite')"
-                            class="px-3.5 py-2 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-bold transition-all flex items-center gap-1.5 backdrop-blur-md cursor-pointer"
-                            title="Salin teks pesan undangan lengkap ke clipboard untuk ditempel di chat/grup">
-                        <svg x-show="!copiedInvite" class="w-3.5 h-3.5 text-blue-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"/>
-                        </svg>
-                        <svg x-show="copiedInvite" x-cloak class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
-                        </svg>
-                        <span x-text="copiedInvite ? 'Pesan Disalin!' : 'Salin Teks Undangan'"></span>
-                    </button>
                 </div>
             </div>
 
