@@ -195,7 +195,7 @@
         {{-- ══ KONTEN UTAMA PORTAL SISWA: TABS & KPI HUB (ALPINE.JS)                 ══ --}}
         {{-- ══════════════════════════════════════════════════════════════════════════ --}}
         <div x-data="{
-            activeTab: '{{ in_array($filterStatus, ['in_progress', 'completed', 'all_modules']) ? $filterStatus : 'classes' }}',
+            activeTab: '{{ in_array($filterStatus, ['classes', 'completed', 'all_modules']) ? $filterStatus : 'in_progress' }}',
             searchQuery: '',
             selectedGrade: 'all',
             selectedClassId: 'all',
@@ -211,7 +211,7 @@
                 this.selectedSubjectId = 'all';
                 this.selectedStatus = 'all';
                 const url = new URL(window.location);
-                if (tab === 'classes') {
+                if (tab === 'in_progress') {
                     url.searchParams.delete('status');
                 } else {
                     url.searchParams.set('status', tab);

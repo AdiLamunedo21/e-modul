@@ -292,8 +292,8 @@ class DashboardController extends Controller
             ];
         });
 
-        // Filter tab berdasarkan query parameter
-        $filterStatus = $request->query('status', 'all');
+        // Filter tab berdasarkan query parameter (default: in_progress / Sedang Dikerjakan)
+        $filterStatus = $request->query('status', 'in_progress');
         $filterSubject = $request->query('subject', 'all');
 
         $filteredModules = $processedModules;
