@@ -12,7 +12,7 @@
         <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm p-6 sm:p-7 hover:shadow-md transition">
             <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black text-sm shadow-md shadow-indigo-600/20">
+                    <div class="w-10 h-10 flex items-center justify-center font-black text-2xl text-indigo-600 shrink-0">
                         1
                     </div>
                     <div>
@@ -30,7 +30,7 @@
                 @if($module->isInfoComponentActive('kata_pengantar'))
                     <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition">
                         <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-bold">✏️</span>
+                            <span class="w-8 h-8 flex items-center justify-center text-lg shrink-0">✏️</span>
                             <div>
                                 <h4 class="text-xs font-bold text-slate-900">Kata Pengantar</h4>
                                 <p class="text-[11px] text-slate-500">Sambutan dan motivasi dari guru pengampu</p>
@@ -41,7 +41,7 @@
                                 <button type="button"
                                         @click="goToPage('kata_pengantar')"
                                         class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition cursor-pointer">
-                                    <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                    <span class="text-emerald-600 font-black text-sm">✓</span>
                                     <span>Selesai Dibaca</span>
                                 </button>
                             </template>
@@ -60,7 +60,7 @@
                 @if($module->isInfoComponentActive('petunjuk_penggunaan'))
                     <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition">
                         <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-bold">💡</span>
+                            <span class="w-8 h-8 flex items-center justify-center text-lg shrink-0">💡</span>
                             <div>
                                 <h4 class="text-xs font-bold text-slate-900">Petunjuk Penggunaan</h4>
                                 <p class="text-[11px] text-slate-500">Panduan langkah belajar mandiri peserta didik</p>
@@ -71,7 +71,7 @@
                                 <button type="button"
                                         @click="goToPage('petunjuk_penggunaan')"
                                         class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition cursor-pointer">
-                                    <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                    <span class="text-emerald-600 font-black text-sm">✓</span>
                                     <span>Selesai Dibaca</span>
                                 </button>
                             </template>
@@ -100,7 +100,7 @@
         <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm p-6 sm:p-7 hover:shadow-md transition">
             <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-teal-600 text-white flex items-center justify-center font-black text-sm shadow-md shadow-teal-600/20">
+                    <div class="w-10 h-10 flex items-center justify-center font-black text-2xl text-teal-600 shrink-0">
                         2
                     </div>
                     <div>
@@ -118,7 +118,7 @@
                 @if($module->isInfoComponentActive('tujuan_pembelajaran'))
                     <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition">
                         <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center text-sm font-bold">🎯</span>
+                            <span class="w-8 h-8 flex items-center justify-center text-lg shrink-0">🎯</span>
                             <div>
                                 <h4 class="text-xs font-bold text-slate-900">Tujuan & Capaian</h4>
                                 <p class="text-[11px] text-slate-500">Rumusan kompetensi CP & TP modul</p>
@@ -129,7 +129,7 @@
                                 <button type="button"
                                         @click="goToPage('tujuan_pembelajaran')"
                                         class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition cursor-pointer">
-                                    <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                    <span class="text-emerald-600 font-black text-sm">✓</span>
                                     <span>Selesai Dibaca</span>
                                 </button>
                             </template>
@@ -160,7 +160,7 @@
                 @if($module->isInfoComponentActive('peta_konsep') && $hasPetaKonsep)
                     <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition">
                         <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center text-sm font-bold">🗺️</span>
+                            <span class="w-8 h-8 flex items-center justify-center text-lg shrink-0">🗺️</span>
                             <div>
                                 <h4 class="text-xs font-bold text-slate-900">Peta Konsep Materi</h4>
                                 <p class="text-[11px] text-slate-500">Alur keterkaitan materi kejuruan</p>
@@ -171,7 +171,7 @@
                                 <button type="button"
                                         @click="goToPage('peta_konsep')"
                                         class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition cursor-pointer">
-                                    <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                    <span class="text-emerald-600 font-black text-sm">✓</span>
                                     <span>Selesai Dibaca</span>
                                 </button>
                             </template>
@@ -202,7 +202,7 @@
                 @if($module->isInfoComponentActive('glosarium') && $hasGlosarium)
                     <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition">
                         <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center text-sm font-bold">📖</span>
+                            <span class="w-8 h-8 flex items-center justify-center text-lg shrink-0">📖</span>
                             <div>
                                 <h4 class="text-xs font-bold text-slate-900">Glosarium Istilah</h4>
                                 <p class="text-[11px] text-slate-500">Kamus istilah teknis & konsep penting</p>
@@ -213,7 +213,7 @@
                                 <button type="button"
                                         @click="goToPage('glosarium')"
                                         class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition cursor-pointer">
-                                    <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                    <span class="text-emerald-600 font-black text-sm">✓</span>
                                     <span>Selesai Dibaca</span>
                                 </button>
                             </template>
@@ -238,7 +238,7 @@
                 @if($module->has_pre_test && $module->preTest)
                     <div class="flex items-center justify-between p-3.5 rounded-2xl bg-teal-50/70 border border-teal-200 hover:bg-teal-100/50 transition">
                         <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-xl bg-teal-600 text-white flex items-center justify-center text-sm font-bold">⚡</span>
+                            <span class="w-8 h-8 flex items-center justify-center text-lg shrink-0">⚡</span>
                             <div>
                                 <h4 class="text-xs font-bold text-teal-950">Pre-test (Diagnostik)</h4>
                                 <p class="text-[11px] text-teal-700">Kuis diagnostik sebelum membaca materi</p>
@@ -249,7 +249,7 @@
                                 <button type="button"
                                         @click="goToPage('pre_test')"
                                         class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-extrabold hover:bg-emerald-100 transition cursor-pointer">
-                                    <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                    <span class="text-emerald-600 font-black text-sm">✓</span>
                                     <span>Skor: {{ $studentResult->pre_test_score }}</span>
                                 </button>
                             @else
@@ -277,7 +277,7 @@
         <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm p-6 sm:p-7 hover:shadow-md transition">
             <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-black text-sm shadow-md shadow-blue-600/20">
+                    <div class="w-10 h-10 flex items-center justify-center font-black text-2xl text-blue-600 shrink-0">
                         3
                     </div>
                     <div>
@@ -295,7 +295,7 @@
                 @if($module->has_materi)
                     <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition">
                         <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-bold">📖</span>
+                            <span class="w-8 h-8 flex items-center justify-center text-lg shrink-0">📖</span>
                             <div>
                                 <h4 class="text-xs font-bold text-slate-900">Uraian Materi & PPT</h4>
                                 <p class="text-[11px] text-slate-500">Materi teori komprehensif & slide presentasi</p>
@@ -306,7 +306,7 @@
                                 <button type="button"
                                         @click="goToPage('materi')"
                                         class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition cursor-pointer">
-                                    <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                    <span class="text-emerald-600 font-black text-sm">✓</span>
                                     <span>Selesai Dibaca</span>
                                 </button>
                             </template>
@@ -331,7 +331,7 @@
                 @if($module->has_video)
                     <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition">
                         <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-xl bg-red-100 text-red-700 flex items-center justify-center text-sm font-bold">▶️</span>
+                            <span class="w-8 h-8 flex items-center justify-center text-lg shrink-0">▶️</span>
                             <div>
                                 <h4 class="text-xs font-bold text-slate-900">Video & Resume YouTube</h4>
                                 <p class="text-[11px] text-slate-500">Tonton video pembelajaran & kirim resume</p>
@@ -342,7 +342,7 @@
                                 <button type="button"
                                         @click="goToPage('video')"
                                         class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition cursor-pointer">
-                                    <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                    <span class="text-emerald-600 font-black text-sm">✓</span>
                                     <span>{{ $videoSummary->manual_score !== null ? 'Nilai: ' . $videoSummary->manual_score : 'Resume Terkirim' }}</span>
                                 </button>
                             @else
@@ -370,7 +370,7 @@
         <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm p-6 sm:p-7 hover:shadow-md transition">
             <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-violet-600 text-white flex items-center justify-center font-black text-sm shadow-md shadow-violet-600/20">
+                    <div class="w-10 h-10 flex items-center justify-center font-black text-2xl text-violet-600 shrink-0">
                         4
                     </div>
                     <div>
@@ -388,7 +388,7 @@
                 @if($module->has_embed)
                     <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition">
                         <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center text-sm font-bold">🎮</span>
+                            <span class="w-8 h-8 flex items-center justify-center text-lg shrink-0">🎮</span>
                             <div>
                                 <h4 class="text-xs font-bold text-slate-900">Simulator Embed</h4>
                                 <p class="text-[11px] text-slate-500">Praktik langsung & unggah bukti screenshot</p>
@@ -399,7 +399,7 @@
                                 <button type="button"
                                         @click="goToPage('embed')"
                                         class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition cursor-pointer">
-                                    <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                    <span class="text-emerald-600 font-black text-sm">✓</span>
                                     <span>{{ $embedSubmission->manual_score !== null ? 'Nilai: ' . $embedSubmission->manual_score : 'Terkirim' }}</span>
                                 </button>
                             @else
@@ -425,7 +425,7 @@
                 @if($module->has_job_sheet)
                     <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition">
                         <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center text-sm font-bold">📑</span>
+                            <span class="w-8 h-8 flex items-center justify-center text-lg shrink-0">📑</span>
                             <div>
                                 <h4 class="text-xs font-bold text-slate-900">Job Sheet Praktikum</h4>
                                 <p class="text-[11px] text-slate-500">Unduh panduan & unggah laporan PDF</p>
@@ -436,7 +436,7 @@
                                 <button type="button"
                                         @click="goToPage('job_sheet')"
                                         class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition cursor-pointer">
-                                    <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                    <span class="text-emerald-600 font-black text-sm">✓</span>
                                     <span>{{ $jobSheetSubmission->manual_score !== null ? 'Nilai: ' . $jobSheetSubmission->manual_score : 'Terkirim' }}</span>
                                 </button>
                             @else
@@ -462,7 +462,7 @@
                 @if($module->has_lkpd)
                     <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition">
                         <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center text-sm font-bold">📋</span>
+                            <span class="w-8 h-8 flex items-center justify-center text-lg shrink-0">📋</span>
                             <div>
                                 <h4 class="text-xs font-bold text-slate-900">Tugas LKPD</h4>
                                 <p class="text-[11px] text-slate-500">Lembar kerja peserta didik & umpan balik</p>
@@ -473,7 +473,7 @@
                                 <button type="button"
                                         @click="goToPage('lkpd')"
                                         class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition cursor-pointer">
-                                    <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                    <span class="text-emerald-600 font-black text-sm">✓</span>
                                     <span>{{ $lkpdSubmission->manual_score !== null ? 'Nilai: ' . $lkpdSubmission->manual_score : 'Terkirim' }}</span>
                                 </button>
                             @else
@@ -501,7 +501,7 @@
         <div class="rounded-3xl bg-white border border-slate-200/90 shadow-sm p-6 sm:p-7 hover:shadow-md transition">
             <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-rose-600 text-white flex items-center justify-center font-black text-sm shadow-md shadow-rose-600/20">
+                    <div class="w-10 h-10 flex items-center justify-center font-black text-2xl text-rose-600 shrink-0">
                         5
                     </div>
                     <div>
@@ -519,7 +519,7 @@
                 @if($module->has_post_test && $module->postTest)
                     <div class="flex items-center justify-between p-3.5 rounded-2xl bg-rose-50/70 border border-rose-200 hover:bg-rose-100/50 transition">
                         <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center text-sm font-bold">🏆</span>
+                            <span class="w-8 h-8 flex items-center justify-center text-lg shrink-0">🏆</span>
                             <div>
                                 <h4 class="text-xs font-bold text-rose-950">Post-test (Evaluasi Akhir)</h4>
                                 <p class="text-[11px] text-rose-800">Uji pemahaman komprehensif setelah menuntaskan materi</p>
@@ -530,7 +530,7 @@
                                 <button type="button"
                                         @click="goToPage('post_test')"
                                         class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-extrabold hover:bg-emerald-100 transition cursor-pointer">
-                                    <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                    <span class="text-emerald-600 font-black text-sm">✓</span>
                                     <span>Skor: {{ $studentResult->post_test_score }}</span>
                                 </button>
                             @else
@@ -556,7 +556,7 @@
                 @if($module->isInfoComponentActive('daftar_pustaka'))
                     <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/60 transition">
                         <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-xl bg-slate-200 text-slate-700 flex items-center justify-center text-sm font-bold">📚</span>
+                            <span class="w-8 h-8 flex items-center justify-center text-lg shrink-0">📚</span>
                             <div>
                                 <h4 class="text-xs font-bold text-slate-900">Daftar Pustaka</h4>
                                 <p class="text-[11px] text-slate-500">Rujukan buku referensi, standar kejuruan, dan modul</p>
@@ -567,7 +567,7 @@
                                 <button type="button"
                                         @click="goToPage('daftar_pustaka')"
                                         class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition cursor-pointer">
-                                    <span class="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">✓</span>
+                                    <span class="text-emerald-600 font-black text-sm">✓</span>
                                     <span>Selesai Dibaca</span>
                                 </button>
                             </template>
@@ -591,7 +591,7 @@
                 {{-- Item: Rekap Nilai --}}
                 <div class="flex items-center justify-between p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200 hover:bg-emerald-100/50 transition">
                     <div class="flex items-center gap-3">
-                        <span class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-sm font-bold">📊</span>
+                        <span class="w-8 h-8 flex items-center justify-center text-lg shrink-0">📊</span>
                         <div>
                             <h4 class="text-xs font-bold text-emerald-950">Rekapitulasi Nilai</h4>
                             <p class="text-[11px] text-emerald-800">Transparansi skor perolehan tugas mandiri & kuis evaluasi</p>

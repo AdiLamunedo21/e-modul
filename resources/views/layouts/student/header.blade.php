@@ -29,7 +29,7 @@
 
             {{-- Breadcrumb / Judul Halaman Aktif --}}
             <div class="flex items-center gap-2">
-                <span class="text-sm font-bold text-gray-800">
+                <span class="text-[13px] sm:text-sm font-bold text-gray-800">
                     @yield('page-title', 'Portal Siswa')
                 </span>
                 <span class="hidden sm:inline-block text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 font-semibold px-2.5 py-0.5 rounded-full">

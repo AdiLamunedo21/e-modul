@@ -52,13 +52,13 @@
 
                 {{-- Badge Counter In-Progress --}}
                 @if(!empty($inProgBadge) && $inProgBadge > 0)
-                    <span class="absolute -top-1 -right-1.5 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-amber-500 text-[9px] font-black text-white shadow-xs">
+                    <span class="absolute -top-1 -right-1.5 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-amber-500 text-[8px] font-black text-white shadow-xs">
                         {{ $inProgBadge > 99 ? '99+' : $inProgBadge }}
                     </span>
                 @endif
             </div>
 
-            <span class="text-[10px] font-bold tracking-tight mt-1 leading-none transition-colors"
+            <span class="text-[9px] font-bold tracking-tight mt-1 leading-none transition-colors"
                   :class="currentTab === 'in_progress' ? 'text-amber-700 font-black' : 'text-slate-500 group-hover:text-slate-700'">
                 Belajar
             </span>
@@ -84,13 +84,13 @@
 
                 {{-- Badge Counter Kelas --}}
                 @if(!empty($classesBadge) && $classesBadge > 0)
-                    <span class="absolute -top-1 -right-1.5 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-blue-600 text-[9px] font-black text-white shadow-xs">
+                    <span class="absolute -top-1 -right-1.5 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-blue-600 text-[8px] font-black text-white shadow-xs">
                         {{ $classesBadge }}
                     </span>
                 @endif
             </div>
 
-            <span class="text-[10px] font-bold tracking-tight mt-1 leading-none transition-colors"
+            <span class="text-[9px] font-bold tracking-tight mt-1 leading-none transition-colors"
                   :class="currentTab === 'classes' ? 'text-blue-700 font-black' : 'text-slate-500 group-hover:text-slate-700'">
                 Kelas
             </span>
@@ -113,7 +113,7 @@
                 </svg>
             </button>
 
-            <span class="text-[10px] font-black text-emerald-700 tracking-tight mt-1 leading-none">
+            <span class="text-[9px] font-black text-emerald-700 tracking-tight mt-1 leading-none">
                 Gabung
             </span>
         </div>
@@ -134,13 +134,13 @@
 
                 {{-- Badge Counter Selesai --}}
                 @if(!empty($completedBadge) && $completedBadge > 0)
-                    <span class="absolute -top-1 -right-1.5 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-emerald-600 text-[9px] font-black text-white shadow-xs">
+                    <span class="absolute -top-1 -right-1.5 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-emerald-600 text-[8px] font-black text-white shadow-xs">
                         {{ $completedBadge }}
                     </span>
                 @endif
             </div>
 
-            <span class="text-[10px] font-bold tracking-tight mt-1 leading-none transition-colors"
+            <span class="text-[9px] font-bold tracking-tight mt-1 leading-none transition-colors"
                   :class="currentTab === 'completed' ? 'text-emerald-700 font-black' : 'text-slate-500 group-hover:text-slate-700'">
                 Selesai
             </span>
@@ -167,13 +167,13 @@
 
                 {{-- Badge Counter Semua Modul --}}
                 @if(!empty($allModulesBadge) && $allModulesBadge > 0)
-                    <span class="absolute -top-1 -right-1.5 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-indigo-600 text-[9px] font-black text-white shadow-xs">
+                    <span class="absolute -top-1 -right-1.5 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-indigo-600 text-[8px] font-black text-white shadow-xs">
                         {{ $allModulesBadge > 99 ? '99+' : $allModulesBadge }}
                     </span>
                 @endif
             </div>
 
-            <span class="text-[9.5px] font-bold tracking-tight mt-1 leading-none transition-colors truncate max-w-full text-center"
+            <span class="text-[8.5px] font-bold tracking-tight mt-1 leading-none transition-colors truncate max-w-full text-center"
                   :class="currentTab === 'all_modules' ? 'text-indigo-700 font-black' : 'text-slate-500 group-hover:text-slate-700'">
                 Semua Modul
             </span>
