@@ -1,7 +1,12 @@
 @extends('layouts.student.dashboardstudent')
 
-@section('title', 'Mata Pelajaran ' . $class->full_name . ' — E-Modul SMKN 3 Yogyakarta')
-@section('page-title', 'Mata Pelajaran ' . $class->full_name)
+@php
+    $classMajorCode = $class->major ? ($class->major->code ?: $class->major->name) : $class->major_name;
+    $classHeaderTitle = 'MAPEL kelas ' . ($classMajorCode ?: '') . trim($class->section ?? '');
+@endphp
+
+@section('title', $classHeaderTitle . ' — E-Modul SMKN 3 Yogyakarta')
+@section('page-title', $classHeaderTitle)
 
 @section('content')
 

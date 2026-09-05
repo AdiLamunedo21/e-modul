@@ -37,6 +37,9 @@
             <p class="text-[11px] text-slate-400">Guru Pengampu Mata Pelajaran</p>
         </div>
 
+        {{-- Sentinel akhir bahan bacaan untuk deteksi scroll --}}
+        <div class="reading-end-sentinel h-1 w-full pointer-events-none my-1" data-page="kata_pengantar"></div>
+
         {{-- Tombol Tandai Selesai Dibaca --}}
         <div class="mt-8 pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>

@@ -461,7 +461,7 @@
 
 
                         {{-- Form Utama dengan Kontainer Soal Satu per Satu --}}
-                        <form action="{{ route('student.modules.pre-test.submit', $module) }}" method="POST" class="space-y-6">
+                        <form action="{{ route('student.modules.pre-test.submit', $module) }}" method="POST" class="space-y-6 pb-24 lg:pb-0" id="pre-test-form">
                             @csrf
 
                             @foreach($module->preTest->questions as $idx => $q)
@@ -580,8 +580,8 @@
                                 </div>
                             @endforeach
 
-                            {{-- Bottom Navigation Bar (Sequential Progression) --}}
-                            <div class="pt-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-200">
+                            {{-- Bottom Navigation Bar (Sequential Progression) -- TAMPIL DI DESKTOP, DI MOBILE PINDAH KE NAV BAWAH --}}
+                            <div class="hidden lg:flex pt-3 items-center justify-between gap-3 border-t border-slate-200">
                                 <div class="w-full sm:w-auto flex items-center gap-2 text-xs text-slate-500 font-medium">
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-[11px] text-slate-600 font-semibold">
                                         <span>🔒</span>
@@ -621,7 +621,7 @@
                                     {{-- Tombol Selesai & Kirim Ujian (Hanya muncul di soal terakhir) --}}
                                     <template x-if="currentQuestion === totalQuestions - 1">
                                         <button type="button"
-                                                @click="attemptSubmit($el.closest('form'))"
+                                                @click="attemptSubmit(document.getElementById('pre-test-form'))"
                                                 :disabled="!isCurrentQuestionAnswered()"
                                                 :style="isCurrentQuestionAnswered()
                                                     ? 'background: linear-gradient(135deg, #0d9488 0%, #059669 100%) !important; color: #ffffff !important;'
@@ -638,6 +638,66 @@
                                 </div>
                             </div>
                         </form>
+
+                        {{-- ══ MOBILE FIXED BOTTOM ACTION BAR (KHUSUS SMARTPHONE / TABLET) ══ --}}
+                        <div class="fixed bottom-0 inset-x-0 z-40 lg:hidden bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-[0_-4px_25px_rgba(15,23,42,0.12)] px-3 py-2.5 transition-all select-none"
+                             style="padding-bottom: max(0.6rem, env(safe-area-inset-bottom));">
+                            <div class="max-w-md mx-auto flex items-center justify-between gap-2">
+                                {{-- Tombol Batal jika sedang mode Latihan Ulang --}}
+                                @if($initialPreScore !== null)
+                                    <button type="button"
+                                            @click="showPreRetakeForm = false"
+                                            class="py-2.5 px-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all active:scale-95 shrink-0 shadow-2xs">
+                                        Batal
+                                    </button>
+                                @endif
+
+                                {{-- Indikator Soal Aktif --}}
+                                <div class="py-2 px-2.5 rounded-2xl bg-slate-100/90 text-slate-700 text-xs font-bold flex items-center gap-1 shrink-0">
+                                    <span>Soal</span>
+                                    <span class="font-black text-teal-700" x-text="currentQuestion + 1"></span>
+                                    <span>/</span>
+                                    <span x-text="totalQuestions"></span>
+                                </div>
+
+                                {{-- Tombol Lanjut ke Soal Berikutnya (Belum di Soal Terakhir) --}}
+                                <template x-if="currentQuestion < totalQuestions - 1">
+                                    <button type="button"
+                                            @click="next()"
+                                            :disabled="!isCurrentQuestionAnswered()"
+                                            :class="{
+                                                'bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-md shadow-teal-600/25 cursor-pointer active:scale-95': isCurrentQuestionAnswered(),
+                                                'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed opacity-75': !isCurrentQuestionAnswered()
+                                            }"
+                                            class="flex-1 py-2.5 px-3 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs">
+                                        <span x-show="!isCurrentQuestionAnswered()" class="truncate">Pilih Jawaban Dulu</span>
+                                        <span x-show="isCurrentQuestionAnswered()" class="truncate flex items-center gap-1">
+                                            <span>Lanjut ke Soal</span>
+                                            <span x-text="currentQuestion + 2"></span>
+                                            <span>→</span>
+                                        </span>
+                                    </button>
+                                </template>
+
+                                {{-- Tombol Kirim Jawaban (Di Soal Terakhir) --}}
+                                <template x-if="currentQuestion === totalQuestions - 1">
+                                    <button type="button"
+                                            @click="attemptSubmit(document.getElementById('pre-test-form'))"
+                                            :disabled="!isCurrentQuestionAnswered()"
+                                            :class="{
+                                                'bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-md shadow-teal-600/30 ring-2 ring-teal-400/50 cursor-pointer active:scale-95 animate-pulse': isCurrentQuestionAnswered(),
+                                                'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed opacity-75': !isCurrentQuestionAnswered()
+                                            }"
+                                            class="flex-1 py-2.5 px-3 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-1.5 shadow-2xs">
+                                        <span>🏁</span>
+                                        <span x-show="!isCurrentQuestionAnswered()" class="truncate">Pilih Jawaban Terakhir</span>
+                                        <span x-show="isCurrentQuestionAnswered()" class="truncate">
+                                            {{ $initialPreScore !== null ? 'Kirim Jawaban Latihan' : 'Kirim Jawaban Pre-test' }}
+                                        </span>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
                     </div>
                 @endif
             </div>

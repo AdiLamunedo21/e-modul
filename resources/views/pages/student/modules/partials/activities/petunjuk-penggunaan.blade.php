@@ -58,6 +58,9 @@
         </div>
     </div>
 
+    {{-- Sentinel akhir bahan bacaan untuk deteksi scroll --}}
+    <div class="reading-end-sentinel h-1 w-full pointer-events-none my-1" data-page="petunjuk_penggunaan"></div>
+
     {{-- Tombol Tandai Selesai Dibaca --}}
     <div class="rounded-3xl bg-white border border-slate-200/90 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
         <p class="text-xs text-slate-500">

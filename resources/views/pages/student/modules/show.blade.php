@@ -145,6 +145,14 @@
         showPostRetakeForm: false,
         showPostHistory: false,
 
+        hasScrolledToEnd: false,
+        scrollObserver: null,
+
+        get isCurrentPageReading() {
+            const p = this.pages.find(item => item.id === this.activePage);
+            return p ? p.type === 'read' : true;
+        },
+
         get isTakingPreTest() {
             @if($module->has_pre_test && $module->preTest)
                 return !{{ $isPreTestDone ? 'true' : 'false' }} || this.showPreRetakeForm;
@@ -174,6 +182,99 @@
                     window.dispatchEvent(new CustomEvent('set-sidebar-open', { detail: false }));
                 }
             });
+
+            // Sinkronkan mode belajar ke mobile-nav di layout
+            this.$watch('viewMode', val => {
+                window.dispatchEvent(new CustomEvent('toggle-learn-mode', { detail: val === 'learn' }));
+                if (val === 'learn') {
+                    this.initScrollDetection();
+                }
+            });
+
+            this.$watch('activePage', () => {
+                this.initScrollDetection();
+            });
+
+            // Inisialisasi awal
+            window.dispatchEvent(new CustomEvent('toggle-learn-mode', { detail: this.viewMode === 'learn' }));
+            if (this.viewMode === 'learn') {
+                this.initScrollDetection();
+            }
+
+            // Global scroll listener sebagai backup deteksi scroll
+            const onScrollHandler = () => {
+                if (!this.hasScrolledToEnd && this.viewMode === 'learn') {
+                    this.checkScrollPosition();
+                }
+            };
+            window.addEventListener('scroll', onScrollHandler, { passive: true });
+            const scrollableMain = document.querySelector('.overflow-y-auto');
+            if (scrollableMain) {
+                scrollableMain.addEventListener('scroll', onScrollHandler, { passive: true });
+            }
+        },
+
+        initScrollDetection() {
+            // Jika halaman sudah selesai dibaca, langsung buka tombol tengah
+            if (this.isCompleted(this.activePage)) {
+                this.hasScrolledToEnd = true;
+                return;
+            }
+
+            // Jika bukan halaman tipe 'read' (misal kuis/tugas), tidak perlu deteksi scroll bacaan
+            if (!this.isCurrentPageReading) {
+                this.hasScrolledToEnd = true;
+                return;
+            }
+
+            this.hasScrolledToEnd = false;
+
+            this.$nextTick(() => {
+                if (this.scrollObserver) {
+                    this.scrollObserver.disconnect();
+                }
+
+                const allSentinels = Array.from(document.querySelectorAll('.reading-end-sentinel'));
+                const currentSentinels = allSentinels.filter(el => el.getAttribute('data-page') === this.activePage);
+                if (currentSentinels.length) {
+                    this.scrollObserver = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                this.hasScrolledToEnd = true;
+                            }
+                        });
+                    }, {
+                        root: null,
+                        threshold: 0.05,
+                        rootMargin: '0px 0px 80px 0px'
+                    });
+
+                    currentSentinels.forEach(el => this.scrollObserver.observe(el));
+                }
+
+                // Cek apakah konten sudah cukup pendek dan langsung terlihat di layar
+                setTimeout(() => {
+                    this.checkScrollPosition();
+                }, 350);
+            });
+        },
+
+        checkScrollPosition() {
+            if (this.hasScrolledToEnd) return;
+            const allSentinels = Array.from(document.querySelectorAll('.reading-end-sentinel'));
+            const sentinel = allSentinels.find(el => el.getAttribute('data-page') === this.activePage);
+            if (sentinel && sentinel.offsetParent !== null) {
+                const rect = sentinel.getBoundingClientRect();
+                const vh = window.innerHeight || document.documentElement.clientHeight;
+                if (rect.top <= vh + 80) {
+                    this.hasScrolledToEnd = true;
+                }
+            }
+        },
+
+        markCurrentAsCompleted() {
+            this.markAsRead(this.activePage);
+            this.hasScrolledToEnd = true;
         },
         
         get totalActiveComps() {
@@ -282,6 +383,8 @@
             this.viewMode = 'learn';
             this.mobileDrawerOpen = false;
             window.scrollTo({ top: 0, behavior: 'smooth' });
+            const mainScroll = document.querySelector('.overflow-y-auto');
+            if (mainScroll) mainScroll.scrollTo({ top: 0, behavior: 'smooth' });
         },
 
         // Menandai halaman selesai dibaca tanpa berpindah halaman
@@ -376,7 +479,7 @@
     @include('pages.student.modules.partials.overview')
 
     {{-- ═══ VIEW 2: MODE BELAJAR INTERAKTIF (WORKSPACE AKTIVITAS PEMBELAJARAN FULL WIDTH) ═══ --}}
-    <div x-show="viewMode === 'learn'" x-cloak class="w-full space-y-6">
+    <div x-show="viewMode === 'learn'" x-cloak class="w-full space-y-6 pb-24 lg:pb-0">
 
         {{-- 1. Kata Pengantar --}}
         @include('pages.student.modules.partials.activities.kata-pengantar')

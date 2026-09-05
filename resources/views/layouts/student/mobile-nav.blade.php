@@ -18,6 +18,7 @@
 @endphp
 
 <nav x-data="{
+        inLearnMode: {{ (request()->routeIs('student.modules.show') && (request()->has('page') || session('success') || session('error'))) ? 'true' : 'false' }},
         currentTab: '{{ $isDashboard ? (in_array($currentStatus, ['classes', 'completed', 'all_modules', 'in_progress']) ? $currentStatus : $defaultNavTab) : '' }}',
         goToTab(tab, fallbackUrl) {
             const isDash = window.location.pathname.endsWith('/student/dashboard') || window.location.pathname.endsWith('/student/portal');
@@ -30,6 +31,11 @@
         }
      }"
      x-on:student-tab-changed.window="currentTab = $event.detail"
+     x-on:toggle-learn-mode.window="inLearnMode = $event.detail"
+     x-show="!inLearnMode"
+     x-transition:leave="transition ease-in duration-150"
+     x-transition:leave-start="opacity-100 translate-y-0"
+     x-transition:leave-end="opacity-0 translate-y-4"
      class="fixed bottom-0 inset-x-0 z-40 lg:hidden bg-white border-t border-slate-200/90 shadow-[0_-4px_25px_rgba(15,23,42,0.08)] px-2 pt-2 transition-all select-none"
      style="padding-bottom: max(0.6rem, env(safe-area-inset-bottom));"
      aria-label="Navigasi Mobile Siswa">
