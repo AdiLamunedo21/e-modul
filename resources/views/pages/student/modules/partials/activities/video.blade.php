@@ -102,9 +102,14 @@
                         <form action="{{ route('student.modules.submission.cancel', ['module' => $module->id, 'type' => 'video']) }}" method="POST">
                             @csrf
                             @method('DELETE')
-                            <button type="submit"
-                                    onclick="return confirm('Apakah Anda ingin membatalkan resume ini untuk mengedit ulang?');"
-                                    class="text-xs text-red-600 hover:text-red-700 font-bold underline cursor-pointer">
+                            <button type="button"
+                                    @click="openCancelModal({
+                                        title: 'Batalkan Resume Video?',
+                                        description: 'Apakah Anda yakin ingin membatalkan resume video ini untuk mengedit ulang?',
+                                        warningText: 'Teks resume sebelumnya akan dihapus dari sistem dan status pengerjaan modul ini akan direset sampai Anda mengirimkan resume baru.',
+                                        confirmLabel: 'Ya, Batalkan Resume'
+                                    }, $el.closest('form'))"
+                                    class="text-xs text-rose-600 hover:text-rose-700 font-bold underline cursor-pointer">
                                 Batalkan / Edit Ulang
                             </button>
                         </form>
@@ -112,9 +117,9 @@
                 </div>
 
                 @if($videoSummary)
-                    <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+                    <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3 min-w-0 max-w-full overflow-hidden">
                         <p class="text-xs text-slate-500">Dikirim pada: {{ $videoSummary->created_at->translatedFormat('d M Y, H:i') }} WIB</p>
-                        <div class="text-sm text-slate-800 leading-relaxed whitespace-pre-line font-medium">
+                        <div class="text-sm text-slate-800 leading-relaxed whitespace-pre-line font-medium break-words break-all sm:break-words [overflow-wrap:anywhere] [word-break:break-word] max-w-full overflow-hidden">
                             {{ $videoSummary->summary_text }}
                         </div>
                         @if($videoSummary->manual_score !== null)

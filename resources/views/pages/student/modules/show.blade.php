@@ -435,7 +435,7 @@
             this.openSections[secNum] = !this.openSections[secNum];
         },
 
-        // ══ MODAL KONFIRMASI SUBMIT ══
+        // ══ MODAL KONFIRMASI SUBMIT & PEMBATALAN TUGAS ══
         submitModal: {
             open: false,
             submitting: false,
@@ -444,6 +444,8 @@
             accentColor: 'emerald',
             warningText: '',
             confirmLabel: 'Kirim Sekarang',
+            category: 'Konfirmasi Pengiriman',
+            loadingLabel: 'Mengirim...',
             formEl: null,
         },
         openSubmitModal(config, formEl) {
@@ -454,6 +456,21 @@
             this.submitModal.accentColor = config.accentColor || 'emerald';
             this.submitModal.warningText = config.warningText || '';
             this.submitModal.confirmLabel = config.confirmLabel || 'Kirim Sekarang';
+            this.submitModal.category = config.category || 'Konfirmasi Pengiriman';
+            this.submitModal.loadingLabel = config.loadingLabel || 'Mengirim...';
+            this.submitModal.formEl = formEl;
+            document.body.style.overflow = 'hidden';
+        },
+        openCancelModal(config, formEl) {
+            this.submitModal.open = true;
+            this.submitModal.submitting = false;
+            this.submitModal.title = config.title || 'Batalkan Kiriman Tugas?';
+            this.submitModal.description = config.description || 'Apakah Anda yakin ingin membatalkan kiriman tugas ini untuk mengunggah atau mengedit ulang?';
+            this.submitModal.accentColor = 'rose';
+            this.submitModal.warningText = config.warningText || 'Tugas yang dibatalkan akan direset dan harus dikirimkan kembali agar dapat dinilai guru.';
+            this.submitModal.confirmLabel = config.confirmLabel || 'Ya, Batalkan Tugas';
+            this.submitModal.category = 'Konfirmasi Pembatalan';
+            this.submitModal.loadingLabel = 'Membatalkan...';
             this.submitModal.formEl = formEl;
             document.body.style.overflow = 'hidden';
         },

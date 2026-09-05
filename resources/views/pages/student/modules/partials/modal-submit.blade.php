@@ -37,18 +37,32 @@
         {{-- Header --}}
         <div class="px-6 pt-4 pb-5 sm:pt-6 border-b border-slate-100">
             <div class="flex items-start justify-between gap-4">
-                <div class="flex-1 min-w-0">
-                    <p class="text-[10px] font-black uppercase tracking-widest"
-                       :class="{
-                           'text-teal-600': submitModal.accentColor === 'teal',
-                           'text-rose-600': submitModal.accentColor === 'rose',
-                           'text-blue-600': submitModal.accentColor === 'blue',
-                           'text-indigo-600': submitModal.accentColor === 'indigo',
-                           'text-amber-600': submitModal.accentColor === 'amber',
-                           'text-emerald-600': submitModal.accentColor === 'emerald'
-                       }">Konfirmasi Pengiriman</p>
-                    <h3 class="mt-1 text-[17px] font-black text-slate-900 leading-snug tracking-tight"
-                        x-text="submitModal.title"></h3>
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 rounded-2xl flex items-center justify-center text-lg shrink-0 shadow-2xs"
+                         :class="{
+                             'bg-teal-100 text-teal-600': submitModal.accentColor === 'teal',
+                             'bg-rose-100 text-rose-600': submitModal.accentColor === 'rose',
+                             'bg-blue-100 text-blue-600': submitModal.accentColor === 'blue',
+                             'bg-indigo-100 text-indigo-600': submitModal.accentColor === 'indigo',
+                             'bg-amber-100 text-amber-600': submitModal.accentColor === 'amber',
+                             'bg-emerald-100 text-emerald-600': submitModal.accentColor === 'emerald'
+                         }">
+                        <span x-text="submitModal.accentColor === 'rose' ? '🗑️' : '🚀'"></span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[10px] font-black uppercase tracking-widest"
+                           :class="{
+                               'text-teal-600': submitModal.accentColor === 'teal',
+                               'text-rose-600': submitModal.accentColor === 'rose',
+                               'text-blue-600': submitModal.accentColor === 'blue',
+                               'text-indigo-600': submitModal.accentColor === 'indigo',
+                               'text-amber-600': submitModal.accentColor === 'amber',
+                               'text-emerald-600': submitModal.accentColor === 'emerald'
+                           }"
+                           x-text="submitModal.category || (submitModal.accentColor === 'rose' ? 'Konfirmasi Pembatalan' : 'Konfirmasi Pengiriman')"></p>
+                        <h3 class="mt-1 text-[17px] font-black text-slate-900 leading-snug tracking-tight"
+                            x-text="submitModal.title"></h3>
+                    </div>
                 </div>
                 <button type="button"
                         @click="closeSubmitModal()"
@@ -143,7 +157,7 @@
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        <span>Mengirim...</span>
+                        <span x-text="submitModal.loadingLabel || 'Mengirim...'"></span>
                     </span>
                 </template>
 

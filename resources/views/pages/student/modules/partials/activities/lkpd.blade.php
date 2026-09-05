@@ -48,9 +48,14 @@
                         <form action="{{ route('student.modules.submission.cancel', ['module' => $module->id, 'type' => 'lkpd']) }}" method="POST">
                             @csrf
                             @method('DELETE')
-                            <button type="submit"
-                                    onclick="return confirm('Apakah Anda ingin membatalkan berkas LKPD ini untuk mengunggah ulang?');"
-                                    class="text-xs text-red-600 hover:text-red-700 font-bold underline cursor-pointer">
+                            <button type="button"
+                                    @click="openCancelModal({
+                                        title: 'Batalkan Berkas LKPD?',
+                                        description: 'Apakah Anda yakin ingin membatalkan berkas LKPD ini untuk mengunggah ulang dokumen baru?',
+                                        warningText: 'File dokumen laporan LKPD yang sebelumnya diunggah akan dihapus dari sistem dan status pengerjaan modul akan direset sampai Anda mengunggah berkas baru.',
+                                        confirmLabel: 'Ya, Batalkan Berkas'
+                                    }, $el.closest('form'))"
+                                    class="text-xs text-rose-600 hover:text-rose-700 font-bold underline cursor-pointer">
                                 Batalkan / Unggah Ulang
                             </button>
                         </form>

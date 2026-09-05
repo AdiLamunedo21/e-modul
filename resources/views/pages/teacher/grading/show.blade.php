@@ -590,7 +590,7 @@
                                             <span>Teks Ringkasan Siswa:</span>
                                             <span class="text-[10px] font-normal text-slate-400">${videoSub.created_at}</span>
                                         </p>
-                                        <p class="whitespace-pre-wrap">${videoSub.summary_text}</p>
+                                        <p class="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">${videoSub.summary_text}</p>
                                     </div>
                                 ` : '<div class="p-3 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-xs text-rose-600 font-medium italic text-center">Siswa belum mengetik ringkasan video.</div>'}
                             </div>
