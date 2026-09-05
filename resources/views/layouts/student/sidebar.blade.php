@@ -44,13 +44,18 @@
         {{-- ══ Navigasi Menu Siswa ══ --}}
         @php
             $currentStatus = request()->query('status');
+            $inProgressBadge = isset($stats['in_progress']) ? $stats['in_progress'] : ($sidebarStats['in_progress'] ?? null);
+            $completedBadge = isset($stats['completed_modules']) ? $stats['completed_modules'] : ($sidebarStats['completed'] ?? null);
+            $defaultSidebarStatus = (!empty($inProgressBadge) && $inProgressBadge > 0) ? 'in_progress' : 'classes';
+            $effectiveStatus = $currentStatus ?: $defaultSidebarStatus;
+
             $isDashboardActive = (request()->routeIs('student.dashboard') || request()->routeIs('dashboard.student')) 
                 && !request()->routeIs('student.modules.*') 
-                && (empty($currentStatus) || $currentStatus === 'all');
+                && ($effectiveStatus === 'classes' || $effectiveStatus === 'all');
             $isInProgressActive = (request()->routeIs('student.dashboard') || request()->routeIs('dashboard.student')) 
-                && $currentStatus === 'in_progress';
+                && $effectiveStatus === 'in_progress';
             $isCompletedActive = (request()->routeIs('student.dashboard') || request()->routeIs('dashboard.student')) 
-                && $currentStatus === 'completed';
+                && $effectiveStatus === 'completed';
 
             $isModulesRoute = request()->routeIs('student.modules.*');
             $currentSubjectParam = request()->route('subject');
@@ -62,10 +67,6 @@
             } elseif (isset($subject) && $subject instanceof \App\Models\Subject) {
                 $activeSubjectId = $subject->id;
             }
-
-            // Hitung jumlah modul untuk badge sidebar
-            $inProgressBadge = isset($stats['in_progress']) ? $stats['in_progress'] : ($sidebarStats['in_progress'] ?? null);
-            $completedBadge = isset($stats['completed_modules']) ? $stats['completed_modules'] : ($sidebarStats['completed'] ?? null);
         @endphp
 
         <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"

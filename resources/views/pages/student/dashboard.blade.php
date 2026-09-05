@@ -195,7 +195,8 @@
         {{-- ══ KONTEN UTAMA PORTAL SISWA: TABS & KPI HUB (ALPINE.JS)                 ══ --}}
         {{-- ══════════════════════════════════════════════════════════════════════════ --}}
         <div x-data="{
-            activeTab: '{{ in_array($filterStatus, ['classes', 'completed', 'all_modules']) ? $filterStatus : 'in_progress' }}',
+            activeTab: '{{ in_array($filterStatus, ['classes', 'completed', 'all_modules', 'in_progress']) ? $filterStatus : ($defaultTab ?? 'in_progress') }}',
+            defaultTab: '{{ $defaultTab ?? 'in_progress' }}',
             searchQuery: '',
             selectedGrade: 'all',
             selectedClassId: 'all',
@@ -211,7 +212,7 @@
                 this.selectedSubjectId = 'all';
                 this.selectedStatus = 'all';
                 const url = new URL(window.location);
-                if (tab === 'in_progress') {
+                if (tab === this.defaultTab) {
                     url.searchParams.delete('status');
                 } else {
                     url.searchParams.set('status', tab);
@@ -375,8 +376,8 @@
             {{-- ══ 3. INTERACTIVE NAVIGATION TABS & FILTER HUB ══ --}}
             <div class="space-y-6">
 
-                {{-- ═══ TAB SELECTOR NAVIGATION BAR ═══ --}}
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-3">
+                {{-- ═══ TAB SELECTOR NAVIGATION BAR (KHUSUS DESKTOP, PADA MOBILE DIGANTIKAN BOTTOM NAV) ═══ --}}
+                <div class="hidden lg:flex items-center justify-between gap-3 border-b border-slate-200/80 pb-3">
                 <div class="inline-flex p-1.5 rounded-2xl bg-slate-200/70 border border-slate-300/60 backdrop-blur-sm gap-1 overflow-x-auto max-w-full no-scrollbar">
                     
                     {{-- Tab 1: Kelas Saya --}}

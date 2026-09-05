@@ -292,8 +292,16 @@ class DashboardController extends Controller
             ];
         });
 
-        // Filter tab berdasarkan query parameter (default: in_progress / Sedang Dikerjakan)
-        $filterStatus = $request->query('status', 'in_progress');
+        // Kategori modul terpisah untuk akses cepat tab dashboard:
+        // Sedang Dikerjakan memprioritaskan modul yang aktif diajarkan oleh guru di kelas!
+        $inProgressModules = $processedModules->filter(fn($m) => $m['is_active_in_class'] || $m['progress_status'] === 'in_progress')->sortByDesc('is_active_in_class')->values();
+        $completedModules = $processedModules->where('progress_status', 'completed')->values();
+
+        // Tentukan default tab pembukaan jika tidak ada parameter status di URL:
+        // Jika ada pembelajaran aktif (in_progress > 0), buka 'in_progress' (Sedang Dikerjakan).
+        // Jika tidak ada pembelajaran aktif, buka 'classes' (Kelas Saya).
+        $defaultTab = $inProgressModules->isNotEmpty() ? 'in_progress' : 'classes';
+        $filterStatus = $request->query('status', $defaultTab);
         $filterSubject = $request->query('subject', 'all');
 
         $filteredModules = $processedModules;
@@ -303,17 +311,17 @@ class DashboardController extends Controller
         }
 
         if ($filterStatus === 'in_progress') {
-            $filteredModules = $filteredModules->filter(fn($m) => $m['is_active_in_class'] || $m['progress_status'] === 'in_progress')->sortByDesc('is_active_in_class')->values();
+            $filteredModules = $inProgressModules;
         } elseif ($filterStatus === 'completed') {
-            $filteredModules = $filteredModules->where('progress_status', 'completed');
+            $filteredModules = $completedModules;
         } elseif ($filterStatus === 'not_started') {
             $filteredModules = $filteredModules->where('progress_status', 'not_started');
         }
 
         // Metrik KPI Statistik Siswa
         $totalModulesCount = $processedModules->count();
-        $completedModulesCount = $processedModules->where('progress_status', 'completed')->count();
-        $inProgressModulesCount = $processedModules->filter(fn($m) => $m['is_active_in_class'] || $m['progress_status'] === 'in_progress')->count();
+        $completedModulesCount = $completedModules->count();
+        $inProgressModulesCount = $inProgressModules->count();
         $notStartedModulesCount = $processedModules->where('progress_status', 'not_started')->count();
 
         // Kumpulan tugas belum selesai (To-Do List 5 Teratas)
@@ -393,11 +401,6 @@ class DashboardController extends Controller
 
         $displayedClasses = $classesWithModules;
 
-        // Kategori modul terpisah untuk akses cepat tab dashboard:
-        // Sedang Dikerjakan memprioritaskan modul yang aktif diajarkan oleh guru di kelas!
-        $inProgressModules = $processedModules->filter(fn($m) => $m['is_active_in_class'] || $m['progress_status'] === 'in_progress')->sortByDesc('is_active_in_class')->values();
-        $completedModules = $processedModules->where('progress_status', 'completed')->values();
-
         // Ekstrak daftar tingkat/jenjang kelas yang diikuti siswa untuk chip filter cepat
         $availableGrades = $joinedClasses->pluck('grade')->unique()->filter()->values()->toArray();
 
@@ -420,6 +423,7 @@ class DashboardController extends Controller
             'stats',
             'filterStatus',
             'filterSubject',
+            'defaultTab',
             'allPendingTasks',
             'isNewlyRegistered'
         ));

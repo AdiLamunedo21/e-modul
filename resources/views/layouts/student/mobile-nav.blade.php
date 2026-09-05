@@ -9,15 +9,16 @@
 
 @php
     $isDashboard = request()->routeIs('student.dashboard') || request()->routeIs('dashboard.student');
-    $currentStatus = request()->query('status', 'in_progress');
     $inProgBadge = isset($stats['in_progress']) ? $stats['in_progress'] : ($sidebarStats['in_progress'] ?? null);
+    $defaultNavTab = (!empty($inProgBadge) && $inProgBadge > 0) ? 'in_progress' : 'classes';
+    $currentStatus = request()->query('status', $defaultNavTab);
     $completedBadge = isset($stats['completed_modules']) ? $stats['completed_modules'] : ($sidebarStats['completed'] ?? null);
     $allModulesBadge = isset($stats['total_modules']) ? $stats['total_modules'] : ($sidebarStats['total_modules'] ?? null);
     $classesBadge = isset($classesWithModules) ? count($classesWithModules) : (Auth::guard('student')->user()?->classes()->count() ?? 0);
 @endphp
 
 <nav x-data="{
-        currentTab: '{{ $isDashboard ? (in_array($currentStatus, ['classes', 'completed', 'all_modules']) ? $currentStatus : 'in_progress') : '' }}',
+        currentTab: '{{ $isDashboard ? (in_array($currentStatus, ['classes', 'completed', 'all_modules', 'in_progress']) ? $currentStatus : $defaultNavTab) : '' }}',
         goToTab(tab, fallbackUrl) {
             const isDash = window.location.pathname.endsWith('/student/dashboard') || window.location.pathname.endsWith('/student/portal');
             if (isDash) {
