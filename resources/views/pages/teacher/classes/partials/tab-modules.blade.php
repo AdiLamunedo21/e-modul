@@ -294,19 +294,19 @@
                      x-transition:enter-start="opacity-0"
                      x-transition:enter-end="opacity-100"
                      class="group relative bg-white rounded-3xl border transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-xs hover:shadow-xl hover:-translate-y-1
-                            {{ $mod->is_active ? 'border-emerald-400 ring-2 ring-emerald-500/25 shadow-emerald-500/10' : 'border-slate-200/90 hover:border-slate-300' }}">
+                            {{ $mod->is_active ? 'border-emerald-300 ring-2 ring-emerald-500/20 shadow-md shadow-emerald-500/10' : 'border-slate-200/90 hover:border-slate-300' }}">
 
                     {{-- Banner Status Aktif Pembelajaran di Kelas --}}
                     @if($mod->is_active)
-                        <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white px-4 py-2 text-xs font-black flex items-center justify-between shadow-xs">
+                        <div class="bg-emerald-50 border-b border-emerald-200/90 px-4 py-2.5 text-xs font-bold flex items-center justify-between">
                             <div class="flex items-center gap-2">
                                 <span class="relative flex h-2.5 w-2.5">
-                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-200 opacity-75"></span>
-                                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-600"></span>
                                 </span>
-                                <span class="uppercase tracking-wider text-[11px] font-black">Sedang Dibahas di Kelas</span>
+                                <span class="uppercase tracking-wider text-[11px] font-black text-emerald-900">Sedang Dibahas di Kelas</span>
                             </div>
-                            <span class="text-[10px] font-extrabold bg-white/20 px-2 py-0.5 rounded-full backdrop-blur-xs">Aktif Siswa</span>
+                            <span class="text-[10px] font-black bg-emerald-700 text-white px-2.5 py-0.5 rounded-full shadow-2xs">Aktif Siswa</span>
                         </div>
                     @else
                         <div class="bg-slate-50 border-b border-slate-100 px-4 py-1.5 text-[11px] font-medium text-slate-400 flex items-center justify-between">
