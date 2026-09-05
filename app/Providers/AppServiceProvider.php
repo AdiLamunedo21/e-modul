@@ -23,12 +23,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // View Composer untuk Sidebar Siswa: Membagikan daftar Mata Pelajaran & Jumlah Modul
-        View::composer('layouts.student.sidebar', function ($view) {
+        // View Composer untuk Sidebar & Mobile Nav Siswa: Membagikan daftar Mata Pelajaran & Jumlah Modul
+        View::composer(['layouts.student.sidebar', 'layouts.student.mobile-nav'], function ($view) {
             $student = Auth::guard('student')->user();
             $sidebarStats = [
-                'in_progress' => 0,
-                'completed'   => 0,
+                'in_progress'   => 0,
+                'completed'     => 0,
+                'total_modules' => 0,
             ];
 
             if ($student) {
@@ -87,8 +88,9 @@ class AppServiceProvider extends ServiceProvider
                         }
                     }
 
-                    $sidebarStats['in_progress'] = $inProgressCount;
-                    $sidebarStats['completed']   = $completedCount;
+                    $sidebarStats['in_progress']   = $inProgressCount;
+                    $sidebarStats['completed']     = $completedCount;
+                    $sidebarStats['total_modules'] = $modules->count();
                 } else {
                     $subjects = Subject::all();
                 }

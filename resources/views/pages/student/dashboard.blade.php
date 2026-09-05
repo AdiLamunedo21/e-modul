@@ -217,6 +217,7 @@
                     url.searchParams.set('status', tab);
                 }
                 window.history.replaceState({}, '', url);
+                window.dispatchEvent(new CustomEvent('student-tab-changed', { detail: tab }));
             },
 
             matchesClass(item) {
@@ -299,7 +300,9 @@
                 this.selectedSubjectId = 'all';
                 this.selectedStatus = 'all';
             }
-        }" class="space-y-8">
+        }"
+        x-on:switch-student-tab.window="switchTab($event.detail)"
+        class="space-y-8">
 
             {{-- ══ 2. RINGKASAN KPI BELAJAR SISWA (STATS CARDS) — DISEMBUNYIKAN PADA MENU SEDANG DIKERJAKAN & RIWAYAT SELESAI ══ --}}
             <div x-show="activeTab !== 'in_progress' && activeTab !== 'completed'"
@@ -639,54 +642,6 @@
             {{-- ═══ VIEW 2: TAB SEDANG DIKERJAKAN (MODUL PEMBELAJARAN)             ═══ --}}
             {{-- ══════════════════════════════════════════════════════════════════════ --}}
             <div x-show="activeTab === 'in_progress'" x-cloak class="space-y-6">
-
-                {{-- Toolbar Pencarian & Filter Khusus Modul Sedang Dikerjakan --}}
-                <div class="bg-white rounded-3xl border border-slate-200/90 p-4 sm:p-5 shadow-sm space-y-4">
-                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                        
-                        {{-- Live Search Input --}}
-                        <div class="relative flex-1 max-w-lg">
-                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                                </svg>
-                            </div>
-                            <input type="text"
-                                   x-model.debounce.150ms="searchQuery"
-                                   placeholder="Cari judul modul, mata pelajaran, kelas, atau nama guru..."
-                                   class="w-full pl-10 pr-9 py-2.5 bg-slate-50 hover:bg-slate-100/80 focus:bg-white border border-slate-200 rounded-2xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-amber-500/15 focus:border-amber-500 transition-all shadow-inner">
-                            
-                            <button type="button"
-                                    x-show="searchQuery.length > 0"
-                                    x-cloak
-                                    @click="searchQuery = ''"
-                                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition-colors">
-                                <span class="w-5 h-5 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-[10px] font-bold text-slate-600">✕</span>
-                            </button>
-                        </div>
-
-                        {{-- Dropdown Filter Kelas & Mapel --}}
-                        <div class="flex items-center gap-2.5 flex-wrap justify-between lg:justify-end">
-                            {{-- Filter Rombel Kelas --}}
-                            <select x-model="selectedClassId"
-                                    class="text-xs font-bold py-2 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all cursor-pointer">
-                                <option value="all">🏫 Semua Rombel Kelas</option>
-                                @foreach($joinedClasses as $clsOption)
-                                    <option value="{{ $clsOption->id }}">{{ $clsOption->full_name }}</option>
-                                @endforeach
-                            </select>
-
-                            {{-- Filter Mapel --}}
-                            <select x-model="selectedSubjectId"
-                                    class="text-xs font-bold py-2 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all cursor-pointer">
-                                <option value="all">📚 Semua Mata Pelajaran</option>
-                                @foreach($subjects as $subjOption)
-                                    <option value="{{ $subjOption['id'] }}">{{ $subjOption['name'] }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                </div>
 
                 {{-- Status Counter Bar --}}
                 <div class="flex items-center justify-between gap-3 px-1">

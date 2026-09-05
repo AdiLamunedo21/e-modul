@@ -93,8 +93,8 @@
                 </div>
             @endif
 
-            {{-- Konten halaman (scrollable independen) --}}
-            <main class="flex-1 px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto w-full">
+            {{-- Konten halaman (scrollable independen, pb-24 agar tidak tertutup mobile nav) --}}
+            <main class="flex-1 px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-6 max-w-7xl mx-auto w-full">
                 @yield('content')
             </main>
         </div>
@@ -286,6 +286,9 @@
             </div>
         </div>
     </div>
+
+    {{-- ════ NAVIGASI DIGITAL KHUSUS VERSI MOBILE (ROLE SISWA) ════ --}}
+    @include('layouts.student.mobile-nav')
 
     @stack('scripts')
 </body>
