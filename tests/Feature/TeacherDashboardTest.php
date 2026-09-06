@@ -30,7 +30,7 @@ class TeacherDashboardTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Selamat Datang', false);
         $response->assertSee($teacher->name);
-        $response->assertSee('E-Modul Terbaru & Draf Pengerjaan', false);
+        $response->assertSee('Antrean Penilaian Adaptif', false);
         $response->assertSee('Perpustakaan Modul', false);
         $response->assertSee('Grading Center', false);
         $response->assertSee('Rekap Nilai Excel', false);
@@ -110,6 +110,74 @@ class TeacherDashboardTest extends TestCase
         $resNoMatch->assertDontSee($uniqueTitle);
         $resNoMatch->assertSee('Modul Tidak Ditemukan', false);
 
+        $module->delete();
+    }
+
+    public function test_teacher_dashboard_pending_queue_grouped_by_student()
+    {
+        $teacher = Teacher::first();
+        $class = SchoolClass::first();
+        $student1 = Student::first();
+        $student2 = Student::skip(1)->first();
+
+        if (!$teacher || !$class || !$student1 || !$student2) {
+            $this->markTestSkipped('Teacher, class, and at least 2 students required.');
+        }
+
+        // Buat modul untuk guru ini
+        $module = Module::create([
+            'teacher_id' => $teacher->id,
+            'class_id'   => $class->id,
+            'subject_id' => $teacher->subjects()->first()?->id ?? \App\Models\Subject::first()?->id,
+            'title'      => 'Modul Test Queue Grouping ' . uniqid(),
+            'status'     => 'published',
+        ]);
+
+        // Berkas tugas 1 untuk siswa 1
+        $embed = \App\Models\EmbedSubmission::create([
+            'module_id'       => $module->id,
+            'student_id'      => $student1->id,
+            'screenshot_path' => 'test_student1.png',
+            'manual_score'    => null,
+        ]);
+
+        // Berkas tugas 2 untuk siswa 1 (sehingga siswa 1 memiliki 2 berkas pending)
+        $video = \App\Models\VideoSummary::create([
+            'module_id'    => $module->id,
+            'student_id'   => $student1->id,
+            'summary_text' => 'Ringkasan materi siswa 1',
+            'manual_score' => null,
+        ]);
+
+        // Berkas tugas untuk siswa 2
+        $embed2 = \App\Models\EmbedSubmission::create([
+            'module_id'       => $module->id,
+            'student_id'      => $student2->id,
+            'screenshot_path' => 'test_student2.png',
+            'manual_score'    => null,
+        ]);
+
+        $response = $this->actingAs($teacher, 'teacher')
+            ->get(route('teacher.dashboard'));
+
+        $response->assertStatus(200);
+
+        // Ambil data view pendingQueueSorted
+        $pendingQueue = $response->viewData('pendingQueueSorted');
+
+        // Pastikan siswa 1 HANYA muncul 1 kali meskipun mengumpulkan banyak tugas berbeda
+        $student1Entries = $pendingQueue->where('student_id', $student1->id);
+        $this->assertCount(1, $student1Entries);
+        $this->assertGreaterThanOrEqual(2, $student1Entries->first()['pending_tasks_count']);
+
+        // Pastikan siswa 2 juga terlihat di antrean
+        $student2Entries = $pendingQueue->where('student_id', $student2->id);
+        $this->assertCount(1, $student2Entries);
+
+        // Bersihkan data dummy
+        $embed->delete();
+        $video->delete();
+        $embed2->delete();
         $module->delete();
     }
 }

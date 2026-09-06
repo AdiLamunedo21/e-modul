@@ -127,14 +127,14 @@ class DashboardController extends Controller
                 ->whereNull('manual_score')
                 ->with(['student.schoolClass', 'lkpd.module'])
                 ->latest()
-                ->take(6)
+                ->take(50)
                 ->get();
 
             foreach ($pendingLkpd as $sub) {
                 if ($sub->student && $sub->lkpd && $sub->lkpd->module) {
                     $pendingQueue->push([
                         'type'         => 'lkpd',
-                        'type_label'   => 'Tugas LKPD Kelompok',
+                        'type_label'   => 'LKPD Kelompok',
                         'badge_color'  => 'bg-indigo-50 text-indigo-700 border-indigo-200',
                         'file_badge'   => 'Berkas LKPD',
                         'student_name' => $sub->student->name,
@@ -153,7 +153,7 @@ class DashboardController extends Controller
                 ->whereNull('manual_score')
                 ->with(['student.schoolClass', 'jobSheet.module'])
                 ->latest()
-                ->take(6)
+                ->take(50)
                 ->get();
 
             foreach ($pendingJobSheet as $sub) {
@@ -179,7 +179,7 @@ class DashboardController extends Controller
                 ->whereNull('manual_score')
                 ->with(['student.schoolClass', 'module'])
                 ->latest()
-                ->take(6)
+                ->take(50)
                 ->get();
 
             foreach ($pendingEmbed as $sub) {
@@ -205,7 +205,7 @@ class DashboardController extends Controller
                 ->whereNull('manual_score')
                 ->with(['student.schoolClass', 'module'])
                 ->latest()
-                ->take(6)
+                ->take(50)
                 ->get();
 
             foreach ($pendingVideo as $sub) {
@@ -227,8 +227,38 @@ class DashboardController extends Controller
             }
         }
 
-        // Urutkan antrean berdasarkan waktu pengumpulan terbaru
-        $pendingQueueSorted = $pendingQueue->sortByDesc('submitted_at')->values()->take(5);
+        // Urutkan seluruh antrean berdasarkan waktu pengumpulan terbaru
+        $sortedQueue = $pendingQueue->sortByDesc('submitted_at');
+
+        // Kelompokkan per siswa unik (student_id) agar 1 siswa hanya tampil 1 entri di tabel dashboard
+        // sehingga seluruh siswa lain yang mengumpulkan berkas tetap terlihat jelas
+        $pendingQueueSorted = $sortedQueue
+            ->groupBy('student_id')
+            ->map(function ($submissions) {
+                $latest = $submissions->first();
+                $pendingTasksCount = $submissions->count();
+                $uniqueTaskTypes = $submissions->pluck('type_label')->unique()->values();
+                $uniqueModules = $submissions->pluck('module_title')->unique()->values();
+
+                return [
+                    'student_id'          => $latest['student_id'],
+                    'student_name'        => $latest['student_name'],
+                    'student_nisn'        => $latest['student_nisn'],
+                    'class_name'          => $latest['class_name'],
+                    'module_id'           => $latest['module_id'],
+                    'module_title'        => $latest['module_title'],
+                    'type_label'          => $latest['type_label'],
+                    'badge_color'         => $latest['badge_color'],
+                    'file_badge'          => $latest['file_badge'],
+                    'submitted_at'        => $latest['submitted_at'],
+                    'pending_tasks_count' => $pendingTasksCount,
+                    'task_labels'         => $uniqueTaskTypes->all(),
+                    'module_titles'       => $uniqueModules->all(),
+                ];
+            })
+            ->values()
+            ->take(5);
+
         $totalPendingCount = max($pendingResultsCount, $pendingQueue->count());
 
         // 5. Ringkasan Kelas Binaan

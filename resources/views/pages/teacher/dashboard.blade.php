@@ -220,206 +220,6 @@
     </div>
 </div>
 
-{{-- ══ Section: E-Modul Terbaru & Draf Pengerjaan (Maksimal 3 Modul) ══ --}}
-<div class="rounded-2xl bg-white border border-slate-200/80 shadow-sm overflow-hidden mb-8">
-    {{-- Header & Tabs --}}
-    <div class="border-b border-slate-100 p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <div class="flex items-center gap-2">
-                <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                    <span>E-Modul Terbaru & Draf Pengerjaan</span>
-                </h2>
-                <span class="text-[11px] font-extrabold bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full">
-                    3 Teratas
-                </span>
-            </div>
-            <p class="text-xs text-slate-500 mt-1">Daftar 3 e-modul yang baru dibuat, ditambahkan, atau masih dalam tahap penyusunan draf.</p>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-3">
-            {{-- Filter Status Tabs --}}
-            <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-semibold">
-                <a href="{{ route('teacher.dashboard', ['status' => 'all']) }}" 
-                   class="px-3 py-1.5 rounded-lg transition-all {{ $statusFilter === 'all' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
-                    Semua
-                </a>
-                <a href="{{ route('teacher.dashboard', ['status' => 'draft']) }}" 
-                   class="px-3 py-1.5 rounded-lg transition-all {{ $statusFilter === 'draft' ? 'bg-white text-amber-900 shadow-sm' : 'text-slate-600 hover:text-amber-700' }}">
-                    Draf ({{ $counts['draft'] }})
-                </a>
-                <a href="{{ route('teacher.dashboard', ['status' => 'published']) }}" 
-                   class="px-3 py-1.5 rounded-lg transition-all {{ $statusFilter === 'published' ? 'bg-white text-emerald-900 shadow-sm' : 'text-slate-600 hover:text-emerald-700' }}">
-                    Terbit ({{ $counts['published'] }})
-                </a>
-                <a href="{{ route('teacher.dashboard', ['status' => 'shared']) }}" 
-                   class="px-3 py-1.5 rounded-lg transition-all {{ $statusFilter === 'shared' ? 'bg-white text-indigo-900 shadow-sm' : 'text-slate-600 hover:text-indigo-700' }}">
-                    Di Library ({{ $counts['shared'] }})
-                </a>
-            </div>
-
-            {{-- Link ke Manajer Modul Lengkap --}}
-            <a href="{{ route('teacher.modules.index') }}" class="hidden sm:inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700">
-                <span>Manajer Modul ({{ $counts['all'] }})</span>
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
-            </a>
-        </div>
-    </div>
-
-    {{-- Module Cards List (Maksimal 3 Modul) --}}
-    <div class="p-5 sm:p-6 space-y-4">
-        @forelse($modulesData as $item)
-            <div class="p-5 rounded-2xl border {{ $item['status'] === 'draft' ? 'border-amber-200 bg-amber-50/15' : 'border-slate-200/70 bg-white hover:bg-blue-50/15' }} hover:border-blue-300 transition-all">
-                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    {{-- Modul Info --}}
-                    <div class="space-y-2 flex-1">
-                        <div class="flex flex-wrap items-center gap-2">
-                            {{-- Status Badge --}}
-                            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wide border {{ $item['status_label']['color'] }}">
-                                ● {{ $item['status_label']['label'] }}
-                            </span>
-
-                            {{-- Subject Badge --}}
-                            @if($item['model']->subject)
-                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold {{ $item['model']->subject->badgeClasses() }}">
-                                    <span>{{ $item['model']->subject->icon }}</span>
-                                    <span>{{ $item['model']->subject->name }}</span>
-                                </span>
-                            @endif
-
-                            {{-- Shared to Library Badge --}}
-                            @if($item['is_shared'])
-                                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 border border-indigo-200 flex items-center gap-1">
-                                    <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.333A48.357 48.357 0 0012 9.75c-2.551 0-5.056.2-7.5.583V21M3 21h18M12 6.75h.008v.008H12V6.75z"/></svg>
-                                    <span>Di Library</span>
-                                    @if($item['clone_count'] > 0)
-                                        <span class="text-[10px] bg-indigo-200 text-indigo-900 px-1.5 py-0.2 rounded-md font-bold">{{ $item['clone_count'] }} Klon</span>
-                                    @endif
-                                </span>
-                            @endif
-
-                            {{-- Target Class Badge --}}
-                            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
-                                {{ $item['class_name'] }}
-                            </span>
-                            @if(isset($item['model']))
-                                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold border {{ $item['model']->semester_badge['color'] }}">
-                                    {{ $item['model']->semester_badge['short'] }}
-                                </span>
-                            @endif
-                            <span class="text-xs text-slate-400">Diperbarui: {{ $item['updated_at_formatted'] }}</span>
-                        </div>
-
-                        {{-- Module Title --}}
-                        <h3 class="text-base sm:text-lg font-bold text-slate-900 hover:text-blue-600 transition-colors">
-                            <a href="{{ route('teacher.modules.show', $item['id']) }}">
-                                {{ $item['title'] }}
-                            </a>
-                        </h3>
-                        
-                        {{-- 7 Komponen Inti yang Aktif --}}
-                        <div class="flex flex-wrap items-center gap-1.5 pt-1">
-                            <span class="text-[11px] font-bold text-slate-500 mr-1">Komponen Inti Aktif ({{ $item['active_components_count'] }}):</span>
-                            @if(count($item['active_components']) > 0)
-                                @foreach($item['active_components'] as $componentName)
-                                    <span class="text-[10px] font-semibold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md border border-indigo-100">
-                                        {{ $componentName }}
-                                    </span>
-                                @endforeach
-                            @else
-                                <span class="text-[11px] text-slate-400 italic">Belum ada komponen inti yang diaktifkan (Dalam pengerjaan draf)</span>
-                            @endif
-                        </div>
-                    </div>
-
-                    {{-- Progress Bar & Pengumpulan Siswa --}}
-                    <div class="w-full lg:w-72 bg-slate-50 p-4 rounded-xl border border-slate-200/60 shrink-0">
-                        <div class="flex justify-between items-center text-xs font-semibold mb-2">
-                            <span class="text-slate-600">Pengumpulan Siswa</span>
-                            <span class="text-blue-600 font-bold">
-                                {{ $item['submitted_count'] }} / {{ $item['total_students'] }} Siswa ({{ $item['submission_percent'] }}%)
-                            </span>
-                        </div>
-                        <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-                            <div class="bg-blue-600 h-2 rounded-full transition-all" style="width: {{ $item['submission_percent'] }}%"></div>
-                        </div>
-                        <div class="mt-2 flex items-center justify-between text-[11px] text-slate-500">
-                            <span>Pending Nilai: <strong class="{{ $item['pending_count'] > 0 ? 'text-amber-600' : 'text-slate-600' }}">{{ $item['pending_count'] }} Siswa</strong></span>
-                            <span class="text-emerald-600 font-bold">Selesai: {{ $item['graded_count'] }}</span>
-                        </div>
-                    </div>
-
-                    {{-- Action Buttons --}}
-                    <div class="flex items-center gap-2 lg:flex-col lg:items-end shrink-0">
-                        <div class="flex items-center gap-1.5">
-                            <a href="{{ route('teacher.modules.show', $item['id']) }}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-all shadow-sm">
-                                <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
-                                <span>{{ $item['status'] === 'draft' ? 'Lanjutkan di Builder' : 'Kelola (5 Bagian)' }}</span>
-                            </a>
-                            <a href="{{ route('teacher.grading.show', $item['id']) }}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm transition-all">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                <span>Grading ({{ $item['pending_count'] }})</span>
-                            </a>
-                        </div>
-                        <div class="flex items-center gap-1.5">
-                            <a href="{{ route('teacher.reports.export.module', $item['id']) }}" class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-slate-600 bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:text-emerald-700 rounded-lg transition-all">
-                                <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-8.625 1.125V5.625m17.25 13.875c.621 0 1.125-.504 1.125-1.125M20.625 19.5h-7.5c-.621 0-1.125-.504-1.125-1.125m8.625 1.125V5.625m-17.25 0c0-.621.504-1.125 1.125-1.125h15c.621 0 1.125.504 1.125 1.125m-17.25 0v12.75c0 .621.504 1.125 1.125 1.125h15c.621 0 1.125-.504 1.125-1.125V5.625m-17.25 0h17.25M9 4.5v15M15 4.5v15M3.75 9.75h16.5M3.75 14.25h16.5"/></svg>
-                                <span>Excel .xlsx</span>
-                            </a>
-                            <form action="{{ route('teacher.modules.toggle-share', $item['id']) }}" method="POST" class="inline">
-                                @csrf
-                                <button type="submit" class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold {{ $item['is_shared'] ? 'text-indigo-700 bg-indigo-50 border-indigo-200' : 'text-slate-600 bg-slate-50 border-slate-200' }} border hover:bg-indigo-100 rounded-lg transition-all" title="{{ $item['is_shared'] ? 'Batalkan Berbagi ke Library' : 'Bagikan ke Perpustakaan Modul' }}">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"/></svg>
-                                    <span>{{ $item['is_shared'] ? 'Unshare' : 'Share' }}</span>
-                                </button>
-                            </form>
-                            <button type="button"
-                                    @click="deleteModalOpen = true; deleteUrl = '{{ route('teacher.modules.destroy', $item['id']) }}'; deleteTitle = '{{ addslashes($item['title']) }}'"
-                                    class="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-semibold text-rose-600 bg-rose-50 border border-rose-200 hover:bg-rose-100 rounded-lg transition-all"
-                                    title="Hapus Modul Ini">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
-                                <span>Hapus</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @empty
-            <div class="text-center py-12 px-4 rounded-2xl bg-slate-50/60 border border-dashed border-slate-200">
-                <div class="w-16 h-16 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-                    </svg>
-                </div>
-                <h3 class="text-base font-bold text-slate-800">Belum ada modul pada kategori ini</h3>
-                <p class="text-xs text-slate-500 max-w-md mx-auto mt-1 mb-5">
-                    Mulai rancang modul ajar modular 5 bagian atau duplikasi modul dari katalog perpustakaan bersama.
-                </p>
-                <div class="flex items-center justify-center gap-3">
-                    <a href="{{ route('teacher.modules.create') }}" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm transition-all">
-                        <span>Buat Modul Baru</span>
-                    </a>
-                    <a href="{{ route('teacher.library.index') }}" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-all">
-                        <span>Jelajahi Library Modul</span>
-                    </a>
-                </div>
-            </div>
-        @endforelse
-    </div>
-
-    {{-- Footer Info: Jika modul lebih dari 3 --}}
-    @if(($counts['all'] ?? 0) > 3)
-        <div class="p-4 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-            <span class="text-slate-500">
-                Menampilkan <strong>{{ count($modulesData) }}</strong> modul terbaru dari total <strong>{{ $counts['all'] }}</strong> modul portofolio Anda.
-            </span>
-            <a href="{{ route('teacher.modules.index') }}" class="inline-flex items-center gap-1.5 font-bold text-blue-600 hover:text-blue-700 hover:underline">
-                <span>Buka Manajer Modul Lengkap ({{ $counts['all'] }})</span>
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
-            </a>
-        </div>
-    @endif
-</div>
-
 {{-- ══ Bottom Section: Grading Center Queue, Assigned Classes & Builder Guide ══ --}}
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
@@ -450,22 +250,33 @@
                                     {{ strtoupper(substr($sub['student_name'] ?? 'S', 0, 2)) }}
                                 </div>
                                 <div>
-                                    <div class="flex items-center gap-2">
+                                    <div class="flex items-center gap-2 flex-wrap">
                                         <p class="text-sm font-bold text-slate-800">{{ $sub['student_name'] }}</p>
                                         <span class="text-[10px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded">
                                             {{ $sub['class_name'] }}
                                         </span>
+                                        @if(($sub['pending_tasks_count'] ?? 1) > 1)
+                                            <span class="text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full">
+                                                {{ $sub['pending_tasks_count'] }} Berkas Dikumpulkan
+                                            </span>
+                                        @endif
                                     </div>
                                     <p class="text-xs text-slate-500 mt-0.5">
-                                        Modul: <span class="font-medium text-slate-700">{{ $sub['module_title'] }}</span> • 
-                                        Tugas: <span class="font-semibold text-slate-800">{{ $sub['type_label'] }}</span>
+                                        Modul: <span class="font-medium text-slate-700">{{ $sub['module_title'] }}</span>@if(count($sub['module_titles'] ?? []) > 1)<span class="text-slate-400 text-[11px]"> (+{{ count($sub['module_titles']) - 1 }} modul lain)</span>@endif • 
+                                        Tugas: <span class="font-semibold text-slate-800">{{ implode(', ', $sub['task_labels'] ?? [$sub['type_label']]) }}</span>
                                     </p>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-2 self-end sm:self-center">
-                                <span class="text-[11px] font-bold px-2.5 py-1 rounded-lg border {{ $sub['badge_color'] }}">
-                                    {{ $sub['file_badge'] }}
-                                </span>
+                            <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
+                                @if(($sub['pending_tasks_count'] ?? 1) > 1)
+                                    <span class="text-[11px] font-bold px-2.5 py-1 rounded-lg border border-amber-200 bg-amber-50 text-amber-700">
+                                        {{ $sub['pending_tasks_count'] }} Berkas Pending
+                                    </span>
+                                @else
+                                    <span class="text-[11px] font-bold px-2.5 py-1 rounded-lg border {{ $sub['badge_color'] }}">
+                                        {{ $sub['file_badge'] }}
+                                    </span>
+                                @endif
                                 <a href="{{ route('teacher.grading.show', $sub['module_id']) }}" class="px-3 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-all">
                                     Beri Nilai
                                 </a>
