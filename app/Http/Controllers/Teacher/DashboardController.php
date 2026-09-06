@@ -43,9 +43,14 @@ class DashboardController extends Controller
         $teacher = $this->teacher();
         $teacherId = $teacher->id;
 
-        // 1. Query seluruh modul milik guru
+        // 1. Query seluruh modul milik guru dengan optimasi eager loading hemat RAM
         $allTeacherModules = Module::where('teacher_id', $teacherId)
-            ->with(['schoolClass.students', 'schoolClass.major', 'studentResults.student', 'clonedFrom', 'subject'])
+            ->with([
+                'schoolClass' => fn($q) => $q->withCount('students'),
+                'schoolClass.major',
+                'studentResults:id,module_id,student_id,grading_status,summative_score',
+                'subject:id,name,code,color,icon',
+            ])
             ->latest()
             ->get();
 
@@ -91,7 +96,7 @@ class DashboardController extends Controller
 
         // Format data modul untuk antarmuka
         $modulesData = $limitedModules->map(function ($mod) {
-            $classStudentsCount = $mod->schoolClass && $mod->schoolClass->students ? $mod->schoolClass->students->count() : 0;
+            $classStudentsCount = $mod->schoolClass ? ($mod->schoolClass->students_count ?? ($mod->schoolClass->students ? $mod->schoolClass->students->count() : 0)) : 0;
             $submittedCount     = $mod->studentResults ? $mod->studentResults->count() : 0;
             $pendingCount       = $mod->studentResults ? $mod->studentResults->where('grading_status', 'pending')->count() : 0;
             $gradedCount        = $mod->studentResults ? $mod->studentResults->where('grading_status', 'graded')->count() : 0;

@@ -154,13 +154,16 @@ class GradingController extends Controller
             $subjects = Subject::orderBy('name')->get();
         }
 
-        // Kalkulasi per mapel di kelas ini
-        $subjects->transform(function (Subject $sub) use ($teacher, $class) {
-            $modules = Module::where('teacher_id', $teacher->id)
-                ->where('class_id', $class->id)
-                ->where('subject_id', $sub->id)
-                ->with('studentResults')
-                ->get();
+        // Load seluruh modul guru di kelas ini satu kali saja (hindari N+1 query per mapel)
+        $classModules = Module::where('teacher_id', $teacher->id)
+            ->where('class_id', $class->id)
+            ->with(['studentResults:id,module_id,student_id,grading_status,summative_score'])
+            ->get();
+        $modulesBySubject = $classModules->groupBy('subject_id');
+
+        // Kalkulasi per mapel di kelas ini secara in-memory
+        $subjects->transform(function (Subject $sub) use ($modulesBySubject) {
+            $modules = $modulesBySubject->get($sub->id, collect());
 
             $results = $modules->pluck('studentResults')->flatten();
             $graded = $results->where('grading_status', 'graded');
@@ -175,12 +178,11 @@ class GradingController extends Controller
             return $sub;
         });
 
-        $classModules = Module::where('teacher_id', $teacher->id)->where('class_id', $class->id)->with('studentResults')->get();
         $classResults = $classModules->pluck('studentResults')->flatten();
         $classGraded = $classResults->where('grading_status', 'graded');
 
         $classStats = [
-            'total_students'  => $class->students()->count(),
+            'total_students'  => $class->students ? $class->students->count() : $class->students()->count(),
             'total_modules'   => $classModules->count(),
             'published_count' => $classModules->where('status', 'published')->count(),
             'pending_count'   => $classResults->where('grading_status', 'pending')->count(),
@@ -281,33 +283,24 @@ class GradingController extends Controller
             });
         }
 
+        // Indeks koleksi per student_id untuk lookup instan O(1)
+        $resultsByStudent = $module->studentResults->keyBy('student_id');
+        $videoByStudent = $module->has_video ? $module->videoSummaries->keyBy('student_id') : collect();
+        $embedByStudent = $module->has_embed ? $module->embedSubmissions->keyBy('student_id') : collect();
+        $jobSheetSubmissions = $module->has_job_sheet && $module->jobSheets->isNotEmpty()
+            ? $module->jobSheets->first()->submissions->keyBy('student_id')
+            : collect();
+        $lkpdSubmissions = $module->has_lkpd && $module->lkpds->isNotEmpty()
+            ? $module->lkpds->first()->submissions->keyBy('student_id')
+            : collect();
+
         // Memetakan data lengkap setiap siswa di kelas
-        $studentsData = $classStudents->map(function ($student) use ($module) {
-            $result = $module->studentResults->firstWhere('student_id', $student->id);
-
-            $videoSummary = $module->has_video
-                ? $module->videoSummaries->firstWhere('student_id', $student->id)
-                : null;
-
-            $embedSubmission = $module->has_embed
-                ? $module->embedSubmissions->firstWhere('student_id', $student->id)
-                : null;
-
-            $jobSheetSubmission = null;
-            if ($module->has_job_sheet) {
-                $jobSheet = $module->jobSheets->first();
-                if ($jobSheet) {
-                    $jobSheetSubmission = $jobSheet->submissions->firstWhere('student_id', $student->id);
-                }
-            }
-
-            $lkpdSubmission = null;
-            if ($module->has_lkpd) {
-                $lkpd = $module->lkpds->first();
-                if ($lkpd) {
-                    $lkpdSubmission = $lkpd->submissions->firstWhere('student_id', $student->id);
-                }
-            }
+        $studentsData = $classStudents->map(function ($student) use ($resultsByStudent, $videoByStudent, $embedByStudent, $jobSheetSubmissions, $lkpdSubmissions) {
+            $result = $resultsByStudent->get($student->id);
+            $videoSummary = $videoByStudent->get($student->id);
+            $embedSubmission = $embedByStudent->get($student->id);
+            $jobSheetSubmission = $jobSheetSubmissions->get($student->id);
+            $lkpdSubmission = $lkpdSubmissions->get($student->id);
 
             // Tentukan status pengerjaan / penilaian
             $hasAnySubmission = $result !== null ||

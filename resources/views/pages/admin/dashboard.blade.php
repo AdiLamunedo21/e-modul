@@ -164,7 +164,7 @@
                 <tbody class="divide-y divide-slate-100">
                     @forelse($teachers as $teacher)
                         @php
-                            $assignedClassesCount = $teacher->assignedClasses()->count();
+                            $assignedClassesCount = $teacher->classes_count ?? $teacher->assignedClasses()->count();
                         @endphp
                         <tr class="hover:bg-slate-50/60 transition-colors">
                             <td class="py-4 px-6">

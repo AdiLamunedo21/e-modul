@@ -115,8 +115,6 @@ class ClassController extends Controller
         $allTeacherModules = $baseModulesQuery->select(['id', 'teacher_id', 'class_id', 'subject_id', 'status'])
             ->with(['studentResults' => fn($sq) => $sq->select(['id', 'module_id', 'student_id', 'grading_status', 'summative_score'])])
             ->get();
-        $assignedClassIds = $allTeacherModules->pluck('class_id')->filter()->unique();
-        $totalStudentsInAssignedClasses = Student::whereIn('class_id', $assignedClassIds)->count();
         $allResults = $allTeacherModules->pluck('studentResults')->flatten();
         $gradedResults = $allResults->where('grading_status', 'graded');
         $overallAvgScore = $gradedResults->count() > 0 ? (int) round($gradedResults->avg('summative_score')) : 0;

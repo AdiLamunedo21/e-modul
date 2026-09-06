@@ -49,8 +49,9 @@ class DashboardController extends Controller
         ];
 
         // ── 2. Produktivitas & Monitoring Guru ──
-        $teachers = Teacher::with(['subjects', 'modules.schoolClass'])
+        $teachers = Teacher::with(['subjects:id,name,code'])
             ->withCount([
+                'classes',
                 'modules',
                 'modules as published_modules_count' => fn($q) => $q->where('status', 'published'),
                 'modules as draft_modules_count'     => fn($q) => $q->where('status', 'draft'),

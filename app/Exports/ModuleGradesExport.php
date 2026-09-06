@@ -166,26 +166,23 @@ class ModuleGradesExport
         $currentRow = $dataStartRow;
         $no = 1;
 
-        foreach ($students as $student) {
-            $result = $module->studentResults->firstWhere('student_id', $student->id);
-            $videoSummary = $module->has_video ? $module->videoSummaries->firstWhere('student_id', $student->id) : null;
-            $embedSub = $module->has_embed ? $module->embedSubmissions->firstWhere('student_id', $student->id) : null;
-            
-            $jobSheetSub = null;
-            if ($module->has_job_sheet) {
-                $jobSheet = $module->jobSheets->first();
-                if ($jobSheet) {
-                    $jobSheetSub = $jobSheet->submissions->firstWhere('student_id', $student->id);
-                }
-            }
+        // Indeks koleksi per student_id untuk lookup instan O(1)
+        $resultsByStudent = $module->studentResults->keyBy('student_id');
+        $videoByStudent = $module->has_video ? $module->videoSummaries->keyBy('student_id') : collect();
+        $embedByStudent = $module->has_embed ? $module->embedSubmissions->keyBy('student_id') : collect();
+        $jobSheetSubmissions = $module->has_job_sheet && $module->jobSheets->isNotEmpty()
+            ? $module->jobSheets->first()->submissions->keyBy('student_id')
+            : collect();
+        $lkpdSubmissions = $module->has_lkpd && $module->lkpds->isNotEmpty()
+            ? $module->lkpds->first()->submissions->keyBy('student_id')
+            : collect();
 
-            $lkpdSub = null;
-            if ($module->has_lkpd) {
-                $lkpd = $module->lkpds->first();
-                if ($lkpd) {
-                    $lkpdSub = $lkpd->submissions->firstWhere('student_id', $student->id);
-                }
-            }
+        foreach ($students as $student) {
+            $result = $resultsByStudent->get($student->id);
+            $videoSummary = $videoByStudent->get($student->id);
+            $embedSub = $embedByStudent->get($student->id);
+            $jobSheetSub = $jobSheetSubmissions->get($student->id);
+            $lkpdSub = $lkpdSubmissions->get($student->id);
 
             // No
             $sheet->setCellValueExplicit("A{$currentRow}", $no++, DataType::TYPE_NUMERIC);
