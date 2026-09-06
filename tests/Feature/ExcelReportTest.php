@@ -5,15 +5,12 @@ namespace Tests\Feature;
 use App\Exports\ModuleGradesExport;
 use App\Models\Module;
 use App\Models\SchoolClass;
-use App\Models\Student;
-use App\Models\StudentResult;
-use App\Models\Subject;
 use App\Models\Teacher;
 use Tests\TestCase;
 
 class ExcelReportTest extends TestCase
 {
-    public function test_teacher_can_access_reports_index()
+    public function test_legacy_reports_url_redirects_to_grading_center()
     {
         $teacher = Teacher::first();
         if (!$teacher) {
@@ -23,12 +20,10 @@ class ExcelReportTest extends TestCase
         $response = $this->actingAs($teacher, 'teacher')
             ->get(route('teacher.reports.index'));
 
-        $response->assertStatus(200);
-        $response->assertSee('Pusat Laporan Nilai');
-        $response->assertSee('Pilih Kelas');
+        $response->assertRedirect(route('teacher.grading.index'));
     }
 
-    public function test_teacher_can_access_class_subjects_report()
+    public function test_legacy_class_reports_url_redirects_to_grading_class()
     {
         $teacher = Teacher::first();
         $class = SchoolClass::first();
@@ -39,30 +34,10 @@ class ExcelReportTest extends TestCase
         $response = $this->actingAs($teacher, 'teacher')
             ->get(route('teacher.reports.class', $class->id));
 
-        $response->assertStatus(200);
-        $response->assertSee($class->full_name);
-        $response->assertSee('Daftar Kelas');
-        $response->assertSee('Buka Modul Pembelajaran');
+        $response->assertRedirect(route('teacher.grading.class', $class->id));
     }
 
-    public function test_teacher_can_access_subject_modules_report()
-    {
-        $teacher = Teacher::first();
-        $class = SchoolClass::first();
-        $subject = Subject::first();
-        if (!$teacher || !$class || !$subject) {
-            $this->markTestSkipped('Teacher, Class, or Subject data not seeded.');
-        }
-
-        $response = $this->actingAs($teacher, 'teacher')
-            ->get(route('teacher.reports.class.subject', [$class->id, $subject->id]));
-
-        $response->assertStatus(200);
-        $response->assertSee($subject->name);
-        $response->assertSee('Daftar Mapel');
-    }
-
-    public function test_teacher_can_access_module_student_report()
+    public function test_teacher_can_export_module_grades_from_grading_center()
     {
         $teacher = Teacher::first();
         $module = Module::where('teacher_id', $teacher->id)->first();
@@ -71,15 +46,15 @@ class ExcelReportTest extends TestCase
         }
 
         $response = $this->actingAs($teacher, 'teacher')
-            ->get(route('teacher.reports.module', $module->id));
+            ->get(route('teacher.grading.export', $module));
 
         $response->assertStatus(200);
-        $response->assertSee($module->title);
-        $response->assertSee('Daftar Modul');
-        $response->assertSee('Unduh Spreadsheet Excel (.xlsx)');
+        $response->assertHeader('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $this->assertTrue($response->headers->has('content-disposition'));
+        $this->assertStringContainsString('.xlsx', $response->headers->get('content-disposition'));
     }
 
-    public function test_teacher_can_export_module_grades_to_excel()
+    public function test_legacy_export_route_alias_still_works()
     {
         $teacher = Teacher::first();
         $module = Module::where('teacher_id', $teacher->id)->first();
@@ -112,7 +87,7 @@ class ExcelReportTest extends TestCase
 
         // Teacher 2 tries to export module owned by Teacher 1
         $response = $this->actingAs($teacher2, 'teacher')
-            ->get(route('teacher.reports.export.module', $moduleOfTeacher1));
+            ->get(route('teacher.grading.export', $moduleOfTeacher1));
 
         $response->assertStatus(403);
     }

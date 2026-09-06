@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Teacher;
 
+use App\Exports\ModuleGradesExport;
 use App\Http\Controllers\Controller;
 use App\Models\Major;
 use App\Models\Module;
@@ -579,12 +580,25 @@ class GradingController extends Controller
     }
 
     /**
+     * Mengunduh rekapitulasi nilai satu modul dalam format Microsoft Excel (.xlsx)
+     * langsung dari Pusat Penilaian (Grading Center).
+     */
+    public function export(Module $module)
+    {
+        $this->authorizeTeacher($module);
+
+        $export = new ModuleGradesExport($module);
+
+        return $export->download();
+    }
+
+    /**
      * Memastikan guru hanya dapat mengelola modul miliknya sendiri.
      */
     protected function authorizeTeacher(Module $module): void
     {
         if ($module->teacher_id !== Auth::guard('teacher')->id()) {
-            abort(403, 'Anda tidak memiliki hak akses untuk menilai modul ini.');
+            abort(403, 'Anda tidak memiliki hak akses untuk mengelola atau mengunduh laporan modul ini.');
         }
     }
 }

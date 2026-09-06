@@ -115,15 +115,6 @@
                     <span>Pusat Penilaian</span>
                 </div>
             </a>
-
-            {{-- Rekap Laporan Nilai (Spreadsheet / Excel) --}}
-            <a href="{{ route('teacher.reports.index') }}" class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors group
-                {{ request()->routeIs('teacher.reports.*') ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
-                <svg class="w-5 h-5 shrink-0 {{ request()->routeIs('teacher.reports.*') ? 'text-emerald-400' : 'group-hover:text-emerald-400' }} transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-8.625 1.125V5.625m17.25 13.875c.621 0 1.125-.504 1.125-1.125M20.625 19.5h-7.5c-.621 0-1.125-.504-1.125-1.125m8.625 1.125V5.625m-17.25 0c0-.621.504-1.125 1.125-1.125h15c.621 0 1.125.504 1.125 1.125m-17.25 0v12.75c0 .621.504 1.125 1.125 1.125h15c.621 0 1.125-.504 1.125-1.125V5.625m-17.25 0h17.25M9 4.5v15M15 4.5v15M3.75 9.75h16.5M3.75 14.25h16.5" />
-                </svg>
-                <span>Laporan Nilai (Excel)</span>
-            </a>
         </nav>
 
         {{-- ══ Logout Button ══ --}}

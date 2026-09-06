@@ -36,16 +36,6 @@
             Daftar modul pembelajaran untuk mata pelajaran <strong>{{ $subject->name }}</strong> pada <strong>{{ $class->full_name }}</strong>. Pilih modul di bawah untuk membuka tabel matriks pengisian nilai.
         </p>
     </div>
-
-    <div class="flex items-center gap-3 shrink-0">
-        <a href="{{ route('teacher.reports.class.subject', [$class->id, $subject->id]) }}"
-           class="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-slate-700 bg-white border border-slate-200/90 rounded-xl hover:bg-slate-50 hover:border-slate-300 shadow-sm transition-all">
-            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-            </svg>
-            <span>Laporan Excel Modul Ini</span>
-        </a>
-    </div>
 </div>
 
 {{-- ══ Stat Cards (4 Grid) ══ --}}

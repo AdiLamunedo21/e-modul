@@ -14,7 +14,6 @@ use App\Http\Controllers\Teacher\JobSheetController;
 use App\Http\Controllers\Teacher\LkpdController;
 use App\Http\Controllers\Teacher\PostTestController;
 use App\Http\Controllers\Teacher\GradingController;
-use App\Http\Controllers\Teacher\ReportController;
 use App\Http\Controllers\Teacher\ClassController;
 use App\Http\Controllers\Teacher\DashboardController;
 use App\Http\Controllers\Teacher\ModuleLibraryController;
@@ -179,17 +178,18 @@ Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(fu
     Route::get('/grading/classes/{class}',                                  [GradingController::class, 'showClassSubjects'])->name('grading.class');
     Route::get('/grading/classes/{class}/subjects/{subject}',               [GradingController::class, 'showSubjectModules'])->name('grading.class.subject');
     Route::get('/grading/modules/{module}',                                 [GradingController::class, 'show'])->name('grading.show');
+    Route::get('/grading/modules/{module}/export',                          [GradingController::class, 'export'])->name('grading.export');
     Route::get('/grading/modules/{module}/students/{student}',              [GradingController::class, 'getStudentDetail'])->name('grading.student.detail');
     Route::post('/grading/modules/{module}/students/{student}',             [GradingController::class, 'updateStudentGrade'])->name('grading.student.update');
     Route::post('/grading/modules/{module}/batch',                          [GradingController::class, 'batchUpdate'])->name('grading.batch.update');
 
-    // Laporan Spreadsheet / Excel (.xlsx) - Alur Berjenjang (Kelas -> Mapel -> Modul -> Laporan Siswa)
-    Route::get('/reports',                                                   [ReportController::class, 'index'])->name('reports.index');
-    Route::get('/reports/classes/{class}',                                   [ReportController::class, 'showClassSubjects'])->name('reports.class');
-    Route::get('/reports/classes/{class}/subjects/{subject}',                [ReportController::class, 'showSubjectModules'])->name('reports.class.subject');
-    Route::get('/reports/modules/{module}',                                  [ReportController::class, 'showModuleReport'])->name('reports.module');
-    Route::get('/reports/modules/{module}/export',                           [ReportController::class, 'exportModule'])->name('reports.export.module');
-    Route::get('/modules/{module}/export-grades',                            [ReportController::class, 'exportModule'])->name('modules.export.grades');
+    // Kompatibilitas Tautan Laporan: Ekspor langsung via GradingController & Redirect URL lama ke Pusat Penilaian
+    Route::get('/reports/modules/{module}/export',                           [GradingController::class, 'export'])->name('reports.export.module');
+    Route::get('/modules/{module}/export-grades',                            [GradingController::class, 'export'])->name('modules.export.grades');
+    Route::get('/reports',                                                   fn() => redirect()->route('teacher.grading.index'))->name('reports.index');
+    Route::get('/reports/classes/{class}',                                   fn($class) => redirect()->route('teacher.grading.class', $class))->name('reports.class');
+    Route::get('/reports/classes/{class}/subjects/{subject}',                fn($class, $subject) => redirect()->route('teacher.grading.class.subject', [$class, $subject]))->name('reports.class.subject');
+    Route::get('/reports/modules/{module}',                                  fn($module) => redirect()->route('teacher.grading.show', $module))->name('reports.module');
 
     // Build Kelas & Direktori Siswa
     Route::get('/classes',                                                  [ClassController::class, 'index'])->name('classes.index');
