@@ -38,7 +38,7 @@ class PostTestController extends Controller
     public function edit(Module $module)
     {
         $this->authorize($module);
-        $module->load('schoolClass');
+        $module->load(['schoolClass', 'preTest.questions']);
 
         $postTest = $module->postTest()->firstOrCreate([], [
             'title'               => 'Post-test: Evaluasi Pemahaman Materi',
@@ -48,8 +48,9 @@ class PostTestController extends Controller
         ]);
 
         $postTest->load('questions');
+        $preTestQuestions = $module->preTest?->questions ?? collect();
 
-        return view('pages.teacher.modules.post-test', compact('module', 'postTest'));
+        return view('pages.teacher.modules.post-test', compact('module', 'postTest', 'preTestQuestions'));
     }
 
     /**
@@ -58,7 +59,7 @@ class PostTestController extends Controller
     public function preview(Module $module)
     {
         $this->authorize($module);
-        $module->load('schoolClass');
+        $module->load(['schoolClass', 'preTest.questions']);
 
         $postTest = $module->postTest()->with('questions')->firstOrCreate([], [
             'title'               => 'Post-test: Evaluasi Pemahaman Materi',
@@ -78,6 +79,8 @@ class PostTestController extends Controller
         $this->authorize($module);
 
         $hasPostTest = $request->boolean('has_post_test');
+        $hasCustomQuestions = $request->filled('questions') && is_array($request->questions) && count($request->questions) > 0;
+        $hasPreTestQuestions = $module->preTest && $module->preTest->questions()->exists();
 
         $rules = [
             'title'               => ['nullable', 'string', 'max:255'],
@@ -88,18 +91,23 @@ class PostTestController extends Controller
 
         // Validasi butir soal jika post-test diaktifkan
         if ($hasPostTest) {
-            $rules['questions']                         = ['required', 'array', 'min:1'];
-            $rules['questions.*.question_text']         = ['required', 'string', 'min:3'];
-            $rules['questions.*.correct_answer']        = ['required', 'string', 'in:A,B,C,D,E'];
-            $rules['questions.*.options.A']             = ['required', 'string'];
-            $rules['questions.*.options.B']             = ['required', 'string'];
-            $rules['questions.*.score_weight']          = ['nullable', 'integer', 'min:1'];
-            $rules['questions.*.time_limit_seconds']     = ['nullable', 'integer', 'min:0', 'max:3600'];
-            $rules['questions.*.explanation']           = ['nullable', 'string'];
+            if ($hasCustomQuestions) {
+                $rules['questions']                         = ['required', 'array', 'min:1'];
+                $rules['questions.*.question_text']         = ['required', 'string', 'min:3'];
+                $rules['questions.*.correct_answer']        = ['required', 'string', 'in:A,B,C,D,E'];
+                $rules['questions.*.options.A']             = ['required', 'string'];
+                $rules['questions.*.options.B']             = ['required', 'string'];
+                $rules['questions.*.score_weight']          = ['nullable', 'integer', 'min:1'];
+                $rules['questions.*.time_limit_seconds']     = ['nullable', 'integer', 'min:0', 'max:3600'];
+                $rules['questions.*.explanation']           = ['nullable', 'string'];
+            } elseif (!$hasPreTestQuestions) {
+                // Hanya wajibkan input jika pre-test modul juga belum memiliki butir soal
+                $rules['questions'] = ['required', 'array', 'min:1'];
+            }
         }
 
         $request->validate($rules, [
-            'questions.required'                 => 'Minimal harus ada 1 butir soal jika fitur Post-test diaktifkan.',
+            'questions.required'                 => 'Minimal harus ada 1 butir soal jika fitur Post-test diaktifkan, atau pastikan Pre-test modul sudah memiliki butir soal untuk diwariskan otomatis.',
             'questions.min'                      => 'Minimal harus ada 1 butir soal jika fitur Post-test diaktifkan.',
             'questions.*.question_text.required' => 'Teks pertanyaan wajib diisi pada setiap butir soal.',
             'questions.*.correct_answer.required'=> 'Pilih kunci jawaban yang benar (A/B/C/D/E) pada setiap butir soal.',
@@ -107,7 +115,7 @@ class PostTestController extends Controller
             'questions.*.options.B.required'     => 'Pilihan B wajib diisi.',
         ]);
 
-        DB::transaction(function () use ($request, $module, $hasPostTest) {
+        DB::transaction(function () use ($request, $module, $hasPostTest, $hasCustomQuestions) {
             // Update status flag di tabel modules
             $module->update(['has_post_test' => $hasPostTest]);
 
@@ -124,7 +132,7 @@ class PostTestController extends Controller
             $postTest->questions()->delete();
 
             $order = 1;
-            if (!empty($request->questions) && is_array($request->questions)) {
+            if ($hasCustomQuestions) {
                 foreach ($request->questions as $q) {
                     $qText = trim($q['question_text'] ?? $q['pertanyaan'] ?? '');
                     if (empty($qText)) {

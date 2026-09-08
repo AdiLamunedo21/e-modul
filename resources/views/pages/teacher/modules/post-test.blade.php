@@ -98,6 +98,12 @@
                class="px-4 py-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-900/90 text-white border border-white/25 hover:border-white/40 text-xs font-bold transition-all flex items-center gap-2 backdrop-blur-sm shadow-sm">
                 ← Kembali ke Detail
             </a>
+            <a href="{{ route('teacher.live-quiz.create', ['module_id' => $module->id, 'test_type' => 'post_test']) }}"
+               class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-lg shadow-emerald-950/40 flex items-center gap-2 border border-emerald-400/30"
+               title="Mulai Mode Pantau Layar Kuis Live">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+                Kuis Live
+            </a>
             <a href="{{ route('teacher.modules.post-test.preview', $module) }}" target="_blank"
                class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-lg shadow-emerald-950/40 flex items-center gap-2 border border-emerald-400/30">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -215,7 +221,14 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                        @if(!empty($preTestQuestions) && count($preTestQuestions) > 0)
+                            <button type="button" onclick="copyQuestionsFromPreTest()"
+                                    class="px-3.5 py-2 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs">
+                                <span>📥</span>
+                                <span>Salin Soal Pre-test ({{ count($preTestQuestions) }})</span>
+                            </button>
+                        @endif
                         <button type="button" onclick="addNewQuestion()"
                                 class="px-4 py-2 text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-xl shadow shadow-teal-600/20 transition-all flex items-center gap-1.5">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
@@ -230,15 +243,41 @@
                     @endphp
 
                     @if(empty($questions) || (is_countable($questions) && count($questions) === 0))
-                        <div id="empty-state" class="text-center py-12 px-4 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
-                            <div class="w-14 h-14 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mx-auto mb-3">
-                                <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/></svg>
+                        @if(!empty($preTestQuestions) && count($preTestQuestions) > 0)
+                            <div id="empty-state" class="py-8 px-6 border-2 border-teal-300/80 rounded-2xl bg-gradient-to-br from-teal-50/70 via-emerald-50/40 to-white text-center space-y-3">
+                                <div class="w-12 h-12 rounded-2xl bg-teal-600 text-white flex items-center justify-center mx-auto shadow-md shadow-teal-600/20 text-xl">
+                                    ⚡
+                                </div>
+                                <div class="max-w-xl mx-auto space-y-1">
+                                    <h3 class="text-sm font-black text-slate-900">Otomatis Mewarisi Bank Soal & Kunci Pre-test</h3>
+                                    <p class="text-xs text-slate-600 leading-relaxed">
+                                        Modul ini telah memiliki <strong class="text-teal-800">{{ count($preTestQuestions) }} butir soal & kunci jawaban di Pre-test</strong>. 
+                                        Karena daftar soal di bawah ini belum diisi soal tersendiri, sistem secara otomatis mengandalkan soal dan kunci jawaban dari Pre-test untuk dikerjakan siswa. 
+                                        <strong>Guru tidak perlu mengunci jawaban lagi</strong>.
+                                    </p>
+                                </div>
+                                <div class="pt-2 flex items-center justify-center gap-3 flex-wrap">
+                                    <button type="button" onclick="copyQuestionsFromPreTest()" class="px-4 py-2 text-xs font-bold text-teal-800 bg-white border border-teal-300 hover:bg-teal-100 rounded-xl transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer">
+                                        <span>📥</span>
+                                        <span>Salin Soal dari Pre-test ke Editor</span>
+                                    </button>
+                                    <button type="button" onclick="addNewQuestion()" class="px-4 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer">
+                                        <span>+ Buat Soal Khusus Baru</span>
+                                    </button>
+                                </div>
                             </div>
-                            <h3 class="text-sm font-bold text-slate-800">Belum ada butir soal tersimpan</h3>
-                            <button type="button" onclick="addNewQuestion()" class="mt-4 px-4 py-2 text-xs font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-xl transition-all">
-                                + Tambah Soal Pertama
-                            </button>
-                        </div>
+                        @else
+                            <div id="empty-state" class="text-center py-12 px-4 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
+                                <div class="w-14 h-14 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mx-auto mb-3">
+                                    <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/></svg>
+                                </div>
+                                <h3 class="text-sm font-bold text-slate-800">Belum ada butir soal tersimpan</h3>
+                                <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1">Tambahkan butir soal evaluasi akhir modul untuk siswa.</p>
+                                <button type="button" onclick="addNewQuestion()" class="mt-4 px-4 py-2 text-xs font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-xl transition-all">
+                                    + Tambah Soal Pertama
+                                </button>
+                            </div>
+                        @endif
                     @else
                         @foreach($questions as $qIndex => $question)
                             @include('pages.teacher.modules.partials.question-card', ['qIndex' => $qIndex, 'question' => $question, 'accent' => 'teal'])
@@ -464,6 +503,38 @@
         const newCard = document.getElementById(`question-card-${currentCount}`);
         if (newCard) {
             newCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    function copyQuestionsFromPreTest() {
+        const preQuestions = @json($preTestQuestions ?? []);
+        if (!preQuestions || preQuestions.length === 0) {
+            alert('Tidak ada butir soal di Pre-test untuk disalin.');
+            return;
+        }
+
+        const count = preQuestions.length;
+        const currentCount = document.querySelectorAll('.question-card').length;
+        let confirmMsg = `Salin ${count} butir soal beserta pilihan dan kunci jawaban dari Pre-test ke editor ini?`;
+        if (currentCount > 0) {
+            confirmMsg += `\n\nPerhatian: ${currentCount} butir soal yang saat ini ada di editor akan digantikan oleh butir soal Pre-test.`;
+        }
+
+        if (confirm(confirmMsg)) {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '';
+            preQuestions.forEach(q => {
+                addNewQuestion({
+                    question_text: q.question_text || q.pertanyaan || '',
+                    options: q.options || q.pilihan || {},
+                    correct_answer: q.correct_answer || q.kunci_jawaban || 'A',
+                    score_weight: q.score_weight || q.bobot || 20,
+                    time_limit_seconds: q.time_limit_seconds || '',
+                    explanation: q.explanation || q.pembahasan || ''
+                });
+            });
+            renumberQuestions();
+            updateSummary();
         }
     }
 

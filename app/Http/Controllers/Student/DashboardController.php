@@ -7,6 +7,7 @@ use App\Models\Module;
 use App\Models\SchoolClass;
 use App\Models\Student;
 use App\Models\Subject;
+use App\Models\LiveQuizSession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -45,6 +46,10 @@ class DashboardController extends Controller
         }
 
         $joinedClassIds = $joinedClasses->pluck('id')->toArray();
+        if ($student->class_id && !in_array($student->class_id, $joinedClassIds)) {
+            $joinedClassIds[] = (int) $student->class_id;
+        }
+        $joinedClassIds = array_unique($joinedClassIds);
         $filterClassId = $request->query('class_id', 'all');
         $class = $joinedClasses->first();
 
@@ -407,6 +412,21 @@ class DashboardController extends Controller
         // Banner selamat datang hanya aktif selama 10 menit pertama sejak siswa terdaftar
         $isNewlyRegistered = $student->created_at ? $student->created_at->gte(now()->subMinutes(10)) : false;
 
+        // Cek apakah ada Kuis Live yang sedang aktif untuk kelas siswa ini atau terbuka umum
+        $activeLiveQuiz = LiveQuizSession::with(['module.subject', 'teacher', 'schoolClass'])
+            ->where('status', '!=', 'finished')
+            ->where(function ($q) use ($joinedClassIds) {
+                $q->whereNull('class_id');
+                if (!empty($joinedClassIds)) {
+                    $q->orWhereIn('class_id', $joinedClassIds)
+                      ->orWhereHas('module', function ($mq) use ($joinedClassIds) {
+                          $mq->whereIn('class_id', $joinedClassIds);
+                      });
+                }
+            })
+            ->latest()
+            ->first();
+
         return view('pages.student.dashboard', compact(
             'student',
             'class',
@@ -425,7 +445,8 @@ class DashboardController extends Controller
             'filterSubject',
             'defaultTab',
             'allPendingTasks',
-            'isNewlyRegistered'
+            'isNewlyRegistered',
+            'activeLiveQuiz'
         ));
     }
 

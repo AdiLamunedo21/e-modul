@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="h-full overflow-hidden">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +10,14 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         [x-cloak] { display: none !important; }
+        
+        /* Kunci html dan body agar tidak memicu scrollbar ganda di peramban */
+        html, body {
+            height: 100% !important;
+            overflow: hidden !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
         body { font-family: 'Inter', system-ui, sans-serif; }
 
         /* Sembunyikan batang scrollbar di sidebar di semua browser */
@@ -24,6 +32,25 @@
             width: 0 !important;
             height: 0 !important;
         }
+
+        /* Scrollbar tunggal yang rapi dan halus untuk konten utama */
+        main {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 transparent;
+        }
+        main::-webkit-scrollbar {
+            width: 6px;
+        }
+        main::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        main::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        main::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
     </style>
     @stack('styles')
     @stack('head')
@@ -36,7 +63,7 @@
     - Mobile: Fixed Overlay di bawah sticky header (top-16)
 --}}
 <body
-    class="bg-slate-100 antialiased text-slate-900"
+    class="h-full overflow-hidden bg-slate-100 antialiased text-slate-900"
     x-data="{ sidebarOpen: window.innerWidth >= 1024 }"
 >
     {{--
@@ -51,7 +78,7 @@
     ></div>
 
     {{-- ─── WRAPPER UTAMA: flex row setinggi layar (App Shell) ────────── --}}
-    <div class="flex h-screen overflow-hidden">
+    <div class="flex h-full w-full overflow-hidden">
 
         {{-- ─── SIDEBAR GURU ───────────────────────────────────────────── --}}
         @include('layouts.teacher.sidebar')

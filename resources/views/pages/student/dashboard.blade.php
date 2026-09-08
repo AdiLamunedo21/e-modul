@@ -27,6 +27,109 @@
         </div>
     @endif
 
+    <script>
+    function studentDashboardLiveQuiz(initialQuiz) {
+        return {
+            quiz: initialQuiz,
+            pollInterval: null,
+            get hasActiveQuiz() {
+                return this.quiz !== null && this.quiz !== undefined;
+            },
+            get quizTitle() {
+                return this.quiz ? (this.quiz.title || 'Kuis Live') : '';
+            },
+            get quizTestType() {
+                return this.quiz ? (this.quiz.test_type_label || (this.quiz.test_type === 'pre_test' ? 'Pre-Test' : 'Post-Test')) : 'Kuis';
+            },
+            get quizTeacher() {
+                return this.quiz ? (this.quiz.teacher_name || 'Pengampu') : '';
+            },
+            get quizPin() {
+                return this.quiz ? (this.quiz.pin || '') : '';
+            },
+            get quizStatusLabel() {
+                if (!this.quiz) return 'Kuis Live';
+                if (this.quiz.status === 'lobby') return 'Kuis Live: Ruang Tunggu Dibuka!';
+                return 'Kuis Live Sedang Berlangsung!';
+            },
+            init() {
+                // Polling berkala setiap 3 detik untuk deteksi instan saat guru memulai kuis
+                this.pollInterval = setInterval(() => this.checkActive(), 3000);
+            },
+            async checkActive() {
+                try {
+                    const res = await fetch('{{ route('student.live-quiz.active-check') }}', {
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    if (data.has_active_quiz && data.quiz) {
+                        this.quiz = data.quiz;
+                    } else {
+                        this.quiz = null;
+                    }
+                } catch (e) {
+                    // Ignore network errors during silent poll
+                }
+            }
+        };
+    }
+    </script>
+
+    {{-- ══ BANNER KUIS LIVE INTERAKTIF BERJALAN (REAL-TIME AUTO-POLL) ══ --}}
+    <div x-data="studentDashboardLiveQuiz({{ $activeLiveQuiz ? json_encode([
+            'id'              => $activeLiveQuiz->id,
+            'pin'             => $activeLiveQuiz->pin,
+            'title'           => $activeLiveQuiz->module->title ?? 'Kuis Live',
+            'test_type'       => $activeLiveQuiz->test_type,
+            'test_type_label' => $activeLiveQuiz->test_type === 'pre_test' ? 'Pre-Test' : 'Post-Test',
+            'teacher_name'    => $activeLiveQuiz->teacher->name ?? 'Pengampu',
+            'status'          => $activeLiveQuiz->status,
+        ]) : 'null' }})"
+        x-show="hasActiveQuiz"
+        x-cloak
+        x-transition:enter="transition ease-out duration-300 transform"
+        x-transition:enter-start="opacity-0 -translate-y-4 scale-98"
+        x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+        x-transition:leave="transition ease-in duration-200 transform"
+        x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+        x-transition:leave-end="opacity-0 -translate-y-4 scale-98"
+        class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-800 via-teal-900 to-slate-950 p-6 sm:p-7 text-white shadow-xl shadow-emerald-950/30 border border-emerald-500/40">
+        <div class="absolute -right-8 -bottom-8 w-44 h-44 bg-emerald-500/15 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="space-y-1.5">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-xs font-black uppercase tracking-wider text-emerald-300">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span x-text="quizStatusLabel">Kuis Live Sedang Berlangsung!</span>
+                </div>
+                <h3 class="text-xl sm:text-2xl font-black tracking-tight text-white flex flex-wrap items-center gap-2">
+                    <span x-text="quizTitle">{{ $activeLiveQuiz->module->title ?? 'Kuis Live' }}</span>
+                    <span class="text-xs font-bold px-2.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase"
+                          x-text="quizTestType">
+                        {{ isset($activeLiveQuiz) && $activeLiveQuiz ? ($activeLiveQuiz->test_type === 'pre_test' ? 'Pre-Test' : 'Post-Test') : 'Pre-Test' }}
+                    </span>
+                </h3>
+                <p class="text-slate-300 text-xs sm:text-sm">
+                    Guru <span class="font-semibold text-white" x-text="quizTeacher">{{ $activeLiveQuiz->teacher->name ?? 'Pengampu' }}</span> sedang memandu kuis di depan kelas. PIN Game: <span class="font-mono font-black text-emerald-300 bg-slate-900 border border-emerald-500/30 px-2.5 py-0.5 rounded-lg tracking-widest text-base" x-text="quizPin">{{ $activeLiveQuiz->pin ?? '' }}</span>
+                </p>
+            </div>
+
+            <div class="shrink-0">
+                <form action="{{ route('student.live-quiz.submit-join') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="pin" :value="quizPin" value="{{ $activeLiveQuiz->pin ?? '' }}">
+                    <button type="submit"
+                            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm shadow-xl shadow-emerald-500/20 transition-all transform hover:scale-105 active:scale-95 cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                        </svg>
+                        <span>Gabung Kuis Sekarang</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     {{-- ══════════════════════════════════════════════════════════════════════════ --}}
     {{-- KONDISI 1: DASHBOARD KOSONG (SISWA BELUM BERGABUNG KE KELAS MANAPUN)        --}}
     {{-- ══════════════════════════════════════════════════════════════════════════ --}}

@@ -105,6 +105,21 @@
             {{-- Grup: Evaluasi & Penilaian --}}
             <p class="pt-5 pb-1 px-3 text-[11px] font-bold uppercase tracking-widest text-slate-500">Evaluasi & Penilaian</p>
 
+            {{-- Kuis Live (Mode Pantau Interaktif Layar Penuh) --}}
+            <a href="{{ route('teacher.live-quiz.index') }}" class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors group
+                {{ request()->routeIs('teacher.live-quiz.*') ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 shrink-0 {{ request()->routeIs('teacher.live-quiz.*') ? 'text-emerald-400' : 'group-hover:text-emerald-400' }} transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                    </svg>
+                    <span>Kuis Live</span>
+                </div>
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                    LIVE
+                </span>
+            </a>
+
             {{-- Pusat Penilaian --}}
             <a href="{{ route('teacher.grading.index') }}" class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors group
                 {{ request()->routeIs('teacher.grading.*') ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">

@@ -530,12 +530,12 @@ class ModuleController extends Controller
         $this->authorizeStudentAccess($module);
         abort_if(!$module->has_post_test, 403, 'Komponen Post-test tidak aktif pada modul ini.');
 
-        $postTest = $module->postTest()->with('questions')->first();
-        abort_if(!$postTest || $postTest->questions->isEmpty(), 422, 'Soal Post-test belum dikonfigurasi oleh guru.');
+        $questions = $module->getEffectivePostTestQuestions();
+
+        abort_if($questions->isEmpty(), 422, 'Soal Post-test belum dikonfigurasi oleh guru.');
 
         $student = $this->student();
         $answers = $request->input('answers', []);
-        $questions = $postTest->questions;
         $totalQuestions = $questions->count();
 
         $correctCount = 0;

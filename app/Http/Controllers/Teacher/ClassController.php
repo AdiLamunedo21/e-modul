@@ -353,14 +353,15 @@ class ClassController extends Controller
             $message = "Modul '{$module->title}' berhasil dinonaktifkan dari pembelajaran aktif di kelas {$class->full_name}.";
             $type = 'info';
         } else {
-            // Nonaktifkan modul lain di kelas & mapel yang sama (jika ada) agar fokus 1 modul utama aktif
+            // Pastikan HANYA ADA SATU modul yang aktif di satu kelas pada satu waktu.
+            // Jika guru lain/mapel lain sebelumnya mengaktifkan modul dan belum dinonaktifkan saat kelas berakhir,
+            // seluruh modul lain di kelas ini akan otomatis dinonaktifkan.
             Module::where('class_id', $class->id)
-                ->where('subject_id', $module->subject_id)
                 ->where('id', '!=', $module->id)
                 ->update(['is_active' => false]);
 
             $module->update(['is_active' => true]);
-            $message = "Modul '{$module->title}' berhasil DIAKTIFKAN untuk pembelajaran di kelas {$class->full_name}! Siswa sekarang dapat melihatnya di menu Sedang Dikerjakan.";
+            $message = "Modul '{$module->title}' berhasil DIAKTIFKAN untuk pembelajaran di kelas {$class->full_name}! (Modul lain di kelas ini otomatis dinonaktifkan).";
             $type = 'success';
         }
 

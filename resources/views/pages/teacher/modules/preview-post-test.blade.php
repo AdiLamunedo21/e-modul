@@ -87,14 +87,30 @@
                 {{-- Daftar Soal --}}
                 <div class="p-6 sm:p-8 space-y-5">
                     @php 
-                        $questions = $postTest->questions ?? collect(); 
+                        $questions = $module->getEffectivePostTestQuestions();
+                        $isInherited = $module->isPostTestInheritingPreTest();
                     @endphp
+
+                    @if($isInherited)
+                        <div class="p-4 rounded-2xl bg-teal-50 border border-teal-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-teal-900">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-xl shrink-0">⚡</span>
+                                <div>
+                                    <strong class="font-bold block text-teal-950">Mewarisi Butir Soal & Kunci Jawaban Pre-test</strong>
+                                    <p class="text-teal-700 text-[11px] mt-0.5">Post-test belum diisi butir soal khusus, sehingga secara otomatis menampilkan {{ $questions->count() }} butir soal dan kunci jawaban dari Pre-test.</p>
+                                </div>
+                            </div>
+                            <a href="{{ route('teacher.modules.post-test.edit', $module) }}" class="px-3.5 py-1.5 rounded-xl bg-white border border-teal-300 text-teal-800 font-bold hover:bg-teal-100 transition shrink-0 self-start sm:self-auto shadow-2xs">
+                                Kustomisasi Soal Post-test
+                            </a>
+                        </div>
+                    @endif
 
                     @if($questions->isEmpty())
                         <div class="text-center py-12">
                             <div class="text-5xl mb-4">📝</div>
                             <h3 class="text-slate-700 font-bold text-sm">Belum ada butir soal yang tersimpan di database.</h3>
-                            <p class="text-slate-400 text-xs mt-1">Kembali ke editor untuk menambahkan butir soal post-test.</p>
+                            <p class="text-slate-400 text-xs mt-1">Tambahkan butir soal di editor Pre-test atau Post-test modul ini.</p>
                             <a href="{{ route('teacher.modules.post-test.edit', $module) }}" class="inline-flex items-center gap-1.5 mt-4 px-4 py-2 text-xs font-bold text-teal-700 bg-teal-50 rounded-xl hover:bg-teal-100 transition-colors">
                                 ← Buka Editor Post-test
                             </a>

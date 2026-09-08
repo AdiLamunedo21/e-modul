@@ -25,6 +25,8 @@ use App\Http\Controllers\Admin\StudentController as AdminStudentController;
 use App\Http\Controllers\Admin\SubjectController as AdminSubjectController;
 use App\Http\Controllers\Admin\MajorController as AdminMajorController;
 use App\Http\Controllers\Admin\ClassController as AdminClassController;
+use App\Http\Controllers\Teacher\LiveQuizController as TeacherLiveQuizController;
+use App\Http\Controllers\Student\LiveQuizController as StudentLiveQuizController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -200,6 +202,20 @@ Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(fu
     Route::post('/classes/{class}/modules/{module}/toggle-active',           [ClassController::class, 'toggleActiveModule'])->name('classes.modules.toggle-active');
     Route::delete('/classes/{class}',                                       [ClassController::class, 'destroy'])->name('classes.destroy');
     Route::get('/classes/{class}/students/{student}/summary',               [ClassController::class, 'getStudentAcademicSummary'])->name('classes.student.summary');
+
+    // Kuis Live (Mode Pantau Interaktif Layar Penuh ala Kahoot/Quizizz)
+    Route::get('/live-quiz',                                                 [TeacherLiveQuizController::class, 'index'])->name('live-quiz.index');
+    Route::get('/live-quiz/create',                                          [TeacherLiveQuizController::class, 'create'])->name('live-quiz.create');
+    Route::post('/live-quiz',                                                [TeacherLiveQuizController::class, 'store'])->name('live-quiz.store');
+    Route::get('/live-quiz/{session}/host',                                  [TeacherLiveQuizController::class, 'host'])->name('live-quiz.host');
+    Route::post('/live-quiz/{session}/start',                                [TeacherLiveQuizController::class, 'start'])->name('live-quiz.start');
+    Route::post('/live-quiz/{session}/reveal',                               [TeacherLiveQuizController::class, 'reveal'])->name('live-quiz.reveal');
+    Route::post('/live-quiz/{session}/leaderboard',                          [TeacherLiveQuizController::class, 'leaderboard'])->name('live-quiz.leaderboard');
+    Route::post('/live-quiz/{session}/next-question',                        [TeacherLiveQuizController::class, 'nextQuestion'])->name('live-quiz.next');
+    Route::post('/live-quiz/{session}/finish',                               [TeacherLiveQuizController::class, 'finish'])->name('live-quiz.finish');
+    Route::post('/live-quiz/{session}/save-grades',                          [TeacherLiveQuizController::class, 'saveGrades'])->name('live-quiz.save-grades');
+    Route::get('/live-quiz/{session}/host-poll',                             [TeacherLiveQuizController::class, 'hostPoll'])->name('live-quiz.host-poll');
+    Route::delete('/live-quiz/{session}',                                    [TeacherLiveQuizController::class, 'destroy'])->name('live-quiz.destroy');
 });
 
 // ─── Student Protected ─────────────────────────────────────────────────────
@@ -233,4 +249,12 @@ Route::middleware('auth:student')->prefix('student')->group(function () {
     Route::post('/modules/{module}/lkpd',                   [StudentModuleController::class, 'submitLkpd'])->name('student.modules.lkpd.submit');
     Route::post('/modules/{module}/post-test',              [StudentModuleController::class, 'submitPostTest'])->name('student.modules.post-test.submit');
     Route::delete('/modules/{module}/submissions/{type}',   [StudentModuleController::class, 'cancelSubmission'])->name('student.modules.submission.cancel');
+
+    // Kuis Live (Mode Interaktif Siswa)
+    Route::get('/live-quiz/active-check',                                   [StudentLiveQuizController::class, 'checkActiveSession'])->name('student.live-quiz.active-check');
+    Route::get('/live-quiz/join',                                           [StudentLiveQuizController::class, 'join'])->name('student.live-quiz.join');
+    Route::post('/live-quiz/join',                                          [StudentLiveQuizController::class, 'submitJoin'])->name('student.live-quiz.submit-join');
+    Route::get('/live-quiz/{session}/play',                                 [StudentLiveQuizController::class, 'play'])->name('student.live-quiz.play');
+    Route::post('/live-quiz/{session}/answer',                              [StudentLiveQuizController::class, 'answer'])->name('student.live-quiz.answer');
+    Route::get('/live-quiz/{session}/poll',                                 [StudentLiveQuizController::class, 'playerPoll'])->name('student.live-quiz.poll');
 });

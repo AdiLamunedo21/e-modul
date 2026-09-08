@@ -295,6 +295,63 @@ class TeacherClassTest extends TestCase
         $module2->delete();
     }
 
+    public function test_activating_module_by_teacher_b_deactivates_module_from_teacher_a_with_different_subject_in_same_class()
+    {
+        $teacherA = Teacher::first() ?? Teacher::factory()->create();
+        $teacherB = Teacher::where('id', '!=', $teacherA->id)->first() ?? Teacher::factory()->create();
+
+        $class = SchoolClass::first();
+        $subjects = Subject::take(2)->get();
+        if (!$class || $subjects->count() < 2) {
+            $this->markTestSkipped('Seed data with at least 1 class and 2 subjects required.');
+        }
+
+        $subjectA = $subjects[0];
+        $subjectB = $subjects[1];
+
+        // Pastikan teacherB juga memiliki relasi dengan $class
+        if (!$teacherB->classes()->where('class_id', $class->id)->exists()) {
+            $teacherB->classes()->attach($class->id);
+        }
+
+        // 1. Guru A mengaktifkan modulnya (Mapel A)
+        $moduleA = Module::create([
+            'title'      => 'Modul Guru A ' . uniqid(),
+            'teacher_id' => $teacherA->id,
+            'class_id'   => $class->id,
+            'subject_id' => $subjectA->id,
+            'status'     => 'published',
+            'is_active'  => true,
+        ]);
+
+        // 2. Guru B membuat modul (Mapel B) dalam keadaan non-aktif
+        $moduleB = Module::create([
+            'title'      => 'Modul Guru B ' . uniqid(),
+            'teacher_id' => $teacherB->id,
+            'class_id'   => $class->id,
+            'subject_id' => $subjectB->id,
+            'status'     => 'published',
+            'is_active'  => false,
+        ]);
+
+        $this->assertTrue($moduleA->fresh()->is_active);
+        $this->assertFalse($moduleB->fresh()->is_active);
+
+        // 3. Guru B masuk kelas dan mengaktifkan modulnya
+        $response = $this->actingAs($teacherB, 'teacher')
+            ->post(route('teacher.classes.modules.toggle-active', [$class, $moduleB]));
+
+        $response->assertSessionHas('success');
+
+        // Modul Guru B harus AKTIF, dan Modul Guru A harus OTOMATIS NON-AKTIF
+        $this->assertTrue($moduleB->fresh()->is_active);
+        $this->assertFalse($moduleA->fresh()->is_active);
+
+        // Cleanup
+        $moduleA->delete();
+        $moduleB->delete();
+    }
+
     public function test_active_module_appears_at_the_very_top_of_modules_list()
     {
         $teacher = Teacher::first();

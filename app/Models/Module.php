@@ -761,6 +761,31 @@ class Module extends Model
 
     /* ─── Post-Test Helpers ─────────────────────── */
 
+    /** Mendapatkan koleksi butir soal efektif untuk post-test (menggunakan post-test jika ada, atau mewarisi dari pre-test) */
+    public function getEffectivePostTestQuestions()
+    {
+        if ($this->postTest && $this->postTest->questions()->exists()) {
+            return $this->postTest->questions()->orderBy('order_num', 'asc')->get();
+        }
+
+        if ($this->preTest && $this->preTest->questions()->exists()) {
+            return $this->preTest->questions()->orderBy('order_num', 'asc')->get();
+        }
+
+        return collect();
+    }
+
+    /** Memeriksa apakah post-test sedang mewarisi soal & kunci jawaban dari pre-test */
+    public function isPostTestInheritingPreTest(): bool
+    {
+        $hasCustomPostQuestions = $this->postTest && $this->postTest->questions()->exists();
+        if ($hasCustomPostQuestions) {
+            return false;
+        }
+
+        return (bool) ($this->preTest && $this->preTest->questions()->exists());
+    }
+
     /** Mendapatkan daftar soal post-test */
     public function postTestQuestions(): array
     {
@@ -775,8 +800,17 @@ class Module extends Model
             ])->toArray();
         }
 
+        // Fallback otomatis ke butir soal pre-test jika post-test belum memiliki soal khusus
+        if ($this->preTest && $this->preTest->questions()->exists()) {
+            return $this->preTestQuestions();
+        }
+
         if (is_array($this->post_test_data)) {
             return $this->post_test_data['questions'] ?? [];
+        }
+
+        if (is_array($this->pre_test_data)) {
+            return $this->pre_test_data['questions'] ?? [];
         }
 
         return [];
@@ -785,9 +819,14 @@ class Module extends Model
     /** Jumlah soal post-test */
     public function postTestQuestionCount(): int
     {
-        if ($this->postTest) {
+        if ($this->postTest && $this->postTest->questions()->exists()) {
             return $this->postTest->questions()->count();
         }
+
+        if ($this->preTest && $this->preTest->questions()->exists()) {
+            return $this->preTest->questions()->count();
+        }
+
         return count($this->postTestQuestions());
     }
 

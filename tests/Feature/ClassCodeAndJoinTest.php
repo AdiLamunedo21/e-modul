@@ -54,7 +54,7 @@ class ClassCodeAndJoinTest extends TestCase
                 'section'  => $section,
             ]);
 
-        $newClass = SchoolClass::where('section', $section)->first();
+        $newClass = SchoolClass::where('section', $section)->latest('id')->first();
         $this->assertNotNull($newClass);
         $this->assertNotEmpty($newClass->code);
 

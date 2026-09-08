@@ -1,8 +1,10 @@
 {{-- ═══════════════════════════════════════════════════════════════ --}}
 {{-- 12. POST-TEST (EVALUASI AKHIR MODUL) ══════════════════════════ --}}
 {{-- ═══════════════════════════════════════════════════════════════ --}}
-@if($module->has_post_test && $module->postTest)
+@if($module->has_post_test && ($module->postTest || $module->preTest))
 @php
+    $effectivePostQuestions = $module->getEffectivePostTestQuestions();
+    $isInheritedFromPre = $module->isPostTestInheritingPreTest();
     $postTestAttempts = $studentResult?->getTestAttempts('post_test') ?? [];
     $postTestAttemptCount = $studentResult?->getTestAttemptCount('post_test') ?? 0;
     $latestPostRetakeScore = $studentResult?->getLatestRetakeScore('post_test');
@@ -17,12 +19,18 @@
             <div class="flex items-center gap-3.5">
                 <span class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-2xl font-bold shrink-0">🏆</span>
                 <div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 flex-wrap">
                         <span class="text-[10px] font-extrabold uppercase tracking-widest text-rose-600">Bagian {{ $secMap[5] ?? 5 }} • Evaluasi Akhir</span>
                         <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">Post-test Sumatif</span>
+                        @if($isInheritedFromPre)
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200 flex items-center gap-1">
+                                <span>⚡</span>
+                                <span>Otomatis dari Pre-test</span>
+                            </span>
+                        @endif
                     </div>
                     <h2 class="text-xl sm:text-2xl font-black text-slate-900 leading-tight mt-0.5">{{ $module->postTest->title ?? 'Post-test: Evaluasi Pemahaman' }}</h2>
-                    <p class="text-xs text-slate-500 font-medium mt-0.5">{{ $module->postTest->questionCount() }} Butir Soal • Target KKTP: {{ $module->postTest->kktp ?? 75 }}</p>
+                    <p class="text-xs text-slate-500 font-medium mt-0.5">{{ $effectivePostQuestions->count() }} Butir Soal • Target KKTP: {{ $module->postTest->kktp ?? 75 }}</p>
                 </div>
             </div>
 
@@ -202,6 +210,66 @@
                                 <span>Sudah Selesai Dikerjakan</span>
                             </div>
                         </div>
+                        {{-- ═══ Accordion: Tinjau Butir Soal & Pembahasan Kunci Jawaban ═══ --}}
+                        @if($effectivePostQuestions->isNotEmpty())
+                            <div x-data="{ showReview: false }" class="pt-3 border-t border-rose-100">
+                                <button type="button"
+                                        @click="showReview = !showReview"
+                                        class="w-full py-3 px-4 rounded-2xl bg-white hover:bg-rose-50/70 border border-rose-200/80 text-left flex items-center justify-between transition cursor-pointer shadow-2xs">
+                                    <span class="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-800">
+                                        <span class="w-6 h-6 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center text-xs">📖</span>
+                                        <span>Tinjau Butir Soal & Kunci Jawaban</span>
+                                        <span class="text-[11px] text-slate-400 font-normal">({{ $effectivePostQuestions->count() }} butir soal)</span>
+                                    </span>
+                                    <span class="text-xs font-bold text-rose-600 flex items-center gap-1">
+                                        <span x-text="showReview ? 'Tutup Review' : 'Lihat Soal & Pembahasan'"></span>
+                                        <span x-text="showReview ? '▲' : '▼'"></span>
+                                    </span>
+                                </button>
+
+                                <div x-show="showReview" x-cloak class="mt-4 space-y-4 animate-fade-in">
+                                    @foreach($effectivePostQuestions as $rIdx => $rQ)
+                                        <div class="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs space-y-3">
+                                            <div class="flex items-center justify-between text-xs">
+                                                <span class="font-extrabold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">
+                                                    Soal #{{ $rIdx + 1 }}
+                                                </span>
+                                                <span class="text-slate-400 font-medium text-[11px]">
+                                                    Bobot: {{ $rQ->score_weight ?: 10 }} Poin
+                                                </span>
+                                            </div>
+                                            <p class="text-xs sm:text-sm font-semibold text-slate-800 leading-relaxed">
+                                                {{ $rQ->question_text }}
+                                            </p>
+                                            <div class="space-y-1.5 pt-1">
+                                                @foreach(['A', 'B', 'C', 'D', 'E'] as $rOpt)
+                                                    @if(!empty($rQ->options[$rOpt]))
+                                                        @php $isCorrect = ($rOpt === strtoupper($rQ->correct_answer)); @endphp
+                                                        <div class="flex items-center gap-2.5 p-2.5 rounded-xl text-xs {{ $isCorrect ? 'bg-emerald-50 border border-emerald-300 font-bold text-emerald-900' : 'bg-slate-50 border border-slate-200 text-slate-700' }}">
+                                                            <span class="w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold {{ $isCorrect ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600' }}">
+                                                                {{ $rOpt }}
+                                                            </span>
+                                                            <span class="flex-1">{{ $rQ->options[$rOpt] }}</span>
+                                                            @if($isCorrect)
+                                                                <span class="text-[10px] font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-200">
+                                                                    ✓ Kunci Jawaban
+                                                                </span>
+                                                            @endif
+                                                        </div>
+                                                    @endif
+                                                @endforeach
+                                            </div>
+                                            @if(!empty($rQ->explanation))
+                                                <div class="p-3 rounded-xl bg-amber-50/80 border border-amber-200 text-xs text-amber-900">
+                                                    <span class="font-bold flex items-center gap-1 text-amber-800 mb-0.5">💡 Pembahasan:</span>
+                                                    <p class="text-slate-700 leading-relaxed">{{ $rQ->explanation }}</p>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
             @endif
@@ -209,7 +277,7 @@
             {{-- ═══ 2. FORM PENGERJAAN SOAL POST-TEST (TAMPIL SAAT MENGERJAKAN SOAL) ═══ --}}
             <div x-show="isTakingPostTest">
 
-                @if($module->postTest->questions->isEmpty())
+                @if($effectivePostQuestions->isEmpty())
                     <div class="py-12 text-center bg-slate-50 rounded-3xl border border-dashed border-slate-300 space-y-2">
                         <span class="text-3xl">🏆</span>
                         <h4 class="text-sm font-bold text-slate-700">Belum Ada Soal Post-test</h4>
@@ -217,10 +285,10 @@
                     </div>
                 @else
                     @php
-                        $postQuestionsCount = $module->postTest->questions->count();
+                        $postQuestionsCount = $effectivePostQuestions->count();
                         $postQuestionsTimeLimits = [];
                         $postQuestionsIds = [];
-                        foreach ($module->postTest->questions as $qIdx => $qItem) {
+                        foreach ($effectivePostQuestions as $qIdx => $qItem) {
                             $postQuestionsTimeLimits[$qIdx] = (int) ($qItem->time_limit_seconds ?: 0);
                             $postQuestionsIds[$qIdx] = (string) $qItem->id;
                         }
@@ -471,7 +539,7 @@
                         <form action="{{ route('student.modules.post-test.submit', $module) }}" method="POST" class="space-y-6 pb-24 lg:pb-0" id="post-test-form">
                             @csrf
 
-                            @foreach($module->postTest->questions as $idx => $q)
+                            @foreach($effectivePostQuestions as $idx => $q)
                                 <div x-show="currentQuestion === {{ $idx }}"
                                      x-transition:enter="transition ease-out duration-200"
                                      x-transition:enter-start="opacity-0 translate-y-1"
