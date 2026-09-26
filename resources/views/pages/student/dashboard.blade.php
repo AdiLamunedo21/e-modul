@@ -307,6 +307,7 @@
             selectedStatus: 'all',
             classItems: {{ Js::from($classesWithModules) }},
             moduleItems: {{ Js::from($processedModules) }},
+            tabAllModules: {{ Js::from($tabAllModules) }},
 
             switchTab(tab) {
                 this.activeTab = tab;
@@ -391,6 +392,10 @@
 
             countVisibleModules(status = null) {
                 return this.moduleItems.filter(m => this.matchesModule(m, status)).length;
+            },
+
+            countVisibleAllModules() {
+                return this.tabAllModules.filter(m => this.matchesModule(m)).length;
             },
 
             get hasActiveFilters() {
@@ -528,7 +533,7 @@
                         <span>📚 Semua Modul</span>
                         <span class="px-2 py-0.5 rounded-full text-[10px]"
                               :class="activeTab === 'all_modules' ? 'bg-blue-700 text-white' : 'bg-slate-300/60 text-slate-600'">
-                            {{ $stats['total_modules'] }}
+                            {{ min(15, $stats['total_modules']) }}
                         </span>
                     </button>
                 </div>
@@ -774,7 +779,7 @@
 
                 {{-- Grid Card Modul Sedang Dikerjakan --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @forelse($inProgressModules as $mod)
+                    @forelse($inProgressModules->take(15) as $mod)
                         <div x-show="matchesModule(moduleItems.find(m => m.id === {{ $mod['id'] }}), 'in_progress')"
                              x-transition:enter="transition ease-out duration-200"
                              x-transition:enter-start="opacity-0 scale-95"
@@ -1014,7 +1019,7 @@
 
                 {{-- Grid Card Modul Riwayat Selesai --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @forelse($processedModules->where('progress_status', 'completed') as $mod)
+                    @forelse($completedModules->take(15) as $mod)
                         <div x-show="matchesModule(moduleItems.find(m => m.id === {{ $mod['id'] }}), 'completed')"
                              x-transition:enter="transition ease-out duration-200"
                              x-transition:enter-start="opacity-0 scale-95"
@@ -1246,12 +1251,14 @@
                             <span>📚</span>
                             <span>Seluruh Modul Pembelajaran</span>
                         </h2>
-                        <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Katalog lengkap seluruh e-modul terbit dari kelas yang Anda ikuti.</p>
+                        <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">
+                            Katalog e-modul terbit dari kelas yang Anda ikuti @if($processedModules->count() > 15)<span class="text-blue-600 font-semibold">(dibatasi 15 modul)</span>@endif.
+                        </p>
                     </div>
 
                     <div class="flex items-center gap-2">
                         <span class="px-2.5 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200 text-[11px] sm:text-xs font-extrabold"
-                              x-text="countVisibleModules() + ' dari ' + moduleItems.length + ' Modul'">
+                              x-text="'Menampilkan ' + countVisibleAllModules() + ' dari ' + tabAllModules.length + ' Modul' + ({{ $processedModules->count() }} > 15 ? ' (Maks. 15 Modul)' : '')">
                         </span>
                         <div x-show="hasActiveFilters" x-cloak>
                             <button type="button"
@@ -1263,10 +1270,10 @@
                     </div>
                 </div>
 
-                {{-- Grid Card Semua Modul --}}
+                {{-- Grid Card Semua Modul (Dibatasi Maksimal 15 Modul) --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @forelse($processedModules as $mod)
-                        <div x-show="matchesModule(moduleItems.find(m => m.id === {{ $mod['id'] }}))"
+                    @forelse($tabAllModules as $mod)
+                        <div x-show="matchesModule(tabAllModules.find(m => m.id === {{ $mod['id'] }}))"
                              x-transition:enter="transition ease-out duration-200"
                              x-transition:enter-start="opacity-0 scale-95"
                              x-transition:enter-end="opacity-100 scale-100"
@@ -1381,8 +1388,22 @@
                         </div>
                     @endforelse
 
-                    @if($processedModules->isNotEmpty())
-                        <div x-show="countVisibleModules() === 0"
+                    @if($processedModules->count() > 15)
+                        <div class="col-span-full mt-2 p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+                            <div class="flex items-center gap-2.5 text-slate-600 text-xs">
+                                <span class="text-base">ℹ️</span>
+                                <span>Menampilkan <strong>15 modul</strong> dari total {{ $stats['total_modules'] }} modul. Untuk melihat modul per rombel kelas selengkapnya, silakan buka menu <strong>Kelas Saya</strong>.</span>
+                            </div>
+                            <button type="button"
+                                    @click="switchTab('classes')"
+                                    class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-emerald-600 text-white text-xs font-bold transition-colors shrink-0">
+                                Buka Kelas Saya →
+                            </button>
+                        </div>
+                    @endif
+
+                    @if($tabAllModules->isNotEmpty())
+                        <div x-show="countVisibleAllModules() === 0"
                              x-cloak
                              class="col-span-full py-16 text-center bg-white rounded-3xl border border-slate-200/90 shadow-sm space-y-4">
                             <div class="w-16 h-16 rounded-2xl bg-blue-50 text-blue-500 border border-blue-200 flex items-center justify-center mx-auto text-3xl font-black">

@@ -435,4 +435,28 @@ class StudentDashboardTest extends TestCase
         // Cleanup
         $activeModule->delete();
     }
+
+    public function test_student_dashboard_module_tab_limits_modules_to_15()
+    {
+        $student = Student::first();
+        if (!$student) {
+            $this->markTestSkipped('Seed data required.');
+        }
+
+        $response = $this->actingAs($student, 'student')
+            ->get(route('student.dashboard', ['status' => 'all_modules']));
+
+        $response->assertStatus(200);
+
+        $tabAllModules = $response->viewData('tabAllModules');
+        $this->assertNotNull($tabAllModules);
+        $this->assertLessThanOrEqual(15, $tabAllModules->count());
+
+        $processedModules = $response->viewData('processedModules');
+        if ($processedModules && $processedModules->count() > 15) {
+            $this->assertEquals(15, $tabAllModules->count());
+            $response->assertSee('dibatasi 15 modul');
+        }
+    }
 }
+

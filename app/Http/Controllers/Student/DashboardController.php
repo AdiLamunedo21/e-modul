@@ -302,6 +302,9 @@ class DashboardController extends Controller
         $inProgressModules = $processedModules->filter(fn($m) => $m['is_active_in_class'] || $m['progress_status'] === 'in_progress')->sortByDesc('is_active_in_class')->values();
         $completedModules = $processedModules->where('progress_status', 'completed')->values();
 
+        // Batasi modul yang tampil di tab Semua Modul dashboard siswa maksimal 15 modul (prioritaskan modul aktif di kelas dan terbaru)
+        $tabAllModules = $processedModules->sortByDesc('is_active_in_class')->take(15)->values();
+
         // Tentukan default tab pembukaan jika tidak ada parameter status di URL:
         // Jika ada pembelajaran aktif (in_progress > 0), buka 'in_progress' (Sedang Dikerjakan).
         // Jika tidak ada pembelajaran aktif, buka 'classes' (Kelas Saya).
@@ -437,6 +440,7 @@ class DashboardController extends Controller
             'filterClassId',
             'subjects',
             'processedModules',
+            'tabAllModules',
             'filteredModules',
             'inProgressModules',
             'completedModules',
