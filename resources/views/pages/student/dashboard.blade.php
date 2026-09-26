@@ -308,6 +308,7 @@
             classItems: {{ Js::from($classesWithModules) }},
             moduleItems: {{ Js::from($processedModules) }},
             tabAllModules: {{ Js::from($tabAllModules) }},
+            inProgressModules: {{ Js::from($inProgressModules) }},
 
             switchTab(tab) {
                 this.activeTab = tab;
@@ -392,6 +393,10 @@
 
             countVisibleModules(status = null) {
                 return this.moduleItems.filter(m => this.matchesModule(m, status)).length;
+            },
+
+            countVisibleInProgressModules() {
+                return this.inProgressModules.filter(m => this.matchesModule(m, 'in_progress')).length;
             },
 
             countVisibleAllModules() {
@@ -760,12 +765,12 @@
                             <span>⏳</span>
                             <span>Modul Sedang Dikerjakan</span>
                         </h2>
-                        <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Daftar modul pembelajaran yang sedang aktif Anda pelajari secara mandiri.</p>
+                        <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Modul pembelajaran yang sedang aktif dipelajari di kelas Anda saat ini.</p>
                     </div>
 
                     <div class="flex items-center gap-2">
                         <span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[11px] sm:text-xs font-extrabold"
-                              x-text="countVisibleModules('in_progress') + ' Modul'">
+                              x-text="countVisibleInProgressModules() + ' Modul Aktif'">
                         </span>
                         <div x-show="hasActiveFilters" x-cloak>
                             <button type="button"
@@ -777,10 +782,10 @@
                     </div>
                 </div>
 
-                {{-- Grid Card Modul Sedang Dikerjakan --}}
+                {{-- Grid Card Modul Sedang Dikerjakan (Maksimal 1 Modul Aktif Sesuai Pergantian Mapel di Kelas) --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @forelse($inProgressModules->take(15) as $mod)
-                        <div x-show="matchesModule(moduleItems.find(m => m.id === {{ $mod['id'] }}), 'in_progress')"
+                    @forelse($inProgressModules as $mod)
+                        <div x-show="matchesModule(inProgressModules.find(m => m.id === {{ $mod['id'] }}), 'in_progress')"
                              x-transition:enter="transition ease-out duration-200"
                              x-transition:enter-start="opacity-0 scale-95"
                              x-transition:enter-end="opacity-100 scale-100"
@@ -918,7 +923,7 @@
 
                     {{-- Empty State jika hasil filter/pencarian in_progress nihil --}}
                     @if($inProgressModules->isNotEmpty())
-                        <div x-show="countVisibleModules('in_progress') === 0"
+                        <div x-show="countVisibleInProgressModules() === 0"
                              x-cloak
                              class="col-span-full py-16 text-center bg-white rounded-3xl border border-slate-200/90 shadow-sm space-y-4">
                             <div class="w-16 h-16 rounded-2xl bg-amber-50 text-amber-500 border border-amber-200 flex items-center justify-center mx-auto text-3xl font-black">

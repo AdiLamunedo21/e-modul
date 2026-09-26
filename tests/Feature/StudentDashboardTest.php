@@ -458,5 +458,89 @@ class StudentDashboardTest extends TestCase
             $response->assertSee('dibatasi 15 modul');
         }
     }
+
+    public function test_only_one_module_can_be_active_per_class_and_activating_new_one_deactivates_old()
+    {
+        $class = SchoolClass::first();
+        $teachers = Teacher::take(2)->get();
+        $subjects = Subject::take(2)->get();
+        if (!$class || $teachers->count() < 2 || $subjects->count() < 2) {
+            $this->markTestSkipped('Seed data required.');
+        }
+
+        $teacher1 = $teachers[0];
+        $teacher2 = $teachers[1];
+        $subject1 = $subjects[0];
+        $subject2 = $subjects[1];
+
+        // Guru 1 mengaktifkan modul Mapel 1 di kelas
+        $modul1 = Module::create([
+            'teacher_id' => $teacher1->id,
+            'class_id'   => $class->id,
+            'subject_id' => $subject1->id,
+            'title'      => 'Modul Mapel 1 ' . uniqid(),
+            'status'     => 'published',
+            'is_active'  => true,
+        ]);
+
+        $this->assertTrue((bool)$modul1->fresh()->is_active);
+
+        // Pergantian mapel di kelas: Guru 2 mengaktifkan modul Mapel 2 di kelas yang sama
+        $modul2 = Module::create([
+            'teacher_id' => $teacher2->id,
+            'class_id'   => $class->id,
+            'subject_id' => $subject2->id,
+            'title'      => 'Modul Mapel 2 ' . uniqid(),
+            'status'     => 'published',
+            'is_active'  => true,
+        ]);
+
+        // Modul 2 harus AKTIF, dan Modul 1 otomatis NONAKTIF
+        $this->assertTrue((bool)$modul2->fresh()->is_active);
+        $this->assertFalse((bool)$modul1->fresh()->is_active);
+
+        // Hanya boleh ada 1 modul aktif di kelas ini
+        $activeCount = Module::where('class_id', $class->id)->where('is_active', true)->count();
+        $this->assertEquals(1, $activeCount);
+
+        // Cleanup
+        $modul1->delete();
+        $modul2->delete();
+    }
+
+    public function test_student_dashboard_in_progress_tab_displays_only_one_module()
+    {
+        $student = Student::first();
+        $class = SchoolClass::find($student->class_id) ?? SchoolClass::first();
+        $teachers = Teacher::take(2)->get();
+        $subjects = Subject::take(2)->get();
+        if (!$student || !$class || $teachers->count() < 2 || $subjects->count() < 2) {
+            $this->markTestSkipped('Seed data required.');
+        }
+
+        // Buat 1 modul aktif di kelas siswa
+        $activeMod = Module::create([
+            'teacher_id' => $teachers[0]->id,
+            'class_id'   => $class->id,
+            'subject_id' => $subjects[0]->id,
+            'title'      => 'Modul Pembelajaran Aktif ' . uniqid(),
+            'status'     => 'published',
+            'is_active'  => true,
+        ]);
+
+        $response = $this->actingAs($student, 'student')
+            ->get(route('student.dashboard', ['status' => 'in_progress']));
+
+        $response->assertStatus(200);
+
+        $inProgressModules = $response->viewData('inProgressModules');
+        $this->assertNotNull($inProgressModules);
+        $this->assertCount(1, $inProgressModules);
+        $this->assertEquals($activeMod->id, $inProgressModules->first()['id']);
+
+        // Cleanup
+        $activeMod->delete();
+    }
 }
+
 

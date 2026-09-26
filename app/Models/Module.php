@@ -36,6 +36,23 @@ class Module extends Model
         return $query->where('is_active', true);
     }
 
+    /**
+     * Aturan Satu Modul Aktif per Kelas (Pergantian Mapel di Kelas):
+     * Setiap kali sebuah modul diaktifkan di suatu kelas, seluruh modul lain
+     * di kelas tersebut otomatis dinonaktifkan.
+     */
+    protected static function booted()
+    {
+        static::saving(function (Module $module) {
+            if ($module->is_active && $module->class_id) {
+                static::where('class_id', $module->class_id)
+                    ->when($module->exists, fn($q) => $q->where('id', '!=', $module->id))
+                    ->where('is_active', true)
+                    ->update(['is_active' => false]);
+            }
+        });
+    }
+
     /* ─── Relationships ─────────────────────────── */
 
     public function teacher()
