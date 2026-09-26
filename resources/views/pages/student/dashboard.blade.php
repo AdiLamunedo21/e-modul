@@ -356,7 +356,7 @@
                 if (!item) return false;
 
                 if (requiredStatus === 'in_progress') {
-                    if (!item.is_active_in_class && item.progress_status !== 'in_progress') {
+                    if (!item.is_active_in_class) {
                         return false;
                     }
                 } else if (requiredStatus && item.progress_status !== requiredStatus) {
@@ -365,7 +365,7 @@
 
                 if (!requiredStatus && this.selectedStatus !== 'all') {
                     if (this.selectedStatus === 'in_progress') {
-                        if (!item.is_active_in_class && item.progress_status !== 'in_progress') {
+                        if (!item.is_active_in_class) {
                             return false;
                         }
                     } else if (item.progress_status !== this.selectedStatus) {

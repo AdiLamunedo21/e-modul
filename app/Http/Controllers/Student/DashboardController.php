@@ -299,10 +299,9 @@ class DashboardController extends Controller
 
         // Kategori modul terpisah untuk akses cepat tab dashboard:
         // Tab Sedang Dikerjakan HANYA menampilkan SATU modul aktif di kelas (seperti pergantian mapel di kelas).
-        // Prioritas utama adalah modul yang sedang aktif diajarkan guru di kelas (is_active_in_class = true).
-        // Jika tidak ada modul aktif di kelas, tampilkan maksimal 1 modul yang sedang dikerjakan siswa.
-        $inProgressModules = $processedModules->filter(fn($m) => $m['is_active_in_class'] || $m['progress_status'] === 'in_progress')
-            ->sortByDesc('is_active_in_class')
+        // Modul yang tampil adalah modul yang secara eksplisit DIAKTIFKAN oleh guru di kelas (is_active_in_class = true).
+        // Jika guru belum mengaktifkan modul di kelas, tab ini tidak menampilkan modul aktif.
+        $inProgressModules = $processedModules->where('is_active_in_class', true)
             ->take(1)
             ->values();
         $completedModules = $processedModules->where('progress_status', 'completed')->values();
@@ -377,7 +376,7 @@ class DashboardController extends Controller
                 $filteredClassModules = $filteredClassModules->where('subject_id', (int) $filterSubject)->values();
             }
             if ($filterStatus === 'in_progress') {
-                $filteredClassModules = $filteredClassModules->filter(fn($m) => $m['is_active_in_class'] || $m['progress_status'] === 'in_progress')->sortByDesc('is_active_in_class')->values();
+                $filteredClassModules = $filteredClassModules->where('is_active_in_class', true)->values();
             } elseif ($filterStatus === 'completed') {
                 $filteredClassModules = $filteredClassModules->where('progress_status', 'completed')->sortByDesc('is_active_in_class')->values();
             } elseif ($filterStatus === 'not_started') {
@@ -386,7 +385,7 @@ class DashboardController extends Controller
 
             $modulesCount = $classModules->count();
             $completedCount = $classModules->where('progress_status', 'completed')->count();
-            $inProgressCount = $classModules->filter(fn($m) => $m['is_active_in_class'] || $m['progress_status'] === 'in_progress')->count();
+            $inProgressCount = $classModules->where('is_active_in_class', true)->count();
             $notStartedCount = $classModules->where('progress_status', 'not_started')->count();
             $avgProgress = $modulesCount > 0 ? (int) round($classModules->avg('progress_percent')) : 0;
             $teacherNames = $classModules->pluck('teacher_name')->unique()->filter()->values();

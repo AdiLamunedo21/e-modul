@@ -11,10 +11,7 @@
     {{-- ══ 1. HEADER & BREADCRUMB ══ --}}
     @include('pages.teacher.classes.partials.header')
 
-    {{-- ══ 2. RINGKASAN METRIK KELAS KHUSUS GURU ══ --}}
-    @include('pages.teacher.classes.partials.stats')
-
-    {{-- ══ 3. TAB KONTEN: DIREKTORI SISWA VS PORTOFOLIO MODUL ══ --}}
+    {{-- ══ 2. TAB KONTEN: DIREKTORI SISWA VS PORTOFOLIO MODUL ══ --}}
     <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
         {{-- Tab Switcher --}}
         @include('pages.teacher.classes.partials.tab-nav')

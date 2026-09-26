@@ -54,21 +54,9 @@
                                 {{ $students->firstItem() + $index }}
                             </td>
 
-                            {{-- Nama Siswa & Avatar --}}
-                            <td class="py-3.5 px-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-black text-xs flex items-center justify-center shadow-xs">
-                                        {{ strtoupper(substr($student->name, 0, 2)) }}
-                                    </div>
-                                    <div>
-                                        <p class="font-bold text-slate-900 leading-tight">
-                                            {{ $student->name }}
-                                        </p>
-                                        <p class="text-[11px] text-slate-400">
-                                            {{ $class->full_name }}
-                                        </p>
-                                    </div>
-                                </div>
+                            {{-- Nama Siswa --}}
+                            <td class="py-3.5 px-4 font-bold text-slate-900">
+                                {{ $student->name }}
                             </td>
 
                             {{-- NISN --}}

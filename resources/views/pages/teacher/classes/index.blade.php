@@ -13,6 +13,18 @@
         this.targetClassName = className;
         this.importActionUrl = url;
         this.importModalOpen = true;
+    },
+    deleteModalOpen: false,
+    deleteClassName: '',
+    deleteActionUrl: '',
+    deleteModulesCount: 0,
+    deleteStudentsCount: 0,
+    openDeleteModal(className, actionUrl, modulesCount, studentsCount) {
+        this.deleteClassName = className;
+        this.deleteActionUrl = actionUrl;
+        this.deleteModulesCount = modulesCount;
+        this.deleteStudentsCount = studentsCount;
+        this.deleteModalOpen = true;
     }
 }" class="space-y-8 pb-12">
 
@@ -374,11 +386,22 @@
                         <button @click="openImportModal({{ $class->id }}, '{{ addslashes($class->full_name) }}', '{{ route('teacher.classes.import-modules', $class) }}')"
                                 title="Salin / Impor Modul ke Kelas Ini"
                                 type="button"
-                                class="px-3 py-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white border border-indigo-200/70 text-xs font-bold transition-all flex items-center gap-1.5">
+                                class="px-3 py-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white border border-indigo-200/70 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
                             </svg>
                             <span class="hidden sm:inline">Impor Modul</span>
+                        </button>
+
+                        {{-- Hapus Kelas Button --}}
+                        <button @click="openDeleteModal('{{ addslashes($class->full_name) }}', '{{ route('teacher.classes.destroy', $class) }}', {{ $class->teacher_modules_count ?? $class->modules->count() }}, {{ $class->students_count }})"
+                                title="Hapus Rombel Kelas Ini"
+                                type="button"
+                                class="px-3 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200/70 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                            </svg>
+                            <span class="hidden sm:inline">Hapus</span>
                         </button>
                     </div>
 
@@ -464,6 +487,78 @@
                             Impor Modul Sekarang
                         </button>
                     </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- ══ 6. MODAL: KONFIRMASI HAPUS KELAS ══ --}}
+    <div x-cloak
+         x-show="deleteModalOpen"
+         @keydown.escape.window="deleteModalOpen = false"
+         class="fixed inset-0 z-50 overflow-y-auto"
+         aria-labelledby="modal-title-delete"
+         role="dialog"
+         aria-modal="true">
+
+        {{-- Backdrop --}}
+        <div x-show="deleteModalOpen"
+             x-transition.opacity
+             class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs transition-opacity"
+             @click="deleteModalOpen = false"
+             aria-hidden="true"></div>
+
+        {{-- Dialog Wrapper --}}
+        <div class="flex min-h-screen items-center justify-center p-4 sm:p-6 lg:px-8 text-center">
+            <div x-show="deleteModalOpen"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 @click.stop
+                 class="relative w-full max-w-md transform rounded-3xl bg-white text-left shadow-2xl transition-all border border-rose-100 overflow-hidden my-8">
+
+                {{-- Header --}}
+                <div class="p-6 sm:p-8 space-y-4">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-black text-xl border border-rose-100 shrink-0">
+                            ⚠️
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-black text-slate-900 leading-tight">
+                                Hapus <span x-text="deleteClassName"></span>?
+                            </h3>
+                            <p class="text-xs text-rose-600 font-semibold mt-0.5">Modul akan dihapus dan siswa dilepaskan</p>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-rose-50/70 border border-rose-200 text-xs text-rose-900 space-y-2">
+                        <p>
+                            Anda akan menghapus rombel <strong x-text="deleteClassName"></strong>.
+                        </p>
+                        <p class="text-[11px] text-rose-700 font-medium">
+                            Ketentuan penghapusan kelas ini:
+                        </p>
+                        <ul class="list-disc list-inside space-y-1 text-[11px] text-rose-800 font-medium pl-1">
+                            <li>Seluruh modul pembelajaran pada kelas ini (<span x-text="deleteModulesCount"></span> modul) akan dihapus.</li>
+                            <li>Siswa terdaftar (<span x-text="deleteStudentsCount"></span> siswa) akan <strong>dilepaskan status kelasnya</strong>.</li>
+                            <li><strong>Akun siswa TIDAK DIHAPUS</strong> (NISN, nama, dan akses login siswa tetap aman untuk bergabung ke kelas lain).</li>
+                        </ul>
+                    </div>
+                </div>
+
+                {{-- Footer --}}
+                <form :action="deleteActionUrl" method="POST" class="px-6 sm:px-8 py-4 border-t border-slate-100 bg-slate-50/80 flex items-center justify-end gap-3">
+                    @csrf
+                    @method('DELETE')
+                    <button @click="deleteModalOpen = false" type="button" class="px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-200/70 rounded-xl transition-colors cursor-pointer">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-5 py-2.5 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-md shadow-rose-600/25 transition-all cursor-pointer">
+                        Ya, Hapus Kelas
+                    </button>
                 </form>
             </div>
         </div>

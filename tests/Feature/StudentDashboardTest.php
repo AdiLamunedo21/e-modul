@@ -322,13 +322,14 @@ class StudentDashboardTest extends TestCase
 
         $student->joinClass($class);
 
-        // Modul 1: Sedang dikerjakan (Pre-test selesai, komponen lain belum)
+        // Modul 1: Sedang dikerjakan & aktif di kelas (Pre-test selesai, komponen lain belum)
         $moduleInProgress = Module::create([
             'teacher_id'    => $teacher->id,
             'class_id'      => $class->id,
             'subject_id'    => $subject->id,
             'title'         => 'Modul Progress ' . uniqid(),
             'status'        => 'published',
+            'is_active'     => true,
             'has_pre_test'  => true,
             'has_materi'    => true,
         ]);
@@ -359,40 +360,42 @@ class StudentDashboardTest extends TestCase
             'grading_status'  => 'graded',
         ]);
 
-        // 1. Akses menu 'Sedang Dikerjakan' (?status=in_progress)
-        $respProgress = $this->actingAs($student, 'student')
-            ->get(route('student.dashboard', ['status' => 'in_progress']));
+        try {
+            // 1. Akses menu 'Sedang Dikerjakan' (?status=in_progress)
+            $respProgress = $this->actingAs($student, 'student')
+                ->get(route('student.dashboard', ['status' => 'in_progress']));
 
-        $respProgress->assertStatus(200);
-        $respProgress->assertSee('Modul Sedang Dikerjakan');
-        $respProgress->assertSee($moduleInProgress->title);
-        $respProgress->assertSee($class->full_name);
-        $respProgress->assertSee($subject->name);
-        $respProgress->assertSee($teacher->name);
-        $respProgress->assertSee('Lanjutkan Belajar Modul');
+            $respProgress->assertStatus(200);
+            $respProgress->assertSee('Modul Sedang Dikerjakan');
+            $respProgress->assertSee($moduleInProgress->title);
+            $respProgress->assertSee($class->full_name);
+            $respProgress->assertSee($subject->name);
+            $respProgress->assertSee($teacher->name);
+            $respProgress->assertSee('Lanjutkan Belajar Modul');
 
-        // Pastikan KPI stats card disembunyikan (style="display: none;")
-        $respProgress->assertSee('style="display: none;"', false);
+            // Pastikan KPI stats card disembunyikan (style="display: none;")
+            $respProgress->assertSee('style="display: none;"', false);
 
-        // 2. Akses menu 'Riwayat Selesai' (?status=completed)
-        $respCompleted = $this->actingAs($student, 'student')
-            ->get(route('student.dashboard', ['status' => 'completed']));
+            // 2. Akses menu 'Riwayat Selesai' (?status=completed)
+            $respCompleted = $this->actingAs($student, 'student')
+                ->get(route('student.dashboard', ['status' => 'completed']));
 
-        $respCompleted->assertStatus(200);
-        $respCompleted->assertSee('Riwayat Modul Selesai');
-        $respCompleted->assertSee($moduleCompleted->title);
-        $respCompleted->assertSee($class->full_name);
-        $respCompleted->assertSee($subject->name);
-        $respCompleted->assertSee('95 / 100');
-        $respCompleted->assertSee('Pelajari Ulang Modul');
-        // Pastikan KPI stats card disembunyikan (style="display: none;")
-        $respCompleted->assertSee('style="display: none;"', false);
-
-        // Cleanup
-        $moduleInProgress->studentResults()->delete();
-        $moduleInProgress->delete();
-        $moduleCompleted->studentResults()->delete();
-        $moduleCompleted->delete();
+            $respCompleted->assertStatus(200);
+            $respCompleted->assertSee('Riwayat Modul Selesai');
+            $respCompleted->assertSee($moduleCompleted->title);
+            $respCompleted->assertSee($class->full_name);
+            $respCompleted->assertSee($subject->name);
+            $respCompleted->assertSee('95 / 100');
+            $respCompleted->assertSee('Pelajari Ulang Modul');
+            // Pastikan KPI stats card disembunyikan (style="display: none;")
+            $respCompleted->assertSee('style="display: none;"', false);
+        } finally {
+            // Cleanup
+            $moduleInProgress->studentResults()->delete();
+            $moduleInProgress->delete();
+            $moduleCompleted->studentResults()->delete();
+            $moduleCompleted->delete();
+        }
     }
 
     public function test_student_sees_active_learning_module_in_sedang_dikerjakan_with_badge()

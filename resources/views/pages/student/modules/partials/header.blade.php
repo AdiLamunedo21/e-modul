@@ -10,19 +10,11 @@
                     <span>←</span>
                     <span>Daftar Modul ({{ $classNameText }})</span>
                 </a>
-                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold {{ $module->subject?->badgeClasses() ?? 'bg-blue-100 text-blue-800' }}">
-                    <span>{{ $module->subject->code ?? 'MAPEL' }}</span>
-                </span>
-                <span class="px-2.5 py-1 rounded-xl text-xs font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase tracking-wide">
-                    ✓ Terbit & Aktif
-                </span>
             </div>
             <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight">
                 {{ $module->title }}
             </h1>
             <p class="text-xs sm:text-sm text-slate-500 font-medium flex flex-wrap items-center gap-2">
-                <span>👨‍🏫 Guru Pengampu: <strong>{{ $module->teacher->name ?? 'Guru' }}</strong></span>
-                <span>•</span>
                 <span>Terakhir diperbarui: {{ $module->updated_at->translatedFormat('d M Y') }}</span>
             </p>
         </div>
