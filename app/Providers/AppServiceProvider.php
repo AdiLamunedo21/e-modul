@@ -35,16 +35,6 @@ class AppServiceProvider extends ServiceProvider
             if ($student) {
                 $joinedClassIds = $student->joinedClassIds();
                 if (!empty($joinedClassIds)) {
-                    $hasCustomSubjects = $student->relationLoaded('subjects')
-                        ? $student->subjects->isNotEmpty()
-                        : $student->subjects()->exists();
-
-                    $query = $hasCustomSubjects ? $student->subjects() : Subject::query();
-                    $subjects = $query->select(['subjects.id', 'subjects.name', 'subjects.code', 'subjects.icon', 'subjects.color'])
-                        ->withCount(['modules' => function ($q) use ($joinedClassIds) {
-                            $q->whereIn('class_id', $joinedClassIds)->where('status', 'published');
-                        }])->get();
-
                     // Hitung jumlah modul dalam progres dan selesai untuk badge sidebar (hanya kolom metadata penting)
                     $modules = Module::select([
                             'id', 'class_id', 'is_active',
@@ -91,13 +81,8 @@ class AppServiceProvider extends ServiceProvider
                     $sidebarStats['in_progress']   = $inProgressCount;
                     $sidebarStats['completed']     = $completedCount;
                     $sidebarStats['total_modules'] = $modules->count();
-                } else {
-                    $subjects = Subject::all();
                 }
-            } else {
-                $subjects = Subject::all();
             }
-            $view->with('studentSidebarSubjects', $subjects);
             $view->with('sidebarStats', $sidebarStats);
         });
     }

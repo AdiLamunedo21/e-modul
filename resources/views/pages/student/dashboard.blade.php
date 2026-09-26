@@ -405,13 +405,14 @@
                 this.selectedStatus = 'all';
             }
         }"
+        x-init="window.dispatchEvent(new CustomEvent('student-tab-changed', { detail: activeTab }))"
         x-on:switch-student-tab.window="switchTab($event.detail)"
         class="space-y-8">
 
-            {{-- ══ 2. RINGKASAN KPI BELAJAR SISWA (STATS CARDS) — DISEMBUNYIKAN PADA MENU SEDANG DIKERJAKAN & RIWAYAT SELESAI ══ --}}
-            <div x-show="activeTab !== 'in_progress' && activeTab !== 'completed'"
+            {{-- ══ 2. RINGKASAN KPI BELAJAR SISWA (STATS CARDS) — KHUSUS DITAMPILKAN PADA TAB KELAS SAYA (DISEMBUNYIKAN PADA SEDANG DIKERJAKAN, RIWAYAT SELESAI, & SEMUA MODUL) ══ --}}
+            <div x-show="activeTab === 'classes'"
                  x-cloak
-                 @if(in_array($filterStatus, ['in_progress', 'completed'])) style="display: none;" @endif
+                 @if($filterStatus !== 'classes') style="display: none;" @endif
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0 -translate-y-2"
                  x-transition:enter-end="opacity-100 translate-y-0"

@@ -160,9 +160,17 @@
                                         {{ strtoupper(substr($t->name, 0, 2)) }}
                                     </div>
                                     <div>
-                                        <a href="{{ route('admin.teachers.show', $t) }}" class="font-bold text-slate-900 hover:text-indigo-600 text-xs transition-colors">
-                                            {{ $t->name }}
-                                        </a>
+                                        <div class="flex items-center gap-1.5 flex-wrap">
+                                            <a href="{{ route('admin.teachers.show', $t) }}" class="font-bold text-slate-900 hover:text-indigo-600 text-xs transition-colors">
+                                                {{ $t->name }}
+                                            </a>
+                                            @if(in_array($t->identity_number, $existingAdminNips ?? []))
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200" title="Guru ini juga memiliki akun Administrator">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                                                    Admin
+                                                </span>
+                                            @endif
+                                        </div>
                                         <p class="text-[11px] text-slate-400 font-mono">NIP: {{ $t->identity_number }}</p>
                                     </div>
                                 </div>
@@ -221,6 +229,22 @@
                                         </svg>
                                         <span>Detail</span>
                                     </a>
+
+                                    {{-- Tombol Jadikan Admin (jika belum terdaftar sebagai admin) --}}
+                                    @if(!in_array($t->identity_number, $existingAdminNips ?? []))
+                                        <form action="{{ route('admin.teachers.make-admin', $t) }}" method="POST" class="inline"
+                                              onsubmit="return confirm('Beri hak akses Administrator kepada guru {{ $t->name }} (NIP: {{ $t->identity_number }})? Guru ini akan dapat mengelola Admin Panel dengan kata sandi yang sama.')">
+                                            @csrf
+                                            <button type="submit"
+                                                    class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-600 hover:text-white rounded-xl transition-all border border-indigo-200"
+                                                    title="Beri Hak Akses Administrator">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                                                </svg>
+                                                <span>Jadikan Admin</span>
+                                            </button>
+                                        </form>
+                                    @endif
 
                                     {{-- Tombol Edit Guru --}}
                                     <button type="button"

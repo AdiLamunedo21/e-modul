@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
+use App\Models\Admin;
 use App\Models\Module;
 use App\Models\SchoolClass;
 use App\Models\Student;
@@ -317,5 +318,26 @@ class DashboardController extends Controller
             'pendingQueueSorted',
             'classesSummary'
         ));
+    }
+
+    /**
+     * Alih peran instan dari Guru ke Administrator (jika NIP terdaftar di tabel Admin).
+     */
+    public function switchToAdmin(Request $request)
+    {
+        $teacher = Auth::guard('teacher')->user();
+        if (!$teacher) {
+            return redirect()->route('login.teacher');
+        }
+
+        $admin = Admin::where('identity_number', $teacher->identity_number)->first();
+        if (!$admin) {
+            return back()->with('error', 'Akun NIP Anda belum terdaftar sebagai Administrator.');
+        }
+
+        Auth::guard('admin')->login($admin);
+
+        return redirect()->route('admin.dashboard')
+            ->with('success', "Selamat datang di Admin Panel Supervisi, {$admin->name}!");
     }
 }

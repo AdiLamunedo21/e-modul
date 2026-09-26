@@ -38,9 +38,28 @@
             </div>
         </div>
 
-        {{-- Kanan: Profile Pill --}}
+        {{-- Kanan: Profile Pill & Role Switcher --}}
         <div class="flex items-center gap-3">
 
+            {{-- Switch to Admin Panel (jika NIP guru terdaftar sebagai admin) --}}
+            @php
+                $currentTeacher = Auth::guard('teacher')->user();
+                $isAlsoAdmin = $currentTeacher ? \App\Models\Admin::where('identity_number', $currentTeacher->identity_number)->exists() : false;
+            @endphp
+            @if($isAlsoAdmin)
+                <form action="{{ route('teacher.switch-to-admin') }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                            title="Beralih peran langsung ke Admin Panel Supervisi">
+                        <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                        </svg>
+                        <span class="hidden sm:inline">Admin Panel</span>
+                        <span class="sm:hidden">Admin</span>
+                    </button>
+                </form>
+            @endif
 
             {{-- Profile Pill Guru --}}
             <div class="flex items-center gap-2.5 rounded-2xl sm:rounded-full border border-gray-200 bg-gray-50 p-1.5 pr-3 shadow-2xs">

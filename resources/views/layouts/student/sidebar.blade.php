@@ -46,37 +46,52 @@
             $currentStatus = request()->query('status');
             $inProgressBadge = isset($stats['in_progress']) ? $stats['in_progress'] : ($sidebarStats['in_progress'] ?? null);
             $completedBadge = isset($stats['completed_modules']) ? $stats['completed_modules'] : ($sidebarStats['completed'] ?? null);
+            $totalModulesBadge = isset($stats['total_modules']) ? $stats['total_modules'] : ($sidebarStats['total_modules'] ?? null);
             $defaultSidebarStatus = (!empty($inProgressBadge) && $inProgressBadge > 0) ? 'in_progress' : 'classes';
             $effectiveStatus = $currentStatus ?: $defaultSidebarStatus;
 
-            $isDashboardActive = (request()->routeIs('student.dashboard') || request()->routeIs('dashboard.student')) 
-                && !request()->routeIs('student.modules.*') 
-                && ($effectiveStatus === 'classes' || $effectiveStatus === 'all');
-            $isInProgressActive = (request()->routeIs('student.dashboard') || request()->routeIs('dashboard.student')) 
-                && $effectiveStatus === 'in_progress';
-            $isCompletedActive = (request()->routeIs('student.dashboard') || request()->routeIs('dashboard.student')) 
-                && $effectiveStatus === 'completed';
+            $isDashboardRoute = (request()->routeIs('student.dashboard') || request()->routeIs('dashboard.student')) 
+                && !request()->routeIs('student.modules.*');
 
-            $isModulesRoute = request()->routeIs('student.modules.*');
-            $currentSubjectParam = request()->route('subject');
-            $activeSubjectId = null;
-            if ($currentSubjectParam instanceof \App\Models\Subject) {
-                $activeSubjectId = $currentSubjectParam->id;
-            } elseif (is_numeric($currentSubjectParam)) {
-                $activeSubjectId = (int) $currentSubjectParam;
-            } elseif (isset($subject) && $subject instanceof \App\Models\Subject) {
-                $activeSubjectId = $subject->id;
-            }
+            $initTab = $isDashboardRoute 
+                ? (in_array($effectiveStatus, ['classes', 'completed', 'all_modules', 'in_progress']) ? $effectiveStatus : 'classes') 
+                : '';
+
+            $isDashboardActive = $isDashboardRoute && ($effectiveStatus === 'classes' || $effectiveStatus === 'all');
+            $isInProgressActive = $isDashboardRoute && $effectiveStatus === 'in_progress';
+            $isCompletedActive = $isDashboardRoute && $effectiveStatus === 'completed';
+            $isAllModulesActive = $isDashboardRoute && $effectiveStatus === 'all_modules';
         @endphp
 
         <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-             x-data="{ modulMenuOpen: true }">
+             x-data="{
+                currentTab: '{{ $initTab }}',
+                goToTab(tab, fallbackUrl) {
+                    const path = window.location.pathname.replace(/\/$/, '');
+                    const isDash = path.endsWith('/student/dashboard') || 
+                                   path.endsWith('/student/portal') || 
+                                   path.endsWith('/student');
+                    if (isDash) {
+                        this.currentTab = tab;
+                        window.dispatchEvent(new CustomEvent('switch-student-tab', { detail: tab }));
+                        if (window.innerWidth < 1024) {
+                            window.dispatchEvent(new CustomEvent('set-sidebar-open', { detail: false }));
+                        }
+                    } else {
+                        window.location.href = fallbackUrl;
+                    }
+                }
+             }"
+             x-on:student-tab-changed.window="currentTab = $event.detail">
 
             {{-- Portal Utama: Dashboard Siswa --}}
-            <a href="{{ route('student.dashboard') }}"
-               class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all
-                   {{ $isDashboardActive ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/25' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
-                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <a href="{{ route('student.dashboard', ['status' => 'classes']) }}"
+               @click.prevent="goToTab('classes', '{{ route('student.dashboard', ['status' => 'classes']) }}')"
+               :class="currentTab === 'classes' ? 'bg-emerald-600 text-white font-bold shadow-lg shadow-emerald-600/25' : 'text-slate-400 hover:bg-slate-800 hover:text-white'"
+               class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all group cursor-pointer {{ $isDashboardActive ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/25' : 'text-slate-400' }}">
+                <svg class="w-5 h-5 shrink-0 transition-colors"
+                     :class="currentTab === 'classes' ? 'text-white' : 'text-slate-400 group-hover:text-white'"
+                     fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
                 </svg>
                 <span>Dashboard Siswa</span>
@@ -116,81 +131,62 @@
             {{-- Grup: Pembelajaran --}}
             <p class="pt-6 pb-1 px-3 text-[11px] font-bold uppercase tracking-widest text-slate-500">Modul & Pembelajaran</p>
 
-            {{-- Menu Utama: Modul Belajar (Parent Accordion with Subject Sub-menus) --}}
-            <div class="space-y-1">
-                <button type="button"
-                        @click="modulMenuOpen = !modulMenuOpen"
-                        class="w-full flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-colors
-                     {{ $isModulesRoute ? 'bg-slate-800 text-emerald-400' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-5 h-5 shrink-0 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0118 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/>
-                        </svg>
-                        <span>Modul Belajar</span>
-                    </div>
-                    <svg class="w-4 h-4 text-slate-400 transition-transform duration-200"
-                         :class="modulMenuOpen ? 'rotate-180 text-emerald-400' : ''"
-                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
-                    </svg>
-                </button>
 
-                {{-- Sub-menu Mata Pelajaran (Tanpa icon) --}}
-                <div x-show="modulMenuOpen"
-                     x-transition:enter="transition ease-out duration-150"
-                     x-transition:enter-start="opacity-0 -translate-y-1"
-                     x-transition:enter-end="opacity-100 translate-y-0"
-                     class="pl-4 pr-1 py-1 space-y-1 border-l-2 border-slate-700/60 ml-5 my-1">
-
-                    {{-- Dynamic Sub-menus per Subject (Tanpa icon) --}}
-                    @if(isset($studentSidebarSubjects) && $studentSidebarSubjects->isNotEmpty())
-                        @foreach($studentSidebarSubjects as $sSubj)
-                            @php
-                                $isSubjActive = ($activeSubjectId === $sSubj->id);
-                            @endphp
-                            <a href="{{ route('student.modules.subject', $sSubj->id) }}"
-                               class="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all group
-                                   {{ $isSubjActive ? 'bg-emerald-600 text-white font-bold shadow-md shadow-emerald-600/25' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200' }}">
-                                <span class="truncate">{{ $sSubj->name }}</span>
-                                @if(isset($sSubj->modules_count) && $sSubj->modules_count > 0)
-                                    <span class="ml-1.5 px-1.5 py-0.2 rounded text-[10px] font-bold shrink-0
-                                        {{ $isSubjActive ? 'bg-emerald-700/60 text-white' : 'bg-slate-800 text-slate-400 group-hover:text-emerald-400' }}">
-                                        {{ $sSubj->modules_count }}
-                                    </span>
-                                @endif
-                            </a>
-                        @endforeach
-                    @endif
-                </div>
-            </div>
 
             {{-- Shortcut Filter: Sedang Dikerjakan --}}
             <a href="{{ route('student.dashboard', ['status' => 'in_progress']) }}"
-               class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all group
-                   {{ $isInProgressActive ? 'bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40 shadow-md shadow-amber-500/10' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+               @click.prevent="goToTab('in_progress', '{{ route('student.dashboard', ['status' => 'in_progress']) }}')"
+               :class="currentTab === 'in_progress' ? 'bg-amber-500 text-white font-bold shadow-lg shadow-amber-500/25 ring-1 ring-amber-400' : 'text-slate-400 hover:bg-slate-800 hover:text-white'"
+               class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all group cursor-pointer {{ $isInProgressActive ? 'bg-amber-500 text-white font-bold shadow-lg shadow-amber-500/25 ring-1 ring-amber-400' : 'text-slate-400' }}">
                 <div class="flex items-center gap-3">
-                    <svg class="w-5 h-5 shrink-0 {{ $isInProgressActive ? 'text-amber-300' : 'text-amber-400 group-hover:text-amber-300' }} transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 shrink-0 transition-colors"
+                         :class="currentTab === 'in_progress' ? 'text-white' : 'text-amber-400 group-hover:text-amber-300'"
+                         fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <span>Sedang Dikerjakan</span>
                 </div>
-                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold {{ $isInProgressActive ? 'bg-amber-400 text-slate-900 shadow-sm' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30' }}">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold transition-colors"
+                      :class="currentTab === 'in_progress' ? 'bg-amber-600 text-white shadow-xs' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'">
                     {{ is_null($inProgressBadge) ? 'Proses' : $inProgressBadge . ' Modul' }}
                 </span>
             </a>
 
             {{-- Shortcut Filter: Riwayat Selesai --}}
             <a href="{{ route('student.dashboard', ['status' => 'completed']) }}"
-               class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all group
-                   {{ $isCompletedActive ? 'bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40 shadow-md shadow-emerald-600/10' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+               @click.prevent="goToTab('completed', '{{ route('student.dashboard', ['status' => 'completed']) }}')"
+               :class="currentTab === 'completed' ? 'bg-emerald-600 text-white font-bold shadow-lg shadow-emerald-600/25 ring-1 ring-emerald-500' : 'text-slate-400 hover:bg-slate-800 hover:text-white'"
+               class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all group cursor-pointer {{ $isCompletedActive ? 'bg-emerald-600 text-white font-bold shadow-lg shadow-emerald-600/25 ring-1 ring-emerald-500' : 'text-slate-400' }}">
                 <div class="flex items-center gap-3">
-                    <svg class="w-5 h-5 shrink-0 {{ $isCompletedActive ? 'text-emerald-300' : 'text-emerald-400 group-hover:text-emerald-300' }} transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 shrink-0 transition-colors"
+                         :class="currentTab === 'completed' ? 'text-white' : 'text-emerald-400 group-hover:text-emerald-300'"
+                         fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <span>Riwayat Selesai</span>
                 </div>
-                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold {{ $isCompletedActive ? 'bg-emerald-400 text-slate-900 shadow-sm' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' }}">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold transition-colors"
+                      :class="currentTab === 'completed' ? 'bg-emerald-700 text-white shadow-xs' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'">
                     {{ is_null($completedBadge) ? 'Lulus' : $completedBadge . ' Modul' }}
+                </span>
+            </a>
+
+            {{-- Shortcut Filter: Semua Modul --}}
+            <a href="{{ route('student.dashboard', ['status' => 'all_modules']) }}"
+               @click.prevent="goToTab('all_modules', '{{ route('student.dashboard', ['status' => 'all_modules']) }}')"
+               :class="currentTab === 'all_modules' ? 'bg-blue-600 text-white font-bold shadow-lg shadow-blue-600/25 ring-1 ring-blue-500' : 'text-slate-400 hover:bg-slate-800 hover:text-white'"
+               class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all group cursor-pointer {{ $isAllModulesActive ? 'bg-blue-600 text-white font-bold shadow-lg shadow-blue-600/25 ring-1 ring-blue-500' : 'text-slate-400' }}">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 shrink-0 transition-colors"
+                         :class="currentTab === 'all_modules' ? 'text-white' : 'text-blue-400 group-hover:text-blue-300'"
+                         fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0118 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                    </svg>
+                    <span>Semua Modul</span>
+                </div>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold transition-colors"
+                      :class="currentTab === 'all_modules' ? 'bg-blue-700 text-white shadow-xs' : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'">
+                    {{ is_null($totalModulesBadge) ? 'Modul' : $totalModulesBadge . ' Modul' }}
                 </span>
             </a>
 

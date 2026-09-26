@@ -64,6 +64,24 @@ class Student extends Authenticatable
     }
 
     /**
+     * Menyinkronkan mata pelajaran siswa secara otomatis dari kelas yang diikuti.
+     */
+    public function syncSubjectsFromClass(?SchoolClass $schoolClass = null): void
+    {
+        $class = $schoolClass ?? $this->schoolClass;
+        if (!$class && $this->class_id) {
+            $class = SchoolClass::find($this->class_id);
+        }
+
+        if ($class) {
+            $subjectIds = $class->getAvailableSubjectIds();
+            if (!empty($subjectIds)) {
+                $this->subjects()->syncWithoutDetaching($subjectIds);
+            }
+        }
+    }
+
+    /**
      * Menggabungkan siswa ke rombel kelas tertentu dan otomatis menyinkronkan mata pelajaran.
      */
     public function joinClass(SchoolClass $schoolClass): void
@@ -76,17 +94,10 @@ class Student extends Authenticatable
         // 2. Simpan juga ke kolom class_id sebagai penanda kelas aktif terakhir
         $this->update(['class_id' => $schoolClass->id]);
 
-        // 3. Cari seluruh mata pelajaran yang ada di modul-modul kelas ini
-        $subjectIds = $schoolClass->modules()
-            ->whereNotNull('subject_id')
-            ->pluck('subject_id')
-            ->unique()
-            ->toArray();
-
-        if (!empty($subjectIds)) {
-            $this->subjects()->syncWithoutDetaching($subjectIds);
-        }
+        // 3. Otomatis sinkronkan mata pelajaran dari rombel kelas ini
+        $this->syncSubjectsFromClass($schoolClass);
     }
+
 
     /**
      * Mengeluarkan siswa dari rombel kelas tertentu.
@@ -188,6 +199,11 @@ class Student extends Authenticatable
     }
 
     public function lkpdSubmissions()
+    {
+        return $this->hasMany(Submission::class);
+    }
+
+    public function submissions()
     {
         return $this->hasMany(Submission::class);
     }

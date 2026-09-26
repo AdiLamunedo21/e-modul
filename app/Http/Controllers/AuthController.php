@@ -16,7 +16,7 @@ class AuthController extends Controller
     public function showAdminLogin()
     {
         if (Auth::guard('admin')->check()) {
-            return redirect()->route('dashboard.admin');
+            return redirect()->route('admin.dashboard');
         }
         return view('auth.admin-login');
     }
@@ -33,10 +33,10 @@ class AuthController extends Controller
             
             $intended = session()->get('url.intended');
             if ($intended && str_contains($intended, '/admin')) {
-                return redirect()->intended(route('dashboard.admin'));
+                return redirect()->intended(route('admin.dashboard'));
             }
             
-            return redirect()->route('dashboard.admin');
+            return redirect()->route('admin.dashboard');
         }
 
         return back()->withErrors([

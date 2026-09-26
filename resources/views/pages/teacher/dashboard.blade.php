@@ -92,15 +92,11 @@
             </div>
         </div>
 
-        {{-- Fitur Cepat: Manajer Modul & Perpustakaan --}}
-        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-            <a href="{{ route('teacher.modules.index') }}" class="group/link inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors" title="Buka Katalog & Manajer Modul">
-                <span>Manajer Modul</span>
-                <svg class="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
-            </a>
-            <a href="{{ route('teacher.library.index') }}" class="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-lg border border-indigo-100 transition-colors" title="Perpustakaan Bersama (Kloning & Berbagi Modul)">
-                <svg class="w-3 h-3 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.333A48.357 48.357 0 0012 9.75c-2.551 0-5.056.2-7.5.583V21M3 21h18M12 6.75h.008v.008H12V6.75z" /></svg>
-                <span>Library ({{ $stats['shared_modules'] }})</span>
+        {{-- Fitur Cepat: Manajer Modul --}}
+        <div class="mt-4 pt-3 border-t border-slate-100">
+            <a href="{{ route('teacher.modules.index') }}" class="group/link inline-flex items-center justify-between w-full text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors" title="Buka Katalog & Manajer Modul">
+                <span>Buka Manajer Modul</span>
+                <svg class="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
             </a>
         </div>
     </div>
@@ -127,13 +123,10 @@
         </div>
 
         {{-- Fitur Cepat: Kelas Binaan --}}
-        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-            <a href="{{ route('teacher.classes.index') }}" class="group/link inline-flex items-center gap-1.5 text-xs font-bold text-sky-600 hover:text-sky-700 transition-colors" title="Lihat Direktori Siswa & Rombel Kelas">
-                <span>Kelas Binaan</span>
-                <svg class="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
-            </a>
-            <a href="{{ route('teacher.classes.index') }}" class="inline-flex items-center gap-1 text-[11px] font-bold text-sky-700 bg-sky-50 hover:bg-sky-100 px-2.5 py-1 rounded-lg border border-sky-100 transition-colors">
-                <span>Direktori Siswa</span>
+        <div class="mt-4 pt-3 border-t border-slate-100">
+            <a href="{{ route('teacher.classes.index') }}" class="group/link inline-flex items-center justify-between w-full text-xs font-bold text-sky-600 hover:text-sky-700 transition-colors" title="Lihat Direktori Siswa & Rombel Kelas">
+                <span>Lihat Kelas Binaan</span>
+                <svg class="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
             </a>
         </div>
     </div>
@@ -165,20 +158,20 @@
         </div>
 
         {{-- Fitur Cepat: Grading Center --}}
-        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-            <a href="{{ route('teacher.grading.index') }}" class="group/link inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700 transition-colors" title="Buka Pusat Penilaian Adaptif">
+        <div class="mt-4 pt-3 border-t border-slate-100">
+            <a href="{{ route('teacher.grading.index') }}" class="group/link inline-flex items-center justify-between w-full text-xs font-bold text-amber-600 hover:text-amber-700 transition-colors" title="Buka Pusat Penilaian Adaptif">
                 <span>Grading Center</span>
-                <svg class="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
-            </a>
-            @if(($stats['pending_grading'] ?? 0) > 0)
-                <a href="{{ route('teacher.grading.index') }}" class="inline-flex items-center gap-1 text-[11px] font-extrabold text-amber-800 bg-amber-100 hover:bg-amber-200 px-2.5 py-1 rounded-lg animate-pulse transition-colors">
-                    <span>Periksa ({{ $stats['pending_grading'] }})</span>
-                </a>
-            @else
-                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100">
-                    <span>Selesai ✓</span>
+                <span class="inline-flex items-center gap-1.5">
+                    @if(($stats['pending_grading'] ?? 0) > 0)
+                        <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200 animate-pulse">
+                            {{ $stats['pending_grading'] }} Antrean
+                        </span>
+                    @else
+                        <span class="text-[11px] text-emerald-600 font-semibold">Selesai ✓</span>
+                    @endif
+                    <svg class="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
                 </span>
-            @endif
+            </a>
         </div>
     </div>
 
@@ -207,14 +200,11 @@
             </div>
         </div>
 
-        {{-- Fitur Cepat: Pusat Penilaian --}}
-        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-            <a href="{{ route('teacher.grading.index') }}" class="group/link inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-700 transition-colors" title="Buka Pusat Penilaian Adaptif">
-                <span>Pusat Penilaian</span>
-                <svg class="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
-            </a>
-            <a href="{{ route('teacher.grading.index') }}" class="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-lg border border-indigo-100 transition-colors" title="Buka Penilaian & Rekap Nilai">
-                <span>Kelola Nilai</span>
+        {{-- Fitur Cepat: Pusat Penilaian & Rekap --}}
+        <div class="mt-4 pt-3 border-t border-slate-100">
+            <a href="{{ route('teacher.grading.index') }}" class="group/link inline-flex items-center justify-between w-full text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors" title="Buka Penilaian & Unduh Rekap Nilai Excel">
+                <span>Buka Rekap & Nilai</span>
+                <svg class="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
             </a>
         </div>
     </div>
@@ -300,12 +290,8 @@
         </div>
 
         {{-- Footer Antrean --}}
-        <div class="pt-4 mt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-            <span>Sistem penilaian adaptif sinkron dengan komponen modul</span>
-            <a href="{{ route('teacher.grading.index') }}" class="font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" /></svg>
-                <span>Buka Pusat Penilaian</span>
-            </a>
+        <div class="pt-3 mt-2 border-t border-slate-100 text-xs text-slate-400">
+            <span>💡 Nilai tugas siswa disinkronkan langsung ke rekap capaian belajar.</span>
         </div>
     </div>
 
@@ -389,11 +375,9 @@
                 </ul>
             </div>
 
-            <div class="mt-5 pt-3 border-t border-white/15 relative z-10">
-                <a href="{{ route('teacher.modules.create') }}" class="inline-flex items-center justify-center gap-2 w-full rounded-xl bg-white px-4 py-2.5 text-xs font-bold text-blue-700 shadow hover:bg-blue-50 transition-colors">
-                    <span>Rakit Modul Baru Sekarang</span>
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
-                </a>
+            <div class="mt-4 pt-3 border-t border-white/15 relative z-10 flex items-center justify-between text-[11px] text-blue-200">
+                <span>Standar Kurikulum Merdeka</span>
+                <span class="font-bold text-white">SMKN 3 Yogyakarta</span>
             </div>
         </div>
     </div>

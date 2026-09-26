@@ -60,13 +60,20 @@ class DashboardController extends Controller
             ->take(10)
             ->get();
 
-        // ── 3. Ringkasan Mata Pelajaran ──
-        $subjects = Subject::withCount(['modules', 'teachers'])->get();
+        // ── 3. Ringkasan Mata Pelajaran (Top 6 Paling Aktif di Dashboard) ──
+        $totalSubjectsCount = Subject::count();
+        $subjects = Subject::withCount(['modules', 'teachers'])
+            ->orderByDesc('modules_count')
+            ->orderBy('name')
+            ->take(6)
+            ->get();
 
         return view('pages.admin.dashboard', compact(
             'stats',
             'teachers',
-            'subjects'
+            'subjects',
+            'totalSubjectsCount'
         ));
     }
 }
+

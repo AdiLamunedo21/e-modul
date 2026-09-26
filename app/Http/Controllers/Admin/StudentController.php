@@ -158,7 +158,17 @@ class StudentController extends Controller
             'password'        => Hash::make($validated['password']),
         ]);
 
-        if (!empty($validated['subject_ids'])) {
+        if ($student->class_id) {
+            $schoolClass = SchoolClass::find($student->class_id);
+            if ($schoolClass) {
+                $student->classes()->syncWithoutDetaching([$schoolClass->id]);
+                if (!empty($validated['subject_ids'])) {
+                    $student->subjects()->sync($validated['subject_ids']);
+                } else {
+                    $student->syncSubjectsFromClass($schoolClass);
+                }
+            }
+        } elseif (!empty($validated['subject_ids'])) {
             $student->subjects()->sync($validated['subject_ids']);
         }
 
@@ -196,6 +206,7 @@ class StudentController extends Controller
             'password.min'             => 'Password baru minimal terdiri dari 6 karakter.',
         ]);
 
+        $previousClassId = $student->class_id;
         $student->name = $validated['name'];
         $student->identity_number = $validated['identity_number'];
         $student->class_id = $validated['class_id'] ?? null;
@@ -206,10 +217,109 @@ class StudentController extends Controller
 
         $student->save();
 
-        $student->subjects()->sync($validated['subject_ids'] ?? []);
+        if ($student->class_id) {
+            $schoolClass = SchoolClass::find($student->class_id);
+            if ($schoolClass) {
+                $student->classes()->syncWithoutDetaching([$schoolClass->id]);
+                if (isset($validated['subject_ids'])) {
+                    $student->subjects()->sync($validated['subject_ids']);
+                } elseif ($previousClassId != $student->class_id || !$student->subjects()->exists()) {
+                    $student->syncSubjectsFromClass($schoolClass);
+                }
+            }
+        } elseif (isset($validated['subject_ids'])) {
+            $student->subjects()->sync($validated['subject_ids']);
+        }
 
         return redirect()->route('admin.students.class', $student->class_id)
             ->with('success', "Data siswa {$student->name} berhasil diperbarui.");
+    }
+
+    /**
+     * Menyinkronkan seluruh siswa di suatu kelas dengan mata pelajaran aktif kelas tersebut secara massal (1-klik).
+     */
+    public function syncClassSubjects(Request $request, SchoolClass $class)
+    {
+        $students = $class->students()->get();
+        if ($students->isEmpty()) {
+            $students = Student::where('class_id', $class->id)->get();
+        }
+
+        if ($students->isEmpty()) {
+            return redirect()->route('admin.students.class', $class->id)
+                ->with('info', "Belum ada siswa terdaftar di {$class->full_name} untuk disinkronkan.");
+        }
+
+        $availableSubjectIds = $class->getAvailableSubjectIds();
+        $syncedCount = 0;
+
+        foreach ($students as $student) {
+            $student->classes()->syncWithoutDetaching([$class->id]);
+            if (!empty($availableSubjectIds)) {
+                $student->subjects()->syncWithoutDetaching($availableSubjectIds);
+            }
+            $syncedCount++;
+        }
+
+        return redirect()->route('admin.students.class', $class->id)
+            ->with('success', "Berhasil menyinkronkan mata pelajaran untuk {$syncedCount} siswa di {$class->full_name}!");
+    }
+
+    /**
+     * Mengunduh file template Excel (.xlsx) untuk import massal data siswa.
+     */
+    public function downloadImportTemplate(\App\Services\StudentImportService $importService)
+    {
+        $binary = $importService->generateTemplate();
+        $filename = 'Template_Import_Siswa_SMKN3.xlsx';
+
+        return response()->streamDownload(function () use ($binary) {
+            echo $binary;
+        }, $filename, [
+            'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
+    }
+
+    /**
+     * Memproses import massal data siswa dari file Excel / CSV.
+     */
+    public function import(Request $request, \App\Services\StudentImportService $importService)
+    {
+        $request->validate([
+            'file'     => ['required', 'file', 'mimes:xlsx,xls,csv,txt', 'max:10240'],
+            'class_id' => ['nullable', 'exists:classes,id'],
+        ], [
+            'file.required' => 'File spreadsheet Excel / CSV wajib diunggah.',
+            'file.mimes'    => 'Format file harus berupa Excel (.xlsx, .xls) atau CSV (.csv).',
+            'file.max'      => 'Ukuran file maksimal adalah 10 MB.',
+        ]);
+
+        $result = $importService->import($request->file('file'), $request->class_id);
+
+        if ($result['imported_count'] === 0 && $result['skipped_count'] === 0) {
+            return back()->with('info', 'File tidak memuat baris data siswa yang valid.');
+        }
+
+        $message = "Berhasil mengimpor {$result['imported_count']} data siswa!";
+        if (!empty($result['classes_breakdown'])) {
+            $breakdownStr = collect($result['classes_breakdown'])
+                ->map(fn($count, $cls) => "{$cls}: {$count} siswa")
+                ->implode(', ');
+            $message .= " ({$breakdownStr})";
+        }
+
+        $redirect = $request->class_id
+            ? redirect()->route('admin.students.class', $request->class_id)
+            : redirect()->route('admin.students.index');
+
+        if ($result['skipped_count'] > 0) {
+            return $redirect
+                ->with('success', $message)
+                ->with('import_errors', $result['errors']);
+        }
+
+        return $redirect->with('success', $message);
     }
 
     /**
@@ -229,3 +339,4 @@ class StudentController extends Controller
             ->with('success', "Akun siswa {$name} (NISN: {$nisn}) berhasil dihapus dari Master Data.");
     }
 }
+

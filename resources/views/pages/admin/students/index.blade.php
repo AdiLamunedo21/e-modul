@@ -7,6 +7,7 @@
 
 <div x-data="{
     createModalOpen: false,
+    importModalOpen: false,
     selectedClassId: '{{ $classes->first()?->id ?? '' }}'
 }">
 
@@ -29,8 +30,17 @@
             </p>
         </div>
 
-        {{-- Button Tambah Siswa --}}
-        <div>
+        {{-- Action Buttons --}}
+        <div class="flex items-center gap-3 flex-wrap">
+            <button type="button"
+                    @click="importModalOpen = true"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/25 transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                </svg>
+                <span>Import Siswa (Excel)</span>
+            </button>
+
             <button type="button"
                     @click="createModalOpen = true"
                     class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/25 transition-all">
@@ -49,6 +59,22 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
             <span>{{ session('success') }}</span>
+        </div>
+    @endif
+
+    @if(session('import_errors') && count(session('import_errors')) > 0)
+        <div class="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900 shadow-sm">
+            <div class="flex items-center gap-2 font-bold mb-2 text-sm text-amber-800">
+                <svg class="w-5 h-5 text-amber-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+                <span>Catatan Baris yang Dilewati Saat Import ({{ count(session('import_errors')) }} baris):</span>
+            </div>
+            <ul class="list-disc list-inside space-y-1 ml-2 max-h-40 overflow-y-auto">
+                @foreach(session('import_errors') as $err)
+                    <li>Baris {{ $err['row'] }} (NISN: <strong>{{ $err['nisn'] }}</strong>, {{ $err['name'] }}): {{ $err['reason'] }}</li>
+                @endforeach
+            </ul>
         </div>
     @endif
 
@@ -319,9 +345,18 @@
 
                             {{-- Ploting Mata Pelajaran yang Ditempuh (Centang / Checkboxes) --}}
                             <div>
-                                <label class="block font-bold text-slate-700 mb-1">Mata Pelajaran yang Ditempuh</label>
-                                <p class="text-[11px] text-slate-500 mb-1.5">Pilih mata pelajaran yang wajib / harus ditempuh oleh siswa ini:</p>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-44 overflow-y-auto p-2.5 rounded-2xl bg-slate-50 border border-slate-200">
+                                <div class="flex items-center justify-between mb-1">
+                                    <label class="block font-bold text-slate-700">Mata Pelajaran yang Ditempuh</label>
+                                    <button type="button"
+                                            onclick="const cbs = document.querySelectorAll('#global-create-subjects-container input[type=checkbox]'); const anyChecked = Array.from(cbs).some(c => c.checked); cbs.forEach(c => c.checked = !anyChecked);"
+                                            class="text-[11px] font-bold text-indigo-600 hover:text-indigo-700">
+                                        Pilih / Batalkan Semua
+                                    </button>
+                                </div>
+                                <p class="text-[11px] text-slate-500 mb-1.5">
+                                    <span class="text-indigo-600 font-bold">Otomatis:</span> Jika dikosongkan, siswa otomatis mendapat semua mapel kelas yang dipilih.
+                                </p>
+                                <div id="global-create-subjects-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-44 overflow-y-auto p-2.5 rounded-2xl bg-slate-50 border border-slate-200">
                                     @forelse($subjects as $s)
                                         <label class="flex items-center gap-2.5 text-slate-700 cursor-pointer p-2 rounded-xl hover:bg-white transition-all border border-transparent hover:border-slate-200">
                                             <input type="checkbox" name="subject_ids[]" value="{{ $s->id }}" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300">
@@ -335,6 +370,7 @@
                                     @endforelse
                                 </div>
                             </div>
+
                         </div>
                     </div>
 
@@ -351,6 +387,118 @@
         </div>
     </div>
 
+    {{-- ══ MODAL: IMPORT DATA SISWA EXCEL ══ --}}
+    <div x-cloak
+         x-show="importModalOpen"
+         @keydown.escape.window="importModalOpen = false"
+         class="fixed inset-0 z-50 overflow-y-auto"
+         role="dialog"
+         aria-modal="true">
+
+        <div x-show="importModalOpen"
+             x-transition.opacity
+             class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity"
+             @click="importModalOpen = false"></div>
+
+        <div class="flex min-h-screen items-center justify-center p-4 sm:p-6 text-center">
+            <div x-show="importModalOpen"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:scale-95"
+                 class="relative z-10 w-full max-w-lg mx-auto transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all my-8 border border-slate-100">
+
+                <form action="{{ route('admin.students.import') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+
+                    <div class="bg-white p-6 sm:p-7">
+                        <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-base font-black text-slate-900">Import Siswa via Excel</h3>
+                                    <p class="text-[11px] text-slate-500">Unggah file spreadsheet (.xlsx, .xls, .csv)</p>
+                                </div>
+                            </div>
+                            <button type="button" @click="importModalOpen = false" class="text-slate-400 hover:text-slate-600 text-lg leading-none">&times;</button>
+                        </div>
+
+                        <div class="space-y-4 text-xs">
+                            {{-- Step 1: Download Template --}}
+                            <div class="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-100 flex items-center justify-between gap-3">
+                                <div>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-500 block">Langkah 1</span>
+                                    <p class="font-bold text-slate-900 text-xs mt-0.5">Unduh Template Spreadsheet</p>
+                                    <p class="text-[11px] text-slate-500">Format kolom & sheet referensi kode kelas.</p>
+                                </div>
+                                <a href="{{ route('admin.students.import.template') }}"
+                                   class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs transition-colors shrink-0">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                    </svg>
+                                    <span>Unduh Template</span>
+                                </a>
+                            </div>
+
+                            {{-- Step 2: Upload File --}}
+                            <div>
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Langkah 2: Unggah File</span>
+                                <label class="block font-bold text-slate-700 mb-1">Pilih File Excel / CSV <span class="text-red-500">*</span></label>
+                                <input type="file"
+                                       name="file"
+                                       accept=".xlsx,.xls,.csv"
+                                       required
+                                       class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100 transition-colors">
+                                <p class="text-[10px] text-slate-400 mt-1">Format didukung: .xlsx, .xls, .csv (Maksimal 10 MB)</p>
+                            </div>
+
+                            {{-- Target Rombel Default (Opsional) --}}
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">Rombel Kelas Default (Opsional)</label>
+                                <select name="class_id" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-700">
+                                    <option value="">Gunakan Kode Kelas pada File Excel (Otomatis)</option>
+                                    @foreach($classes as $c)
+                                        <option value="{{ $c->id }}">{{ $c->full_name }} (Kode: {{ $c->code }})</option>
+                                    @endforeach
+                                </select>
+                                <p class="text-[10px] text-slate-400 mt-1">Jika baris file tidak mencantumkan kode kelas, siswa akan otomatis masuk ke kelas ini.</p>
+                            </div>
+
+                            {{-- Petunjuk --}}
+                            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-500 text-[11px] space-y-1">
+                                <p class="font-bold text-slate-700">Ketentuan Import:</p>
+                                <ul class="list-disc list-inside space-y-0.5">
+                                    <li>NISN harus unik dan belum pernah didaftarkan.</li>
+                                    <li>Kode kelas dapat dilihat pada Sheet 2 file template.</li>
+                                    <li>Siswa otomatis akan mendapatkan mata pelajaran yang diajarkan di kelasnya.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-2.5">
+                        <button type="button" @click="importModalOpen = false" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 transition-colors">
+                            Batal
+                        </button>
+                        <button type="submit" class="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-extrabold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-600/25 transition-all">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                            </svg>
+                            <span>Mulai Import Data</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 @endsection
+

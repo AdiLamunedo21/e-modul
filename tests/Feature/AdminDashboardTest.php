@@ -52,4 +52,36 @@ class AdminDashboardTest extends TestCase
         $response->assertSee('Distribusi Modul per Mata Pelajaran', false);
         $response->assertDontSee('Rombongan Belajar (Kelas)', false);
     }
+
+    public function test_redundant_portal_route_is_removed()
+    {
+        $admin = Admin::first();
+        if (!$admin) {
+            $this->markTestSkipped('Admin data not seeded.');
+        }
+
+        $response = $this->actingAs($admin, 'admin')
+            ->get('/admin/portal');
+
+        $response->assertStatus(404);
+    }
+
+    public function test_admin_login_redirects_to_admin_dashboard()
+    {
+        $admin = Admin::first();
+        if (!$admin) {
+            $this->markTestSkipped('Admin data not seeded.');
+        }
+
+        $admin->update(['password' => \Illuminate\Support\Facades\Hash::make('password')]);
+
+        $response = $this->post('/login/admin', [
+            'identity_number' => $admin->identity_number,
+            'password'        => 'password',
+        ]);
+
+        $response->assertRedirect(route('admin.dashboard'));
+    }
 }
+
+

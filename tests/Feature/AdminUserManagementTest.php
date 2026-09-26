@@ -290,4 +290,89 @@ class AdminUserManagementTest extends TestCase
             'id' => $student->id,
         ]);
     }
+
+    public function test_admin_registering_student_without_specifying_subjects_automatically_syncs_class_subjects()
+    {
+        $admin = $this->getAdmin();
+        $schoolClass = SchoolClass::first();
+        if (!$schoolClass) {
+            $schoolClass = SchoolClass::create([
+                'grade' => 'X',
+                'major_name' => 'Teknik Komputer',
+            ]);
+        }
+
+        $subject = Subject::first();
+        if (!$subject) {
+            $subject = Subject::create([
+                'name' => 'Pemrograman Dasar',
+                'code' => 'PD01',
+                'color' => 'blue',
+            ]);
+        }
+
+        $nisn = 'NISN_AUTO_' . rand(10000, 99999);
+        $payload = [
+            'name'            => 'Siswa Auto Sync',
+            'identity_number' => $nisn,
+            'class_id'        => $schoolClass->id,
+            'password'        => 'password123',
+            // subject_ids omitted to trigger auto-sync!
+        ];
+
+        $response = $this->actingAs($admin, 'admin')
+            ->post(route('admin.students.store'), $payload);
+
+        $response->assertRedirect(route('admin.students.class', $schoolClass->id));
+        $response->assertSessionHas('success');
+
+        $student = Student::where('identity_number', $nisn)->first();
+        $this->assertNotNull($student);
+        $this->assertTrue($student->classes->contains($schoolClass->id));
+        $this->assertTrue($student->subjects()->exists(), 'Siswa harus otomatis memiliki mata pelajaran dari kelas.');
+
+        // Clean up
+        $student->subjects()->detach();
+        $student->classes()->detach();
+        $student->delete();
+    }
+
+    public function test_admin_can_mass_sync_class_subjects_to_all_students_in_class()
+    {
+        $admin = $this->getAdmin();
+        $schoolClass = SchoolClass::first();
+        if (!$schoolClass) {
+            $schoolClass = SchoolClass::create([
+                'grade' => 'X',
+                'major_name' => 'Teknik Komputer',
+            ]);
+        }
+
+        $nisn = 'NISN_MASS_' . rand(10000, 99999);
+        $student = Student::create([
+            'name'            => 'Siswa Mass Sync',
+            'identity_number' => $nisn,
+            'class_id'        => $schoolClass->id,
+            'password'        => Hash::make('password'),
+        ]);
+        $schoolClass->students()->syncWithoutDetaching([$student->id]);
+        $student->subjects()->detach(); // ensure empty subjects initially
+
+        $this->assertFalse($student->subjects()->exists());
+
+        $response = $this->actingAs($admin, 'admin')
+            ->post(route('admin.students.class.sync-subjects', $schoolClass->id));
+
+        $response->assertRedirect(route('admin.students.class', $schoolClass->id));
+        $response->assertSessionHas('success');
+
+        $student->refresh();
+        $this->assertTrue($student->subjects()->exists(), 'Siswa harus memiliki mata pelajaran setelah mass-sync.');
+
+        // Clean up
+        $student->subjects()->detach();
+        $student->classes()->detach();
+        $student->delete();
+    }
 }
+

@@ -155,7 +155,7 @@
     // Tautan kembali ke daftar modul kelas spesifik
     $classSubjectModulesUrl = $module->class_id
         ? route('student.classes.subject', ['class' => $module->class_id, 'subject' => $module->subject_id])
-        : route('student.modules.subject', $module->subject_id);
+        : route('student.dashboard', ['status' => 'all_modules']);
     $classNameText = $module->schoolClass->full_name ?? ($module->schoolClass->name ?? 'Kelas');
 @endphp
 

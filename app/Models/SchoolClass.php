@@ -125,4 +125,41 @@ class SchoolClass extends Model
             'is_assigned'       => $totalModules > 0,
         ];
     }
+
+    /**
+     * Mengambil seluruh ID mata pelajaran yang aktif/relevan untuk rombel kelas ini:
+     * 1. Dari modul pembelajaran yang ada di kelas ini
+     * 2. Dari guru pengampu yang ditugaskan ke kelas ini
+     * 3. Fallback: jika kelas baru belum ada modul/guru, ambil seluruh mata pelajaran aktif
+     *
+     * @return int[]
+     */
+    public function getAvailableSubjectIds(): array
+    {
+        // 1. Ambil dari modul kelas
+        $fromModules = $this->modules()
+            ->whereNotNull('subject_id')
+            ->pluck('subject_id')
+            ->toArray();
+
+        // 2. Ambil dari guru pengampu kelas
+        $teacherIds = $this->teachers()->pluck('teachers.id')->toArray();
+        $fromTeachers = [];
+        if (!empty($teacherIds)) {
+            $fromTeachers = \Illuminate\Support\Facades\DB::table('teacher_subjects')
+                ->whereIn('teacher_id', $teacherIds)
+                ->pluck('subject_id')
+                ->toArray();
+        }
+
+        $ids = array_values(array_unique(array_filter(array_merge($fromModules, $fromTeachers))));
+
+        // 3. Fallback jika belum ada modul maupun guru pengampu
+        if (empty($ids)) {
+            $ids = Subject::pluck('id')->toArray();
+        }
+
+        return $ids;
+    }
 }
+

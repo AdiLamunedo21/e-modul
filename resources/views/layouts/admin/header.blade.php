@@ -34,33 +34,42 @@
             </span>
         </div>
 
-        {{-- Kanan: Search + Profile --}}
+        {{-- Kanan: Role Switcher & Profile Pill --}}
         <div class="flex items-center gap-3">
 
-            {{-- Search bar (desktop) --}}
-            <div class="hidden md:block relative">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
-                    </svg>
-                </div>
-                <input
-                    type="text"
-                    class="w-64 rounded-lg border border-gray-200 bg-gray-50 py-2 pl-10 pr-3 text-sm text-gray-700 placeholder-gray-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-colors"
-                    placeholder="Pencarian cepat..."
-                >
-            </div>
+            {{-- Switch to Teacher Portal (jika NIP admin terdaftar sebagai guru) --}}
+            @php
+                $currentAdmin = Auth::guard('admin')->user();
+                $isAlsoTeacher = $currentAdmin ? \App\Models\Teacher::where('identity_number', $currentAdmin->identity_number)->exists() : false;
+            @endphp
+            @if($isAlsoTeacher)
+                <form action="{{ route('admin.switch-to-teacher') }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                            title="Beralih peran langsung ke Workspace Guru">
+                        <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                        </svg>
+                        <span class="hidden sm:inline">Workspace Guru</span>
+                        <span class="sm:hidden">Guru</span>
+                    </button>
+                </form>
+            @endif
 
-            {{-- Profile pill --}}
-            <div class="flex items-center gap-2.5 rounded-2xl sm:rounded-full border border-gray-200 bg-gray-50 p-1.5 pr-3 shadow-2xs">
-                <div class="h-8 w-8 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center ring-2 ring-indigo-500/20 shrink-0">
+            {{-- Profile pill (Link to Profile) --}}
+            <a href="{{ route('admin.profile.edit') }}"
+               class="flex items-center gap-2.5 rounded-2xl sm:rounded-full border border-gray-200 bg-gray-50 hover:bg-indigo-50/60 hover:border-indigo-200 p-1.5 pr-3 shadow-2xs transition-all group"
+               title="Buka Pengaturan Profil & Keamanan">
+                <div class="h-8 w-8 rounded-full bg-indigo-600 group-hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center ring-2 ring-indigo-500/20 shrink-0 transition-colors">
                     {{ strtoupper(substr(Auth::guard('admin')->user()->name ?? 'A', 0, 2)) }}
                 </div>
                 <div class="hidden sm:flex flex-col text-left">
-                    <span class="text-xs font-bold text-gray-800 leading-tight">{{ Auth::guard('admin')->user()->name ?? 'Administrator' }}</span>
+                    <span class="text-xs font-bold text-gray-800 group-hover:text-indigo-600 leading-tight transition-colors">{{ Auth::guard('admin')->user()->name ?? 'Administrator' }}</span>
                     <span class="text-[10px] text-gray-500 font-medium">{{ Auth::guard('admin')->user()->identity_number ?? '-' }} (Admin)</span>
                 </div>
-            </div>
+            </a>
+
         </div>
     </div>
 </header>

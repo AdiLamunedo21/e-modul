@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Admin;
 use App\Models\SchoolClass;
 use App\Models\Subject;
 use App\Models\Teacher;
@@ -47,6 +48,7 @@ class TeacherController extends Controller
         $totalTeachers = Teacher::count();
         $assignedTeachersCount = Teacher::has('subjects')->count();
         $unassignedTeachersCount = Teacher::doesntHave('subjects')->count();
+        $existingAdminNips = Admin::pluck('identity_number')->toArray();
 
         $stats = [
             'total'      => $totalTeachers,
@@ -60,7 +62,8 @@ class TeacherController extends Controller
             'classes',
             'stats',
             'search',
-            'subjectId'
+            'subjectId',
+            'existingAdminNips'
         ));
     }
 
@@ -222,5 +225,23 @@ class TeacherController extends Controller
 
         return redirect()->route('admin.teachers.index')
             ->with('success', "Akun guru {$name} (NIP: {$nip}) berhasil dihapus dari Master Data.");
+    }
+
+    /**
+     * Memberikan akses Administrator kepada Guru (menjadikan admin dengan NIP dan password yang sama).
+     */
+    public function makeAdmin(Teacher $teacher)
+    {
+        if (Admin::where('identity_number', $teacher->identity_number)->exists()) {
+            return back()->with('info', "Guru {$teacher->name} sudah terdaftar sebagai Administrator.");
+        }
+
+        Admin::create([
+            'name'            => $teacher->name,
+            'identity_number' => $teacher->identity_number,
+            'password'        => $teacher->password, // gunakan hash password yang sama
+        ]);
+
+        return back()->with('success', "Hak akses Administrator berhasil diberikan kepada guru {$teacher->name} (NIP: {$teacher->identity_number}). Akun kini dapat login ke Admin Panel atau alih peran.");
     }
 }

@@ -21,7 +21,8 @@
         inLearnMode: {{ (request()->routeIs('student.modules.show') && (request()->has('page') || session('success') || session('error'))) ? 'true' : 'false' }},
         currentTab: '{{ $isDashboard ? (in_array($currentStatus, ['classes', 'completed', 'all_modules', 'in_progress']) ? $currentStatus : $defaultNavTab) : '' }}',
         goToTab(tab, fallbackUrl) {
-            const isDash = window.location.pathname.endsWith('/student/dashboard') || window.location.pathname.endsWith('/student/portal');
+            const path = window.location.pathname.replace(/\/$/, '');
+            const isDash = path.endsWith('/student/dashboard') || path.endsWith('/student/portal') || path.endsWith('/student');
             if (isDash) {
                 this.currentTab = tab;
                 window.dispatchEvent(new CustomEvent('switch-student-tab', { detail: tab }));

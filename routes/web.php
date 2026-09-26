@@ -25,6 +25,9 @@ use App\Http\Controllers\Admin\StudentController as AdminStudentController;
 use App\Http\Controllers\Admin\SubjectController as AdminSubjectController;
 use App\Http\Controllers\Admin\MajorController as AdminMajorController;
 use App\Http\Controllers\Admin\ClassController as AdminClassController;
+use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
+use App\Http\Controllers\Admin\AdminManagementController;
+use App\Http\Controllers\Admin\ClassPromotionController as AdminClassPromotionController;
 use App\Http\Controllers\Teacher\LiveQuizController as TeacherLiveQuizController;
 use App\Http\Controllers\Student\LiveQuizController as StudentLiveQuizController;
 
@@ -52,21 +55,39 @@ Route::post('/logout/student',   [AuthController::class, 'studentLogout'])->name
 // ─── Admin Protected ───────────────────────────────────────────────────────
 Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
-    Route::get('/portal', [AdminDashboardController::class, 'index'])->name('dashboard.admin');
+
+    // Pengaturan Akun & Profil Admin
+    Route::get('/profile',            [AdminProfileController::class, 'edit'])->name('admin.profile.edit');
+    Route::patch('/profile',          [AdminProfileController::class, 'update'])->name('admin.profile.update');
+    Route::patch('/profile/password', [AdminProfileController::class, 'updatePassword'])->name('admin.profile.password');
+
+    // Manajemen Akun Administrator (Admin Cadangan & Integrasi Peran)
+    Route::get('/admins',                         [AdminManagementController::class, 'index'])->name('admin.admins.index');
+    Route::post('/admins',                        [AdminManagementController::class, 'store'])->name('admin.admins.store');
+    Route::patch('/admins/{admin}',               [AdminManagementController::class, 'update'])->name('admin.admins.update');
+    Route::delete('/admins/{admin}',              [AdminManagementController::class, 'destroy'])->name('admin.admins.destroy');
+    Route::post('/admins/{admin}/make-teacher',   [AdminManagementController::class, 'makeTeacher'])->name('admin.admins.make-teacher');
+    Route::post('/switch-to-teacher',             [AdminManagementController::class, 'switchToTeacher'])->name('admin.switch-to-teacher');
 
     // Master Data & Pendaftaran Guru
-    Route::get('/teachers',              [AdminTeacherController::class, 'index'])->name('admin.teachers.index');
-    Route::post('/teachers',             [AdminTeacherController::class, 'store'])->name('admin.teachers.store');
-    Route::get('/teachers/{teacher}',    [AdminTeacherController::class, 'show'])->name('admin.teachers.show');
-    Route::patch('/teachers/{teacher}',   [AdminTeacherController::class, 'update'])->name('admin.teachers.update');
-    Route::delete('/teachers/{teacher}',  [AdminTeacherController::class, 'destroy'])->name('admin.teachers.destroy');
+    Route::get('/teachers',                       [AdminTeacherController::class, 'index'])->name('admin.teachers.index');
+    Route::post('/teachers',                      [AdminTeacherController::class, 'store'])->name('admin.teachers.store');
+    Route::get('/teachers/{teacher}',             [AdminTeacherController::class, 'show'])->name('admin.teachers.show');
+    Route::patch('/teachers/{teacher}',           [AdminTeacherController::class, 'update'])->name('admin.teachers.update');
+    Route::delete('/teachers/{teacher}',          [AdminTeacherController::class, 'destroy'])->name('admin.teachers.destroy');
+    Route::post('/teachers/{teacher}/make-admin', [AdminTeacherController::class, 'makeAdmin'])->name('admin.teachers.make-admin');
 
     // Master Data & Pendaftaran Siswa
-    Route::get('/students',               [AdminStudentController::class, 'index'])->name('admin.students.index');
-    Route::get('/students/class/{class}', [AdminStudentController::class, 'showClass'])->name('admin.students.class');
-    Route::post('/students',              [AdminStudentController::class, 'store'])->name('admin.students.store');
-    Route::patch('/students/{student}',    [AdminStudentController::class, 'update'])->name('admin.students.update');
-    Route::delete('/students/{student}',   [AdminStudentController::class, 'destroy'])->name('admin.students.destroy');
+    Route::get('/students',                                  [AdminStudentController::class, 'index'])->name('admin.students.index');
+    Route::get('/students/import/template',                  [AdminStudentController::class, 'downloadImportTemplate'])->name('admin.students.import.template');
+    Route::post('/students/import',                          [AdminStudentController::class, 'import'])->name('admin.students.import');
+    Route::get('/students/class/{class}',                    [AdminStudentController::class, 'showClass'])->name('admin.students.class');
+    Route::post('/students/class/{class}/sync-subjects',      [AdminStudentController::class, 'syncClassSubjects'])->name('admin.students.class.sync-subjects');
+    Route::post('/students',                                 [AdminStudentController::class, 'store'])->name('admin.students.store');
+    Route::patch('/students/{student}',                       [AdminStudentController::class, 'update'])->name('admin.students.update');
+    Route::delete('/students/{student}',                      [AdminStudentController::class, 'destroy'])->name('admin.students.destroy');
+
+
 
     // Master Data Mata Pelajaran
     Route::get('/subjects',              [AdminSubjectController::class, 'index'])->name('admin.subjects.index');
@@ -87,6 +108,13 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::delete('/classes/{class}',                 [AdminClassController::class, 'destroy'])->name('admin.classes.destroy');
     Route::post('/classes/{class}/regenerate-code',   [AdminClassController::class, 'regenerateCode'])->name('admin.classes.regenerate-code');
 
+    // Kenaikan Kelas & Kelulusan Siswa (Tahun Ajaran Baru)
+    Route::get('/academic/promotions',                     [AdminClassPromotionController::class, 'index'])->name('admin.promotions.index');
+    Route::get('/academic/promotions/students/{class}',    [AdminClassPromotionController::class, 'getStudentsByClass'])->name('admin.promotions.students');
+    Route::post('/academic/promotions/promote',            [AdminClassPromotionController::class, 'promote'])->name('admin.promotions.promote');
+    Route::get('/academic/promotions/graduation/export',   [AdminClassPromotionController::class, 'exportGraduationReport'])->name('admin.promotions.graduation.export');
+    Route::post('/academic/promotions/graduation/process', [AdminClassPromotionController::class, 'graduate'])->name('admin.promotions.graduation.process');
+
     // Supervisi Perpustakaan Modul (Library Modul Overview)
     Route::get('/library',                           [\App\Http\Controllers\Admin\ModuleLibraryController::class, 'index'])->name('admin.library.index');
     Route::get('/library/{module}',                  [\App\Http\Controllers\Admin\ModuleLibraryController::class, 'show'])->name('admin.library.show');
@@ -98,6 +126,7 @@ Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(fu
 
     // Dashboard utama
     Route::get('/dashboard',                            [DashboardController::class, 'index'])->name('dashboard');
+    Route::post('/switch-to-admin',                     [DashboardController::class, 'switchToAdmin'])->name('switch-to-admin');
 
     // Manajer Modul (CRUD)
     Route::get('/modules',                              [ModuleManagerController::class, 'index'])->name('modules.index');
@@ -236,8 +265,6 @@ Route::middleware('auth:student')->prefix('student')->group(function () {
     // Modul Pembelajaran per Mata Pelajaran di Kelas Ini
     Route::get('/classes/{class}/subjects/{subject}', [StudentDashboardController::class, 'showClassSubjectModules'])->name('student.classes.subject');
 
-    // Modul Belajar Siswa per Mata Pelajaran (Umum/Global)
-    Route::get('/modules/subject/{subject}', [StudentModuleController::class, 'bySubject'])->name('student.modules.subject');
 
     // Antarmuka Interaktif Mulai Belajar E-Modul 5 Bagian
     Route::get('/modules/{module}',                         [StudentModuleController::class, 'show'])->name('student.modules.show');

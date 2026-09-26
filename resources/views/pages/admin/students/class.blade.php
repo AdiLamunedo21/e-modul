@@ -50,8 +50,41 @@
             </p>
         </div>
 
-        {{-- Button Tambah Siswa ke Kelas Ini --}}
-        <div>
+        {{-- Action Buttons --}}
+        <div class="flex items-center gap-3 flex-wrap">
+            @if($class->grade === 'XII')
+                <a href="{{ route('admin.promotions.index', ['tab' => 'graduation', 'graduation_class_id' => $class->id]) }}"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-bold transition-all shadow-xs"
+                   title="Kelola kelulusan dan unduh rekap nilai siswa kelas XII ini">
+                    <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.636 50.636 0 00-2.658-.813A59.906 59.906 0 0112 3.493a59.903 59.903 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5"/>
+                    </svg>
+                    <span>🎓 Kelulusan Siswa</span>
+                </a>
+            @else
+                <a href="{{ route('admin.promotions.index', ['tab' => 'promotion', 'source_class_id' => $class->id]) }}"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-bold transition-all shadow-xs"
+                   title="Buka panduan kenaikan kelas untuk memindahkan siswa kelas ini ke tingkat berikutnya">
+                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.143 2.143L15 7.5" />
+                    </svg>
+                    <span>🚀 Naikkan Kelas</span>
+                </a>
+            @endif
+
+            <form action="{{ route('admin.students.class.sync-subjects', $class->id) }}" method="POST"
+                  onsubmit="return confirm('Apakah Anda yakin ingin menyinkronkan semua mata pelajaran aktif di kelas {{ $class->full_name }} ke seluruh siswanya?');">
+                @csrf
+                <button type="submit"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs font-bold transition-all shadow-xs"
+                        title="Otomatis sinkronkan mata pelajaran aktif di kelas ini ke semua siswa yang terdaftar">
+                    <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                    </svg>
+                    <span>Sinkronkan Mapel ke Semua Siswa</span>
+                </button>
+            </form>
+
             <button type="button"
                     @click="createModalOpen = true"
                     class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/25 transition-all">
@@ -63,6 +96,7 @@
         </div>
     </div>
 
+
     {{-- ══ Flash Alerts ══ --}}
     @if(session('success'))
         <div class="mb-6 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-800 shadow-sm animate-fade-in">
@@ -70,6 +104,22 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
             <span>{{ session('success') }}</span>
+        </div>
+    @endif
+
+    @if(session('import_errors') && count(session('import_errors')) > 0)
+        <div class="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900 shadow-sm">
+            <div class="flex items-center gap-2 font-bold mb-2 text-sm text-amber-800">
+                <svg class="w-5 h-5 text-amber-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+                <span>Catatan Baris yang Dilewati Saat Import ({{ count(session('import_errors')) }} baris):</span>
+            </div>
+            <ul class="list-disc list-inside space-y-1 ml-2 max-h-40 overflow-y-auto">
+                @foreach(session('import_errors') as $err)
+                    <li>Baris {{ $err['row'] }} (NISN: <strong>{{ $err['nisn'] }}</strong>, {{ $err['name'] }}): {{ $err['reason'] }}</li>
+                @endforeach
+            </ul>
         </div>
     @endif
 
@@ -359,9 +409,18 @@
 
                             {{-- Ploting Mata Pelajaran yang Ditempuh (Centang / Checkboxes) --}}
                             <div>
-                                <label class="block font-bold text-slate-700 mb-1">Mata Pelajaran yang Ditempuh</label>
-                                <p class="text-[11px] text-slate-500 mb-1.5">Pilih mata pelajaran yang wajib / harus ditempuh oleh siswa ini:</p>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-44 overflow-y-auto p-2.5 rounded-2xl bg-slate-50 border border-slate-200">
+                                <div class="flex items-center justify-between mb-1">
+                                    <label class="block font-bold text-slate-700">Mata Pelajaran yang Ditempuh</label>
+                                    <button type="button"
+                                            onclick="const cbs = document.querySelectorAll('#create-subjects-container input[type=checkbox]'); const anyChecked = Array.from(cbs).some(c => c.checked); cbs.forEach(c => c.checked = !anyChecked);"
+                                            class="text-[11px] font-bold text-indigo-600 hover:text-indigo-700">
+                                        Pilih / Batalkan Semua
+                                    </button>
+                                </div>
+                                <p class="text-[11px] text-slate-500 mb-1.5">
+                                    <span class="text-indigo-600 font-bold">Otomatis:</span> Jika dikosongkan, siswa otomatis mendapat semua mapel kelas ini.
+                                </p>
+                                <div id="create-subjects-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-44 overflow-y-auto p-2.5 rounded-2xl bg-slate-50 border border-slate-200">
                                     @forelse($subjects as $s)
                                         <label class="flex items-center gap-2.5 text-slate-700 cursor-pointer p-2 rounded-xl hover:bg-white transition-all border border-transparent hover:border-slate-200">
                                             <input type="checkbox" name="subject_ids[]" value="{{ $s->id }}" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300">
@@ -458,9 +517,16 @@
 
                             {{-- Ploting Mata Pelajaran yang Ditempuh (Centang / Checkboxes) --}}
                             <div>
-                                <label class="block font-bold text-slate-700 mb-1">Mata Pelajaran yang Ditempuh</label>
-                                <p class="text-[11px] text-slate-500 mb-1.5">Pilih mata pelajaran yang wajib / harus ditempuh oleh siswa ini:</p>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-44 overflow-y-auto p-2.5 rounded-2xl bg-slate-50 border border-slate-200">
+                                <div class="flex items-center justify-between mb-1">
+                                    <label class="block font-bold text-slate-700">Mata Pelajaran yang Ditempuh</label>
+                                    <button type="button"
+                                            onclick="const cbs = document.querySelectorAll('#edit-subjects-container input[type=checkbox]'); const anyChecked = Array.from(cbs).some(c => c.checked); cbs.forEach(c => { c.checked = !anyChecked; c.dispatchEvent(new Event('change')); });"
+                                            class="text-[11px] font-bold text-indigo-600 hover:text-indigo-700">
+                                        Pilih / Batalkan Semua
+                                    </button>
+                                </div>
+                                <p class="text-[11px] text-slate-500 mb-1.5">Centang mapel yang ditempuh siswa ini:</p>
+                                <div id="edit-subjects-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-44 overflow-y-auto p-2.5 rounded-2xl bg-slate-50 border border-slate-200">
                                     @forelse($subjects as $s)
                                         <label class="flex items-center gap-2.5 text-slate-700 cursor-pointer p-2 rounded-xl hover:bg-white transition-all border border-transparent hover:border-slate-200">
                                             <input type="checkbox"
@@ -556,3 +622,4 @@
 </div>
 
 @endsection
+

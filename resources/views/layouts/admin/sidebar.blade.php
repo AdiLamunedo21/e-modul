@@ -59,14 +59,17 @@
 
             {{-- Dashboard --}}
             @php
-                $isDashboardActive = request()->routeIs('admin.dashboard') || request()->routeIs('dashboard.admin');
+                $isDashboardActive = request()->routeIs('admin.dashboard');
+                $isAdminsActive    = request()->routeIs('admin.admins.*');
                 $isTeachersActive  = request()->routeIs('admin.teachers.*');
                 $isStudentsActive  = request()->routeIs('admin.students.*');
                 $isSubjectsActive  = request()->routeIs('admin.subjects.*');
                 $isMajorsActive    = request()->routeIs('admin.majors.*');
-                $isClassesActive   = request()->routeIs('admin.classes.*');
-                $isLibraryActive   = request()->routeIs('admin.library.*');
+                $isClassesActive    = request()->routeIs('admin.classes.*');
+                $isPromotionsActive = request()->routeIs('admin.promotions.*');
+                $isLibraryActive    = request()->routeIs('admin.library.*');
             @endphp
+
 
             <a href="{{ route('admin.dashboard') }}"
                class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all
@@ -79,6 +82,18 @@
 
             {{-- Grup: Master Data Pengguna --}}
             <p class="pt-5 pb-1 px-3 text-[11px] font-bold uppercase tracking-widest text-slate-500">Master Pengguna</p>
+
+            {{-- Akun Administrator --}}
+            <a href="{{ route('admin.admins.index') }}"
+               class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all
+                   {{ $isAdminsActive ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                <div class="flex items-center gap-3 truncate">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                    </svg>
+                    <span>Akun Administrator</span>
+                </div>
+            </a>
 
             {{-- Master Guru --}}
             <a href="{{ route('admin.teachers.index') }}"
@@ -143,6 +158,21 @@
                 </div>
             </a>
 
+            {{-- Kenaikan & Kelulusan --}}
+            <a href="{{ route('admin.promotions.index') }}"
+               class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all
+                   {{ $isPromotionsActive ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                <div class="flex items-center gap-3 truncate">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.143 2.143L15 7.5" />
+                    </svg>
+                    <span>Kenaikan & Kelulusan</span>
+                </div>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                    Baru
+                </span>
+            </a>
+
             {{-- Supervisi Library Modul --}}
             <a href="{{ route('admin.library.index') }}"
                class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all
@@ -158,6 +188,7 @@
                 </span>
             </a>
         </nav>
+
 
         {{-- ══ Logout ══ --}}
         <div class="p-4 border-t border-slate-700/50 shrink-0">
