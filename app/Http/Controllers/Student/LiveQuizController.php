@@ -366,6 +366,11 @@ class LiveQuizController extends Controller
             ];
         }
 
+        // Jika sesi telah selesai, pastikan nilai peserta tersimpan ke StudentResult
+        if ($session->status === 'finished' && $participant) {
+            $session->syncGradesToStudentResults($student->id);
+        }
+
         return response()->json($data);
     }
 
@@ -384,6 +389,8 @@ class LiveQuizController extends Controller
             // Jika sesi masih di tahap lobby (belum dimulai guru), hapus data peserta agar akurat di layar guru
             if ($session->status === 'lobby') {
                 $participant->delete();
+            } else {
+                $session->syncGradesToStudentResults($student->id);
             }
         }
 

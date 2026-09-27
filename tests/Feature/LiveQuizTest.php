@@ -693,5 +693,204 @@ class LiveQuizTest extends TestCase
 
         $session->delete();
     }
+
+    public function test_live_quiz_finish_automatically_updates_student_pre_test_score_and_module_progress()
+    {
+        $teacher = Teacher::first() ?? Teacher::factory()->create();
+        $class = SchoolClass::first() ?? SchoolClass::create([
+            'name'        => 'XII RPL Live',
+            'grade_level' => 'XII',
+            'major_id'    => 1,
+            'code'        => 'RPL-LIVE-PRE',
+        ]);
+        $student = Student::first() ?? Student::create([
+            'name'     => 'Siswa Kuis Live',
+            'nisn'     => '1234567890',
+            'password' => bcrypt('password'),
+            'class_id' => $class->id,
+        ]);
+        if (!$student->classes()->where('classes.id', $class->id)->exists()) {
+            $student->classes()->attach($class->id);
+        }
+
+        $module = $this->getOrCreateModuleWithQuestions($teacher, $class);
+        $questions = $module->preTest->questions()->orderBy('order_num')->get();
+
+        $session = LiveQuizSession::create([
+            'teacher_id'             => $teacher->id,
+            'module_id'              => $module->id,
+            'class_id'               => $class->id,
+            'test_type'              => 'pre_test',
+            'title'                  => "Kuis Live: {$module->title}",
+            'pin_code'               => LiveQuizSession::generatePin(),
+            'status'                 => 'question',
+            'is_active'              => true,
+            'current_question_index' => 0,
+            'current_question_id'    => $questions->first()->id,
+            'time_limit_seconds'     => 30,
+            'total_questions'        => $questions->count(),
+            'grades_saved'           => false,
+            'question_started_at'    => now(),
+        ]);
+
+        $part = LiveQuizParticipant::create([
+            'live_quiz_session_id'  => $session->id,
+            'student_id'            => $student->id,
+            'nickname'              => $student->name,
+            'total_score'           => 1000,
+            'correct_answers_count' => 1,
+        ]);
+
+        // Catat jawaban untuk soal pertama
+        LiveQuizAnswer::create([
+            'live_quiz_session_id'     => $session->id,
+            'live_quiz_participant_id' => $part->id,
+            'question_id'              => $questions->first()->id,
+            'question_index'           => 0,
+            'selected_option'          => $questions->first()->correct_answer,
+            'is_correct'               => true,
+            'response_time_ms'         => 1200,
+            'score_earned'             => 950,
+        ]);
+
+        // Guru mengakhiri kuis live
+        $finishRes = $this->actingAs($teacher, 'teacher')
+            ->postJson(route('teacher.live-quiz.finish', $session));
+
+        $finishRes->assertStatus(200);
+        $finishRes->assertJson(['success' => true, 'status' => 'finished', 'grades_saved' => true]);
+
+        // Pastikan nilai pre-test otomatis tersimpan ke StudentResult
+        $result = StudentResult::where('module_id', $module->id)
+            ->where('student_id', $student->id)
+            ->first();
+
+        $this->assertNotNull($result);
+        $this->assertEquals(50, $result->pre_test_score);
+        $this->assertTrue(in_array('pre_test', $result->read_components ?? []));
+
+        // Siswa membuka halaman detail modul
+        $moduleShowRes = $this->actingAs($student, 'student')
+            ->get(route('student.modules.show', ['module' => $module->id, 'page' => 'pre_test']));
+
+        $moduleShowRes->assertStatus(200);
+        $moduleShowRes->assertSee('Pre-test Diagnostik Selesai!');
+        $moduleShowRes->assertSee('50');
+        $moduleShowRes->assertSee('Kuis Live');
+
+        $session->delete();
+    }
+
+    public function test_live_quiz_finish_automatically_updates_student_post_test_score_and_module_progress()
+    {
+        $teacher = Teacher::first() ?? Teacher::factory()->create();
+        $class = SchoolClass::first() ?? SchoolClass::create([
+            'name'        => 'XII RPL Post',
+            'grade_level' => 'XII',
+            'major_id'    => 1,
+            'code'        => 'RPL-LIVE-POST',
+        ]);
+        $student = Student::first() ?? Student::create([
+            'name'     => 'Siswa Kuis Live 2',
+            'nisn'     => '1234567891',
+            'password' => bcrypt('password'),
+            'class_id' => $class->id,
+        ]);
+        if (!$student->classes()->where('classes.id', $class->id)->exists()) {
+            $student->classes()->attach($class->id);
+        }
+
+        $subject = Subject::first();
+        $module = Module::create([
+            'teacher_id'    => $teacher->id,
+            'subject_id'    => $subject->id,
+            'class_id'      => $class->id,
+            'title'         => 'Modul Post Test Live Quiz',
+            'semester'      => '1',
+            'status'        => 'published',
+            'is_active'     => true,
+            'has_post_test' => true,
+        ]);
+
+        $postTest = PostTest::create([
+            'module_id'           => $module->id,
+            'title'               => 'Post-Test Evaluasi Akhir',
+            'kktp'                => 75,
+            'instructions'        => 'Jawab dengan cermat',
+            'randomize_questions' => false,
+        ]);
+
+        $q1 = PostTestQuestion::create([
+            'post_test_id'   => $postTest->id,
+            'question_text'  => 'Soal Post Test 1?',
+            'options'        => ['A' => 'Opsi A', 'B' => 'Opsi B'],
+            'correct_answer' => 'A',
+            'score_weight'   => 10,
+            'order_num'      => 1,
+        ]);
+
+        $session = LiveQuizSession::create([
+            'teacher_id'             => $teacher->id,
+            'module_id'              => $module->id,
+            'class_id'               => $class->id,
+            'test_type'              => 'post_test',
+            'title'                  => "Kuis Live: {$module->title}",
+            'pin_code'               => LiveQuizSession::generatePin(),
+            'status'                 => 'question',
+            'is_active'              => true,
+            'current_question_index' => 0,
+            'current_question_id'    => $q1->id,
+            'time_limit_seconds'     => 30,
+            'total_questions'        => 1,
+            'grades_saved'           => false,
+            'question_started_at'    => now(),
+        ]);
+
+        $part = LiveQuizParticipant::create([
+            'live_quiz_session_id'  => $session->id,
+            'student_id'            => $student->id,
+            'nickname'              => $student->name,
+            'total_score'           => 1000,
+            'correct_answers_count' => 1,
+        ]);
+
+        LiveQuizAnswer::create([
+            'live_quiz_session_id'     => $session->id,
+            'live_quiz_participant_id' => $part->id,
+            'question_id'              => $q1->id,
+            'question_index'           => 0,
+            'selected_option'          => 'A',
+            'is_correct'               => true,
+            'response_time_ms'         => 800,
+            'score_earned'             => 1000,
+        ]);
+
+        // Guru mengakhiri kuis
+        $finishRes = $this->actingAs($teacher, 'teacher')
+            ->postJson(route('teacher.live-quiz.finish', $session));
+
+        $finishRes->assertStatus(200);
+
+        // Nilai post-test otomatis tersimpan
+        $result = StudentResult::where('module_id', $module->id)
+            ->where('student_id', $student->id)
+            ->first();
+
+        $this->assertNotNull($result);
+        $this->assertEquals(100, $result->post_test_score);
+        $this->assertEquals(100, $result->summative_score);
+
+        // Siswa membuka halaman modul
+        $moduleShowRes = $this->actingAs($student, 'student')
+            ->get(route('student.modules.show', ['module' => $module->id, 'page' => 'post_test']));
+
+        $moduleShowRes->assertStatus(200);
+        $moduleShowRes->assertSee('Post-test Berhasil Diselesaikan!');
+        $moduleShowRes->assertSee('100');
+        $moduleShowRes->assertSee('Kuis Live');
+
+        $session->delete();
+        $module->delete();
+    }
 }
 

@@ -58,6 +58,15 @@
                                     <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
                                         {{ $preTestAttemptCount > 1 ? $preTestAttemptCount . 'x Dikerjakan' : 'Percobaan Pertama' }}
                                     </span>
+                                    @php
+                                        $hasLiveQuizAttempt = collect($preTestAttempts)->contains(fn($a) => ($a['mode'] ?? '') === 'live_quiz');
+                                    @endphp
+                                    @if($hasLiveQuizAttempt)
+                                        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1 shadow-2xs">
+                                            <span>⚡</span>
+                                            <span>Kuis Live Kelas</span>
+                                        </span>
+                                    @endif
                                 </div>
                                 <p class="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-2xl">
                                     Soal Pre-test ini dapat Anda kerjakan ulang secara bebas untuk melatih dan memperdalam pemahaman materi. 
@@ -156,11 +165,16 @@
                                                 <tr class="{{ !empty($att['is_initial']) ? 'bg-teal-50/40 font-semibold' : '' }}">
                                                     <td class="py-2 px-4">Percobaan ke-{{ $att['attempt'] ?? 1 }}</td>
                                                     <td class="py-2 px-4">
-                                                        @if(!empty($att['is_initial']))
-                                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-teal-100 text-teal-800">Nilai Awal Resmi</span>
-                                                        @else
-                                                            <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600">Latihan Ulang</span>
-                                                        @endif
+                                                        <div class="flex items-center gap-1.5 flex-wrap">
+                                                            @if(!empty($att['is_initial']))
+                                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-teal-100 text-teal-800">Nilai Awal Resmi</span>
+                                                            @else
+                                                                <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600">Latihan Ulang</span>
+                                                            @endif
+                                                            @if(!empty($att['mode']) && $att['mode'] === 'live_quiz')
+                                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">⚡ Kuis Live</span>
+                                                            @endif
+                                                        </div>
                                                     </td>
                                                     <td class="py-2 px-4 text-center font-bold {{ !empty($att['is_initial']) ? 'text-teal-700' : 'text-slate-800' }}">
                                                         {{ $att['score'] ?? '-' }}/100

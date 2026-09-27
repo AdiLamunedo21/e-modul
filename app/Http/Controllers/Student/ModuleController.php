@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\EmbedSubmission;
 use App\Models\JobSheet;
 use App\Models\JobSheetSubmission;
+use App\Models\LiveQuizSession;
 use App\Models\Lkpd;
 use App\Models\Module;
 use App\Models\PostTest;
@@ -100,6 +101,27 @@ class ModuleController extends Controller
                 ['summative_score' => 0, 'grading_status' => 'pending', 'read_components' => []]
             );
         }
+
+        // Otomatis sinkronkan nilai kuis live jika siswa pernah mengikuti sesi kuis live pada modul ini
+        $liveSessions = LiveQuizSession::where('module_id', $module->id)
+            ->whereHas('participants', function ($pq) use ($student) {
+                $pq->where('student_id', $student->id);
+            })
+            ->where(function ($sq) {
+                $sq->where('status', 'finished')
+                   ->orWhere('grades_saved', true);
+            })
+            ->get();
+
+        if ($liveSessions->isNotEmpty()) {
+            foreach ($liveSessions as $liveSession) {
+                $liveSession->syncGradesToStudentResults($student->id);
+            }
+            $studentResult = StudentResult::where('module_id', $module->id)
+                ->where('student_id', $student->id)
+                ->first();
+        }
+
         $videoSummary = $module->videoSummaries->first();
         $embedSubmission = $module->embedSubmissions->first();
 

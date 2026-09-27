@@ -65,21 +65,51 @@ class StudentResult extends Model
     }
 
     /** Mencatat percobaan pengerjaan tes baru dengan mengunci nilai awal tes dan membatasi maksimal 3 riwayat */
-    public function recordTestAttempt(string $testType, int $score, int $correctCount, int $totalQuestions): array
+    public function recordTestAttempt(string $testType, int $score, int $correctCount, int $totalQuestions, array $metadata = []): array
     {
         $attemptsData = $this->test_attempts ?? [];
         $typeAttempts = $attemptsData[$testType] ?? [];
         $isFirst = false;
 
+        // Jika terdapat live_quiz_session_id pada metadata, periksa apakah sudah pernah dicatat sebelumnya untuk sesi yang sama (idempoten)
+        if (!empty($metadata['live_quiz_session_id'])) {
+            foreach ($typeAttempts as $idx => $att) {
+                if (isset($att['live_quiz_session_id']) && $att['live_quiz_session_id'] == $metadata['live_quiz_session_id']) {
+                    $typeAttempts[$idx]['score'] = $score;
+                    $typeAttempts[$idx]['correct_count'] = $correctCount;
+                    $typeAttempts[$idx]['total'] = $totalQuestions;
+                    $typeAttempts[$idx]['timestamp'] = now()->toIso8601String();
+
+                    if ($testType === 'pre_test') {
+                        $this->pre_test_score = $score;
+                    } elseif ($testType === 'post_test') {
+                        $this->post_test_score = $score;
+                    }
+
+                    $attemptsData[$testType] = $typeAttempts;
+                    $this->test_attempts = $attemptsData;
+
+                    return [
+                        'attempt'    => $typeAttempts[$idx]['attempt'] ?? ($idx + 1),
+                        'is_initial' => !empty($typeAttempts[$idx]['is_initial']),
+                    ];
+                }
+            }
+        }
+
         if ($testType === 'pre_test') {
-            if ($this->pre_test_score === null) {
+            if ($this->pre_test_score === null || !empty($metadata['is_live_quiz'])) {
+                if ($this->pre_test_score === null) {
+                    $isFirst = true;
+                }
                 $this->pre_test_score = $score;
-                $isFirst = true;
             }
         } elseif ($testType === 'post_test') {
-            if ($this->post_test_score === null) {
+            if ($this->post_test_score === null || !empty($metadata['is_live_quiz'])) {
+                if ($this->post_test_score === null) {
+                    $isFirst = true;
+                }
                 $this->post_test_score = $score;
-                $isFirst = true;
             }
         }
 
@@ -99,14 +129,16 @@ class StudentResult extends Model
         }
 
         $attemptNumber = count($typeAttempts) + 1;
-        $typeAttempts[] = [
+        $attemptRecord = array_merge([
             'attempt'       => $attemptNumber,
             'score'         => $score,
             'correct_count' => $correctCount,
             'total'         => $totalQuestions,
             'timestamp'     => now()->toIso8601String(),
             'is_initial'    => $isFirst,
-        ];
+        ], $metadata);
+
+        $typeAttempts[] = $attemptRecord;
 
         // Batasi riwayat maksimal 3 pengerjaan agar hemat database.
         // Pertahankan percobaan awal resmi (is_initial) dan 2 percobaan terbaru.

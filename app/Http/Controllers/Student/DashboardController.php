@@ -56,6 +56,12 @@ class DashboardController extends Controller
         // Query modul terbit yang ditugaskan untuk seluruh kelas yang diikuti siswa secara efisien
         $studentSubjectIds = $student->subjects()->pluck('subjects.id')->toArray();
 
+        // Pastikan nilai dari kuis live yang pernah diikuti siswa tersinkronisasi
+        LiveQuizSession::whereHas('participants', fn($q) => $q->where('student_id', $student->id))
+            ->where(fn($q) => $q->where('status', 'finished')->orWhere('grades_saved', true))
+            ->get()
+            ->each(fn($s) => $s->syncGradesToStudentResults($student->id));
+
         if (!empty($joinedClassIds)) {
             $modulesQuery = Module::select([
                     'id', 'teacher_id', 'class_id', 'subject_id', 'title',

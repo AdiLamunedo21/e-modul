@@ -335,7 +335,7 @@ class LiveQuizController extends Controller
     }
 
     /**
-     * Mengakhiri Kuis secara Manual dan Menampilkan Podium.
+     * Mengakhiri Kuis secara Manual dan Menampilkan Podium serta Otomatis Menyimpan Nilai.
      */
     public function finish(LiveQuizSession $session)
     {
@@ -345,9 +345,13 @@ class LiveQuizController extends Controller
             'status' => 'finished',
         ]);
 
+        $syncedCount = $session->syncGradesToStudentResults();
+
         return response()->json([
-            'success' => true,
-            'status'  => 'finished',
+            'success'      => true,
+            'status'       => 'finished',
+            'grades_saved' => true,
+            'count'        => $syncedCount,
         ]);
     }
 
@@ -358,41 +362,12 @@ class LiveQuizController extends Controller
     {
         $this->authorizeSession($session);
 
-        $participants = $session->participants()->with('student')->get();
-        $totalQuestions = max(1, $session->total_questions);
-        $module = $session->module;
-        $testType = $session->test_type; // 'pre_test' | 'post_test'
-
-        DB::transaction(function () use ($participants, $totalQuestions, $module, $testType, $session) {
-            foreach ($participants as $part) {
-                if (!$part->student_id) continue;
-
-                // Konversi skor ke skala 0 - 100
-                $calculatedScore = (int) round(($part->correct_answers_count / $totalQuestions) * 100);
-
-                $result = StudentResult::firstOrNew([
-                    'module_id'  => $module->id,
-                    'student_id' => $part->student_id,
-                ]);
-
-                if ($testType === 'pre_test') {
-                    $result->pre_test_score = $calculatedScore;
-                } else {
-                    $result->post_test_score = $calculatedScore;
-                }
-
-                $result->summative_score = $result->calculateSummativeScore($module);
-                $result->grading_status = 'graded';
-                $result->save();
-            }
-
-            $session->update(['grades_saved' => true]);
-        });
+        $syncedCount = $session->syncGradesToStudentResults();
 
         return response()->json([
             'success' => true,
-            'count'   => $participants->count(),
-            'message' => "Nilai berhasil disimpan ke Pusat Penilaian untuk {$participants->count()} siswa!",
+            'count'   => $syncedCount,
+            'message' => "Nilai berhasil disimpan ke Pusat Penilaian untuk {$syncedCount} siswa!",
         ]);
     }
 

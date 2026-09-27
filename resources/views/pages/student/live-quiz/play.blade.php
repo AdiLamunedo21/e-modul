@@ -427,9 +427,14 @@
                 </div>
             </div>
 
-            <div class="pt-2 max-w-sm mx-auto">
+            <div class="pt-2 max-w-sm mx-auto space-y-2.5">
+                <a href="{{ route('student.modules.show', ['module' => $session->module_id, 'page' => $session->test_type === 'pre_test' ? 'pre_test' : 'post_test']) }}"
+                   class="inline-flex items-center justify-center gap-2 w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black text-sm shadow-xl shadow-emerald-950/40 transition-all transform hover:scale-[1.02]">
+                    <span>Buka Detail Modul Pembelajaran</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                </a>
                 <a href="{{ route('student.dashboard') }}"
-                   class="inline-block w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm transition-all shadow-lg shadow-emerald-950/40">
+                   class="inline-block w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold text-xs transition-all border border-slate-800">
                     Kembali ke Dashboard Siswa
                 </a>
             </div>

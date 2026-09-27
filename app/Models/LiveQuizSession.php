@@ -76,10 +76,13 @@ class LiveQuizSession extends Model
     public function getQuestionsList(): Collection
     {
         if ($this->test_type === 'pre_test') {
-            $test = $this->module->preTest;
+            $test = $this->module?->preTest;
             return $test ? $test->questions()->orderBy('order_num', 'asc')->get() : collect();
         } else {
-            $test = $this->module->postTest;
+            if ($this->module) {
+                return $this->module->getEffectivePostTestQuestions();
+            }
+            $test = $this->module?->postTest;
             return $test ? $test->questions()->orderBy('order_num', 'asc')->get() : collect();
         }
     }
@@ -172,5 +175,92 @@ class LiveQuizSession extends Model
             ->orderBy('last_answered_at')
             ->take(3)
             ->get();
+    }
+
+    /**
+     * Menyimpan / menyinkronkan nilai hasil kuis live ke StudentResult (pre_test atau post_test),
+     * mencatat percobaan tes (test_attempts), menandai komponen dibaca, dan memperbarui nilai sumatif.
+     */
+    public function syncGradesToStudentResults(?int $onlyStudentId = null): int
+    {
+        $module = $this->module;
+        if (!$module) {
+            return 0;
+        }
+
+        $testType = $this->test_type ?: 'pre_test'; // 'pre_test' | 'post_test'
+        $totalQuestions = max(1, (int) $this->total_questions);
+
+        // Pertanyaan untuk pembobotan jika ada
+        $questions = $this->getQuestionsList();
+        $totalPossibleScore = (int) $questions->sum('score_weight');
+
+        $query = $this->participants()->with(['student', 'answers']);
+        if ($onlyStudentId) {
+            $query->where('student_id', $onlyStudentId);
+        }
+        $participants = $query->get();
+
+        $syncedCount = 0;
+
+        foreach ($participants as $part) {
+            if (!$part->student_id) {
+                continue;
+            }
+
+            $correctCount = (int) $part->correct_answers_count;
+            if ($totalPossibleScore > 0) {
+                $correctQuestionIds = $part->answers->where('is_correct', true)->pluck('question_id')->toArray();
+                $earnedScore = (int) $questions->whereIn('id', $correctQuestionIds)->sum('score_weight');
+                $calculatedScore = (int) round(($earnedScore / $totalPossibleScore) * 100);
+            } else {
+                $calculatedScore = (int) round(($correctCount / $totalQuestions) * 100);
+            }
+            $calculatedScore = max(0, min(100, $calculatedScore));
+
+            $result = StudentResult::firstOrNew([
+                'module_id'  => $module->id,
+                'student_id' => $part->student_id,
+            ]);
+
+            // Catat ke test_attempts untuk riwayat & pengulangan
+            $result->recordTestAttempt(
+                $testType,
+                $calculatedScore,
+                $correctCount,
+                $totalQuestions,
+                [
+                    'mode'                 => 'live_quiz',
+                    'is_live_quiz'         => true,
+                    'live_quiz_session_id' => $this->id,
+                ]
+            );
+
+            // Pastikan nilai pre_test atau post_test tercatat dari live quiz
+            if ($testType === 'pre_test') {
+                $result->pre_test_score = $calculatedScore;
+            } else {
+                $result->post_test_score = $calculatedScore;
+            }
+
+            // Tandai komponen sebagai dibaca/dilewati dalam alur modul
+            $reads = $result->read_components ?? [];
+            if (!in_array($testType, $reads, true)) {
+                $reads[] = $testType;
+                $result->read_components = $reads;
+            }
+
+            $result->summative_score = $result->calculateSummativeScore($module);
+            $result->grading_status = 'graded';
+            $result->save();
+
+            $syncedCount++;
+        }
+
+        if (!$onlyStudentId) {
+            $this->update(['grades_saved' => true]);
+        }
+
+        return $syncedCount;
     }
 }
