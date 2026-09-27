@@ -29,6 +29,13 @@
                 </span>
                 <span class="text-white/30">•</span>
                 <span class="text-[11px] text-slate-300 font-medium">SMK Negeri 3 Yogyakarta</span>
+                @if($class->code)
+                    <span class="text-white/30">•</span>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        <span>KODE KELAS:</span>
+                        <span class="text-white">{{ $class->code }}</span>
+                    </span>
+                @endif
             </div>
         </div>
 

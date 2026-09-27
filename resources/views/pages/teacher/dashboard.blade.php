@@ -56,6 +56,12 @@
                 </span>
             @endif
         </a>
+        <a href="{{ route('teacher.live-quiz.index') }}" class="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 hover:text-emerald-700 hover:border-emerald-300 transition-all">
+            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+            </svg>
+            <span>Kuis Live</span>
+        </a>
         <a href="{{ route('teacher.modules.create') }}" class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-blue-600/25 hover:bg-blue-700 hover:shadow-blue-600/35 transition-all">
             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -64,6 +70,34 @@
         </a>
     </div>
 </div>
+
+@if(!empty($activeLiveQuiz))
+    {{-- Banner Kuis Live Sedang Berlangsung di Kelas --}}
+    <div class="mb-8 rounded-3xl bg-gradient-to-r from-emerald-800 via-teal-900 to-slate-950 p-6 sm:p-7 text-white shadow-xl shadow-emerald-950/30 border border-emerald-500/40 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="space-y-1.5 z-10">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-xs font-black uppercase tracking-wider text-emerald-300">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                <span>Sesi Kuis Live Sedang Berlangsung di Kelas</span>
+            </div>
+            <h3 class="text-xl sm:text-2xl font-black tracking-tight text-white flex flex-wrap items-center gap-2">
+                <span>{{ $activeLiveQuiz->module->title ?? 'Kuis Live' }}</span>
+                <span class="text-xs font-bold px-2.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase">
+                    {{ $activeLiveQuiz->test_type === 'pre_test' ? 'Pre-Test' : 'Post-Test' }}
+                </span>
+            </h3>
+            <p class="text-slate-300 text-xs sm:text-sm">
+                Target Kelas: <strong class="text-white">{{ $activeLiveQuiz->schoolClass?->full_name ?? 'Umum' }}</strong> • Siswa dapat langsung bergabung melalui tombol <strong class="text-emerald-300">Gabung Kuis Sekarang</strong> di dashboard masing-masing.
+            </p>
+        </div>
+        <div class="flex items-center gap-2.5 z-10 shrink-0">
+            <a href="{{ route('teacher.live-quiz.host', $activeLiveQuiz) }}"
+               class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs sm:text-sm shadow-xl shadow-emerald-500/20 transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+                <span>Buka Layar Pantau Proyektor</span>
+            </a>
+        </div>
+    </div>
+@endif
 
 {{-- ══ Stat Cards & Fitur Cepat (4 Dynamic Cards Grid) ══ --}}
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
@@ -210,176 +244,85 @@
     </div>
 </div>
 
-{{-- ══ Bottom Section: Grading Center Queue, Assigned Classes & Builder Guide ══ --}}
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-    {{-- Antrean Grading Center Live (2 Kolom) --}}
-    <div class="lg:col-span-2 rounded-2xl bg-white border border-slate-200/80 shadow-sm p-5 sm:p-6 flex flex-col justify-between">
-        <div>
-            <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
-                <div>
-                    <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                        <span>Antrean Penilaian Adaptif (Grading Center)</span>
-                        @if(count($pendingQueueSorted) > 0)
-                            <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
-                        @endif
-                    </h3>
-                    <p class="text-xs text-slate-500 mt-0.5">Berkas kiriman siswa yang memerlukan verifikasi dan penilaian manual guru.</p>
-                </div>
-                <a href="{{ route('teacher.grading.index') }}" class="text-xs font-bold text-blue-600 hover:text-blue-700">
-                    Buka Grading Center ({{ $stats['pending_grading'] }}) →
-                </a>
-            </div>
-
-            @if(count($pendingQueueSorted) > 0)
-                <div class="divide-y divide-slate-100">
-                    @foreach($pendingQueueSorted as $sub)
-                        <div class="py-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 group">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-700 shrink-0 text-xs">
-                                    {{ strtoupper(substr($sub['student_name'] ?? 'S', 0, 2)) }}
-                                </div>
-                                <div>
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        <p class="text-sm font-bold text-slate-800">{{ $sub['student_name'] }}</p>
-                                        <span class="text-[10px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded">
-                                            {{ $sub['class_name'] }}
-                                        </span>
-                                        @if(($sub['pending_tasks_count'] ?? 1) > 1)
-                                            <span class="text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full">
-                                                {{ $sub['pending_tasks_count'] }} Berkas Dikumpulkan
-                                            </span>
-                                        @endif
-                                    </div>
-                                    <p class="text-xs text-slate-500 mt-0.5">
-                                        Modul: <span class="font-medium text-slate-700">{{ $sub['module_title'] }}</span>@if(count($sub['module_titles'] ?? []) > 1)<span class="text-slate-400 text-[11px]"> (+{{ count($sub['module_titles']) - 1 }} modul lain)</span>@endif • 
-                                        Tugas: <span class="font-semibold text-slate-800">{{ implode(', ', $sub['task_labels'] ?? [$sub['type_label']]) }}</span>
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
-                                @if(($sub['pending_tasks_count'] ?? 1) > 1)
-                                    <span class="text-[11px] font-bold px-2.5 py-1 rounded-lg border border-amber-200 bg-amber-50 text-amber-700">
-                                        {{ $sub['pending_tasks_count'] }} Berkas Pending
-                                    </span>
-                                @else
-                                    <span class="text-[11px] font-bold px-2.5 py-1 rounded-lg border {{ $sub['badge_color'] }}">
-                                        {{ $sub['file_badge'] }}
-                                    </span>
-                                @endif
-                                <a href="{{ route('teacher.grading.show', $sub['module_id']) }}" class="px-3 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-all">
-                                    Beri Nilai
-                                </a>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            @else
-                <div class="py-10 text-center">
-                    <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-3">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                    <h4 class="text-sm font-bold text-slate-800">Semua Tugas Telah Dinilai</h4>
-                    <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1">
-                        Tidak ada antrean tugas siswa yang pending. Seluruh pengumpulan tugas telah diperiksa.
-                    </p>
-                </div>
-            @endif
-        </div>
-
-        {{-- Footer Antrean --}}
-        <div class="pt-3 mt-2 border-t border-slate-100 text-xs text-slate-400">
-            <span>💡 Nilai tugas siswa disinkronkan langsung ke rekap capaian belajar.</span>
-        </div>
-    </div>
-
-    {{-- Kolom Kanan: Kelas Binaan & Panduan Arsitektur E-Modul (1 Kolom) --}}
-    <div class="space-y-6">
-
-        {{-- Ringkasan Kelas Binaan --}}
-        <div class="rounded-2xl bg-white border border-slate-200/80 shadow-sm p-5">
-            <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
-                <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
-                    <span>Kelas Binaan Saya</span>
+{{-- ══ Bottom Section: Grading Center Queue ══ --}}
+<div class="rounded-2xl bg-white border border-slate-200/80 shadow-sm p-5 sm:p-6 flex flex-col justify-between">
+    <div>
+        <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <span>Antrean Penilaian Adaptif (Grading Center)</span>
+                    @if(count($pendingQueueSorted) > 0)
+                        <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+                    @endif
                 </h3>
-                <a href="{{ route('teacher.classes.index') }}" class="text-xs font-bold text-blue-600 hover:text-blue-700">Lihat Semua →</a>
+                <p class="text-xs text-slate-500 mt-0.5">Berkas kiriman siswa yang memerlukan verifikasi dan penilaian manual guru.</p>
             </div>
+            <a href="{{ route('teacher.grading.index') }}" class="text-xs font-bold text-blue-600 hover:text-blue-700">
+                Buka Grading Center ({{ $stats['pending_grading'] }}) →
+            </a>
+        </div>
 
-            @if(count($classesSummary) > 0)
-                <div class="space-y-3">
-                    @foreach($classesSummary as $cls)
-                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/60 flex items-center justify-between gap-3 hover:border-indigo-200 transition-colors">
+        @if(count($pendingQueueSorted) > 0)
+            <div class="divide-y divide-slate-100">
+                @foreach($pendingQueueSorted as $sub)
+                    <div class="py-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-700 shrink-0 text-xs">
+                                {{ strtoupper(substr($sub['student_name'] ?? 'S', 0, 2)) }}
+                            </div>
                             <div>
-                                <div class="flex items-center gap-2">
-                                    <p class="text-xs font-bold text-slate-800">{{ $cls['full_name'] }}</p>
-                                    <span class="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.2 rounded border border-indigo-100">
-                                        {{ $cls['total_students'] }} Siswa
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <p class="text-sm font-bold text-slate-800">{{ $sub['student_name'] }}</p>
+                                    <span class="text-[10px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded">
+                                        {{ $sub['class_name'] }}
                                     </span>
+                                    @if(($sub['pending_tasks_count'] ?? 1) > 1)
+                                        <span class="text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full">
+                                            {{ $sub['pending_tasks_count'] }} Berkas Dikumpulkan
+                                        </span>
+                                    @endif
                                 </div>
-                                <p class="text-[11px] text-slate-500 mt-0.5">
-                                    {{ $cls['published_modules'] }} Modul Terbit • Rata-rata Skor: <strong>{{ $cls['avg_score'] }}</strong>
+                                <p class="text-xs text-slate-500 mt-0.5">
+                                    Modul: <span class="font-medium text-slate-700">{{ $sub['module_title'] }}</span>@if(count($sub['module_titles'] ?? []) > 1)<span class="text-slate-400 text-[11px]"> (+{{ count($sub['module_titles']) - 1 }} modul lain)</span>@endif • 
+                                    Tugas: <span class="font-semibold text-slate-800">{{ implode(', ', $sub['task_labels'] ?? [$sub['type_label']]) }}</span>
                                 </p>
                             </div>
-                            <a href="{{ route('teacher.classes.show', $cls['id']) }}" class="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:text-blue-600 hover:border-blue-200 shadow-sm transition-all" title="Buka Detail Kelas">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                        </div>
+                        <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
+                            @if(($sub['pending_tasks_count'] ?? 1) > 1)
+                                <span class="text-[11px] font-bold px-2.5 py-1 rounded-lg border border-amber-200 bg-amber-50 text-amber-700">
+                                    {{ $sub['pending_tasks_count'] }} Berkas Pending
+                                </span>
+                            @else
+                                <span class="text-[11px] font-bold px-2.5 py-1 rounded-lg border {{ $sub['badge_color'] }}">
+                                    {{ $sub['file_badge'] }}
+                                </span>
+                            @endif
+                            <a href="{{ route('teacher.grading.show', $sub['module_id']) }}" class="px-3 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-all">
+                                Beri Nilai
                             </a>
                         </div>
-                    @endforeach
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <div class="py-10 text-center">
+                <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
                 </div>
-            @else
-                <p class="text-xs text-slate-400 py-3 text-center">Belum ada kelas yang terhubung dengan modul Anda.</p>
-            @endif
-        </div>
-
-        {{-- Banner Arsitektur E-Module Builder (5 Bagian & 7 Sakelar) --}}
-        <div class="rounded-2xl bg-gradient-to-br from-blue-700 to-indigo-800 p-5 text-white flex flex-col justify-between shadow-lg relative overflow-hidden">
-            {{-- Background decorative circles --}}
-            <div class="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10 blur-xl"></div>
-            <div class="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-blue-400/10 blur-lg"></div>
-
-            <div class="relative z-10">
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/20 text-[10px] font-bold tracking-wider uppercase backdrop-blur-md mb-3 border border-white/20">
-                    ⚡ Standar 5 Bagian E-Modul
-                </span>
-                <h3 class="text-base font-black leading-snug">
-                    Arsitektur E-Modul 5 Bagian Pedagogis
-                </h3>
-                <p class="mt-2 text-xs text-blue-100 leading-relaxed">
-                    Struktur sistematis terpadu untuk pembelajaran kejuruan SMK:
+                <h4 class="text-sm font-bold text-slate-800">Semua Tugas Telah Dinilai</h4>
+                <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1">
+                    Tidak ada antrean tugas siswa yang pending. Seluruh pengumpulan tugas telah diperiksa.
                 </p>
-
-                <ul class="mt-3 space-y-1.5 text-xs text-blue-50">
-                    <li class="flex items-start gap-1.5">
-                        <span class="font-bold text-white bg-blue-500/40 rounded px-1 text-[10px]">1</span>
-                        <span><strong>Bagian Awal:</strong> Kata Pengantar, Petunjuk Penggunaan.</span>
-                    </li>
-                    <li class="flex items-start gap-1.5">
-                        <span class="font-bold text-white bg-blue-500/40 rounded px-1 text-[10px]">2</span>
-                        <span><strong>Pendahuluan:</strong> Capaian, Peta Konsep, Pre-test.</span>
-                    </li>
-                    <li class="flex items-start gap-1.5">
-                        <span class="font-bold text-white bg-blue-500/40 rounded px-1 text-[10px]">3</span>
-                        <span><strong>Kegiatan Belajar:</strong> Materi PPT, Video, Simulator Embed.</span>
-                    </li>
-                    <li class="flex items-start gap-1.5">
-                        <span class="font-bold text-white bg-blue-500/40 rounded px-1 text-[10px]">4</span>
-                        <span><strong>Evaluasi:</strong> Job Sheet PDF, LKPD & Post-test.</span>
-                    </li>
-                    <li class="flex items-start gap-1.5">
-                        <span class="font-bold text-white bg-blue-500/40 rounded px-1 text-[10px]">5</span>
-                        <span><strong>Bagian Akhir:</strong> Daftar Pustaka & Rekap Nilai Excel.</span>
-                    </li>
-                </ul>
             </div>
+        @endif
+    </div>
 
-            <div class="mt-4 pt-3 border-t border-white/15 relative z-10 flex items-center justify-between text-[11px] text-blue-200">
-                <span>Standar Kurikulum Merdeka</span>
-                <span class="font-bold text-white">SMKN 3 Yogyakarta</span>
-            </div>
-        </div>
+    {{-- Footer Antrean --}}
+    <div class="pt-3 mt-2 border-t border-slate-100 text-xs text-slate-400">
+        <span>💡 Nilai tugas siswa disinkronkan langsung ke rekap capaian belajar.</span>
     </div>
 </div>
 

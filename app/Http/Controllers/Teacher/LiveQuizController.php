@@ -63,6 +63,7 @@ class LiveQuizController extends Controller
         if ($requestedModuleId) {
             $activeModule = Module::where('teacher_id', $teacher->id)
                 ->where('id', $requestedModuleId)
+                ->where('is_active', true)
                 ->with(['subject', 'schoolClass', 'preTest.questions', 'postTest.questions'])
                 ->first();
         }
@@ -71,15 +72,6 @@ class LiveQuizController extends Controller
             // Dapatkan modul yang sedang AKTIF di kelas milik guru ini
             $activeModule = Module::where('teacher_id', $teacher->id)
                 ->where('is_active', true)
-                ->with(['subject', 'schoolClass', 'preTest.questions', 'postTest.questions'])
-                ->latest('updated_at')
-                ->latest('id')
-                ->first();
-        }
-
-        if (!$activeModule) {
-            // Fallback ke modul apapun milik guru jika belum ada modul yang di-set is_active = true
-            $activeModule = Module::where('teacher_id', $teacher->id)
                 ->with(['subject', 'schoolClass', 'preTest.questions', 'postTest.questions'])
                 ->latest('updated_at')
                 ->latest('id')
@@ -161,6 +153,12 @@ class LiveQuizController extends Controller
             ->where('teacher_id', $teacher->id)
             ->firstOrFail();
 
+        if (!$module->is_active) {
+            return back()->withInput()->withErrors([
+                'module_id' => 'Kuis Live hanya dapat dimulai apabila guru telah membuka kelas dan mengaktifkan modul ini di kelas didik.',
+            ]);
+        }
+
         $timeLimit = (int) ($request->input('time_limit_seconds') ?: $request->input('default_time_limit', 30));
 
         // Verifikasi ketersediaan soal
@@ -194,6 +192,7 @@ class LiveQuizController extends Controller
             'time_limit_seconds'     => $timeLimit,
             'total_questions'        => $questions->count(),
             'grades_saved'           => false,
+            'is_active'              => true,
         ]);
 
         return redirect()->route('teacher.live-quiz.host', $session);
@@ -470,6 +469,45 @@ class LiveQuizController extends Controller
         ];
 
         return response()->json($data);
+    }
+
+    /**
+     * Buka / Tutup (Aktifkan / Nonaktifkan) Sesi Kuis Live dari Tabel Riwayat.
+     */
+    public function toggleActive(LiveQuizSession $session)
+    {
+        $this->authorizeSession($session);
+
+        if ($session->is_active) {
+            $session->update(['is_active' => false]);
+            $message = "Sesi Kuis Live (PIN: {$session->pin}) berhasil dinonaktifkan / ditutup sementara. Akses siswa ke kuis ini ditutup.";
+            $type = 'success';
+        } else {
+            // Pastikan modul induk masih aktif di kelas
+            if ($session->module && !$session->module->is_active) {
+                return back()->with('error', "Kuis Live tidak dapat diaktifkan karena modul '{$session->module->title}' sedang nonaktif di kelas. Silakan buka menu Kelas Didik untuk mengaktifkan modul di kelas terlebih dahulu.");
+            }
+
+            $updateData = ['is_active' => true];
+            if ($session->status === 'finished') {
+                $updateData['status'] = 'lobby';
+                $updateData['current_question_index'] = 0;
+            }
+
+            $session->update($updateData);
+            $message = "Sesi Kuis Live (PIN: {$session->pin}) berhasil diaktifkan / dibuka kembali! Siswa dapat bergabung ke kuis.";
+            $type = 'success';
+        }
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success'   => true,
+                'is_active' => (bool) $session->is_active,
+                'message'   => $message,
+            ]);
+        }
+
+        return redirect()->route('teacher.live-quiz.index')->with($type, $message);
     }
 
     /**

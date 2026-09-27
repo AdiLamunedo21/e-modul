@@ -93,13 +93,23 @@ class LiveQuizTest extends TestCase
             ->get(route('teacher.live-quiz.index'));
 
         $response->assertStatus(200);
-        $response->assertSee('Kuis Live (Mode Pantau)');
+        $response->assertSee('Kuis Live');
+        $response->assertDontSee('(Mode Pantau)');
+        $response->assertDontSee('Kahoot');
         $response->assertSee('Mulai Kuis Live Baru');
     }
 
     public function test_teacher_can_access_create_form()
     {
         $teacher = Teacher::first() ?? Teacher::factory()->create();
+        $class = SchoolClass::first() ?? SchoolClass::create([
+            'name'        => 'XII RPL 1',
+            'grade_level' => 'XII',
+            'major_id'    => 1,
+            'code'        => 'RPL123',
+        ]);
+        $teacher->classes()->syncWithoutDetaching([$class->id]);
+        $this->getOrCreateModuleWithQuestions($teacher, $class);
 
         $response = $this->actingAs($teacher, 'teacher')
             ->get(route('teacher.live-quiz.create'));
@@ -183,19 +193,20 @@ class LiveQuizTest extends TestCase
         $hostResponse->assertStatus(200);
         $hostResponse->assertSee($session->pin);
 
-        // 3. Siswa melihat layar join
+        // 3. Siswa melihat layar join (tidak ada input Game PIN)
         $student = Student::first() ?? Student::factory()->create(['class_id' => $class->id]);
         $student->classes()->syncWithoutDetaching([$class->id]);
 
         $joinPageResponse = $this->actingAs($student, 'student')
             ->get(route('student.live-quiz.join'));
         $joinPageResponse->assertStatus(200);
-        $joinPageResponse->assertSee('Game PIN');
+        $joinPageResponse->assertSee('Gabung Kuis Sekarang');
+        $joinPageResponse->assertDontSee('Game PIN');
 
-        // 4. Siswa memasukkan PIN untuk gabung kuis
+        // 4. Siswa langsung gabung kuis melalui session_id tanpa wajib PIN
         $submitJoinResponse = $this->actingAs($student, 'student')
             ->post(route('student.live-quiz.submit-join'), [
-                'pin' => $session->pin,
+                'session_id' => $session->id,
             ]);
         $submitJoinResponse->assertRedirect(route('student.live-quiz.play', $session));
 
@@ -510,6 +521,175 @@ class LiveQuizTest extends TestCase
             ->getJson(route('student.live-quiz.active-check'));
         $finishedApiResponse->assertStatus(200);
         $finishedApiResponse->assertJson(['has_active_quiz' => false]);
+
+        $session->delete();
+    }
+
+    public function test_teacher_can_toggle_live_quiz_active_state()
+    {
+        $teacher = Teacher::first() ?? Teacher::factory()->create();
+        $class = SchoolClass::first() ?? SchoolClass::create([
+            'name'        => 'XII RPL 1',
+            'grade_level' => 'XII',
+            'major_id'    => 1,
+            'code'        => 'RPL123',
+        ]);
+        $teacher->classes()->syncWithoutDetaching([$class->id]);
+        $module = $this->getOrCreateModuleWithQuestions($teacher, $class);
+
+        $session = LiveQuizSession::create([
+            'teacher_id'             => $teacher->id,
+            'module_id'              => $module->id,
+            'class_id'               => $class->id,
+            'test_type'              => 'pre_test',
+            'title'                  => "Kuis Live: {$module->title}",
+            'pin_code'               => LiveQuizSession::generatePin(),
+            'status'                 => 'lobby',
+            'is_active'              => true,
+            'current_question_index' => 0,
+            'time_limit_seconds'     => 30,
+            'total_questions'        => 2,
+            'grades_saved'           => false,
+        ]);
+
+        $this->assertTrue($session->is_active);
+
+        // 1. Guru menonaktifkan kuis
+        $toggleOffResponse = $this->actingAs($teacher, 'teacher')
+            ->post(route('teacher.live-quiz.toggle-active', $session));
+        $toggleOffResponse->assertRedirect();
+        $toggleOffResponse->assertSessionHas('success');
+
+        $session->refresh();
+        $this->assertFalse($session->is_active);
+
+        // 2. Guru mengaktifkan kembali kuis
+        $toggleOnResponse = $this->actingAs($teacher, 'teacher')
+            ->post(route('teacher.live-quiz.toggle-active', $session));
+        $toggleOnResponse->assertRedirect();
+        $toggleOnResponse->assertSessionHas('success');
+
+        $session->refresh();
+        $this->assertTrue($session->is_active);
+
+        $session->delete();
+    }
+
+    public function test_deactivated_live_quiz_does_not_appear_on_student_dashboard_and_active_check()
+    {
+        $teacher = Teacher::first() ?? Teacher::factory()->create();
+        $class = SchoolClass::first() ?? SchoolClass::create([
+            'name'        => 'XII RPL 1',
+            'grade_level' => 'XII',
+            'major_id'    => 1,
+            'code'        => 'RPL123',
+        ]);
+        $teacher->classes()->syncWithoutDetaching([$class->id]);
+        $module = $this->getOrCreateModuleWithQuestions($teacher, $class);
+
+        $student = Student::first() ?? Student::factory()->create(['class_id' => $class->id]);
+        $student->classes()->syncWithoutDetaching([$class->id]);
+
+        LiveQuizSession::where('class_id', $class->id)->delete();
+
+        $session = LiveQuizSession::create([
+            'teacher_id'             => $teacher->id,
+            'module_id'              => $module->id,
+            'class_id'               => $class->id,
+            'test_type'              => 'pre_test',
+            'title'                  => "Kuis Live: {$module->title}",
+            'pin_code'               => LiveQuizSession::generatePin(),
+            'status'                 => 'lobby',
+            'is_active'              => false, // Dinonaktifkan oleh guru
+            'current_question_index' => 0,
+            'time_limit_seconds'     => 30,
+            'total_questions'        => 2,
+            'grades_saved'           => false,
+        ]);
+
+        // Kuis nonaktif TIDAK boleh muncul di dashboard siswa
+        $dashboardResponse = $this->actingAs($student, 'student')
+            ->get(route('student.dashboard'));
+        $dashboardResponse->assertStatus(200);
+        $dashboardResponse->assertDontSee($session->pin);
+
+        // Endpoint active-check mengembalikan false
+        $activeCheckResponse = $this->actingAs($student, 'student')
+            ->getJson(route('student.live-quiz.active-check'));
+        $activeCheckResponse->assertStatus(200);
+        $activeCheckResponse->assertJson(['has_active_quiz' => false]);
+
+        // Siswa mencoba submitJoin kuis nonaktif harus ditolak
+        $joinResponse = $this->actingAs($student, 'student')
+            ->post(route('student.live-quiz.submit-join'), [
+                'pin' => $session->pin,
+            ]);
+        $joinResponse->assertRedirect();
+        $joinResponse->assertSessionHasErrors(['pin']);
+
+        $session->delete();
+    }
+
+    public function test_student_can_leave_live_quiz_room()
+    {
+        $teacher = Teacher::first() ?? Teacher::factory()->create();
+        $class = SchoolClass::first() ?? SchoolClass::create([
+            'name'        => 'XII RPL 1',
+            'grade_level' => 'XII',
+            'major_id'    => 1,
+            'code'        => 'RPL123',
+        ]);
+        $teacher->classes()->syncWithoutDetaching([$class->id]);
+        $module = $this->getOrCreateModuleWithQuestions($teacher, $class);
+
+        $student = Student::first() ?? Student::factory()->create(['class_id' => $class->id]);
+        $student->classes()->syncWithoutDetaching([$class->id]);
+
+        $session = LiveQuizSession::create([
+            'teacher_id'             => $teacher->id,
+            'module_id'              => $module->id,
+            'class_id'               => $class->id,
+            'test_type'              => 'pre_test',
+            'title'                  => "Kuis Live: {$module->title}",
+            'pin_code'               => LiveQuizSession::generatePin(),
+            'status'                 => 'lobby',
+            'is_active'              => true,
+            'current_question_index' => 0,
+            'time_limit_seconds'     => 30,
+            'total_questions'        => 2,
+            'grades_saved'           => false,
+        ]);
+
+        // 1. Siswa gabung ke room
+        $this->actingAs($student, 'student')
+            ->post(route('student.live-quiz.submit-join'), [
+                'session_id' => $session->id,
+            ]);
+
+        $this->assertDatabaseHas('live_quiz_participants', [
+            'live_quiz_session_id' => $session->id,
+            'student_id'           => $student->id,
+        ]);
+
+        // 2. Layar play menampilkan tombol keluar room
+        $playResponse = $this->actingAs($student, 'student')
+            ->get(route('student.live-quiz.play', $session));
+        $playResponse->assertStatus(200);
+        $playResponse->assertSee('Keluar Room');
+        $playResponse->assertSee('Keluar dari Ruang Tunggu');
+
+        // 3. Siswa keluar dari room
+        $leaveResponse = $this->actingAs($student, 'student')
+            ->post(route('student.live-quiz.leave', $session));
+
+        $leaveResponse->assertRedirect(route('student.dashboard'));
+        $leaveResponse->assertSessionHas('success');
+
+        // Saat di lobby, peserta dihapus dari sesi
+        $this->assertDatabaseMissing('live_quiz_participants', [
+            'live_quiz_session_id' => $session->id,
+            'student_id'           => $student->id,
+        ]);
 
         $session->delete();
     }

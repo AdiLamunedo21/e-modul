@@ -81,9 +81,35 @@ class AppServiceProvider extends ServiceProvider
                     $sidebarStats['in_progress']   = $inProgressCount;
                     $sidebarStats['completed']     = $completedCount;
                     $sidebarStats['total_modules'] = $modules->count();
+
+                    // Cek apakah ada Kuis Live aktif untuk kelas yang diikuti siswa
+                    $hasActiveLiveQuiz = \App\Models\LiveQuizSession::where('is_active', true)
+                        ->where('status', '!=', 'finished')
+                        ->whereHas('module', fn($mq) => $mq->where('is_active', true))
+                        ->where(function ($q) use ($joinedClassIds) {
+                            $q->whereNull('class_id')
+                              ->orWhereIn('class_id', $joinedClassIds)
+                              ->orWhereHas('module', fn($mq) => $mq->whereIn('class_id', $joinedClassIds));
+                        })
+                        ->exists();
                 }
             }
-            $view->with('sidebarStats', $sidebarStats);
+            $view->with('sidebarStats', $sidebarStats)
+                 ->with('hasActiveLiveQuiz', $hasActiveLiveQuiz ?? false);
+        });
+
+        // View Composer untuk Sidebar Guru: Menentukan apakah ada modul pembelajaran yang aktif di kelas
+        View::composer('layouts.teacher.sidebar', function ($view) {
+            $teacher = Auth::guard('teacher')->user();
+            $hasActiveModule = false;
+
+            if ($teacher) {
+                $hasActiveModule = Module::where('teacher_id', $teacher->id)
+                    ->where('is_active', true)
+                    ->exists();
+            }
+
+            $view->with('hasActiveModule', $hasActiveModule);
         });
     }
 }

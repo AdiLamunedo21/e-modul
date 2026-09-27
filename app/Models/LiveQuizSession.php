@@ -18,6 +18,7 @@ class LiveQuizSession extends Model
         'time_limit_seconds'     => 'integer',
         'total_questions'        => 'integer',
         'grades_saved'           => 'boolean',
+        'is_active'              => 'boolean',
         'question_started_at'    => 'datetime',
     ];
 

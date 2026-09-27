@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Kuis Live Host — {{ $session->pin }} | E-Modul SMKN 3 Yogyakarta</title>
+    <title>Kuis Live Host — {{ $session->module->title ?? 'E-Modul' }} | SMKN 3 Yogyakarta</title>
 
     {{-- Tailwind CSS & Fonts --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -67,13 +67,13 @@
                     {{ $session->module->title }} — <span class="text-slate-300">{{ $session->schoolClass->name ?? 'Semua Kelas' }}</span>
                 </p>
             </div>
-        </div>
-
-        {{-- PIN Indicator & Action Controls --}}
+            {{-- Status Indicator & Action Controls --}}
         <div class="flex items-center gap-3">
-            <div class="hidden sm:flex items-center gap-2.5 bg-slate-900/90 border border-emerald-500/30 px-4 py-2 rounded-xl shadow-inner">
-                <span class="text-[11px] text-slate-400 uppercase font-bold tracking-wider">PIN Game:</span>
-                <span class="font-mono-num font-black text-lg text-emerald-300 tracking-widest">{{ $session->pin }}</span>
+            <div class="hidden sm:flex items-center gap-2 bg-slate-900/90 border border-emerald-500/30 px-3.5 py-1.5 rounded-xl shadow-inner">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                <span class="text-xs text-emerald-300 font-bold uppercase tracking-wider">Kuis Live Terbuka</span>
+                <span class="text-xs text-slate-500">•</span>
+                <span class="text-xs font-semibold text-slate-300">{{ $session->schoolClass?->full_name ?? 'Umum' }}</span>
             </div>
 
             {{-- Sound Audio Toggle --}}
@@ -107,46 +107,45 @@
              ══════════════════════════════════════════════════════════════ --}}
         <div x-show="status === 'lobby'" x-cloak class="w-full max-w-5xl flex flex-col items-center text-center space-y-7 animate-fade-in my-auto">
             
-            {{-- Instruction & Big Neon PIN Card --}}
+            {{-- Instruction & Direct Join Card --}}
             <div class="w-full bg-gradient-to-b from-slate-900/95 via-[#0a1218]/90 to-slate-950/95 border border-emerald-500/30 rounded-3xl p-6 sm:p-10 shadow-2xl shadow-emerald-950/40 relative overflow-hidden">
                 <div class="absolute -top-32 -left-32 w-72 h-72 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none"></div>
                 <div class="absolute -bottom-32 -right-32 w-72 h-72 bg-teal-500/15 rounded-full blur-3xl pointer-events-none"></div>
 
-                <div class="relative z-10 flex flex-col items-center space-y-5">
-                    <div class="space-y-2">
-                        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-black uppercase tracking-wider">
-                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                            Ruang Tunggu Kelas Aktif
-                        </div>
-                        <p class="text-xs sm:text-sm font-bold uppercase tracking-widest text-slate-400">
-                            Buka browser di HP / Laptop siswa dan kunjungi:
-                        </p>
-                        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-950 border border-emerald-500/30 text-emerald-300 font-mono text-sm sm:text-base font-bold shadow-inner">
-                            <span>{{ url('/student/live-quiz/join') }}</span>
-                            <button type="button" @click="copyUrl()" class="p-1 text-slate-400 hover:text-white" title="Salin Tautan">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75"/></svg>
-                            </button>
-                        </div>
+                <div class="relative z-10 flex flex-col items-center space-y-6 max-w-2xl mx-auto">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-black uppercase tracking-wider">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        Ruang Tunggu Kelas Aktif
                     </div>
 
-                    {{-- Hero Neon PIN Box --}}
-                    <div class="pt-2">
-                        <p class="text-[11px] uppercase font-extrabold tracking-widest text-emerald-400/80 mb-2">
-                            Lalu Masukkan PIN Game:
+                    <div class="space-y-2 text-center">
+                        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight">
+                            {{ $session->module->title ?? 'Kuis Live Interaktif' }}
+                        </h1>
+                        <p class="text-emerald-400 font-bold text-xs sm:text-sm flex items-center justify-center gap-2">
+                            <span>Tipe Evaluasi: {{ $session->test_type === 'pre_test' ? 'Pre-Test' : 'Post-Test' }}</span>
+                            <span>•</span>
+                            <span>Target Kelas: {{ $session->schoolClass?->full_name ?? 'Seluruh Siswa' }}</span>
                         </p>
-                        <div class="relative group">
-                            <div class="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
-                            <div class="relative bg-gradient-to-b from-[#071015] to-[#04080c] border-2 border-emerald-500/60 rounded-3xl px-8 sm:px-16 py-4 sm:py-6 shadow-2xl flex items-center justify-center gap-4">
-                                <span class="font-mono-num font-black text-6xl sm:text-7xl lg:text-8xl text-emerald-300 tracking-[0.22em] pin-neon-glow">
-                                    {{ $session->pin }}
-                                </span>
-                                <button type="button"
-                                        @click="copyPin()"
-                                        class="px-3 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold transition-all"
-                                        title="Salin PIN">
-                                    <span x-text="pinCopied ? '✓ Tersalin' : 'Salin'">Salin</span>
-                                </button>
+                    </div>
+
+                    {{-- Panduan Siswa Masuk Langsung --}}
+                    <div class="w-full bg-gradient-to-r from-emerald-950/70 via-slate-900/90 to-teal-950/70 border-2 border-emerald-500/40 rounded-3xl p-6 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-5 text-left">
+                        <div class="space-y-1.5">
+                            <div class="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-emerald-300">
+                                <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+                                <span>Masuk Otomatis Tanpa PIN</span>
                             </div>
+                            <h3 class="text-base sm:text-lg font-extrabold text-white">
+                                Siswa Buka Dashboard Siswa
+                            </h3>
+                            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                                Tekan tombol hijau <strong class="text-emerald-300">"Gabung Kuis Sekarang"</strong> di layar HP/Laptop masing-masing untuk langsung masuk.
+                            </p>
+                        </div>
+                        <div class="shrink-0 px-4 py-3 rounded-2xl bg-emerald-500/20 border border-emerald-400/30 text-center">
+                            <span class="text-[10px] font-black text-emerald-300 uppercase tracking-widest block">Metode Masuk</span>
+                            <span class="text-xs sm:text-sm font-black text-white">1-Klik Tanpa PIN</span>
                         </div>
                     </div>
                 </div>
@@ -162,7 +161,7 @@
                               x-text="participants.length">0</span>
                     </div>
                     <span class="text-xs text-slate-400" x-show="participants.length === 0">
-                        Menunggu siswa pertama memasukkan PIN...
+                        Menunggu siswa bergabung dari dashboard...
                     </span>
                     <span class="text-xs text-emerald-400 font-semibold" x-show="participants.length > 0">
                         ✓ Siswa sedang bersiap
@@ -176,7 +175,7 @@
                             <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center animate-pulse">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
                             </div>
-                            <span>Belum ada siswa yang masuk. Tampilkan PIN di atas ke siswa di kelas.</span>
+                            <span>Belum ada siswa yang masuk. Arahkan siswa menekan tombol 'Gabung Kuis Sekarang' di dashboard masing-masing.</span>
                         </div>
                     </template>
                     <template x-for="(p, idx) in participants" :key="p.id">
@@ -376,11 +375,11 @@
              ══════════════════════════════════════════════════════════════ --}}
         <div x-show="status === 'leaderboard'" x-cloak class="w-full max-w-3xl flex flex-col space-y-6 my-auto animate-fade-in">
             <div class="text-center space-y-2">
-                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-black uppercase tracking-wider">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-600 text-xs font-black uppercase tracking-wider">
                     ⚡ Papan Peringkat Teratas
                 </div>
-                <h2 class="text-3xl font-black text-white">Klasemen Sementara</h2>
-                <p class="text-xs text-slate-400">Poin dihitung dari ketepatan dan kecepatan menjawab</p>
+                <h2 class="text-3xl font-black text-slate-900" style="color: #0f172a;">Klasemen Sementara</h2>
+                <p class="text-xs text-slate-600" style="color: #475569;">Poin dihitung dari ketepatan dan kecepatan menjawab</p>
             </div>
 
             {{-- Leaderboard Top 5 List --}}

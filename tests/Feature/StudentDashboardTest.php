@@ -366,7 +366,7 @@ class StudentDashboardTest extends TestCase
                 ->get(route('student.dashboard', ['status' => 'in_progress']));
 
             $respProgress->assertStatus(200);
-            $respProgress->assertSee('Modul Sedang Dikerjakan');
+            $respProgress->assertSee('Sedang Dikerjakan');
             $respProgress->assertSee($moduleInProgress->title);
             $respProgress->assertSee($class->full_name);
             $respProgress->assertSee($subject->name);

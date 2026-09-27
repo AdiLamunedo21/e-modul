@@ -20,7 +20,9 @@
          searchKeyword: '',
          selectedSemester: 'all',
          selectedStatus: 'all',
-         explorerView: 'grid',
+         explorerView: (new URLSearchParams(window.location.search).get('view')) || (function() {
+             try { return localStorage.getItem('teacher_modules_view_mode'); } catch (e) { return null; }
+         })() || 'grid',
          currentPage: 1,
          perPage: 9,
          modules: {{ json_encode($teacherModulesJson) }},
@@ -28,6 +30,13 @@
              this.$watch('searchKeyword', () => { this.currentPage = 1; });
              this.$watch('selectedSemester', () => { this.currentPage = 1; });
              this.$watch('selectedStatus', () => { this.currentPage = 1; });
+             this.$watch('explorerView', (val) => {
+                 try { localStorage.setItem('teacher_modules_view_mode', val); } catch (e) {}
+                 const url = new URL(window.location);
+                 url.searchParams.set('view', val);
+                 window.history.replaceState({}, '', url);
+             });
+             try { localStorage.setItem('teacher_modules_view_mode', this.explorerView); } catch (e) {}
          },
          matchesModule(mod) {
              // 1. Filter Semester
@@ -389,6 +398,7 @@
                         @if($mod->is_active)
                             <form action="{{ route('teacher.classes.modules.toggle-active', [$class, $mod]) }}" method="POST" class="w-full">
                                 @csrf
+                                <input type="hidden" name="view" :value="explorerView">
                                 <button type="submit"
                                         class="w-full py-2.5 px-4 rounded-2xl bg-emerald-100 hover:bg-rose-100 text-emerald-800 hover:text-rose-800 border border-emerald-300 hover:border-rose-300 font-extrabold text-xs transition-all flex items-center justify-center gap-2 group/btn shadow-xs cursor-pointer">
                                     <svg class="w-4 h-4 text-emerald-600 group-hover/btn:text-rose-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -398,9 +408,23 @@
                                     <span class="hidden group-hover/btn:inline">✕ Klik untuk Nonaktifkan</span>
                                 </button>
                             </form>
+
+                            {{-- Tombol Menuju Halaman Kuis Live (Hanya muncul saat modul/materi aktif di kelas) --}}
+                            <a href="{{ route('teacher.live-quiz.index') }}"
+                               class="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs transition-all shadow-md shadow-emerald-600/20 hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer group/live">
+                                <svg class="w-4 h-4 text-emerald-200 group-hover/live:scale-110 transition-transform shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                                </svg>
+                                <span>Kuis Live Interaktif</span>
+                                <span class="relative flex h-2 w-2">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                                </span>
+                            </a>
                         @else
                             <form action="{{ route('teacher.classes.modules.toggle-active', [$class, $mod]) }}" method="POST" class="w-full">
                                 @csrf
+                                <input type="hidden" name="view" :value="explorerView">
                                 <button type="submit"
                                         class="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-extrabold text-xs transition-all shadow-md shadow-blue-600/20 hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer">
                                     <svg class="w-4 h-4 text-blue-200 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -432,7 +456,7 @@
             <table class="w-full text-left text-xs">
                 <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
                     <tr>
-                        <th class="py-3.5 px-4">Modul & Mata Pelajaran</th>
+                        <th class="py-3.5 px-4">Materi Pembelajaran</th>
                         <th class="py-3.5 px-4 text-center">Semester & Status</th>
                         <th class="py-3.5 px-4 text-center">Komponen</th>
                         <th class="py-3.5 px-4 text-center">Submisi & Rata-rata</th>
@@ -514,19 +538,31 @@
                             </td>
                             <td class="py-3.5 px-4 text-center whitespace-nowrap">
                                 @if($mod->is_active)
-                                    <form action="{{ route('teacher.classes.modules.toggle-active', [$class, $mod]) }}" method="POST" class="inline-block">
-                                        @csrf
-                                        <button type="submit"
-                                                title="Modul sedang aktif di kelas. Klik untuk nonaktifkan."
-                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-100 hover:bg-rose-100 text-emerald-800 hover:text-rose-800 border border-emerald-300 hover:border-rose-300 font-extrabold text-[11px] transition-all group/btn cursor-pointer">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 group-hover/btn:bg-rose-600 animate-pulse"></span>
-                                            <span class="group-hover/btn:hidden">Aktif di Kelas</span>
-                                            <span class="hidden group-hover/btn:inline">Nonaktifkan</span>
-                                        </button>
-                                    </form>
+                                    <div class="flex flex-col items-center gap-1.5">
+                                        <form action="{{ route('teacher.classes.modules.toggle-active', [$class, $mod]) }}" method="POST" class="inline-block">
+                                            @csrf
+                                            <input type="hidden" name="view" :value="explorerView">
+                                            <button type="submit"
+                                                    title="Modul sedang aktif di kelas. Klik untuk nonaktifkan."
+                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-100 hover:bg-rose-100 text-emerald-800 hover:text-rose-800 border border-emerald-300 hover:border-rose-300 font-extrabold text-[11px] transition-all group/btn cursor-pointer">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 group-hover/btn:bg-rose-600 animate-pulse"></span>
+                                                <span class="group-hover/btn:hidden">Aktif di Kelas</span>
+                                                <span class="hidden group-hover/btn:inline">Nonaktifkan</span>
+                                            </button>
+                                        </form>
+                                        <a href="{{ route('teacher.live-quiz.index') }}"
+                                           title="Buka Halaman Kuis Live"
+                                           class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-[10px] transition-all shadow-xs cursor-pointer">
+                                            <svg class="w-3 h-3 text-emerald-200" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                                            </svg>
+                                            <span>Kuis Live</span>
+                                        </a>
+                                    </div>
                                 @else
                                     <form action="{{ route('teacher.classes.modules.toggle-active', [$class, $mod]) }}" method="POST" class="inline-block">
                                         @csrf
+                                        <input type="hidden" name="view" :value="explorerView">
                                         <button type="submit"
                                                 title="Aktifkan modul ini untuk rombel {{ $class->full_name }}"
                                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-blue-600 text-slate-700 hover:text-white border border-slate-200 font-bold text-[11px] transition-all cursor-pointer">

@@ -68,6 +68,15 @@
             {{-- Grup: E-Modul & Pembelajaran --}}
             <p class="pt-5 pb-1 px-3 text-[11px] font-bold uppercase tracking-widest text-slate-500">Modul Pembelajaran</p>
 
+            {{-- E-Module Builder (Buat Modul Baru) --}}
+            <a href="{{ route('teacher.modules.create') }}" class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors group
+                {{ request()->routeIs('teacher.modules.create') ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                <svg class="w-5 h-5 shrink-0 {{ request()->routeIs('teacher.modules.create') ? 'text-blue-400' : 'group-hover:text-blue-400' }} transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 015.25 6H10" />
+                </svg>
+                <span>Buat Modul (Builder)</span>
+            </a>
+
             {{-- Manajer Modul --}}
             <a href="{{ route('teacher.modules.index') }}" class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors group
                 {{ (request()->routeIs('teacher.modules.*') && !request()->routeIs('teacher.modules.create')) ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
@@ -77,15 +86,6 @@
                     </svg>
                     <span>Manajer Modul</span>
                 </div>
-            </a>
-
-            {{-- E-Module Builder (Buat Modul Baru) --}}
-            <a href="{{ route('teacher.modules.create') }}" class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors group
-                {{ request()->routeIs('teacher.modules.create') ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
-                <svg class="w-5 h-5 shrink-0 {{ request()->routeIs('teacher.modules.create') ? 'text-blue-400' : 'group-hover:text-blue-400' }} transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 015.25 6H10" />
-                </svg>
-                <span>Buat Modul (Builder)</span>
             </a>
 
             {{-- Library Modul (Shared Repository & Cloning) --}}
@@ -105,20 +105,22 @@
             {{-- Grup: Evaluasi & Penilaian --}}
             <p class="pt-5 pb-1 px-3 text-[11px] font-bold uppercase tracking-widest text-slate-500">Evaluasi & Penilaian</p>
 
-            {{-- Kuis Live (Mode Pantau Interaktif Layar Penuh) --}}
-            <a href="{{ route('teacher.live-quiz.index') }}" class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors group
-                {{ request()->routeIs('teacher.live-quiz.*') ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
-                <div class="flex items-center gap-3">
-                    <svg class="w-5 h-5 shrink-0 {{ request()->routeIs('teacher.live-quiz.*') ? 'text-emerald-400' : 'group-hover:text-emerald-400' }} transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-                    </svg>
-                    <span>Kuis Live</span>
-                </div>
-                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-                    LIVE
-                </span>
-            </a>
+            {{-- Kuis Live: Hanya tampil apabila ada modul/materi yang sedang aktif di kelas --}}
+            @if(!empty($hasActiveModule) || request()->routeIs('teacher.live-quiz.*'))
+                <a href="{{ route('teacher.live-quiz.index') }}" class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors group
+                    {{ request()->routeIs('teacher.live-quiz.*') ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5 shrink-0 {{ request()->routeIs('teacher.live-quiz.*') ? 'text-emerald-400' : 'group-hover:text-emerald-400' }} transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                        </svg>
+                        <span>Kuis Live</span>
+                    </div>
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                        LIVE
+                    </span>
+                </a>
+            @endif
 
             {{-- Pusat Penilaian --}}
             <a href="{{ route('teacher.grading.index') }}" class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors group

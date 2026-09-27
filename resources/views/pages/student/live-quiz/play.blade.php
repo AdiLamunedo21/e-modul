@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Live Quiz Controller — {{ $session->pin }}</title>
+    <title>Kuis Live Siswa — {{ $session->module->title ?? 'E-Modul' }}</title>
 
     {{-- Tailwind CSS & Fonts --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -33,7 +33,7 @@
     <header class="w-full bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-4 py-3 flex items-center justify-between shrink-0 z-30 sticky top-0">
         <div class="flex items-center gap-2.5">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-            <span class="font-bold text-xs text-emerald-400 uppercase tracking-wider">PIN: {{ $session->pin }}</span>
+            <span class="font-bold text-xs text-emerald-400 uppercase tracking-wider">Kuis Live Aktif</span>
             <template x-if="totalQuestions > 0 && status !== 'lobby' && status !== 'finished'">
                 <span class="hidden sm:inline-flex px-2.5 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-[11px] font-extrabold text-slate-300">
                     Soal <span x-text="currentQuestionIndex + 1">1</span>/<span x-text="totalQuestions">1</span>
@@ -53,6 +53,21 @@
                 <span class="text-[10px] uppercase font-bold text-slate-400">Rank:</span>
                 <span class="font-mono-num font-black text-xs sm:text-sm text-emerald-400">#<span x-text="myRank">1</span></span>
             </div>
+
+            {{-- Tombol Keluar Room Kuis --}}
+            <form action="{{ route('student.live-quiz.leave', $session) }}" method="POST"
+                  onsubmit="return confirm('Apakah Anda yakin ingin keluar dari room kuis live ini?')">
+                @csrf
+                <button type="submit"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/30 text-xs font-bold transition-all shadow-sm cursor-pointer"
+                        title="Keluar dari Room Kuis">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                    </svg>
+                    <span class="hidden sm:inline">Keluar Room</span>
+                    <span class="sm:hidden">Keluar</span>
+                </button>
+            </form>
         </div>
     </header>
 
@@ -76,14 +91,31 @@
                 </p>
             </div>
 
-            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 text-sm text-slate-300 space-y-2 max-w-md mx-auto shadow-xl">
-                <div class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                    Menunggu Guru Memulai Kuis
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 text-sm text-slate-300 space-y-4 max-w-md mx-auto shadow-xl">
+                <div class="space-y-2">
+                    <div class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                        Menunggu Guru Memulai Kuis
+                    </div>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Kuis live akan segera dimulai. Pertanyaan dan pilihan jawaban akan tampil langsung di layar HP/laptop kamu!
+                    </p>
                 </div>
-                <p class="text-xs text-slate-400 leading-relaxed">
-                    Kuis live akan segera dimulai. Pertanyaan dan pilihan jawaban akan tampil langsung di layar HP/laptop kamu!
-                </p>
+
+                {{-- Tombol Keluar dari Ruang Tunggu --}}
+                <div class="pt-2 border-t border-slate-800/80">
+                    <form action="{{ route('student.live-quiz.leave', $session) }}" method="POST"
+                          onsubmit="return confirm('Apakah Anda yakin ingin keluar dari ruang tunggu kuis ini?')">
+                        @csrf
+                        <button type="submit"
+                                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-white border border-rose-500/30 text-xs font-bold transition-all shadow-sm cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                            </svg>
+                            <span>Keluar dari Ruang Tunggu</span>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
 
@@ -349,8 +381,8 @@
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
             </div>
             <div>
-                <h3 class="text-xl sm:text-2xl font-black text-white">Klasemen Sementara</h3>
-                <p class="text-xs text-slate-400 mt-1">Perhatikan proyektor untuk klasemen lengkap kelas!</p>
+                <h3 class="text-xl sm:text-2xl font-black text-slate-900" style="color: #0f172a;">Klasemen Sementara</h3>
+                <p class="text-xs text-slate-600 mt-1" style="color: #475569;">Perhatikan proyektor untuk klasemen lengkap kelas!</p>
             </div>
 
             <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-3 max-w-sm mx-auto shadow-2xl">

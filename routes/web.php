@@ -244,6 +244,7 @@ Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(fu
     Route::post('/live-quiz/{session}/finish',                               [TeacherLiveQuizController::class, 'finish'])->name('live-quiz.finish');
     Route::post('/live-quiz/{session}/save-grades',                          [TeacherLiveQuizController::class, 'saveGrades'])->name('live-quiz.save-grades');
     Route::get('/live-quiz/{session}/host-poll',                             [TeacherLiveQuizController::class, 'hostPoll'])->name('live-quiz.host-poll');
+    Route::post('/live-quiz/{session}/toggle-active',                        [TeacherLiveQuizController::class, 'toggleActive'])->name('live-quiz.toggle-active');
     Route::delete('/live-quiz/{session}',                                    [TeacherLiveQuizController::class, 'destroy'])->name('live-quiz.destroy');
 });
 
@@ -284,4 +285,5 @@ Route::middleware('auth:student')->prefix('student')->group(function () {
     Route::get('/live-quiz/{session}/play',                                 [StudentLiveQuizController::class, 'play'])->name('student.live-quiz.play');
     Route::post('/live-quiz/{session}/answer',                              [StudentLiveQuizController::class, 'answer'])->name('student.live-quiz.answer');
     Route::get('/live-quiz/{session}/poll',                                 [StudentLiveQuizController::class, 'playerPoll'])->name('student.live-quiz.poll');
+    Route::post('/live-quiz/{session}/leave',                               [StudentLiveQuizController::class, 'leave'])->name('student.live-quiz.leave');
 });

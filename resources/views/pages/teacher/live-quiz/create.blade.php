@@ -67,7 +67,7 @@ function liveQuizCreateForm() {
                 </div>
                 <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white">Mulai Sesi Kuis Live</h1>
                 <p class="text-slate-300 text-sm leading-relaxed max-w-xl font-normal">
-                    Sesi kuis live langsung menggunakan modul yang sedang aktif Anda ajarkan di kelas. Tentukan <strong class="text-emerald-300 font-semibold">Tipe Evaluasi</strong> dan <strong class="text-emerald-300 font-semibold">Batas Waktu</strong>, lalu tampilkan PIN di layar proyektor.
+                    Sesi kuis live langsung menggunakan modul yang sedang aktif Anda ajarkan di kelas. Tentukan <strong class="text-emerald-300 font-semibold">Tipe Evaluasi</strong> dan <strong class="text-emerald-300 font-semibold">Batas Waktu</strong>, lalu siswa dapat langsung bergabung otomatis dari dashboard masing-masing.
                 </p>
             </div>
 

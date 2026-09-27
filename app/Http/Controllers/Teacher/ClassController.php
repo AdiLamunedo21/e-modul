@@ -373,7 +373,12 @@ class ClassController extends Controller
             ]);
         }
 
-        return redirect()->route('teacher.classes.show', ['class' => $class->id, 'tab' => 'modules'])
+        $redirectParams = ['class' => $class->id, 'tab' => 'modules'];
+        if ($view = request()->input('view')) {
+            $redirectParams['view'] = $view;
+        }
+
+        return redirect()->route('teacher.classes.show', $redirectParams)
             ->with($type, $message);
     }
 

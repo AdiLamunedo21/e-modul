@@ -110,14 +110,14 @@
                     </span>
                 </h3>
                 <p class="text-slate-300 text-xs sm:text-sm">
-                    Guru <span class="font-semibold text-white" x-text="quizTeacher">{{ $activeLiveQuiz->teacher->name ?? 'Pengampu' }}</span> sedang memandu kuis di depan kelas. PIN Game: <span class="font-mono font-black text-emerald-300 bg-slate-900 border border-emerald-500/30 px-2.5 py-0.5 rounded-lg tracking-widest text-base" x-text="quizPin">{{ $activeLiveQuiz->pin ?? '' }}</span>
+                    Guru <span class="font-semibold text-white" x-text="quizTeacher">{{ $activeLiveQuiz->teacher->name ?? 'Pengampu' }}</span> sedang memandu kuis di kelas. Klik tombol di samping untuk langsung bergabung ke sesi kuis!
                 </p>
             </div>
 
             <div class="shrink-0">
                 <form action="{{ route('student.live-quiz.submit-join') }}" method="POST">
                     @csrf
-                    <input type="hidden" name="pin" :value="quizPin" value="{{ $activeLiveQuiz->pin ?? '' }}">
+                    <input type="hidden" name="session_id" :value="quiz ? quiz.id : '{{ $activeLiveQuiz->id ?? '' }}'" value="{{ $activeLiveQuiz->id ?? '' }}">
                     <button type="submit"
                             class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm shadow-xl shadow-emerald-500/20 transition-all transform hover:scale-105 active:scale-95 cursor-pointer">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -757,30 +757,6 @@
             {{-- ═══ VIEW 2: TAB SEDANG DIKERJAKAN (MODUL PEMBELAJARAN)             ═══ --}}
             {{-- ══════════════════════════════════════════════════════════════════════ --}}
             <div x-show="activeTab === 'in_progress'" x-cloak class="space-y-6">
-
-                {{-- Status Counter Bar --}}
-                <div class="flex items-center justify-between gap-3 px-1">
-                    <div>
-                        <h2 class="text-[17px] sm:text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-                            <span>⏳</span>
-                            <span>Modul Sedang Dikerjakan</span>
-                        </h2>
-                        <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Modul pembelajaran yang sedang aktif dipelajari di kelas Anda saat ini.</p>
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                        <span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[11px] sm:text-xs font-extrabold"
-                              x-text="countVisibleInProgressModules() + ' Modul Aktif'">
-                        </span>
-                        <div x-show="hasActiveFilters" x-cloak>
-                            <button type="button"
-                                    @click="resetFilters()"
-                                    class="text-[11px] sm:text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline ml-2">
-                                ✕ Reset
-                            </button>
-                        </div>
-                    </div>
-                </div>
 
                 {{-- Grid Card Modul Sedang Dikerjakan (Maksimal 1 Modul Aktif Sesuai Pergantian Mapel di Kelas) --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

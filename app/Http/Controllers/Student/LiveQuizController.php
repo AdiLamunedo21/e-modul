@@ -33,7 +33,11 @@ class LiveQuizController extends Controller
         $joinedClassIds = array_unique($joinedClasses);
 
         $activeLiveQuiz = LiveQuizSession::with(['module.subject', 'teacher', 'schoolClass'])
+            ->where('is_active', true)
             ->where('status', '!=', 'finished')
+            ->whereHas('module', function ($mq) {
+                $mq->where('is_active', true);
+            })
             ->where(function ($q) use ($joinedClassIds) {
                 $q->whereNull('class_id');
                 if (!empty($joinedClassIds)) {
@@ -82,7 +86,11 @@ class LiveQuizController extends Controller
         }
         $studentClassIds = array_unique($studentClassIds);
 
-        $activeClassSession = LiveQuizSession::where('status', '!=', 'finished')
+        $activeClassSession = LiveQuizSession::where('is_active', true)
+            ->where('status', '!=', 'finished')
+            ->whereHas('module', function ($mq) {
+                $mq->where('is_active', true);
+            })
             ->where(function ($q) use ($studentClassIds) {
                 $q->whereNull('class_id');
                 if (!empty($studentClassIds)) {
@@ -96,29 +104,63 @@ class LiveQuizController extends Controller
     }
 
     /**
-     * Memproses Verifikasi PIN dan Mendaftarkan Siswa ke Sesi.
+     * Memproses Pendaftaran Siswa ke Sesi Kuis Live (Tanpa Wajib PIN).
      */
     public function submitJoin(Request $request)
     {
         $student = $this->student();
 
-        $pin = trim((string) ($request->input('pin_code') ?: $request->input('pin', '')));
+        $studentClassIds = $student->classes()->pluck('classes.id')->toArray();
+        if ($student->class_id) {
+            $studentClassIds[] = (int) $student->class_id;
+        }
+        $studentClassIds = array_unique($studentClassIds);
 
-        if (strlen($pin) !== 6) {
-            return back()->withInput()->withErrors([
-                'pin'      => 'PIN kuis harus berupa 6 digit angka.',
-                'pin_code' => 'PIN kuis harus berupa 6 digit angka.',
-            ]);
+        $session = null;
+
+        // 1. Coba cari sesi berdasarkan session_id
+        if ($sessionId = $request->input('session_id')) {
+            $session = LiveQuizSession::where('id', $sessionId)
+                ->where('is_active', true)
+                ->where('status', '!=', 'finished')
+                ->whereHas('module', function ($mq) {
+                    $mq->where('is_active', true);
+                })
+                ->first();
         }
 
-        $session = LiveQuizSession::where('pin_code', $pin)
-            ->where('status', '!=', 'finished')
-            ->first();
+        // 2. Coba cari sesi berdasarkan PIN jika diisi
+        if (!$session && $pin = trim((string) ($request->input('pin_code') ?: $request->input('pin', '')))) {
+            $session = LiveQuizSession::where('pin_code', $pin)
+                ->where('is_active', true)
+                ->where('status', '!=', 'finished')
+                ->whereHas('module', function ($mq) {
+                    $mq->where('is_active', true);
+                })
+                ->first();
+        }
+
+        // 3. Jika tidak ada ID/PIN, otomatis temukan sesi kuis yang sedang aktif untuk kelas siswa
+        if (!$session) {
+            $session = LiveQuizSession::where('is_active', true)
+                ->where('status', '!=', 'finished')
+                ->whereHas('module', function ($mq) {
+                    $mq->where('is_active', true);
+                })
+                ->where(function ($q) use ($studentClassIds) {
+                    $q->whereNull('class_id');
+                    if (!empty($studentClassIds)) {
+                        $q->orWhereIn('class_id', $studentClassIds);
+                    }
+                })
+                ->latest()
+                ->first();
+        }
 
         if (!$session) {
             return back()->withInput()->withErrors([
-                'pin'      => 'PIN kuis tidak ditemukan atau sesi kuis telah berakhir.',
-                'pin_code' => 'PIN kuis tidak ditemukan atau sesi kuis telah berakhir.',
+                'pin'     => 'Sesi kuis live tidak ditemukan, sedang ditutup, atau kelas belum dibuka oleh guru.',
+                'session' => 'Sesi kuis live tidak ditemukan, sedang ditutup, atau kelas belum dibuka oleh guru.',
             ]);
         }
 
@@ -129,8 +171,8 @@ class LiveQuizController extends Controller
 
             if (!$isClassMember) {
                 return back()->withInput()->withErrors([
-                    'pin'      => "Kuis ini hanya diperuntukkan bagi siswa rombel {$session->schoolClass?->full_name}.",
-                    'pin_code' => "Kuis ini hanya diperuntukkan bagi siswa rombel {$session->schoolClass?->full_name}.",
+                    'pin'     => "Kuis ini hanya diperuntukkan bagi siswa rombel {$session->schoolClass?->full_name}.",
+                    'session' => "Kuis ini hanya diperuntukkan bagi siswa rombel {$session->schoolClass?->full_name}.",
                 ]);
             }
         }
@@ -177,6 +219,10 @@ class LiveQuizController extends Controller
     public function answer(Request $request, LiveQuizSession $session)
     {
         $student = $this->student();
+
+        if (!$session->is_active || ($session->module && !$session->module->is_active)) {
+            return response()->json(['success' => false, 'message' => 'Sesi kuis sedang dinonaktifkan / ditutup sementara oleh guru.'], 422);
+        }
 
         if ($session->status !== 'question') {
             return response()->json(['success' => false, 'message' => 'Waktu menjawab soal telah berakhir.'], 422);
@@ -284,8 +330,9 @@ class LiveQuizController extends Controller
             ->count() + 1;
 
         $data = [
-            'status'                 => in_array($session->status, ['question', 'reveal', 'leaderboard']) ? 'active' : $session->status,
+            'status'                 => !$session->is_active ? 'inactive' : (in_array($session->status, ['question', 'reveal', 'leaderboard']) ? 'active' : $session->status),
             'raw_status'             => $session->status,
+            'is_active'              => (bool) $session->is_active,
             'current_question_index' => $session->current_question_index,
             'total_questions'        => $session->total_questions,
             'time_limit'             => $session->time_limit_seconds,
@@ -320,5 +367,34 @@ class LiveQuizController extends Controller
         }
 
         return response()->json($data);
+    }
+
+    /**
+     * Siswa Keluar dari Room Kuis Live.
+     */
+    public function leave(LiveQuizSession $session)
+    {
+        $student = $this->student();
+
+        $participant = LiveQuizParticipant::where('live_quiz_session_id', $session->id)
+            ->where('student_id', $student->id)
+            ->first();
+
+        if ($participant) {
+            // Jika sesi masih di tahap lobby (belum dimulai guru), hapus data peserta agar akurat di layar guru
+            if ($session->status === 'lobby') {
+                $participant->delete();
+            }
+        }
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success'  => true,
+                'message'  => 'Anda telah keluar dari room kuis live.',
+                'redirect' => route('student.dashboard'),
+            ]);
+        }
+
+        return redirect()->route('student.dashboard')->with('success', 'Anda telah keluar dari room kuis live.');
     }
 }

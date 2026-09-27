@@ -450,5 +450,80 @@ class TeacherClassTest extends TestCase
             $s->delete();
         }
     }
+
+    public function test_active_module_displays_live_quiz_button_under_active_button(): void
+    {
+        $teacher = Teacher::first() ?? Teacher::factory()->create();
+        $class = SchoolClass::first() ?? SchoolClass::factory()->create();
+        $subject = Subject::first() ?? Subject::factory()->create();
+
+        // Create inactive module
+        $inactiveMod = Module::create([
+            'teacher_id' => $teacher->id,
+            'class_id' => $class->id,
+            'subject_id' => $subject->id,
+            'title' => 'Inactive Test Module',
+            'semester' => 1,
+            'status' => 'published',
+            'is_active' => false,
+        ]);
+
+        // When inactive, live quiz button is not displayed
+        $response = $this->actingAs($teacher, 'teacher')
+            ->get(route('teacher.classes.show', ['class' => $class->id, 'tab' => 'modules']));
+
+        $response->assertOk();
+        $response->assertDontSee('Kuis Live Interaktif');
+
+        // Activate module
+        $inactiveMod->update(['is_active' => true]);
+
+        $responseActive = $this->actingAs($teacher, 'teacher')
+            ->get(route('teacher.classes.show', ['class' => $class->id, 'tab' => 'modules']));
+
+        $responseActive->assertOk();
+        $responseActive->assertSee('Sedang Dibahas di Kelas');
+        $responseActive->assertSee('✓ Modul Aktif di Kelas Ini');
+        $responseActive->assertSee('Kuis Live Interaktif');
+        $responseActive->assertSee(route('teacher.live-quiz.index'));
+
+        // Cleanup
+        $inactiveMod->delete();
+    }
+
+    public function test_toggle_active_module_preserves_view_mode(): void
+    {
+        $teacher = Teacher::first() ?? Teacher::factory()->create();
+        $class = SchoolClass::first() ?? SchoolClass::factory()->create();
+        $subject = Subject::first() ?? Subject::factory()->create();
+
+        $mod = Module::create([
+            'teacher_id' => $teacher->id,
+            'class_id'   => $class->id,
+            'subject_id' => $subject->id,
+            'title'      => 'Test View Mode Preservation ' . uniqid(),
+            'semester'   => 1,
+            'status'     => 'published',
+            'is_active'  => false,
+        ]);
+
+        // Submit toggle dengan mode list
+        $response = $this->actingAs($teacher, 'teacher')
+            ->post(route('teacher.classes.modules.toggle-active', [$class, $mod]), [
+                'view' => 'list',
+            ]);
+
+        $response->assertRedirect(route('teacher.classes.show', [
+            'class' => $class->id,
+            'tab'   => 'modules',
+            'view'  => 'list',
+        ]));
+
+        $this->assertTrue($mod->fresh()->is_active);
+
+        // Cleanup
+        $mod->delete();
+    }
 }
+
 

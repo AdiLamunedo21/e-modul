@@ -309,6 +309,17 @@ class DashboardController extends Controller
             'total_shared_library' => $totalSharedInLibrary,
         ];
 
+        $activeLiveQuiz = \App\Models\LiveQuizSession::where('teacher_id', $teacher->id)
+            ->where('is_active', true)
+            ->where('status', '!=', 'finished')
+            ->with(['module.subject', 'schoolClass'])
+            ->latest()
+            ->first();
+
+        $hasActiveModuleInClass = Module::where('teacher_id', $teacher->id)
+            ->where('is_active', true)
+            ->exists();
+
         return view('pages.teacher.dashboard', compact(
             'teacher',
             'stats',
@@ -316,7 +327,9 @@ class DashboardController extends Controller
             'modulesData',
             'statusFilter',
             'pendingQueueSorted',
-            'classesSummary'
+            'classesSummary',
+            'activeLiveQuiz',
+            'hasActiveModuleInClass'
         ));
     }
 

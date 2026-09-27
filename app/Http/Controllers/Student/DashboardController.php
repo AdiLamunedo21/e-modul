@@ -419,9 +419,14 @@ class DashboardController extends Controller
         // Banner selamat datang hanya aktif selama 10 menit pertama sejak siswa terdaftar
         $isNewlyRegistered = $student->created_at ? $student->created_at->gte(now()->subMinutes(10)) : false;
 
-        // Cek apakah ada Kuis Live yang sedang aktif untuk kelas siswa ini atau terbuka umum
+        // Cek apakah ada Kuis Live yang sedang aktif untuk kelas siswa ini:
+        // Guru harus telah membuka kelas (modul is_active = true) dan mengaktifkan kuis live (session is_active = true, status != finished)
         $activeLiveQuiz = LiveQuizSession::with(['module.subject', 'teacher', 'schoolClass'])
+            ->where('is_active', true)
             ->where('status', '!=', 'finished')
+            ->whereHas('module', function ($mq) {
+                $mq->where('is_active', true);
+            })
             ->where(function ($q) use ($joinedClassIds) {
                 $q->whereNull('class_id');
                 if (!empty($joinedClassIds)) {

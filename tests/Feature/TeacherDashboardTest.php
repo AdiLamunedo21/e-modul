@@ -75,7 +75,7 @@ class TeacherDashboardTest extends TestCase
         $response->assertSee('Siswa & Kelas Binaan', false);
         $response->assertSee('Perlu Dinilai (Grading)', false);
         $response->assertSee('Laporan Excel', false);
-        $response->assertSee('Arsitektur E-Modul 5 Bagian Pedagogis', false);
+        $response->assertSee('Antrean Penilaian Adaptif', false);
     }
 
     public function test_teacher_can_search_modules_by_keyword()
@@ -180,4 +180,41 @@ class TeacherDashboardTest extends TestCase
         $embed2->delete();
         $module->delete();
     }
+
+    public function test_sidebar_live_quiz_button_visibility_based_on_active_module(): void
+    {
+        $teacher = Teacher::first() ?? Teacher::factory()->create();
+        $class = SchoolClass::first() ?? SchoolClass::factory()->create();
+        $subject = \App\Models\Subject::first() ?? \App\Models\Subject::factory()->create();
+
+        // Pastikan tidak ada modul yang aktif terlebih dahulu
+        Module::where('teacher_id', $teacher->id)->update(['is_active' => false]);
+
+        $responseNoActive = $this->actingAs($teacher, 'teacher')
+            ->get(route('teacher.classes.index'));
+
+        $responseNoActive->assertOk();
+        $responseNoActive->assertDontSee('<span>Kuis Live</span>', false);
+
+        // Buat atau aktifkan modul milik guru ini
+        $mod = Module::create([
+            'teacher_id' => $teacher->id,
+            'class_id'   => $class->id,
+            'subject_id' => $subject->id,
+            'title'      => 'Modul Aktif untuk Tes Sidebar ' . uniqid(),
+            'status'     => 'published',
+            'is_active'  => true,
+            'semester'   => 1,
+        ]);
+
+        $responseActive = $this->actingAs($teacher, 'teacher')
+            ->get(route('teacher.classes.index'));
+
+        $responseActive->assertOk();
+        $responseActive->assertSee('<span>Kuis Live</span>', false);
+
+        // Bersihkan
+        $mod->delete();
+    }
 }
+

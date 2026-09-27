@@ -1,6 +1,6 @@
 @extends('layouts.teacher.dashboardteacher')
 
-@section('title', 'Kuis Live (Mode Pantau) — Teacher Workspace')
+@section('title', 'Kuis Live — Teacher Workspace')
 @section('page-title', 'Kuis Live')
 
 @section('content')
@@ -16,8 +16,8 @@
                     </svg>
                 </span>
                 <div>
-                    <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Kuis Live (Mode Pantau)</h1>
-                    <p class="text-sm text-slate-500">Pandu kuis interaktif di proyektor kelas ala Kahoot/Quizizz dengan kendali slide guru & papan skor langsung.</p>
+                    <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Kuis Live</h1>
+                    <p class="text-sm text-slate-500">Pandu kuis interaktif di proyektor kelas dengan kendali slide guru & papan skor langsung.</p>
                 </div>
             </div>
         </div>
@@ -43,38 +43,6 @@
             {{ session('error') }}
         </div>
     @endif
-
-    {{-- ══ Penjelasan 2 Mode Evaluasi ══ --}}
-    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Mengenal 2 Mode Evaluasi E-Modul</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="rounded-xl border border-slate-100 bg-slate-50/70 p-4 flex gap-3.5">
-                <div class="w-9 h-9 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 font-bold text-sm">
-                    1
-                </div>
-                <div>
-                    <h3 class="text-sm font-bold text-slate-800">Mode Mandiri (Self-Paced)</h3>
-                    <p class="text-xs text-slate-500 mt-1 leading-relaxed">
-                        Siswa mengerjakan Pre-Test dan Post-Test secara individu melalui antarmuka modul masing-masing tanpa perlu dipandu langsung. Nilai otomatis tersimpan ke Pusat Penilaian.
-                    </p>
-                </div>
-            </div>
-            <div class="rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 flex gap-3.5">
-                <div class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 font-bold text-sm">
-                    2
-                </div>
-                <div>
-                    <h3 class="text-sm font-bold text-emerald-900 flex items-center gap-2">
-                        <span>Mode Pantau / Kuis Live</span>
-                        <span class="px-1.5 py-0.5 rounded text-[10px] font-black uppercase bg-emerald-700 text-white tracking-wide">Aktif</span>
-                    </h3>
-                    <p class="text-xs text-slate-600 mt-1 leading-relaxed">
-                        Guru membuka layar proyektor di kelas. Siswa memasukkan <strong>PIN 6 Digit</strong> via HP/Laptop. Guru menggeser slide soal demi soal, siswa berlomba menjawab dengan cepat untuk memperoleh poin maksimal hingga podium juara!
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
 
     {{-- ══ Ringkasan Statistik ══ --}}
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -144,8 +112,8 @@
                 <table class="w-full text-left text-sm text-slate-600">
                     <thead class="bg-slate-50 text-[11px] font-extrabold uppercase tracking-wider text-slate-400 border-b border-slate-100">
                         <tr>
-                            <th class="px-5 py-4">PIN Game</th>
-                            <th class="px-5 py-4">Modul & Mata Pelajaran</th>
+                            <th class="px-5 py-4">ID Sesi</th>
+                            <th class="px-5 py-4">Materi Pembelajaran</th>
                             <th class="px-5 py-4">Tipe Tes</th>
                             <th class="px-5 py-4">Target Kelas</th>
                             <th class="px-5 py-4">Status Sesi</th>
@@ -156,9 +124,9 @@
                     <tbody class="divide-y divide-slate-100">
                         @foreach($sessions as $session)
                             <tr class="hover:bg-slate-50/70 transition-colors">
-                                <td class="px-5 py-4 font-mono font-black text-base text-slate-900">
-                                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900 text-emerald-400 font-mono tracking-widest text-sm shadow-sm border border-emerald-500/20">
-                                        <span>{{ $session->pin }}</span>
+                                <td class="px-5 py-4 font-mono font-bold text-sm text-slate-900">
+                                    <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 text-emerald-400 font-mono font-bold text-xs shadow-sm border border-emerald-500/20">
+                                        <span>#{{ $session->id }}</span>
                                     </div>
                                 </td>
                                 <td class="px-5 py-4">
@@ -184,7 +152,12 @@
                                     </span>
                                 </td>
                                 <td class="px-5 py-4">
-                                    @if($session->status === 'lobby')
+                                    @if(!$session->is_active)
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                            Nonaktif (Ditutup)
+                                        </span>
+                                    @elseif($session->status === 'lobby')
                                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
                                             <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
                                             Menunggu Siswa (Lobby)
@@ -208,7 +181,30 @@
                                     </span>
                                 </td>
                                 <td class="px-5 py-4 text-right">
-                                    <div class="flex items-center justify-end gap-2">
+                                    <div class="flex items-center justify-end gap-2 flex-wrap">
+                                        {{-- Tombol Tutup / Buka (Nonaktifkan / Aktifkan) Kuis Live --}}
+                                        @if($session->is_active && $session->status !== 'finished')
+                                            <form action="{{ route('teacher.live-quiz.toggle-active', $session) }}" method="POST" class="inline">
+                                                @csrf
+                                                <button type="submit"
+                                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                                                        title="Tutup / Nonaktifkan Sesi Kuis Live Sementara">
+                                                    <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                                                    <span>Nonaktifkan Kuis</span>
+                                                </button>
+                                            </form>
+                                        @else
+                                            <form action="{{ route('teacher.live-quiz.toggle-active', $session) }}" method="POST" class="inline">
+                                                @csrf
+                                                <button type="submit"
+                                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                                                        title="Buka / Aktifkan Sesi Kuis Live Kembali">
+                                                    <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/></svg>
+                                                    <span>Aktifkan Kuis</span>
+                                                </button>
+                                            </form>
+                                        @endif
+
                                         @if($session->status !== 'finished')
                                             <a href="{{ route('teacher.live-quiz.host', $session) }}"
                                                class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition-colors">
@@ -224,7 +220,7 @@
                                         @endif
 
                                         <button type="button"
-                                                @click="deleteModalOpen = true; deleteUrl = '{{ route('teacher.live-quiz.destroy', $session) }}'; sessionTitle = 'PIN: {{ $session->pin }} ({{ $session->module->title ?? '' }})'"
+                                                @click="deleteModalOpen = true; deleteUrl = '{{ route('teacher.live-quiz.destroy', $session) }}'; sessionTitle = 'Sesi #{{ $session->id }} ({{ $session->module->title ?? '' }})'"
                                                 class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
                                                 title="Hapus Sesi">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
