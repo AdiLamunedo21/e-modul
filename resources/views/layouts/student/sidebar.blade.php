@@ -192,18 +192,6 @@
                 </span>
             </a>
 
-            {{-- Grup: Bantuan Belajar --}}
-            <p class="pt-6 pb-1 px-3 text-[11px] font-bold uppercase tracking-widest text-slate-500">Pedoman Belajar</p>
-
-            <div class="p-3.5 rounded-2xl bg-slate-800/70 border border-slate-700/60 text-slate-300">
-                <div class="flex items-center gap-2 mb-1.5">
-                    <span class="text-sm">💡</span>
-                    <h4 class="text-xs font-bold text-white">Panduan 5 Bagian</h4>
-                </div>
-                <p class="text-[11px] text-slate-400 leading-relaxed">
-                    Selesaikan materi, kuis, praktik embed, LKPD & Job Sheet untuk mencapai kompetensi maksimal.
-                </p>
-            </div>
         </nav>
 
         {{-- ══ Profil Bawah & Logout Siswa (dengan pb-24 di mobile agar tidak tertutup nav bottom dock) ══ --}}
