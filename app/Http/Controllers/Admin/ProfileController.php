@@ -26,8 +26,26 @@ class ProfileController extends Controller
     {
         $admin = Auth::guard('admin')->user();
 
+        $emailRule = [
+            'nullable',
+            'string',
+            'email',
+            'max:255',
+            Rule::unique('admins', 'email')->ignore($admin->id),
+        ];
+        if ($request->has('email')) {
+            $emailRule = [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique('admins', 'email')->ignore($admin->id),
+            ];
+        }
+
         $validated = $request->validate([
             'name'            => ['required', 'string', 'max:255'],
+            'email'           => $emailRule,
             'identity_number' => [
                 'required',
                 'string',
@@ -36,14 +54,22 @@ class ProfileController extends Controller
             ],
         ], [
             'name.required'            => 'Nama lengkap administrator wajib diisi.',
+            'email.required'           => 'Email administrator wajib diisi.',
+            'email.email'              => 'Format email tidak valid (contoh: namaSingkat@gmail.com).',
+            'email.unique'             => 'Email ini sudah digunakan oleh akun lain.',
             'identity_number.required' => 'NIP / Nomor Identitas wajib diisi.',
             'identity_number.unique'   => 'NIP / Nomor Identitas ini sudah digunakan akun lain.',
         ]);
 
-        $admin->update([
+        $updateData = [
             'name'            => $validated['name'],
             'identity_number' => $validated['identity_number'],
-        ]);
+        ];
+        if (!empty($validated['email'])) {
+            $updateData['email'] = strtolower(trim($validated['email']));
+        }
+
+        $admin->update($updateData);
 
         return redirect()->route('admin.profile.edit')
             ->with('profile_success', 'Informasi profil administrator berhasil diperbarui.');

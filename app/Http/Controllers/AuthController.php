@@ -23,12 +23,34 @@ class AuthController extends Controller
 
     public function adminLogin(Request $request)
     {
-        $credentials = $request->validate([
-            'identity_number' => ['required'],
-            'password' => ['required'],
+        $request->validate([
+            'email'           => ['nullable', 'string'],
+            'identity_number' => ['nullable', 'string'],
+            'password'        => ['required'],
         ]);
 
-        if (Auth::guard('admin')->attempt($credentials)) {
+        $identifier = $request->input('email') ?? $request->input('identity_number');
+        if (!$identifier) {
+            return back()->withErrors([
+                'email' => 'Email administrator wajib diisi.',
+            ])->onlyInput('email');
+        }
+
+        // Coba autentikasi via Email
+        $attempt = Auth::guard('admin')->attempt([
+            'email'    => strtolower(trim($identifier)),
+            'password' => $request->password,
+        ]);
+
+        // Fallback: Coba via NIP / Identity Number
+        if (!$attempt) {
+            $attempt = Auth::guard('admin')->attempt([
+                'identity_number' => trim($identifier),
+                'password'        => $request->password,
+            ]);
+        }
+
+        if ($attempt) {
             $request->session()->regenerate();
             
             $intended = session()->get('url.intended');
@@ -39,9 +61,10 @@ class AuthController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
+        $errorField = ($request->filled('identity_number') && !$request->filled('email')) ? 'identity_number' : 'email';
         return back()->withErrors([
-            'identity_number' => 'NIP atau Password yang dimasukkan salah.',
-        ])->onlyInput('identity_number');
+            $errorField => 'Email atau Password yang dimasukkan salah.',
+        ])->onlyInput('email', 'identity_number');
     }
 
     public function adminLogout(Request $request)
@@ -65,12 +88,34 @@ class AuthController extends Controller
 
     public function teacherLogin(Request $request)
     {
-        $credentials = $request->validate([
-            'identity_number' => ['required'],
-            'password' => ['required'],
+        $request->validate([
+            'email'           => ['nullable', 'string'],
+            'identity_number' => ['nullable', 'string'],
+            'password'        => ['required'],
         ]);
 
-        if (Auth::guard('teacher')->attempt($credentials)) {
+        $identifier = $request->input('email') ?? $request->input('identity_number');
+        if (!$identifier) {
+            return back()->withErrors([
+                'email' => 'Email guru wajib diisi.',
+            ])->onlyInput('email');
+        }
+
+        // Coba autentikasi via Email
+        $attempt = Auth::guard('teacher')->attempt([
+            'email'    => strtolower(trim($identifier)),
+            'password' => $request->password,
+        ]);
+
+        // Fallback: Coba via NIP / Identity Number
+        if (!$attempt) {
+            $attempt = Auth::guard('teacher')->attempt([
+                'identity_number' => trim($identifier),
+                'password'        => $request->password,
+            ]);
+        }
+
+        if ($attempt) {
             $request->session()->regenerate();
 
             $intended = session()->get('url.intended');
@@ -81,9 +126,10 @@ class AuthController extends Controller
             return redirect()->route('teacher.dashboard');
         }
 
+        $errorField = ($request->filled('identity_number') && !$request->filled('email')) ? 'identity_number' : 'email';
         return back()->withErrors([
-            'identity_number' => 'NUPTK / NIP atau Password yang dimasukkan salah.',
-        ])->onlyInput('identity_number');
+            $errorField => 'Email atau Password yang dimasukkan salah.',
+        ])->onlyInput('email', 'identity_number');
     }
 
     public function teacherLogout(Request $request)

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
+use App\Models\Module;
 use App\Models\SchoolClass;
 use App\Models\Subject;
 use App\Models\Teacher;
@@ -131,28 +132,63 @@ class TeacherController extends Controller
     }
 
     /**
+     * Menampilkan isi lengkap E-Modul guru untuk supervisi Admin Master.
+     */
+    public function showModule(Teacher $teacher, Module $module)
+    {
+        if ($module->teacher_id !== $teacher->id) {
+            abort(404, 'Modul pembelajaran ini tidak terdaftar pada profil guru ini.');
+        }
+
+        request()->merge(['from' => 'teacher']);
+        return app(\App\Http\Controllers\Admin\ModuleLibraryController::class)->show($module);
+    }
+
+    /**
      * Menyimpan data pendaftaran guru baru.
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $rules = [
             'name'            => ['required', 'string', 'max:255'],
+            'email'           => ['nullable', 'string', 'email', 'max:255', 'unique:teachers,email'],
             'identity_number' => ['required', 'string', 'max:100', 'unique:teachers,identity_number'],
             'password'        => ['required', 'string', 'min:6'],
             'subject_ids'     => ['nullable', 'array'],
             'subject_ids.*'   => ['exists:subjects,id'],
             'class_ids'       => ['nullable', 'array'],
             'class_ids.*'     => ['exists:classes,id'],
-        ], [
+        ];
+
+        if ($request->has('email')) {
+            $rules['email'] = ['required', 'string', 'email', 'max:255', 'unique:teachers,email'];
+        }
+
+        $validated = $request->validate($rules, [
             'name.required'            => 'Nama lengkap guru wajib diisi.',
+            'email.required'           => 'Email guru wajib diisi.',
+            'email.email'              => 'Format email tidak valid (contoh: namaSingkat@gmail.com).',
+            'email.unique'             => 'Email ini sudah terdaftar untuk guru lain.',
             'identity_number.required' => 'NIP / NUPTK / Identitas wajib diisi.',
             'identity_number.unique'   => 'NIP / Identitas ini sudah terdaftar untuk guru lain.',
             'password.required'        => 'Password akun guru wajib diisi.',
             'password.min'             => 'Password minimal terdiri dari 6 karakter.',
         ]);
 
+        $email = $validated['email'] ?? null;
+        if (empty($email)) {
+            $clean = preg_replace('/^(Drs\.|Dr\.|Ir\.|Prof\.|H\.|Hj\.|Ust\.)\s+/i', '', trim($validated['name']));
+            $parts = explode(',', $clean);
+            $words = preg_split('/\s+/', trim($parts[0]));
+            $firstWord = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $words[0] ?? 'guru'));
+            $email = ($firstWord ?: 'guru') . rand(100, 9999) . '@gmail.com';
+        } else {
+            $email = strtolower(trim($email));
+        }
+
         $teacher = Teacher::create([
             'name'            => $validated['name'],
+            'email'           => $email,
             'identity_number' => $validated['identity_number'],
             'password'        => Hash::make($validated['password']),
         ]);
@@ -170,7 +206,7 @@ class TeacherController extends Controller
         }
 
         return redirect()->route('admin.teachers.index')
-            ->with('success', "Akun guru {$teacher->name} (NIP: {$teacher->identity_number}) berhasil didaftarkan.");
+            ->with('success', "Akun guru {$teacher->name} (Email: {$teacher->email} | NIP: {$teacher->identity_number}) berhasil didaftarkan.");
     }
 
     /**
@@ -178,8 +214,27 @@ class TeacherController extends Controller
      */
     public function update(Request $request, Teacher $teacher)
     {
+        $emailRule = [
+            'nullable',
+            'string',
+            'email',
+            'max:255',
+            Rule::unique('teachers', 'email')->ignore($teacher->id),
+        ];
+
+        if ($request->has('email')) {
+            $emailRule = [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique('teachers', 'email')->ignore($teacher->id),
+            ];
+        }
+
         $validated = $request->validate([
             'name'            => ['required', 'string', 'max:255'],
+            'email'           => $emailRule,
             'identity_number' => [
                 'required',
                 'string',
@@ -193,12 +248,18 @@ class TeacherController extends Controller
             'class_ids.*'     => ['exists:classes,id'],
         ], [
             'name.required'            => 'Nama lengkap guru wajib diisi.',
+            'email.required'           => 'Email guru wajib diisi.',
+            'email.email'              => 'Format email tidak valid (contoh: namaSingkat@gmail.com).',
+            'email.unique'             => 'Email ini sudah digunakan oleh guru lain.',
             'identity_number.required' => 'NIP / Identitas wajib diisi.',
             'identity_number.unique'   => 'NIP / Identitas ini sudah terdaftar untuk guru lain.',
             'password.min'             => 'Password baru minimal terdiri dari 6 karakter.',
         ]);
 
         $teacher->name = $validated['name'];
+        if (!empty($validated['email'])) {
+            $teacher->email = strtolower(trim($validated['email']));
+        }
         $teacher->identity_number = $validated['identity_number'];
 
         if (!empty($validated['password'])) {
@@ -253,16 +314,25 @@ class TeacherController extends Controller
      */
     public function makeAdmin(Teacher $teacher)
     {
-        if (Admin::where('identity_number', $teacher->identity_number)->exists()) {
+        $exists = Admin::where('identity_number', $teacher->identity_number)
+            ->when(!empty($teacher->email), fn($q) => $q->orWhere('email', $teacher->email))
+            ->exists();
+
+        if ($exists) {
             return back()->with('info', "Guru {$teacher->name} sudah terdaftar sebagai Administrator.");
         }
 
-        Admin::create([
+        $email = !empty($teacher->email)
+            ? $teacher->email
+            : (strtolower(preg_replace('/[^a-zA-Z0-9]/', '', explode(' ', $teacher->name)[0] ?? 'admin')) . rand(100, 9999) . '@gmail.com');
+
+        $admin = Admin::create([
             'name'            => $teacher->name,
+            'email'           => $email,
             'identity_number' => $teacher->identity_number,
             'password'        => $teacher->password, // gunakan hash password yang sama
         ]);
 
-        return back()->with('success', "Hak akses Administrator berhasil diberikan kepada guru {$teacher->name} (NIP: {$teacher->identity_number}). Akun kini dapat login ke Admin Panel atau alih peran.");
+        return back()->with('success', "Hak akses Administrator berhasil diberikan kepada guru {$teacher->name} (Email: {$admin->email} | NIP: {$teacher->identity_number}). Akun kini dapat login ke Admin Panel atau alih peran.");
     }
 }

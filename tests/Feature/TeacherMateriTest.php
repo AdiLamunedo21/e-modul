@@ -186,4 +186,42 @@ class TeacherMateriTest extends TestCase
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['judul_materi', 'uraian_materi']);
     }
+
+    public function test_teacher_can_stream_and_preview_materi_with_slides()
+    {
+        [$teacher, $module] = $this->getTeacherAndModule();
+        if (!$teacher) {
+            $this->markTestSkipped('Data pengujian tidak mencukupi.');
+        }
+
+        $filePath = 'materi-slides/test_teacher_' . uniqid() . '.pdf';
+        Storage::disk('public')->put($filePath, '%PDF-1.4 test document content');
+
+        $module->update([
+            'has_materi' => true,
+            'materi_data' => [
+                'judul_materi'  => 'Materi Presentasi Guru',
+                'uraian_materi' => '<p>Uraian materi lengkap untuk simulasi preview guru.</p>',
+                'ppt_file_path' => $filePath,
+                'ppt_file_name' => 'Presentasi_Guru.pdf',
+            ],
+        ]);
+
+        try {
+            // 1. Teacher can stream PDF inline
+            $streamRes = $this->actingAs($teacher, 'teacher')
+                ->get(route('teacher.modules.materi.stream-ppt', $module));
+            $streamRes->assertStatus(200);
+            $this->assertEquals('application/pdf', $streamRes->headers->get('Content-Type'));
+            $this->assertStringContainsString('inline', $streamRes->headers->get('Content-Disposition'));
+
+            // 2. Teacher can open standalone preview page
+            $previewRes = $this->actingAs($teacher, 'teacher')
+                ->get(route('teacher.modules.materi.preview', $module));
+            $previewRes->assertStatus(200);
+            $previewRes->assertSee('Presentasi_Guru.pdf', false);
+        } finally {
+            Storage::disk('public')->delete($filePath);
+        }
+    }
 }

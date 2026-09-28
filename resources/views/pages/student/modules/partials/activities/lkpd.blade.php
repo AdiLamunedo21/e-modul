@@ -20,22 +20,120 @@
         </div>
 
         <div class="p-6 sm:p-8 space-y-6">
-            {{-- Instruksi & Download LKPD --}}
-            <div class="p-5 rounded-2xl bg-amber-50/50 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <h4 class="text-sm font-bold text-amber-950">Berkas Soal & Instruksi LKPD</h4>
-                    <p class="text-xs text-amber-800 mt-0.5">Pelajari dan diskusikan soal LKPD bersama kelompok kerja Anda.</p>
+            {{-- ══ PRATINJAU DOKUMEN INSTRUKSI LKPD (GAYA GOOGLE SITES) ══ --}}
+            @if(!empty($lkpd?->pdf_file_path))
+                @php
+                    $lkpdPdfUrl = route('student.modules.lkpd.stream-pdf', $module);
+                    $lkpdPdfName = $lkpdData['judul_lkpd'] ?? 'Lembar Kerja Peserta Didik (LKPD)';
+                @endphp
+                <div x-data="{
+                        isFullscreen: false,
+                        toggleFullscreen() {
+                            const el = this.$refs.lkpdPreviewContainer;
+                            if (!document.fullscreenElement) {
+                                if (el.requestFullscreen) {
+                                    el.requestFullscreen();
+                                } else if (el.webkitRequestFullscreen) {
+                                    el.webkitRequestFullscreen();
+                                }
+                                this.isFullscreen = true;
+                            } else {
+                                if (document.exitFullscreen) {
+                                    document.exitFullscreen();
+                                }
+                                this.isFullscreen = false;
+                            }
+                        }
+                     }"
+                     @fullscreenchange.window="isFullscreen = !!document.fullscreenElement"
+                     class="space-y-3">
+                    
+                    {{-- Container Frame Pratinjau Dokumen --}}
+                    <div x-ref="lkpdPreviewContainer"
+                         class="rounded-3xl border border-amber-200/90 shadow-md bg-slate-900 overflow-hidden flex flex-col transition-all"
+                         :class="isFullscreen ? 'fixed inset-0 z-[99999] rounded-none border-none shadow-none h-screen w-screen' : 'w-full'">
+                        
+                        {{-- Top Header / Toolbar ala Google Sites --}}
+                        <div class="px-4 sm:px-6 py-3.5 bg-slate-900 text-white flex flex-wrap items-center justify-between gap-3 shrink-0 border-b border-slate-800">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center text-xs font-black shadow-sm shrink-0">
+                                    PDF
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h4 class="text-xs sm:text-sm font-bold text-white truncate max-w-[200px] sm:max-w-md">
+                                            {{ $lkpdPdfName }}
+                                        </h4>
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-400/30 shrink-0">
+                                            <span>👁️</span> Lembar Tugas
+                                        </span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-400 truncate">
+                                        Soal, Penugasan & Lembar Kerja Diskusi Kelompok Siswa
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- Action Toolbar: Layar Penuh, Buka Tab Baru, Unduh --}}
+                            <div class="flex items-center gap-2 shrink-0">
+                                {{-- Tombol Mode Layar Penuh --}}
+                                <button type="button"
+                                        @click="toggleFullscreen()"
+                                        class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold transition-all flex items-center gap-1.5 border border-slate-700 cursor-pointer shadow-xs"
+                                        :title="isFullscreen ? 'Keluar dari Layar Penuh' : 'Buka dalam Layar Penuh (Fullscreen)'">
+                                    <svg class="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"/>
+                                    </svg>
+                                    <span class="hidden sm:inline" x-text="isFullscreen ? 'Keluar' : 'Layar Penuh'">Layar Penuh</span>
+                                </button>
+
+                                {{-- Buka di Tab Baru --}}
+                                <a href="{{ $lkpdPdfUrl }}"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold transition-all flex items-center gap-1.5 border border-slate-700 shadow-xs"
+                                   title="Buka dokumen di tab browser baru">
+                                    <svg class="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/>
+                                    </svg>
+                                    <span class="hidden sm:inline">Tab Baru</span>
+                                </a>
+
+                                {{-- Tombol Unduh Berkas --}}
+                                <a href="{{ $lkpdPdfUrl }}"
+                                   target="_blank"
+                                   download
+                                   class="px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm shadow-amber-600/30"
+                                   title="Unduh berkas PDF LKPD">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+                                    </svg>
+                                    <span>Unduh PDF</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        {{-- Frame Iframe Pratinjau Native PDF --}}
+                        <div class="relative w-full bg-slate-950 flex-1 overflow-hidden"
+                             :class="isFullscreen ? 'h-full' : 'h-[460px] sm:h-[560px] lg:h-[620px]'">
+                            <iframe src="{{ $lkpdPdfUrl }}#toolbar=1&navpanes=1"
+                                    class="w-full h-full border-0 absolute inset-0 bg-slate-100"
+                                    type="application/pdf"
+                                    allowfullscreen
+                                    title="{{ $lkpdPdfName }}">
+                            </iframe>
+                        </div>
+
+                        {{-- Footer Informasi --}}
+                        <div class="px-4 sm:px-6 py-2 bg-slate-900 border-t border-slate-800 text-[11px] sm:text-xs text-slate-400 flex items-center justify-between shrink-0">
+                            <span class="flex items-center gap-1.5">
+                                <span>💡</span>
+                                <span>Diskusikan dan selesaikan tugas LKPD di atas, kemudian kumpulkan jawaban pada formulir di bawah.</span>
+                            </span>
+                        </div>
+                    </div>
                 </div>
-                @if(!empty($lkpd?->pdf_file_path))
-                    <a href="{{ asset('storage/' . $lkpd->pdf_file_path) }}"
-                       target="_blank"
-                       download
-                       class="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-sm transition flex items-center justify-center gap-2 shrink-0">
-                        <span>Unduh Berkas LKPD PDF</span>
-                        <span>📥</span>
-                    </a>
-                @endif
-            </div>
+            @endif
 
             {{-- Form / Status Pengumpulan LKPD --}}
             <div class="pt-4 border-t border-slate-100">

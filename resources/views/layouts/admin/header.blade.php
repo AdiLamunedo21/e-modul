@@ -40,7 +40,7 @@
             {{-- Switch to Teacher Portal (jika NIP admin terdaftar sebagai guru) --}}
             @php
                 $currentAdmin = Auth::guard('admin')->user();
-                $isAlsoTeacher = $currentAdmin ? \App\Models\Teacher::where('identity_number', $currentAdmin->identity_number)->exists() : false;
+                $isAlsoTeacher = $currentAdmin ? \App\Models\Teacher::where('identity_number', $currentAdmin->identity_number)->when(!empty($currentAdmin->email), fn($q) => $q->orWhere('email', $currentAdmin->email))->exists() : false;
             @endphp
             @if($isAlsoTeacher)
                 <form action="{{ route('admin.switch-to-teacher') }}" method="POST" class="inline">
@@ -66,7 +66,7 @@
                 </div>
                 <div class="hidden sm:flex flex-col text-left">
                     <span class="text-xs font-bold text-gray-800 group-hover:text-indigo-600 leading-tight transition-colors">{{ Auth::guard('admin')->user()->name ?? 'Administrator' }}</span>
-                    <span class="text-[10px] text-gray-500 font-medium">{{ Auth::guard('admin')->user()->identity_number ?? '-' }} (Admin)</span>
+                    <span class="text-[10px] text-gray-500 font-medium">{{ Auth::guard('admin')->user()->email ?? Auth::guard('admin')->user()->identity_number }} (Admin)</span>
                 </div>
             </a>
 

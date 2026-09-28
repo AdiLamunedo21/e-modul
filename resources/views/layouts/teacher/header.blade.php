@@ -44,7 +44,7 @@
             {{-- Switch to Admin Panel (jika NIP guru terdaftar sebagai admin) --}}
             @php
                 $currentTeacher = Auth::guard('teacher')->user();
-                $isAlsoAdmin = $currentTeacher ? \App\Models\Admin::where('identity_number', $currentTeacher->identity_number)->exists() : false;
+                $isAlsoAdmin = $currentTeacher ? \App\Models\Admin::where('identity_number', $currentTeacher->identity_number)->when(!empty($currentTeacher->email), fn($q) => $q->orWhere('email', $currentTeacher->email))->exists() : false;
             @endphp
             @if($isAlsoAdmin)
                 <form action="{{ route('teacher.switch-to-admin') }}" method="POST" class="inline">
@@ -68,7 +68,7 @@
                 </div>
                 <div class="hidden sm:flex flex-col text-left">
                     <span class="text-xs font-bold text-gray-800 leading-tight">{{ Auth::guard('teacher')->user()->name ?? 'Guru Pengajar' }}</span>
-                    <span class="text-[10px] text-gray-500 font-medium">{{ Auth::guard('teacher')->user()->identity_number ?? '-' }}</span>
+                    <span class="text-[10px] text-gray-500 font-medium">{{ Auth::guard('teacher')->user()->email ?? Auth::guard('teacher')->user()->identity_number }}</span>
                 </div>
             </div>
         </div>

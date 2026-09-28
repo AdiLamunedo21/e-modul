@@ -343,9 +343,15 @@ class DashboardController extends Controller
             return redirect()->route('login.teacher');
         }
 
-        $admin = Admin::where('identity_number', $teacher->identity_number)->first();
+        $admin = Admin::where('identity_number', $teacher->identity_number)
+            ->orWhere(function ($q) use ($teacher) {
+                if ($teacher->email) {
+                    $q->where('email', $teacher->email);
+                }
+            })->first();
+
         if (!$admin) {
-            return back()->with('error', 'Akun NIP Anda belum terdaftar sebagai Administrator.');
+            return back()->with('error', 'Akun NIP/Email Anda belum terdaftar sebagai Administrator.');
         }
 
         Auth::guard('admin')->login($admin);

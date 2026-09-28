@@ -129,12 +129,22 @@
 }" class="w-full space-y-6">
 
     {{-- ══ 1. BREADCRUMB & ADMIN HEADER ══ --}}
+    @php
+        $fromTeacher = request('from') === 'teacher' || (request()->header('referer') && str_contains(request()->header('referer'), '/admin/teachers'));
+        $teacher = $module->teacher;
+    @endphp
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-            <nav class="flex items-center gap-2 text-xs text-slate-400 mb-1">
+            <nav class="flex items-center gap-2 text-xs text-slate-400 mb-1 flex-wrap">
                 <a href="{{ route('admin.dashboard') }}" class="hover:text-indigo-600 transition-colors">Dashboard</a>
                 <span>/</span>
-                <a href="{{ route('admin.library.index') }}" class="hover:text-indigo-600 transition-colors">Library Modul</a>
+                @if($fromTeacher && $teacher)
+                    <a href="{{ route('admin.teachers.index') }}" class="hover:text-indigo-600 transition-colors">Master Data Guru</a>
+                    <span>/</span>
+                    <a href="{{ route('admin.teachers.show', $teacher) }}" class="hover:text-indigo-600 transition-colors truncate max-w-[160px]">{{ $teacher->name }}</a>
+                @else
+                    <a href="{{ route('admin.library.index') }}" class="hover:text-indigo-600 transition-colors">Library Modul</a>
+                @endif
                 <span>/</span>
                 <span class="text-slate-700 font-semibold truncate max-w-xs sm:max-w-md">{{ $module->title }}</span>
             </nav>
@@ -148,13 +158,23 @@
 
         {{-- Actions --}}
         <div class="flex items-center gap-2.5 flex-wrap">
-            <a href="{{ route('admin.library.index') }}"
-               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold transition-all shadow-xs">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-                </svg>
-                <span>Kembali ke Library</span>
-            </a>
+            @if($fromTeacher && $teacher)
+                <a href="{{ route('admin.teachers.show', $teacher) }}"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold transition-all shadow-xs">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                    </svg>
+                    <span>Kembali ke Detail Guru</span>
+                </a>
+            @else
+                <a href="{{ route('admin.library.index') }}"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold transition-all shadow-xs">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                    </svg>
+                    <span>Kembali ke Library</span>
+                </a>
+            @endif
 
             {{-- Moderasi Toggle Share --}}
             <form action="{{ route('admin.library.toggle-share', $module) }}" method="POST" onsubmit="return confirm('{{ $module->is_shared ? 'Tarik modul ini dari Library Publik?' : 'Publikasikan modul ini ke Library Publik?' }}');">
@@ -237,7 +257,16 @@
                         <div class="w-6 h-6 rounded-lg bg-indigo-600 text-white font-black text-[10px] flex items-center justify-center">
                             {{ strtoupper(substr($module->teacher->name ?? 'G', 0, 1)) }}
                         </div>
-                        <span>Penyusun: <strong class="text-white">{{ $module->teacher->name ?? 'Guru' }}</strong> (NIP: {{ $module->teacher->identity_number ?? '-' }})</span>
+                        <span>Penyusun: 
+                            @if($module->teacher)
+                                <a href="{{ route('admin.teachers.show', $module->teacher) }}" class="text-white hover:text-indigo-300 font-bold underline decoration-dotted transition-colors" title="Lihat Profil Guru">
+                                    {{ $module->teacher->name }}
+                                </a>
+                            @else
+                                <strong class="text-white">Guru</strong>
+                            @endif
+                            (NIP: {{ $module->teacher->identity_number ?? '-' }})
+                        </span>
                     </div>
                     <span>•</span>
                     <span>Rilis: {{ $module->shared_at ? $module->shared_at->format('d M Y') : $module->created_at->format('d M Y') }}</span>

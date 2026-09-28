@@ -32,12 +32,14 @@ class AdminSeeder extends Seeder
 
             $admin->update([
                 'name'            => 'Drs. Ahmad Fauzi, M.Pd.',
+                'email'           => 'ahmad@gmail.com',
                 'identity_number' => '197501011999031001',
                 'password'        => $password,
             ]);
         } else {
             Admin::create([
                 'name'            => 'Drs. Ahmad Fauzi, M.Pd.',
+                'email'           => 'ahmad@gmail.com',
                 'identity_number' => '197501011999031001',
                 'password'        => $password,
             ]);

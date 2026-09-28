@@ -10,7 +10,7 @@
     editModalOpen: false,
     deleteModalOpen: false,
     createMode: 'teacher', // 'teacher' or 'manual'
-    activeAdmin: { id: null, name: '', identity_number: '' },
+    activeAdmin: { id: null, name: '', email: '', identity_number: '' },
     openEdit(admin) {
         this.activeAdmin = JSON.parse(JSON.stringify(admin));
         this.editModalOpen = true;
@@ -206,7 +206,11 @@
                                                 </span>
                                             @endif
                                         </div>
-                                        <p class="text-xs text-slate-400 font-mono mt-0.5">NIP: {{ $a->identity_number }}</p>
+                                        <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                                            <span class="text-xs text-indigo-600 font-medium font-mono">{{ $a->email }}</span>
+                                            <span class="text-slate-300">•</span>
+                                            <span class="text-xs text-slate-400 font-mono">NIP: {{ $a->identity_number }}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </td>
@@ -410,6 +414,20 @@
 
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Email Administrator (Login) <span class="text-red-500">*</span>
+                    </label>
+                    <input type="email"
+                           name="email"
+                           required
+                           placeholder="namaSingkat@gmail.com"
+                           class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none font-mono">
+                    <p class="text-[11px] text-slate-500 mt-1">
+                        Format: <strong>namaSingkat@gmail.com</strong> (digunakan untuk login ke panel admin).
+                    </p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                         NIP / Nomor Identitas Pegawai <span class="text-red-500">*</span>
                     </label>
                     <input type="text"
@@ -487,6 +505,21 @@
                            x-model="activeAdmin.name"
                            required
                            class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Email Administrator (Login) <span class="text-red-500">*</span>
+                    </label>
+                    <input type="email"
+                           name="email"
+                           x-model="activeAdmin.email"
+                           required
+                           placeholder="namaSingkat@gmail.com"
+                           class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none font-mono">
+                    <p class="text-[11px] text-slate-500 mt-1">
+                        Format: <strong>namaSingkat@gmail.com</strong>
+                    </p>
                 </div>
 
                 <div>

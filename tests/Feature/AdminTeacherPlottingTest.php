@@ -117,4 +117,43 @@ class AdminTeacherPlottingTest extends TestCase
         $this->assertTrue($teacher->subjects->contains($subject->id));
         $this->assertTrue($teacher->classes->contains($class->id));
     }
+
+    public function test_admin_can_view_teacher_module_content_from_teacher_page()
+    {
+        $admin = $this->createAdmin();
+
+        $teacher = Teacher::create([
+            'name' => 'Guru Inspeksi Modul',
+            'identity_number' => 'NIP_TEST_' . uniqid(),
+            'password' => Hash::make('password123'),
+        ]);
+
+        $subject = Subject::firstOrCreate(['code' => 'TEST_INSP'], ['name' => 'Mapel Inspeksi']);
+        $class = SchoolClass::first();
+
+        $module = Module::create([
+            'teacher_id' => $teacher->id,
+            'class_id' => $class->id,
+            'subject_id' => $subject->id,
+            'title' => 'Modul Khusus Inspeksi Admin Master',
+            'semester' => '1',
+            'status' => 'draft',
+        ]);
+
+        // 1. Cek halaman detail guru menampilkan link & tombol Lihat Isi Modul
+        $responseShowTeacher = $this->actingAs($admin, 'admin')->get(route('admin.teachers.show', $teacher));
+        $responseShowTeacher->assertStatus(200);
+        $responseShowTeacher->assertSee('Modul Khusus Inspeksi Admin Master');
+        $responseShowTeacher->assertSee(route('admin.teachers.modules.show', [$teacher, $module]));
+        $responseShowTeacher->assertSee('Lihat Isi Modul');
+
+        // 2. Akses isi modul oleh admin master
+        $responseModule = $this->actingAs($admin, 'admin')->get(route('admin.teachers.modules.show', [$teacher, $module]));
+        $responseModule->assertStatus(200);
+        $responseModule->assertSee('Pratinjau E-Modul Pembelajaran');
+        $responseModule->assertSee('Mode Supervisi Admin');
+        $responseModule->assertSee('Modul Khusus Inspeksi Admin Master');
+        $responseModule->assertSee('Kembali ke Detail Guru');
+    }
 }
+

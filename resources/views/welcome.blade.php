@@ -299,7 +299,7 @@
                             Ujian evaluasi Post-test sumatif berstandar KKTP untuk memvalidasi ketuntasan kompetensi akhir peserta didik.
                         </p>
                         <div class="pt-2 text-[11px] font-bold text-rose-700 flex items-center gap-1.5">
-                            <span>🎯 Target KKTP Tuntas</span>
+                            <span>🎯 Target KKM Tuntas</span>
                         </div>
                     </div>
 

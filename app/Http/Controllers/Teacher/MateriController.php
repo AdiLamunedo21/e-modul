@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
 use App\Models\Module;
+use App\Services\PptxParserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -73,7 +74,9 @@ class MateriController extends Controller
             'poin_penting'     => [],
         ], $materiData);
 
-        return view('pages.teacher.modules.preview-materi', compact('module', 'data'));
+        $slides = PptxParserService::parse($data['ppt_file_path'] ?? null);
+
+        return view('pages.teacher.modules.preview-materi', compact('module', 'data', 'slides'));
     }
 
     /**
@@ -199,6 +202,39 @@ class MateriController extends Controller
         }
 
         return Storage::disk('public')->download($pptPath, $pptName);
+    }
+
+    /**
+     * Stream berkas PPT/PDF secara inline untuk pratinjau browser guru.
+     */
+    public function streamPpt(Module $module)
+    {
+        $this->authorize($module);
+
+        $materiData = is_array($module->materi_data) ? $module->materi_data : [];
+        $pptPath = $materiData['ppt_file_path'] ?? null;
+        $pptName = $materiData['ppt_file_name'] ?? 'Materi_Presentasi.pdf';
+
+        if (!$pptPath || !Storage::disk('public')->exists($pptPath)) {
+            abort(404, 'Berkas presentasi tidak ditemukan atau belum diunggah.');
+        }
+
+        $fullPath = Storage::disk('public')->path($pptPath);
+        $mime = 'application/octet-stream';
+        if (str_ends_with(strtolower($pptName), '.pdf')) {
+            $mime = 'application/pdf';
+        } elseif (str_ends_with(strtolower($pptName), '.pptx')) {
+            $mime = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+        } elseif (str_ends_with(strtolower($pptName), '.ppt')) {
+            $mime = 'application/vnd.ms-powerpoint';
+        }
+
+        return response()->file($fullPath, [
+            'Content-Type'        => $mime,
+            'Content-Disposition' => 'inline; filename="' . $pptName . '"',
+            'X-Frame-Options'     => 'SAMEORIGIN',
+            'Cache-Control'       => 'public, max-age=3600',
+        ]);
     }
 
     /**

@@ -36,8 +36,33 @@
         </div>
     @endif
 
-    {{-- ══ 1. HEADER BANNER INSTITUSIONAL ══ --}}
-    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-800 via-indigo-800 to-slate-900 p-6 sm:p-8 text-white shadow-xl shadow-blue-950/20 border border-blue-700/40">
+    {{-- ══ 1. HEADER BANNER INSTITUSIONAL (Otomatis Hilang dalam 10 Detik) ══ --}}
+    <div x-data="{
+            showBanner: true,
+            progressWidth: 100,
+            timer: null,
+            init() {
+                this.$nextTick(() => {
+                    setTimeout(() => { this.progressWidth = 0; }, 50);
+                });
+                this.timer = setTimeout(() => {
+                    this.close();
+                }, 10000);
+            },
+            close() {
+                if (this.timer) clearTimeout(this.timer);
+                this.showBanner = false;
+            }
+         }"
+         x-show="showBanner"
+         x-cloak
+         x-transition:enter="transition cubic-bezier(0.16, 1, 0.3, 1) duration-500"
+         x-transition:enter-start="opacity-0 -translate-y-4 scale-[0.98]"
+         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+         x-transition:leave="transition cubic-bezier(0.16, 1, 0.3, 1) duration-500"
+         x-transition:leave-start="opacity-100 max-h-[400px]"
+         x-transition:leave-end="opacity-0 max-h-0 py-0 -translate-y-4 overflow-hidden"
+         class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-800 via-indigo-800 to-slate-900 p-6 sm:p-8 text-white shadow-xl shadow-blue-950/20 border border-blue-700/40">
         {{-- Glow Elements --}}
         <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <div class="absolute right-1/3 -top-10 w-48 h-48 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
@@ -62,12 +87,28 @@
                 </p>
             </div>
 
-            <div class="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 text-xs text-blue-100 font-bold shrink-0">
-                <svg class="w-4 h-4 text-blue-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                </svg>
-                <span>Dikelola oleh Admin</span>
+            <div class="flex items-center gap-2.5 shrink-0 self-start md:self-center">
+                <div class="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 text-xs text-blue-100 font-bold">
+                    <svg class="w-4 h-4 text-blue-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                    </svg>
+                    <span>Dikelola oleh Admin</span>
+                </div>
+
+                {{-- Tombol Tutup Banner --}}
+                <button type="button"
+                        @click="close()"
+                        class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center text-xs font-bold transition-all cursor-pointer shrink-0 border border-white/10"
+                        title="Tutup banner">
+                    ✕
+                </button>
             </div>
+        </div>
+
+        {{-- Progress Bar Countdown 10 Detik --}}
+        <div class="relative z-10 w-full bg-white/15 rounded-full h-1 overflow-hidden mt-6">
+            <div class="bg-gradient-to-r from-blue-300 via-indigo-200 to-teal-300 h-full rounded-full transition-all duration-[10000ms] ease-linear"
+                 :style="'width: ' + progressWidth + '%'"></div>
         </div>
     </div>
 

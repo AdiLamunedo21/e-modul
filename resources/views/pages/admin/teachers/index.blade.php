@@ -9,7 +9,7 @@
     createModalOpen: false,
     editModalOpen: false,
     deleteModalOpen: false,
-    activeTeacher: { id: null, name: '', identity_number: '', subjects: [], class_ids: [], subject_ids: [] },
+    activeTeacher: { id: null, name: '', email: '', identity_number: '', subjects: [], class_ids: [], subject_ids: [] },
     openEdit(teacher) {
         this.activeTeacher = JSON.parse(JSON.stringify(teacher));
         if (!this.activeTeacher.class_ids) this.activeTeacher.class_ids = [];
@@ -149,6 +149,7 @@
                             $tDataJson = json_encode([
                                 'id' => $t->id,
                                 'name' => $t->name,
+                                'email' => $t->email,
                                 'identity_number' => $t->identity_number,
                                 'subject_ids' => $tSubjectsIds,
                                 'class_ids' => $tClassIds,
@@ -173,7 +174,11 @@
                                                 </span>
                                             @endif
                                         </div>
-                                        <p class="text-[11px] text-slate-400 font-mono">NIP: {{ $t->identity_number }}</p>
+                                        <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                                            <span class="text-[11px] text-indigo-600 font-medium font-mono">{{ $t->email }}</span>
+                                            <span class="text-slate-300">•</span>
+                                            <span class="text-[11px] text-slate-400 font-mono">NIP: {{ $t->identity_number }}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </td>
@@ -329,6 +334,13 @@
                                 <input type="text" name="name" required placeholder="Contoh: Budi Santoso, S.Kom." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
                             </div>
 
+                            {{-- Email Guru (Login) --}}
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">Email Guru (Login) <span class="text-red-500">*</span></label>
+                                <input type="email" name="email" required placeholder="namaSingkat@gmail.com" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono">
+                                <p class="text-[11px] text-slate-400 mt-1">Format: <strong>namaSingkat@gmail.com</strong> (digunakan guru untuk login ke sistem)</p>
+                            </div>
+
                             {{-- NIP / Identitas --}}
                             <div>
                                 <label class="block font-bold text-slate-700 mb-1">NIP / NUPTK / No. Identitas <span class="text-red-500">*</span></label>
@@ -434,6 +446,13 @@
                             <div>
                                 <label class="block font-bold text-slate-700 mb-1">Nama Lengkap & Gelar <span class="text-red-500">*</span></label>
                                 <input type="text" name="name" x-model="activeTeacher.name" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                            </div>
+
+                            {{-- Email Guru (Login) --}}
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">Email Guru (Login) <span class="text-red-500">*</span></label>
+                                <input type="email" name="email" x-model="activeTeacher.email" required placeholder="namaSingkat@gmail.com" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono">
+                                <p class="text-[11px] text-slate-400 mt-1">Format: <strong>namaSingkat@gmail.com</strong></p>
                             </div>
 
                             {{-- NIP / Identitas --}}

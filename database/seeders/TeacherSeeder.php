@@ -31,18 +31,21 @@ class TeacherSeeder extends Seeder
         $teachers = [
             [
                 'name'             => 'Budi Santoso, S.Kom.',
+                'email'            => 'budi@gmail.com',
                 'identity_number'  => '198501152010011002',
                 'old_identities'   => ['NIP123456', '198501152010011002'],
                 'classes'          => array_filter([$classTe1?->id, $classDp1?->id]),
             ],
             [
                 'name'             => 'Siti Aminah, M.T.',
+                'email'            => 'siti@gmail.com',
                 'identity_number'  => '198804122015022001',
                 'old_identities'   => ['NIP123457', '198804122015022001'],
                 'classes'          => array_filter([$classDp1?->id]),
             ],
             [
                 'name'             => 'Hendra Wijaya, S.T.',
+                'email'            => 'hendra@gmail.com',
                 'identity_number'  => '199008202019031003',
                 'old_identities'   => ['NIP123458', '199008202019031003'],
                 'classes'          => array_filter([$classTkj1?->id]),
@@ -76,12 +79,14 @@ class TeacherSeeder extends Seeder
 
                 $teacher->update([
                     'name'            => $tData['name'],
+                    'email'           => $tData['email'],
                     'identity_number' => $tData['identity_number'],
                     'password'        => $password,
                 ]);
             } else {
                 $teacher = Teacher::create([
                     'name'            => $tData['name'],
+                    'email'           => $tData['email'],
                     'identity_number' => $tData['identity_number'],
                     'password'        => $password,
                 ]);

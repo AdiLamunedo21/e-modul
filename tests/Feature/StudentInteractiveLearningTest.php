@@ -617,5 +617,54 @@ class StudentInteractiveLearningTest extends TestCase
             $module->delete();
         }
     }
+
+    public function test_student_can_stream_and_download_materi_documents()
+    {
+        $student = Student::first();
+        $teacher = Teacher::first();
+        $subject = Subject::first();
+
+        if (!$student || !$teacher || !$subject) {
+            $this->markTestSkipped('Data pengujian tidak mencukupi.');
+        }
+
+        $student->subjects()->syncWithoutDetaching([$subject->id]);
+
+        $filePath = 'materi-slides/test_' . uniqid() . '.pdf';
+        Storage::disk('public')->put($filePath, '%PDF-1.4 test document content');
+
+        $module = Module::create([
+            'teacher_id' => $teacher->id,
+            'class_id'   => $student->class_id,
+            'subject_id' => $subject->id,
+            'title'      => 'Modul Uji Dokumen ' . uniqid(),
+            'status'     => 'published',
+            'has_materi' => true,
+            'materi_data' => [
+                'judul_materi'  => 'Materi Dokumen PDF',
+                'uraian_materi' => '<p>Uraian materi uji dokumen presentasi.</p>',
+                'ppt_file_path' => $filePath,
+                'ppt_file_name' => 'Dokumen_Uji.pdf',
+            ],
+        ]);
+
+        try {
+            // 1. Stream Materi PDF
+            $streamRes = $this->actingAs($student, 'student')
+                ->get(route('student.modules.materi.stream-ppt', $module));
+            $streamRes->assertStatus(200);
+            $this->assertEquals('application/pdf', $streamRes->headers->get('Content-Type'));
+            $this->assertStringContainsString('inline', $streamRes->headers->get('Content-Disposition'));
+
+            // 2. Download Materi PDF
+            $downRes = $this->actingAs($student, 'student')
+                ->get(route('student.modules.materi.download-ppt', $module));
+            $downRes->assertStatus(200);
+            $this->assertStringContainsString('attachment', $downRes->headers->get('Content-Disposition'));
+        } finally {
+            Storage::disk('public')->delete($filePath);
+            $module->delete();
+        }
+    }
 }
 

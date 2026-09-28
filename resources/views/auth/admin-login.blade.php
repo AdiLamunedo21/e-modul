@@ -19,9 +19,9 @@
             <form action="{{ route('login.admin') }}" method="POST" class="space-y-5">
                 @csrf
                 <div>
-                    <label for="identity_number" class="block text-sm font-medium text-slate-700 mb-1">Nomor Induk Pegawai (NIP)</label>
-                    <input type="text" name="identity_number" id="identity_number" value="{{ old('identity_number') }}" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition outline-none" placeholder="Masukkan NIP Anda">
-                    @error('identity_number')
+                    <label for="email" class="block text-sm font-medium text-slate-700 mb-1">Email Administrator</label>
+                    <input type="email" name="email" id="email" value="{{ old('email') }}" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition outline-none" placeholder="namaSingkat@gmail.com">
+                    @error('email')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>

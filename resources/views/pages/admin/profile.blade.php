@@ -75,7 +75,8 @@
                 {{ strtoupper(substr($admin->name ?? 'A', 0, 2)) }}
             </div>
             <h2 class="text-base font-black text-slate-900 tracking-tight leading-snug">{{ $admin->name }}</h2>
-            <p class="text-xs text-slate-400 font-mono mt-0.5">NIP: {{ $admin->identity_number }}</p>
+            <p class="text-xs text-indigo-600 font-mono font-medium mt-0.5">{{ $admin->email }}</p>
+            <p class="text-xs text-slate-400 font-mono">NIP: {{ $admin->identity_number }}</p>
 
             <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-around text-xs">
                 <div class="text-center">
@@ -139,6 +140,17 @@
                                required
                                placeholder="Contoh: Drs. Ahmad Fauzi, M.Pd."
                                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-800 font-medium">
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Email Administrator (Login) <span class="text-red-500">*</span></label>
+                        <input type="email"
+                               name="email"
+                               value="{{ old('email', $admin->email) }}"
+                               required
+                               placeholder="namaSingkat@gmail.com"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-800 font-mono">
+                        <p class="text-[11px] text-slate-400 mt-1">Format: <strong>namaSingkat@gmail.com</strong> (digunakan untuk login ke panel admin)</p>
                     </div>
 
                     <div>

@@ -7,26 +7,79 @@
 
 <div x-data="{ deleteModalOpen: false, deleteUrl: '', deleteTitle: '' }">
 
-{{-- ══ Header Workspace & Contextual Greeting ══ --}}
-<div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
-    <div>
-        <div class="flex items-center gap-2 mb-1.5 flex-wrap">
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200">
-                <span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
-                E-Modul Pembelajaran Interaktif
-            </span>
-            <span class="text-xs font-medium text-slate-400">SMKN 3 Yogyakarta</span>
-        </div>
-        <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-            Selamat Datang, {{ $teacher->name ?? 'Bapak/Ibu Guru' }} 👋
-        </h1>
-        <p class="mt-1 text-sm text-slate-500 max-w-3xl">
-            Kelola modul modular 5 bagian, bagikan ke perpustakaan bersama, pantau perkembangan siswa binaan, dan lakukan penilaian adaptif di <strong>Grading Center</strong>.
-        </p>
+{{-- ══ Banner Sambutan Selamat Datang (Otomatis Hilang dalam 5 Detik) ══ --}}
+<div x-data="{
+        showBanner: true,
+        progressWidth: 100,
+        timer: null,
+        init() {
+            this.$nextTick(() => {
+                setTimeout(() => { this.progressWidth = 0; }, 50);
+            });
+            this.timer = setTimeout(() => {
+                this.close();
+            }, 5000);
+        },
+        close() {
+            if (this.timer) clearTimeout(this.timer);
+            this.showBanner = false;
+        }
+     }"
+     x-show="showBanner"
+     x-cloak
+     x-transition:enter="transition cubic-bezier(0.16, 1, 0.3, 1) duration-500"
+     x-transition:enter-start="opacity-0 -translate-y-4 scale-[0.98]"
+     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+     x-transition:leave="transition cubic-bezier(0.16, 1, 0.3, 1) duration-500"
+     x-transition:leave-start="opacity-100 max-h-[350px] mb-6"
+     x-transition:leave-end="opacity-0 max-h-0 mb-0 py-0 -translate-y-4 overflow-hidden"
+     class="relative overflow-hidden mb-6 rounded-3xl bg-gradient-to-r from-blue-700 via-indigo-800 to-slate-900 text-white p-5 sm:p-6 shadow-xl shadow-indigo-950/20 border border-blue-400/30">
+    
+    {{-- Aksen Latar Belakang --}}
+    <div class="absolute -right-8 -top-8 w-44 h-44 rounded-full bg-blue-400/10 blur-2xl pointer-events-none"></div>
+    <div class="absolute -left-8 -bottom-8 w-44 h-44 rounded-full bg-indigo-400/10 blur-2xl pointer-events-none"></div>
 
+    <div class="relative z-10 flex items-start justify-between gap-4">
+        <div class="space-y-2 max-w-3xl">
+            <div class="flex items-center gap-2 flex-wrap">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/15 text-blue-100 border border-white/20 backdrop-blur-sm">
+                    <span class="w-1.5 h-1.5 rounded-full bg-cyan-300 animate-pulse"></span>
+                    E-Modul Pembelajaran Interaktif
+                </span>
+                <span class="text-xs font-medium text-slate-300">SMKN 3 Yogyakarta</span>
+            </div>
+            
+            <h1 class="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight">
+                Selamat Datang, {{ $teacher->name ?? 'Bapak/Ibu Guru' }} 👋
+            </h1>
+
+            <p class="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
+                Kelola modul modular 5 bagian, bagikan ke perpustakaan bersama, pantau perkembangan siswa binaan, dan lakukan penilaian adaptif di <strong class="text-white font-bold">Grading Center</strong>.
+            </p>
+        </div>
+
+        {{-- Tombol Tutup Banner --}}
+        <button type="button"
+                @click="close()"
+                class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center text-xs font-bold transition-all cursor-pointer shrink-0 border border-white/10"
+                title="Tutup banner">
+            ✕
+        </button>
+    </div>
+
+    {{-- Progress Bar Countdown 5 Detik --}}
+    <div class="relative z-10 w-full bg-white/15 rounded-full h-1 overflow-hidden mt-4">
+        <div class="bg-gradient-to-r from-blue-300 via-indigo-200 to-teal-300 h-full rounded-full transition-all duration-[5000ms] ease-linear"
+             :style="'width: ' + progressWidth + '%'"></div>
+    </div>
+</div>
+
+{{-- ══ Header Workspace & Contextual Actions ══ --}}
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div>
         {{-- Banner Tanggung Jawab Mata Pelajaran Guru --}}
         @if($teacher->subjects->isNotEmpty())
-            <div class="mt-3.5 inline-flex items-center gap-2.5 px-3.5 py-2 rounded-2xl bg-slate-900 text-white shadow-sm border border-slate-700/60 flex-wrap">
+            <div class="inline-flex items-center gap-2.5 px-3.5 py-2 rounded-2xl bg-slate-900 text-white shadow-sm border border-slate-700/60 flex-wrap">
                 <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
                     <span>🎯</span>
                     <span>Tanggung Jawab Mapel:</span>
@@ -39,6 +92,11 @@
                         </span>
                     @endforeach
                 </div>
+            </div>
+        @else
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                <h2 class="text-base font-bold text-slate-800 tracking-tight">Workspace Guru</h2>
             </div>
         @endif
     </div>

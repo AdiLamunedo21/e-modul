@@ -10,6 +10,7 @@
     activeTeacher: {
         id: {{ $teacher->id }},
         name: '{{ addslashes($teacher->name) }}',
+        email: '{{ $teacher->email }}',
         identity_number: '{{ $teacher->identity_number }}',
         subject_ids: {{ json_encode($teacher->allAssignedSubjectIds()) }},
         class_ids: {{ json_encode($teacher->allAssignedClassIds()) }}
@@ -83,10 +84,17 @@
                             Guru Pendidik
                         </span>
                     </div>
-                    <p class="text-xs text-slate-400 font-mono mt-1 flex items-center gap-2">
-                        <span>NIP:</span>
+                    <div class="flex items-center gap-2 mt-1 flex-wrap text-xs font-mono">
+                        <span class="font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-md flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/>
+                            </svg>
+                            {{ $teacher->email }}
+                        </span>
+                        <span class="text-slate-300">•</span>
+                        <span class="text-slate-400">NIP:</span>
                         <span class="font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">{{ $teacher->identity_number }}</span>
-                    </p>
+                    </div>
 
                     {{-- Meta: Mapel & Kelas Didik --}}
                     <div class="flex flex-wrap gap-4 mt-3 pt-3 border-t border-slate-100 text-xs">
@@ -238,7 +246,9 @@
 
                             {{-- Judul Modul --}}
                             <h3 class="text-sm font-black text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-2 mb-2 leading-snug">
-                                {{ $mod->title }}
+                                <a href="{{ route('admin.teachers.modules.show', [$teacher, $mod]) }}" class="hover:underline">
+                                    {{ $mod->title }}
+                                </a>
                             </h3>
 
                             {{-- Meta: Mapel & Rombel Kelas --}}
@@ -295,10 +305,19 @@
                             </div>
                         </div>
 
-                        {{-- Footer Card: Info Guru --}}
-                        <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-                            <span class="text-[11px] font-medium">Oleh: <strong class="text-slate-700">{{ $teacher->name }}</strong></span>
-                            <span class="text-[10px] font-mono">ID: #{{ $mod->id }}</span>
+                        {{-- Footer Card: Info Guru & Tombol Lihat Isi Modul --}}
+                        <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 text-xs">
+                            <span class="text-[10px] font-mono text-slate-400">ID: #{{ $mod->id }}</span>
+
+                            <a href="{{ route('admin.teachers.modules.show', [$teacher, $mod]) }}"
+                               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-600 hover:text-white border border-indigo-200 transition-all shadow-2xs group/btn"
+                               title="Lihat & Supervisi Isi Lengkap E-Modul">
+                                <svg class="w-3.5 h-3.5 text-indigo-500 group-hover/btn:text-white transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span>Lihat Isi Modul</span>
+                            </a>
                         </div>
 
                     </div>
@@ -372,6 +391,13 @@
                             <div>
                                 <label class="block font-bold text-slate-700 mb-1">Nama Lengkap & Gelar <span class="text-red-500">*</span></label>
                                 <input type="text" name="name" x-model="activeTeacher.name" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                            </div>
+
+                            {{-- Email Guru (Login) --}}
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">Email Guru (Login) <span class="text-red-500">*</span></label>
+                                <input type="email" name="email" x-model="activeTeacher.email" required placeholder="namaSingkat@gmail.com" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono">
+                                <p class="text-[11px] text-slate-400 mt-1">Format: <strong>namaSingkat@gmail.com</strong> (digunakan guru untuk login ke sistem)</p>
                             </div>
 
                             {{-- NIP / Identitas --}}

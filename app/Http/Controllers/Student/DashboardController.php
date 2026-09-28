@@ -314,11 +314,6 @@ class DashboardController extends Controller
             return !empty($m['is_active_in_class']) || $m['progress_status'] === 'in_progress';
         })->sortByDesc('is_active_in_class')->take(1)->values();
 
-        // Jika belum ada modul yang ditandai aktif di kelas dan belum ada progres siswa,
-        // namun ada modul terbit di kelasnya, fallback tampilkan modul terbit yang belum tuntas
-        if ($inProgressModules->isEmpty() && $processedModules->isNotEmpty()) {
-            $inProgressModules = $processedModules->where('progress_status', '!=', 'completed')->take(1)->values();
-        }
         $completedModules = $processedModules->where('progress_status', 'completed')->values();
 
         // Batasi modul yang tampil di tab Semua Modul dashboard siswa maksimal 15 modul (prioritaskan modul aktif di kelas dan terbaru)

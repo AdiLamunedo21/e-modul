@@ -70,12 +70,13 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::post('/switch-to-teacher',             [AdminManagementController::class, 'switchToTeacher'])->name('admin.switch-to-teacher');
 
     // Master Data & Pendaftaran Guru
-    Route::get('/teachers',                       [AdminTeacherController::class, 'index'])->name('admin.teachers.index');
-    Route::post('/teachers',                      [AdminTeacherController::class, 'store'])->name('admin.teachers.store');
-    Route::get('/teachers/{teacher}',             [AdminTeacherController::class, 'show'])->name('admin.teachers.show');
-    Route::patch('/teachers/{teacher}',           [AdminTeacherController::class, 'update'])->name('admin.teachers.update');
-    Route::delete('/teachers/{teacher}',          [AdminTeacherController::class, 'destroy'])->name('admin.teachers.destroy');
-    Route::post('/teachers/{teacher}/make-admin', [AdminTeacherController::class, 'makeAdmin'])->name('admin.teachers.make-admin');
+    Route::get('/teachers',                            [AdminTeacherController::class, 'index'])->name('admin.teachers.index');
+    Route::post('/teachers',                           [AdminTeacherController::class, 'store'])->name('admin.teachers.store');
+    Route::get('/teachers/{teacher}',                  [AdminTeacherController::class, 'show'])->name('admin.teachers.show');
+    Route::get('/teachers/{teacher}/modules/{module}', [AdminTeacherController::class, 'showModule'])->name('admin.teachers.modules.show');
+    Route::patch('/teachers/{teacher}',                [AdminTeacherController::class, 'update'])->name('admin.teachers.update');
+    Route::delete('/teachers/{teacher}',               [AdminTeacherController::class, 'destroy'])->name('admin.teachers.destroy');
+    Route::post('/teachers/{teacher}/make-admin',      [AdminTeacherController::class, 'makeAdmin'])->name('admin.teachers.make-admin');
 
     // Master Data & Pendaftaran Siswa
     Route::get('/students',                                  [AdminStudentController::class, 'index'])->name('admin.students.index');
@@ -165,6 +166,7 @@ Route::middleware('auth:teacher')->prefix('teacher')->name('teacher.')->group(fu
     Route::post('/modules/{module}/materi/toggle',       [MateriController::class, 'toggle'])->name('modules.materi.toggle');
     Route::get('/modules/{module}/materi/preview',       [MateriController::class, 'preview'])->name('modules.materi.preview');
     Route::get('/modules/{module}/materi/download-ppt',   [MateriController::class, 'downloadPpt'])->name('modules.materi.download-ppt');
+    Route::get('/modules/{module}/materi/stream-ppt',     [MateriController::class, 'streamPpt'])->name('modules.materi.stream-ppt');
     Route::post('/modules/{module}/materi/upload-image', [MateriController::class, 'uploadImage'])->name('modules.materi.upload-image');
 
     // Komponen Inti: 3. Video YouTube & Ringkasan
@@ -269,6 +271,10 @@ Route::middleware('auth:student')->prefix('student')->group(function () {
 
     // Antarmuka Interaktif Mulai Belajar E-Modul 5 Bagian
     Route::get('/modules/{module}',                         [StudentModuleController::class, 'show'])->name('student.modules.show');
+    Route::get('/modules/{module}/materi/stream-ppt',       [StudentModuleController::class, 'streamMateriPpt'])->name('student.modules.materi.stream-ppt');
+    Route::get('/modules/{module}/materi/download-ppt',     [StudentModuleController::class, 'downloadMateriPpt'])->name('student.modules.materi.download-ppt');
+    Route::get('/modules/{module}/job-sheet/stream-pdf',    [StudentModuleController::class, 'streamJobSheetPdf'])->name('student.modules.job-sheet.stream-pdf');
+    Route::get('/modules/{module}/lkpd/stream-pdf',         [StudentModuleController::class, 'streamLkpdPdf'])->name('student.modules.lkpd.stream-pdf');
     Route::post('/modules/{module}/mark-read',              [StudentModuleController::class, 'markRead'])->name('student.modules.mark-read');
     Route::post('/modules/{module}/pre-test',               [StudentModuleController::class, 'submitPreTest'])->name('student.modules.pre-test.submit');
     Route::post('/modules/{module}/video',                  [StudentModuleController::class, 'submitVideoSummary'])->name('student.modules.video.submit');

@@ -16,6 +16,7 @@ use App\Models\StudentResult;
 use App\Models\Subject;
 use App\Models\Submission;
 use App\Models\VideoSummary;
+use App\Services\PptxParserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -179,6 +180,9 @@ class ModuleController extends Controller
             $currentSection = 1;
         }
 
+        // Parse slide presentasi jika berformat PPTX untuk penampil slide interaktif
+        $materiSlides = PptxParserService::parse($materiData['ppt_file_path'] ?? null);
+
         return view('pages.student.modules.show', compact(
             'student',
             'module',
@@ -186,6 +190,7 @@ class ModuleController extends Controller
             'currentSection',
             'informasiUmum',
             'materiData',
+            'materiSlides',
             'videoData',
             'videosList',
             'embedData',
@@ -601,5 +606,104 @@ class ModuleController extends Controller
         }
 
         return $result;
+    }
+
+    /**
+     * Stream berkas presentasi materi (PDF / PPT / PPTX) untuk siswa secara inline.
+     */
+    public function streamMateriPpt(Module $module)
+    {
+        $this->authorizeStudentAccess($module);
+
+        $materiData = is_array($module->materi_data) ? $module->materi_data : [];
+        $pptPath = $materiData['ppt_file_path'] ?? null;
+        $pptName = $materiData['ppt_file_name'] ?? 'Materi_Presentasi.pdf';
+
+        if (!$pptPath || !Storage::disk('public')->exists($pptPath)) {
+            abort(404, 'Berkas presentasi tidak ditemukan atau belum diunggah.');
+        }
+
+        $fullPath = Storage::disk('public')->path($pptPath);
+        $mime = 'application/octet-stream';
+        if (str_ends_with(strtolower($pptName), '.pdf')) {
+            $mime = 'application/pdf';
+        } elseif (str_ends_with(strtolower($pptName), '.pptx')) {
+            $mime = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+        } elseif (str_ends_with(strtolower($pptName), '.ppt')) {
+            $mime = 'application/vnd.ms-powerpoint';
+        }
+
+        return response()->file($fullPath, [
+            'Content-Type'        => $mime,
+            'Content-Disposition' => 'inline; filename="' . $pptName . '"',
+            'X-Frame-Options'     => 'SAMEORIGIN',
+            'Cache-Control'       => 'public, max-age=3600',
+        ]);
+    }
+
+    /**
+     * Download berkas presentasi materi (PDF / PPT / PPTX) untuk siswa.
+     */
+    public function downloadMateriPpt(Module $module)
+    {
+        $this->authorizeStudentAccess($module);
+
+        $materiData = is_array($module->materi_data) ? $module->materi_data : [];
+        $pptPath = $materiData['ppt_file_path'] ?? null;
+        $pptName = $materiData['ppt_file_name'] ?? 'Materi_Presentasi';
+
+        if (!$pptPath || !Storage::disk('public')->exists($pptPath)) {
+            return back()->with('error', 'Berkas presentasi tidak ditemukan atau belum diunggah.');
+        }
+
+        return Storage::disk('public')->download($pptPath, $pptName);
+    }
+
+    /**
+     * Stream berkas PDF Job Sheet untuk siswa.
+     */
+    public function streamJobSheetPdf(Module $module)
+    {
+        $this->authorizeStudentAccess($module);
+
+        $jobSheet = $module->jobSheets->first();
+        $pdfPath = $jobSheet?->pdf_file_path;
+        $pdfName = $jobSheet?->pdf_file_name ?? 'Job_Sheet.pdf';
+
+        if (!$pdfPath || !Storage::disk('public')->exists($pdfPath)) {
+            abort(404, 'Berkas panduan Job Sheet tidak ditemukan.');
+        }
+
+        $fullPath = Storage::disk('public')->path($pdfPath);
+        return response()->file($fullPath, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $pdfName . '"',
+            'X-Frame-Options'     => 'SAMEORIGIN',
+            'Cache-Control'       => 'public, max-age=3600',
+        ]);
+    }
+
+    /**
+     * Stream berkas PDF LKPD untuk siswa.
+     */
+    public function streamLkpdPdf(Module $module)
+    {
+        $this->authorizeStudentAccess($module);
+
+        $lkpd = $module->lkpds->first();
+        $pdfPath = $lkpd?->pdf_file_path;
+        $pdfName = $lkpd?->pdf_file_name ?? 'Panduan_LKPD.pdf';
+
+        if (!$pdfPath || !Storage::disk('public')->exists($pdfPath)) {
+            abort(404, 'Berkas panduan LKPD tidak ditemukan.');
+        }
+
+        $fullPath = Storage::disk('public')->path($pdfPath);
+        return response()->file($fullPath, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $pdfName . '"',
+            'X-Frame-Options'     => 'SAMEORIGIN',
+            'Cache-Control'       => 'public, max-age=3600',
+        ]);
     }
 }
