@@ -187,7 +187,7 @@ class TeacherMateriTest extends TestCase
         $response->assertJsonValidationErrors(['judul_materi', 'uraian_materi']);
     }
 
-    public function test_teacher_can_stream_and_preview_materi_with_slides()
+    public function test_teacher_can_stream_and_preview_materi()
     {
         [$teacher, $module] = $this->getTeacherAndModule();
         if (!$teacher) {
@@ -222,6 +222,51 @@ class TeacherMateriTest extends TestCase
             $previewRes->assertSee('Presentasi_Guru.pdf', false);
         } finally {
             Storage::disk('public')->delete($filePath);
+        }
+    }
+
+    public function test_teacher_streams_converted_pdf_when_available()
+    {
+        [$teacher, $module] = $this->getTeacherAndModule();
+        if (!$teacher) {
+            $this->markTestSkipped('Data pengujian tidak mencukupi.');
+        }
+
+        $baseName = 'test_pptx_' . uniqid();
+        $pptxPath = 'materi-slides/' . $baseName . '.pptx';
+        $pdfPath  = 'materi-slides/' . $baseName . '.pdf';
+
+        Storage::disk('public')->put($pptxPath, 'fake pptx content');
+        Storage::disk('public')->put($pdfPath, '%PDF-1.4 converted visual slide');
+
+        $module->update([
+            'has_materi' => true,
+            'materi_data' => [
+                'judul_materi'     => 'Materi PowerPoint Terkonversi',
+                'uraian_materi'    => '<p>Uraian materi dengan berkas slide PPTX yang telah dikonversi.</p>',
+                'ppt_file_path'    => $pptxPath,
+                'ppt_file_name'    => 'Slide_Asli.pptx',
+                'pdf_preview_path' => $pdfPath,
+            ],
+        ]);
+
+        try {
+            // Stream harus menghasilkan application/pdf
+            $streamRes = $this->actingAs($teacher, 'teacher')
+                ->get(route('teacher.modules.materi.stream-ppt', $module));
+            $streamRes->assertStatus(200);
+            $this->assertEquals('application/pdf', $streamRes->headers->get('Content-Type'));
+            $this->assertStringContainsString('inline', $streamRes->headers->get('Content-Disposition'));
+            $this->assertStringContainsString('Slide_Asli.pdf', $streamRes->headers->get('Content-Disposition'));
+
+            // Download harus tetap mengunduh file asli PPTX
+            $downloadRes = $this->actingAs($teacher, 'teacher')
+                ->get(route('teacher.modules.materi.download-ppt', $module));
+            $downloadRes->assertStatus(200);
+            $this->assertStringContainsString('Slide_Asli.pptx', $downloadRes->headers->get('Content-Disposition'));
+        } finally {
+            Storage::disk('public')->delete($pptxPath);
+            Storage::disk('public')->delete($pdfPath);
         }
     }
 }

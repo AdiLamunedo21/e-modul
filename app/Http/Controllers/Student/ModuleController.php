@@ -16,7 +16,7 @@ use App\Models\StudentResult;
 use App\Models\Subject;
 use App\Models\Submission;
 use App\Models\VideoSummary;
-use App\Services\PptxParserService;
+use App\Services\PptConverterService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -180,9 +180,6 @@ class ModuleController extends Controller
             $currentSection = 1;
         }
 
-        // Parse slide presentasi jika berformat PPTX untuk penampil slide interaktif
-        $materiSlides = PptxParserService::parse($materiData['ppt_file_path'] ?? null);
-
         return view('pages.student.modules.show', compact(
             'student',
             'module',
@@ -190,7 +187,6 @@ class ModuleController extends Controller
             'currentSection',
             'informasiUmum',
             'materiData',
-            'materiSlides',
             'videoData',
             'videosList',
             'embedData',
@@ -623,6 +619,20 @@ class ModuleController extends Controller
             abort(404, 'Berkas presentasi tidak ditemukan atau belum diunggah.');
         }
 
+        // Cek pratinjau PDF visual (hasil konversi otomatis atau dokumen asli PDF)
+        $previewPath = PptConverterService::getPdfPreviewPath($pptPath, $materiData['pdf_preview_path'] ?? null);
+        if ($previewPath && Storage::disk('public')->exists($previewPath)) {
+            $pdfFullPath = Storage::disk('public')->path($previewPath);
+            return response()->file($pdfFullPath, [
+                'Content-Type'        => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="' . pathinfo($pptName, PATHINFO_FILENAME) . '.pdf"',
+                'X-Frame-Options'     => 'SAMEORIGIN',
+                'Cache-Control'       => 'no-cache, no-store, must-revalidate',
+                'Pragma'              => 'no-cache',
+                'Expires'             => '0',
+            ]);
+        }
+
         $fullPath = Storage::disk('public')->path($pptPath);
         $mime = 'application/octet-stream';
         if (str_ends_with(strtolower($pptName), '.pdf')) {
@@ -637,7 +647,9 @@ class ModuleController extends Controller
             'Content-Type'        => $mime,
             'Content-Disposition' => 'inline; filename="' . $pptName . '"',
             'X-Frame-Options'     => 'SAMEORIGIN',
-            'Cache-Control'       => 'public, max-age=3600',
+            'Cache-Control'       => 'no-cache, no-store, must-revalidate',
+            'Pragma'              => 'no-cache',
+            'Expires'             => '0',
         ]);
     }
 

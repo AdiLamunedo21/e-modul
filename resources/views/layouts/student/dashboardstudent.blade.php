@@ -45,6 +45,7 @@
         leaveClassTarget: { id: null, name: '' }
     }"
     @set-sidebar-open.window="sidebarOpen = $event.detail"
+    @toggle-sidebar-focus.window="sidebarOpen = !sidebarOpen"
 >
     {{--
         BACKDROP — hanya di mobile (lg:hidden), mulai dari top-16 agar header tetap bisa diakses.
@@ -94,7 +95,7 @@
             @endif
 
             {{-- Konten halaman (scrollable independen, pb-24 agar tidak tertutup mobile nav) --}}
-            <main class="flex-1 px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-6 max-w-7xl mx-auto w-full">
+            <main class="flex-1 px-3 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-6 {{ request()->routeIs('student.modules.*') ? 'w-full max-w-[1600px]' : 'max-w-7xl' }} mx-auto w-full transition-all duration-300">
                 @yield('content')
             </main>
         </div>

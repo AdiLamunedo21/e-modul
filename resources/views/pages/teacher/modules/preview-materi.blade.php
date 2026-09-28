@@ -38,7 +38,7 @@
 
     {{-- ═══ TOP BAR ═══ --}}
     <div class="sticky top-0 z-50 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 shadow-xl">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-lg shrink-0">📱</div>
                 <div>
@@ -56,7 +56,7 @@
     </div>
 
     {{-- ═══ KONTEN PRATINJAU ═══ --}}
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-16">
+    <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-16">
         <div class="w-full animate-fadeInUp">
             <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-200/60">
 
@@ -93,10 +93,11 @@
                             $pptName = $data['ppt_file_name'] ?? 'Berkas Presentasi Pembelajaran';
                             $pptExt = strtolower(pathinfo($pptName, PATHINFO_EXTENSION) ?: pathinfo($pptPath, PATHINFO_EXTENSION));
                             $isPdf = $pptExt === 'pdf';
-                            $streamUrl = route('teacher.modules.materi.stream-ppt', $module);
+                            $pdfPreview = \App\Services\PptConverterService::getPdfPreviewPath($pptPath, $data['pdf_preview_path'] ?? null);
+                            $hasPdfPreview = !empty($pdfPreview);
+                            $vParam = substr(md5(($pdfPreview ?? $pptPath) . ($data['ppt_file_size'] ?? '')), 0, 8);
+                            $streamUrl = route('teacher.modules.materi.stream-ppt', ['module' => $module, 'v' => $vParam]);
                             $downloadUrl = route('teacher.modules.materi.download-ppt', $module);
-                            $parsedSlides = $slides ?? \App\Services\PptxParserService::parse($pptPath);
-                            $hasSlides = !empty($parsedSlides) && count($parsedSlides) > 0;
                             $fullUrl = url('storage/' . $pptPath);
                             $officeViewerUrl = 'https://view.officeapps.live.com/op/embed.aspx?src=' . urlencode($fullUrl);
                             $googleViewerUrl = 'https://docs.google.com/viewer?url=' . urlencode($fullUrl) . '&embedded=true';
@@ -104,26 +105,9 @@
 
                         <div x-data="{
                                 isFullscreen: false,
-                                currentSlide: 1,
-                                totalSlides: {{ count($parsedSlides) }},
-                                viewMode: '{{ $isPdf ? 'pdf' : ($hasSlides ? 'slides' : 'cloud') }}',
+                                expandedHeight: true,
+                                isWide: true,
                                 cloudViewer: 'office',
-                                nextSlide() {
-                                    if (this.currentSlide < this.totalSlides) {
-                                        this.currentSlide++;
-                                    }
-                                },
-                                prevSlide() {
-                                    if (this.currentSlide > 1) {
-                                        this.currentSlide--;
-                                    }
-                                },
-                                goToSlide(n) {
-                                    const val = parseInt(n);
-                                    if (!isNaN(val) && val >= 1 && val <= this.totalSlides) {
-                                        this.currentSlide = val;
-                                    }
-                                },
                                 toggleFullscreen() {
                                     const el = this.$refs.teacherDocPreview;
                                     if (!document.fullscreenElement) {
@@ -142,13 +126,12 @@
                                 }
                              }"
                              @fullscreenchange.window="isFullscreen = !!document.fullscreenElement"
-                             @keydown.window="if ($event.key === 'ArrowRight' || $event.key === 'PageDown') nextSlide(); else if ($event.key === 'ArrowLeft' || $event.key === 'PageUp') prevSlide();"
                              class="mt-8 space-y-3">
                             
                             {{-- Container Frame Pratinjau Dokumen --}}
                             <div x-ref="teacherDocPreview"
-                                 class="rounded-3xl border border-violet-200 shadow-md bg-slate-900 overflow-hidden flex flex-col transition-all"
-                                 :class="isFullscreen ? 'fixed inset-0 z-[99999] rounded-none border-none shadow-none h-screen w-screen' : 'w-full'">
+                                 class="rounded-3xl border border-violet-200 shadow-md bg-slate-900 overflow-hidden flex flex-col transition-all duration-300"
+                                 :class="isFullscreen ? 'fixed inset-0 z-[99999] rounded-none border-none shadow-none h-screen w-screen' : (isWide ? 'w-auto -mx-3 sm:-mx-6 lg:-mx-8' : 'w-full')">
                                 
                                 {{-- Top Header / Toolbar ala Google Sites --}}
                                 <div class="px-4 sm:px-6 py-3.5 bg-slate-900 text-white flex flex-wrap items-center justify-between gap-3 shrink-0 border-b border-slate-800">
@@ -165,51 +148,45 @@
                                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-500/20 text-rose-300 border border-rose-400/30 shrink-0">
                                                         <span>📄</span> Dokumen PDF
                                                     </span>
-                                                @elseif($hasSlides)
-                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-violet-500/20 text-violet-300 border border-violet-400/30 shrink-0">
-                                                        <span>📊</span> {{ count($parsedSlides) }} Slide Interaktif
-                                                    </span>
                                                 @else
                                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 shrink-0">
-                                                        <span>✓</span> Tersedia untuk Siswa
+                                                        <span>✨</span> Slide Visual (100% Desain Asli)
                                                     </span>
                                                 @endif
                                             </div>
                                             <p class="text-[11px] text-slate-400 truncate">
                                                 @if($isPdf)
                                                     Dokumen PDF Pembelajaran Interaktif (Simulasi Siswa)
-                                                @elseif($hasSlides)
-                                                    Penampil Slide PPTX Interaktif Mandiri (100% Offline)
                                                 @else
-                                                    Slide Presentasi Pembelajaran
+                                                    Pratinjau Visual Slide Sempurna (Format & Desain Asli)
                                                 @endif
                                             </p>
                                         </div>
                                     </div>
 
-                                    {{-- Action Toolbar: Navigasi Slide, Layar Penuh, Buka Tab Baru, Unduh --}}
+                                    {{-- Action Toolbar: Ukuran Halaman, Layar Penuh, Buka Tab Baru, Unduh --}}
                                     <div class="flex items-center gap-2 shrink-0 flex-wrap">
-                                        @if(!$isPdf && $hasSlides)
-                                            <div class="hidden sm:flex items-center bg-slate-800 rounded-xl p-0.5 border border-slate-700" x-show="viewMode === 'slides'">
-                                                <button type="button"
-                                                        @click="prevSlide()"
-                                                        :disabled="currentSlide <= 1"
-                                                        class="px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition"
-                                                        title="Slide Sebelumnya (Panah Kiri)">
-                                                    ←
-                                                </button>
-                                                <span class="px-2.5 text-xs font-mono font-bold text-violet-300">
-                                                    <span x-text="currentSlide">1</span> / {{ count($parsedSlides) }}
-                                                </span>
-                                                <button type="button"
-                                                        @click="nextSlide()"
-                                                        :disabled="currentSlide >= totalSlides"
-                                                        class="px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition"
-                                                        title="Slide Selanjutnya (Panah Kanan)">
-                                                    →
-                                                </button>
-                                            </div>
-                                        @endif
+                                        {{-- Toggle Tinggi Penuh (1 Lembar Word A4) vs Mode Ringkas --}}
+                                        <button type="button"
+                                                @click="expandedHeight = !expandedHeight"
+                                                class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold transition-all flex items-center gap-1.5 border border-slate-700 cursor-pointer shadow-xs"
+                                                :title="expandedHeight ? 'Beralih ke ukuran ringkas (680px)' : 'Perlebar seukuran 1 halaman Word penuh (~1180px)'">
+                                            <svg class="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"/>
+                                            </svg>
+                                            <span class="hidden sm:inline" x-text="expandedHeight ? '1 Halaman Penuh' : 'Mode Ringkas'">1 Halaman Penuh</span>
+                                        </button>
+
+                                        {{-- Toggle Lebar Maksimal Kontainer Dokumen --}}
+                                        <button type="button"
+                                                @click="isWide = !isWide"
+                                                class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold transition-all border border-slate-700 cursor-pointer shadow-xs"
+                                                :title="isWide ? 'Kembalikan ke lebar standar kartu' : 'Lebarkan ruang baca dokumen hingga batas tepi kartu'">
+                                            <svg class="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"/>
+                                            </svg>
+                                            <span x-text="isWide ? 'Lebar Normal' : 'Lebar Maksimal'">Lebar Maksimal</span>
+                                        </button>
 
                                         {{-- Tombol Mode Layar Penuh --}}
                                         <button type="button"
@@ -234,11 +211,11 @@
                                             <span class="hidden sm:inline">Tab Baru</span>
                                         </a>
 
-                                        {{-- Tombol Unduh Berkas --}}
+                                        {{-- Tombol Unduh Berkas Asli --}}
                                         <a href="{{ $downloadUrl }}"
                                            target="_blank"
                                            class="px-3.5 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm shadow-violet-600/30"
-                                           title="Unduh berkas presentasi">
+                                           title="Unduh file presentasi asli ke perangkat">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
                                             </svg>
@@ -248,12 +225,15 @@
                                 </div>
 
                                 {{-- Frame Konten Pratinjau Dokumen --}}
-                                <div class="relative w-full bg-slate-950 flex-1 overflow-hidden"
-                                     :class="isFullscreen ? 'h-full flex items-center justify-center p-4' : 'h-[500px] sm:h-[600px] lg:h-[680px]'">
-                                    @if($isPdf)
-                                        {{-- 1. PDF Native Streaming --}}
-                                        <iframe src="{{ $streamUrl }}#toolbar=1&navpanes=1"
+                                <div class="relative w-full bg-slate-950 flex-1 overflow-hidden transition-all duration-300"
+                                     style="min-height: 1180px; height: 1180px;"
+                                     :style="isFullscreen ? 'height: 100vh !important; min-height: 100vh !important;' : (expandedHeight ? 'height: 1180px !important; min-height: 1180px !important;' : 'height: 680px !important; min-height: 680px !important;')">
+                                    
+                                    {{-- 1. Pratinjau Visual Slide / Dokumen PDF (Native Browser Stream) --}}
+                                    @if($isPdf || $hasPdfPreview)
+                                        <iframe src="{{ $streamUrl }}#toolbar=1&navpanes=0&view=FitH"
                                                 class="w-full h-full border-0 absolute inset-0 bg-slate-100"
+                                                style="width: 100%; height: 100%; min-height: 100%;"
                                                 type="application/pdf"
                                                 allowfullscreen
                                                 title="{{ $pptName }}">
@@ -261,127 +241,16 @@
                                         <object data="{{ $streamUrl }}" type="application/pdf" class="w-full h-full hidden">
                                             <embed src="{{ $streamUrl }}" type="application/pdf" class="w-full h-full" />
                                         </object>
-
-                                    @elseif($hasSlides)
-                                        {{-- 2. Slide Deck Interaktif --}}
-                                        <div x-show="viewMode === 'slides'"
-                                             class="w-full h-full flex flex-col justify-between overflow-y-auto p-4 sm:p-6 lg:p-8 select-text">
-                                            
-                                            {{-- Slide Active Container --}}
-                                            <div class="max-w-4xl w-full mx-auto flex-1 flex flex-col justify-center">
-                                                @foreach($parsedSlides as $sIdx => $slide)
-                                                    <div x-show="currentSlide === {{ $slide['number'] }}"
-                                                         x-cloak
-                                                         class="bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200/90 overflow-hidden flex flex-col transition-all">
-                                                        
-                                                        {{-- Kartu Header Slide --}}
-                                                        <div class="px-6 py-4 bg-gradient-to-r from-violet-950 via-slate-900 to-indigo-950 text-white flex items-center justify-between border-b border-violet-800">
-                                                            <div class="flex items-center gap-2.5">
-                                                                <span class="w-7 h-7 rounded-lg bg-violet-500 text-white flex items-center justify-center font-black text-xs shadow-xs">
-                                                                    {{ $slide['number'] }}
-                                                                </span>
-                                                                <span class="text-xs font-bold text-violet-200 uppercase tracking-wider">
-                                                                    Slide {{ $slide['number'] }} dari {{ count($parsedSlides) }}
-                                                                </span>
-                                                            </div>
-                                                            <span class="text-[11px] font-medium text-slate-400 truncate max-w-[200px]">
-                                                                {{ $module->title }}
-                                                            </span>
-                                                        </div>
-
-                                                        {{-- Konten Utama Slide --}}
-                                                        <div class="p-6 sm:p-8 lg:p-10 space-y-6 flex-1 bg-gradient-to-b from-white to-slate-50">
-                                                            {{-- Judul Slide --}}
-                                                            <h3 class="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 leading-snug border-b border-slate-200/80 pb-4">
-                                                                {{ $slide['title'] }}
-                                                            </h3>
-
-                                                            {{-- Baris Poin / Paragraf Slide --}}
-                                                            @if(!empty($slide['lines']) && count($slide['lines']) > 0)
-                                                                <div class="space-y-3">
-                                                                    @foreach($slide['lines'] as $lineIdx => $line)
-                                                                        <div class="flex items-start gap-3 p-3.5 rounded-xl bg-white border border-slate-200/70 shadow-2xs hover:border-violet-200 transition">
-                                                                            <div class="w-6 h-6 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-xs font-black shrink-0 mt-0.5">
-                                                                                {{ $lineIdx + 1 }}
-                                                                            </div>
-                                                                            <p class="text-sm sm:text-base text-slate-800 font-medium leading-relaxed">
-                                                                                {{ $line }}
-                                                                            </p>
-                                                                        </div>
-                                                                    @endforeach
-                                                                </div>
-                                                            @else
-                                                                <div class="py-12 text-center text-slate-400 italic">
-                                                                    (Halaman judul atau transisi slide materi)
-                                                                </div>
-                                                            @endif
-                                                        </div>
-
-                                                        {{-- Footer Mini Slide --}}
-                                                        <div class="px-6 py-3 bg-slate-100 border-t border-slate-200/80 flex items-center justify-between text-xs text-slate-500">
-                                                            <span>🏫 SMKN 3 Yogyakarta — E-Modul Pembelajaran</span>
-                                                            <span class="font-mono font-bold text-violet-700">Slide {{ $slide['number'] }} / {{ count($parsedSlides) }}</span>
-                                                        </div>
-                                                    </div>
-                                                @endforeach
-                                            </div>
-
-                                            {{-- Bottom Slide Navigation Bar --}}
-                                            <div class="max-w-4xl w-full mx-auto mt-4 pt-3 flex flex-wrap items-center justify-between gap-3 bg-slate-900/90 backdrop-blur-md p-3.5 rounded-2xl border border-slate-800 text-white shrink-0">
-                                                <div class="flex items-center gap-2">
-                                                    <button type="button"
-                                                            @click="prevSlide()"
-                                                            :disabled="currentSlide <= 1"
-                                                            class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold text-white transition flex items-center gap-1.5 border border-slate-700 shadow-xs cursor-pointer">
-                                                        <span>←</span>
-                                                        <span class="hidden sm:inline">Sebelumnya</span>
-                                                    </button>
-                                                    <button type="button"
-                                                            @click="nextSlide()"
-                                                            :disabled="currentSlide >= totalSlides"
-                                                            class="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold text-white transition flex items-center gap-1.5 shadow-sm shadow-violet-600/30 cursor-pointer">
-                                                        <span class="hidden sm:inline">Selanjutnya</span>
-                                                        <span>→</span>
-                                                    </button>
-                                                </div>
-
-                                                {{-- Slider / Range Slide Selector --}}
-                                                <div class="flex items-center gap-3 flex-1 max-w-xs justify-center">
-                                                    <input type="range"
-                                                           min="1"
-                                                           :max="totalSlides"
-                                                           x-model="currentSlide"
-                                                           class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-violet-500">
-                                                    <span class="text-xs font-mono font-bold text-violet-300 shrink-0">
-                                                        <span x-text="currentSlide"></span>/{{ count($parsedSlides) }}
-                                                    </span>
-                                                </div>
-
-                                                <div class="text-[11px] text-slate-400 hidden md:block">
-                                                    💡 Gunakan tombol panah keyboard ← / →
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {{-- Fallback Cloud Viewer --}}
-                                        <div x-show="viewMode === 'cloud'" x-cloak class="w-full h-full relative">
-                                            <iframe :src="cloudViewer === 'office' ? '{{ $officeViewerUrl }}' : '{{ $googleViewerUrl }}'"
-                                                    class="w-full h-full border-0 absolute inset-0 bg-slate-100"
-                                                    allowfullscreen
-                                                    title="{{ $pptName }}">
-                                            </iframe>
-                                        </div>
-
                                     @else
-                                        {{-- Fallback PPT Binary --}}
-                                        <div class="w-full h-full relative">
-                                            <iframe :src="cloudViewer === 'office' ? '{{ $officeViewerUrl }}' : '{{ $googleViewerUrl }}'"
-                                                    class="w-full h-full border-0 absolute inset-0 bg-slate-100"
-                                                    allowfullscreen
-                                                    title="{{ $pptName }}">
-                                            </iframe>
-                                        </div>
+                                        {{-- 2. Fallback Cloud Viewer --}}
+                                        <iframe :src="cloudViewer === 'office' ? '{{ $officeViewerUrl }}' : '{{ $googleViewerUrl }}'"
+                                                class="w-full h-full border-0 absolute inset-0 bg-slate-100"
+                                                style="width: 100%; height: 100%; min-height: 100%;"
+                                                allowfullscreen
+                                                title="{{ $pptName }}">
+                                        </iframe>
                                     @endif
+
                                 </div>
 
                                 {{-- Footer Informasi --}}
@@ -390,22 +259,12 @@
                                         <span>👁️</span>
                                         @if($isPdf)
                                             <span>Ini adalah tampilan yang akan dilihat langsung oleh siswa (format PDF native streaming).</span>
-                                        @elseif($hasSlides)
-                                            <span>Slide interaktif diproses langsung dari berkas PPTX secara mandiri dan dapat dioperasikan secara offline.</span>
                                         @else
-                                            <span>Gunakan opsi di samping jika pratinjau cloud belum termuat.</span>
+                                            <span>Pratinjau visual PowerPoint ditampilkan dengan resolusi tinggi (100% tata letak, warna, dan gambar asli).</span>
                                         @endif
                                     </span>
 
-                                    @if(!$isPdf && $hasSlides)
-                                        <div class="flex items-center gap-3">
-                                            <button type="button"
-                                                    @click="viewMode = (viewMode === 'slides' ? 'cloud' : 'slides')"
-                                                    class="text-violet-400 hover:text-violet-300 font-semibold underline cursor-pointer">
-                                                <span x-text="viewMode === 'slides' ? 'Coba Cloud Viewer (Office/Google) ↗' : 'Kembali ke Slide Interaktif ←'"></span>
-                                            </button>
-                                        </div>
-                                    @elseif(!$isPdf)
+                                    @if(!$isPdf && !$hasPdfPreview)
                                         <div class="flex items-center gap-2">
                                             <button type="button"
                                                     @click="cloudViewer = (cloudViewer === 'office' ? 'google' : 'office')"

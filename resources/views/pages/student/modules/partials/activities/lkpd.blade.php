@@ -28,6 +28,8 @@
                 @endphp
                 <div x-data="{
                         isFullscreen: false,
+                        expandedHeight: true,
+                        isWide: true,
                         toggleFullscreen() {
                             const el = this.$refs.lkpdPreviewContainer;
                             if (!document.fullscreenElement) {
@@ -50,8 +52,8 @@
                     
                     {{-- Container Frame Pratinjau Dokumen --}}
                     <div x-ref="lkpdPreviewContainer"
-                         class="rounded-3xl border border-amber-200/90 shadow-md bg-slate-900 overflow-hidden flex flex-col transition-all"
-                         :class="isFullscreen ? 'fixed inset-0 z-[99999] rounded-none border-none shadow-none h-screen w-screen' : 'w-full'">
+                         class="rounded-3xl border border-amber-200/90 shadow-md bg-slate-900 overflow-hidden flex flex-col transition-all duration-300"
+                         :class="isFullscreen ? 'fixed inset-0 z-[99999] rounded-none border-none shadow-none h-screen w-screen' : (isWide ? 'w-auto -mx-3 sm:-mx-6 lg:-mx-8' : 'w-full')">
                         
                         {{-- Top Header / Toolbar ala Google Sites --}}
                         <div class="px-4 sm:px-6 py-3.5 bg-slate-900 text-white flex flex-wrap items-center justify-between gap-3 shrink-0 border-b border-slate-800">
@@ -75,7 +77,29 @@
                             </div>
 
                             {{-- Action Toolbar: Layar Penuh, Buka Tab Baru, Unduh --}}
-                            <div class="flex items-center gap-2 shrink-0">
+                            <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                                {{-- Toggle Tinggi Penuh (1 Lembar Word A4) vs Mode Ringkas --}}
+                                <button type="button"
+                                        @click="expandedHeight = !expandedHeight"
+                                        class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold transition-all flex items-center gap-1.5 border border-slate-700 cursor-pointer shadow-xs"
+                                        :title="expandedHeight ? 'Beralih ke ukuran ringkas (620px)' : 'Perlebar seukuran 1 halaman Word penuh (~1180px)'">
+                                    <svg class="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"/>
+                                    </svg>
+                                    <span class="hidden sm:inline" x-text="expandedHeight ? '1 Halaman Penuh' : 'Mode Ringkas'">1 Halaman Penuh</span>
+                                </button>
+
+                                {{-- Toggle Lebar Maksimal Kontainer Dokumen --}}
+                                <button type="button"
+                                        @click="isWide = !isWide"
+                                        class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold transition-all border border-slate-700 cursor-pointer shadow-xs"
+                                        :title="isWide ? 'Kembalikan ke lebar standar kartu' : 'Lebarkan ruang baca dokumen hingga batas tepi kartu'">
+                                    <svg class="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"/>
+                                    </svg>
+                                    <span x-text="isWide ? 'Lebar Normal' : 'Lebar Maksimal'">Lebar Maksimal</span>
+                                </button>
+
                                 {{-- Tombol Mode Layar Penuh --}}
                                 <button type="button"
                                         @click="toggleFullscreen()"
@@ -114,10 +138,12 @@
                         </div>
 
                         {{-- Frame Iframe Pratinjau Native PDF --}}
-                        <div class="relative w-full bg-slate-950 flex-1 overflow-hidden"
-                             :class="isFullscreen ? 'h-full' : 'h-[460px] sm:h-[560px] lg:h-[620px]'">
-                            <iframe src="{{ $lkpdPdfUrl }}#toolbar=1&navpanes=1"
+                        <div class="relative w-full bg-slate-950 flex-1 overflow-hidden transition-all duration-300"
+                             style="min-height: 1150px; height: 1150px;"
+                             :style="isFullscreen ? 'height: 100vh !important; min-height: 100vh !important;' : (expandedHeight ? 'height: 1150px !important; min-height: 1150px !important;' : 'height: 620px !important; min-height: 620px !important;')">
+                            <iframe src="{{ $lkpdPdfUrl }}#toolbar=1&navpanes=0&view=FitH"
                                     class="w-full h-full border-0 absolute inset-0 bg-slate-100"
+                                    style="width: 100%; height: 100%; min-height: 100%;"
                                     type="application/pdf"
                                     allowfullscreen
                                     title="{{ $lkpdPdfName }}">
