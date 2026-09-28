@@ -56,8 +56,8 @@ class Student extends Authenticatable
             $ids = $this->classes()->pluck('classes.id')->map(fn($id) => (int)$id)->toArray();
         }
 
-        if (empty($ids) && $this->class_id) {
-            $ids = [(int) $this->class_id];
+        if ($this->class_id && !in_array((int)$this->class_id, $ids)) {
+            $ids[] = (int) $this->class_id;
         }
 
         return $this->memoizedJoinedClassIds = array_values(array_unique(array_filter($ids)));

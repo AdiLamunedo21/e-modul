@@ -7,7 +7,7 @@
 <aside
     class="
         {{-- MOBILE: fixed overlay mulai dari bawah header (top-16) --}}
-        fixed top-16 left-0 bottom-0 z-40
+        fixed top-16 left-0 bottom-0 z-50
         {{-- DESKTOP: kembali ke flex flow, tinggi penuh parent container --}}
         lg:static lg:h-full lg:z-auto lg:inset-auto
 
@@ -206,8 +206,8 @@
             </div>
         </nav>
 
-        {{-- ══ Profil Bawah & Logout Siswa ══ --}}
-        <div class="p-4 border-t border-slate-800 shrink-0">
+        {{-- ══ Profil Bawah & Logout Siswa (dengan pb-24 di mobile agar tidak tertutup nav bottom dock) ══ --}}
+        <div class="p-4 pb-24 lg:pb-4 border-t border-slate-800 shrink-0">
             <div class="flex items-center justify-between gap-3 bg-slate-800/80 p-2.5 rounded-xl border border-slate-700/50">
                 <div class="flex items-center gap-2.5 min-w-0">
                     <img class="h-9 w-9 rounded-full object-cover ring-2 ring-emerald-500/30 shrink-0"

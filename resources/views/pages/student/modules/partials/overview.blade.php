@@ -1,7 +1,7 @@
 {{-- ═══════════════════════════════════════════════════════════════════════ --}}
 {{-- ═══ VIEW 1: TAMPILAN AWAL DETAIL MODUL SISWA (FULL WIDTH CARD) ═════ --}}
 {{-- ═══════════════════════════════════════════════════════════════════════ --}}
-<div x-show="viewMode === 'overview'" x-cloak class="w-full space-y-6">
+<div id="student-module-overview" x-show="viewMode === 'overview'" x-cloak class="w-full space-y-6">
 
     {{-- ══════════════════════════════════════════════════════════════════════
          STRUKTUR 5 BAGIAN E-MODUL (1 KOLOM TUNGGAL BERURUTAN & TERPROTEKSI)
@@ -86,10 +86,13 @@
                                 </template>
                             </template>
                             <template x-if="!isUnlocked('petunjuk_penggunaan')">
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed opacity-75">
+                                <button type="button"
+                                        @click="showLockedNotice()"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-amber-50 text-slate-400 hover:text-amber-700 border border-slate-200 hover:border-amber-300 text-xs font-medium cursor-pointer transition shadow-2xs"
+                                        title="Klik untuk info langkah">
                                     <span>🔒</span>
                                     <span>Terkunci</span>
-                                </span>
+                                </button>
                             </template>
                         </div>
                     </div>
@@ -144,10 +147,13 @@
                                 </button>
                             </template>
                             <template x-if="!isUnlocked('tujuan_pembelajaran')">
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed opacity-75">
+                                <button type="button"
+                                        @click="showLockedNotice()"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-amber-50 text-slate-400 hover:text-amber-700 border border-slate-200 hover:border-amber-300 text-xs font-medium cursor-pointer transition shadow-2xs"
+                                        title="Klik untuk info langkah">
                                     <span>🔒</span>
                                     <span>Terkunci</span>
-                                </span>
+                                </button>
                             </template>
                         </div>
                     </div>
@@ -186,10 +192,13 @@
                                 </button>
                             </template>
                             <template x-if="!isUnlocked('peta_konsep')">
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed opacity-75">
+                                <button type="button"
+                                        @click="showLockedNotice()"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-amber-50 text-slate-400 hover:text-amber-700 border border-slate-200 hover:border-amber-300 text-xs font-medium cursor-pointer transition shadow-2xs"
+                                        title="Klik untuk info langkah">
                                     <span>🔒</span>
                                     <span>Terkunci</span>
-                                </span>
+                                </button>
                             </template>
                         </div>
                     </div>
@@ -228,10 +237,13 @@
                                 </button>
                             </template>
                             <template x-if="!isUnlocked('glosarium')">
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed opacity-75">
+                                <button type="button"
+                                        @click="showLockedNotice()"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-amber-50 text-slate-400 hover:text-amber-700 border border-slate-200 hover:border-amber-300 text-xs font-medium cursor-pointer transition shadow-2xs"
+                                        title="Klik untuk info langkah">
                                     <span>🔒</span>
                                     <span>Terkunci</span>
-                                </span>
+                                </button>
                             </template>
                         </div>
                     </div>
@@ -248,12 +260,12 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
-                            @if($studentResult && $studentResult->pre_test_score !== null)
+                            @if($studentResult && ($studentResult->pre_test_score !== null || $studentResult->getTestAttemptCount('pre_test') > 0))
                                 <button type="button"
                                         @click="goToPage('pre_test')"
                                         class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-extrabold hover:bg-emerald-100 transition cursor-pointer">
                                     <span class="text-emerald-600 font-black text-sm">✓</span>
-                                    <span>Skor: {{ $studentResult->pre_test_score }}</span>
+                                    <span>Skor: {{ $studentResult->pre_test_score ?? 0 }}</span>
                                 </button>
                             @else
                                 <template x-if="isUnlocked('pre_test')">
@@ -264,10 +276,13 @@
                                     </button>
                                 </template>
                                 <template x-if="!isUnlocked('pre_test')">
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed opacity-75">
+                                    <button type="button"
+                                            @click="showLockedNotice()"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-amber-50 text-slate-400 hover:text-amber-700 border border-slate-200 hover:border-amber-300 text-xs font-medium cursor-pointer transition shadow-2xs"
+                                            title="Klik untuk info langkah">
                                         <span>🔒</span>
                                         <span>Terkunci</span>
-                                    </span>
+                                    </button>
                                 </template>
                             @endif
                         </div>
@@ -323,10 +338,13 @@
                                 </button>
                             </template>
                             <template x-if="!isUnlocked('materi')">
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed opacity-75">
+                                <button type="button"
+                                        @click="showLockedNotice()"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-amber-50 text-slate-400 hover:text-amber-700 border border-slate-200 hover:border-amber-300 text-xs font-medium cursor-pointer transition shadow-2xs"
+                                        title="Klik untuk info langkah">
                                     <span>🔒</span>
                                     <span>Terkunci</span>
-                                </span>
+                                </button>
                             </template>
                         </div>
                     </div>
@@ -359,10 +377,13 @@
                                     </button>
                                 </template>
                                 <template x-if="!isUnlocked('video')">
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed opacity-75">
+                                    <button type="button"
+                                            @click="showLockedNotice()"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-amber-50 text-slate-400 hover:text-amber-700 border border-slate-200 hover:border-amber-300 text-xs font-medium cursor-pointer transition shadow-2xs"
+                                            title="Klik untuk info langkah">
                                         <span>🔒</span>
                                         <span>Terkunci</span>
-                                    </span>
+                                    </button>
                                 </template>
                             @endif
                         </div>
@@ -418,10 +439,13 @@
                                     </button>
                                 </template>
                                 <template x-if="!isUnlocked('embed')">
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed opacity-75">
+                                    <button type="button"
+                                            @click="showLockedNotice()"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-amber-50 text-slate-400 hover:text-amber-700 border border-slate-200 hover:border-amber-300 text-xs font-medium cursor-pointer transition shadow-2xs"
+                                            title="Klik untuk info langkah">
                                         <span>🔒</span>
                                         <span>Terkunci</span>
-                                    </span>
+                                    </button>
                                 </template>
                             @endif
                         </div>
@@ -455,10 +479,13 @@
                                     </button>
                                 </template>
                                 <template x-if="!isUnlocked('job_sheet')">
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed opacity-75">
+                                    <button type="button"
+                                            @click="showLockedNotice()"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-amber-50 text-slate-400 hover:text-amber-700 border border-slate-200 hover:border-amber-300 text-xs font-medium cursor-pointer transition shadow-2xs"
+                                            title="Klik untuk info langkah">
                                         <span>🔒</span>
                                         <span>Terkunci</span>
-                                    </span>
+                                    </button>
                                 </template>
                             @endif
                         </div>
@@ -492,10 +519,13 @@
                                     </button>
                                 </template>
                                 <template x-if="!isUnlocked('lkpd')">
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed opacity-75">
+                                    <button type="button"
+                                            @click="showLockedNotice()"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-amber-50 text-slate-400 hover:text-amber-700 border border-slate-200 hover:border-amber-300 text-xs font-medium cursor-pointer transition shadow-2xs"
+                                            title="Klik untuk info langkah">
                                         <span>🔒</span>
                                         <span>Terkunci</span>
-                                    </span>
+                                    </button>
                                 </template>
                             @endif
                         </div>
@@ -535,12 +565,12 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
-                            @if($studentResult && $studentResult->post_test_score !== null)
+                            @if($studentResult && ($studentResult->post_test_score !== null || $studentResult->getTestAttemptCount('post_test') > 0))
                                 <button type="button"
                                         @click="goToPage('post_test')"
                                         class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-extrabold hover:bg-emerald-100 transition cursor-pointer">
                                     <span class="text-emerald-600 font-black text-sm">✓</span>
-                                    <span>Skor: {{ $studentResult->post_test_score }}</span>
+                                    <span>Skor: {{ $studentResult->post_test_score ?? 0 }}</span>
                                 </button>
                             @else
                                 <template x-if="isUnlocked('post_test')">
@@ -551,10 +581,13 @@
                                     </button>
                                 </template>
                                 <template x-if="!isUnlocked('post_test')">
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed opacity-75">
+                                    <button type="button"
+                                            @click="showLockedNotice()"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-amber-50 text-slate-400 hover:text-amber-700 border border-slate-200 hover:border-amber-300 text-xs font-medium cursor-pointer transition shadow-2xs"
+                                            title="Klik untuk info langkah">
                                         <span>🔒</span>
                                         <span>Terkunci</span>
-                                    </span>
+                                    </button>
                                 </template>
                             @endif
                         </div>
@@ -588,10 +621,13 @@
                                 </button>
                             </template>
                             <template x-if="!isUnlocked('daftar_pustaka')">
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-400 border border-slate-200 text-xs font-medium cursor-not-allowed opacity-75">
+                                <button type="button"
+                                        @click="showLockedNotice()"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-amber-50 text-slate-400 hover:text-amber-700 border border-slate-200 hover:border-amber-300 text-xs font-medium cursor-pointer transition shadow-2xs"
+                                        title="Klik untuk info langkah">
                                     <span>🔒</span>
                                     <span>Terkunci</span>
-                                </span>
+                                </button>
                             </template>
                         </div>
                     </div>

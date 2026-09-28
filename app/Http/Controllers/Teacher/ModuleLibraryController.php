@@ -212,6 +212,14 @@ class ModuleLibraryController extends Controller
             ? 'Modul berhasil dibagikan ke Library Modul! Rekan guru lain kini dapat melihat dan menyalin instrumen pembelajaran ini.'
             : 'Modul telah ditarik dari Library Modul dan kembali berstatus Pribadi.';
 
+        if (request()->wantsJson() || request()->ajax()) {
+            return response()->json([
+                'success'   => true,
+                'is_shared' => $isShared,
+                'message'   => $message,
+            ]);
+        }
+
         return back()->with('success', $message);
     }
 }

@@ -30,24 +30,9 @@
                         @endif
                     </div>
                     <h2 class="text-xl sm:text-2xl font-black text-slate-900 leading-tight mt-0.5">{{ $module->postTest->title ?? 'Post-test: Evaluasi Pemahaman' }}</h2>
-                    <p class="text-xs text-slate-500 font-medium mt-0.5">{{ $effectivePostQuestions->count() }} Butir Soal • Target KKTP: {{ $module->postTest->kktp ?? 75 }}</p>
+                    <p class="text-xs text-slate-500 font-medium mt-0.5">{{ $effectivePostQuestions->count() }} Butir Soal • Target KKM: {{ $module->postTest->kktp ?? 75 }}</p>
                 </div>
             </div>
-
-            @if($initialPostScore !== null)
-                <div class="flex flex-wrap items-center gap-2 shrink-0">
-                    <div class="bg-rose-50/90 px-3.5 py-1.5 rounded-2xl border border-rose-200 text-center">
-                        <span class="text-[9px] font-bold text-rose-700 uppercase tracking-wider block">Nilai Awal (Resmi)</span>
-                        <span class="text-xl font-black text-rose-900">{{ $initialPostScore }}/100</span>
-                    </div>
-                    @if($hasRetake)
-                        <div class="bg-indigo-50/90 px-3.5 py-1.5 rounded-2xl border border-indigo-200 text-center">
-                            <span class="text-[9px] font-bold text-indigo-700 uppercase tracking-wider block">Latihan Terakhir</span>
-                            <span class="text-xl font-black text-indigo-900">{{ $latestPostRetakeScore }}/100</span>
-                        </div>
-                    @endif
-                </div>
-            @endif
         </div>
 
         <div :class="isTakingPostTest ? 'p-2 sm:p-6' : 'p-6 sm:p-8'">
@@ -213,7 +198,7 @@
                         {{-- Action Buttons: Latihan Ulang & Lanjut Halaman --}}
                         <div class="pt-4 border-t border-rose-100 flex flex-col sm:flex-row items-center justify-between gap-3">
                             <button type="button"
-                                    @click="showPostRetakeForm = true"
+                                    @click="showPostRetakeForm = true; $dispatch('start-post-retake')"
                                     class="w-full sm:w-auto px-6 py-3 rounded-2xl bg-white hover:bg-rose-50 text-rose-700 border border-rose-300 font-bold text-xs sm:text-sm shadow-2xs transition flex items-center justify-center gap-2 cursor-pointer">
                                 <span>🔄</span>
                                 <span>Kerjakan Ulang Soal (Latihan Mandiri)</span>
@@ -247,9 +232,6 @@
                                             <div class="flex items-center justify-between text-xs">
                                                 <span class="font-extrabold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">
                                                     Soal #{{ $rIdx + 1 }}
-                                                </span>
-                                                <span class="text-slate-400 font-medium text-[11px]">
-                                                    Bobot: {{ $rQ->score_weight ?: 10 }} Poin
                                                 </span>
                                             </div>
                                             <p class="text-xs sm:text-sm font-semibold text-slate-800 leading-relaxed">
@@ -313,6 +295,8 @@
                             totalQuestions: {{ $postQuestionsCount }},
                             questionIds: {{ json_encode($postQuestionsIds) }},
                             answers: {},
+                            isSubmitting: false,
+                            showConfirmSubmitModal: false,
                             showWarningToast: false,
                             warningToastTimer: null,
 
@@ -325,6 +309,29 @@
                             timeExpiredToast: false,
                             timeExpiredTimer: null,
                             expiredQuestions: {},
+
+                            shouldTimerRun() {
+                                return this.viewMode === 'learn' 
+                                    && this.activePage === 'post_test' 
+                                    && this.isTakingPostTest 
+                                    && !this.showConfirmSubmitModal
+                                    && !this.isPaused;
+                            },
+
+                            handleVisibilityChange() {
+                                if (this.shouldTimerRun()) {
+                                    if (this.initialTime === 0) {
+                                        this.startQuestionTimer();
+                                    } else if (!this.timerInterval && this.timeLeft > 0) {
+                                        this.resumeTimer();
+                                    }
+                                } else {
+                                    if (this.timerInterval) {
+                                        clearInterval(this.timerInterval);
+                                        this.timerInterval = null;
+                                    }
+                                }
+                            },
                             
                             init() {
                                 this.$nextTick(() => {
@@ -334,29 +341,59 @@
                                             this.answers[match[1]] = radio.value;
                                         }
                                     });
-                                    this.startQuestionTimer();
+                                    if (this.shouldTimerRun()) {
+                                        this.startQuestionTimer();
+                                    }
                                 });
                                 this.$watch('submitModal.open', val => {
                                     this.isPaused = !!val;
+                                    this.handleVisibilityChange();
+                                });
+                                this.$watch('activePage', () => {
+                                    this.handleVisibilityChange();
+                                this.$watch('viewMode', () => {
+                                    this.handleVisibilityChange();
+                                });
+                            },
+                            startRetake() {
+                                this.currentQuestion = 0;
+                                this.answers = {};
+                                this.expiredQuestions = {};
+                                this.isPaused = false;
+                                this.$nextTick(() => {
+                                    this.$el.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
+                                    this.startQuestionTimer();
                                 });
                             },
                             getCurrentAllottedTime() {
                                 return this.timeLimits[this.currentQuestion] || 0;
                             },
                             startQuestionTimer() {
-                                if (this.timerInterval) clearInterval(this.timerInterval);
+                                if (this.timerInterval) {
+                                    clearInterval(this.timerInterval);
+                                    this.timerInterval = null;
+                                }
                                 const allotted = this.getCurrentAllottedTime();
                                 if (allotted > 0 && !this.expiredQuestions[this.currentQuestion]) {
                                     this.initialTime = allotted;
                                     this.timeLeft = allotted;
                                     this.isPaused = false;
+                                    if (!this.shouldTimerRun()) return;
+
                                     this.timerInterval = setInterval(() => {
-                                        if (this.isPaused) return;
+                                        if (this.isPaused || !this.shouldTimerRun()) {
+                                            if (!this.shouldTimerRun() && this.timerInterval) {
+                                                clearInterval(this.timerInterval);
+                                                this.timerInterval = null;
+                                            }
+                                            return;
+                                        }
                                         if (this.timeLeft > 1) {
                                             this.timeLeft--;
                                         } else {
                                             this.timeLeft = 0;
                                             clearInterval(this.timerInterval);
+                                            this.timerInterval = null;
                                             this.onQuestionTimeExpired();
                                         }
                                     }, 1000);
@@ -365,7 +402,39 @@
                                     this.initialTime = 0;
                                 }
                             },
+                            resumeTimer() {
+                                if (this.timerInterval) {
+                                    clearInterval(this.timerInterval);
+                                    this.timerInterval = null;
+                                }
+                                if (!this.shouldTimerRun() || this.timeLeft <= 0) return;
+                                this.timerInterval = setInterval(() => {
+                                    if (this.isPaused || !this.shouldTimerRun()) {
+                                        if (!this.shouldTimerRun() && this.timerInterval) {
+                                            clearInterval(this.timerInterval);
+                                            this.timerInterval = null;
+                                        }
+                                        return;
+                                    }
+                                    if (this.timeLeft > 1) {
+                                        this.timeLeft--;
+                                    } else {
+                                        this.timeLeft = 0;
+                                        clearInterval(this.timerInterval);
+                                        this.timerInterval = null;
+                                        this.onQuestionTimeExpired();
+                                    }
+                                }, 1000);
+                            },
                             onQuestionTimeExpired() {
+                                if (!this.shouldTimerRun()) {
+                                    if (this.timerInterval) {
+                                        clearInterval(this.timerInterval);
+                                        this.timerInterval = null;
+                                    }
+                                    return;
+                                }
+
                                 this.expiredQuestions[this.currentQuestion] = true;
                                 this.timeExpiredToast = true;
                                 if (this.timeExpiredTimer) clearTimeout(this.timeExpiredTimer);
@@ -377,9 +446,9 @@
                                     this.next(true);
                                 } else {
                                     // Auto submit on last question
-                                    const formEl = this.$el.querySelector('form');
+                                    const formEl = document.getElementById('post-test-form') || this.$el.querySelector('form');
                                     if (formEl) {
-                                        formEl.submit();
+                                        HTMLFormElement.prototype.submit.call(formEl);
                                     }
                                 }
                             },
@@ -429,26 +498,52 @@
                                     this.triggerAntiCopyWarning();
                                 }
                             },
-                            attemptSubmit(formEl) {
+                            openSubmitModal() {
                                 this.isPaused = true;
-                                const missing = this.totalQuestions - this.answeredCount;
-                                let warningMsg = '{{ $initialPostScore !== null ? 'Nilai awal resmi Anda tetap terkunci (' . $initialPostScore . '/100). Skor kali ini dicatat sebagai perbandingan latihan.' : 'Post-test ini menentukan nilai akhir modul Anda.' }}';
-                                
-                                if (missing > 0) {
-                                    warningMsg = '⚠️ Perhatian: Anda baru menjawab ' + this.answeredCount + ' dari ' + this.totalQuestions + ' soal (' + missing + ' soal belum dijawab). ' + warningMsg;
+                                this.showConfirmSubmitModal = true;
+                            },
+                            closeSubmitModal() {
+                                if (this.isSubmitting) return;
+                                this.showConfirmSubmitModal = false;
+                                this.isPaused = false;
+                            },
+                            confirmAndSubmit() {
+                                if (this.isSubmitting) return;
+                                this.isSubmitting = true;
+                                const rawForm = document.getElementById('post-test-form') 
+                                    || (this.$el ? this.$el.querySelector('form') : null);
+
+                                if (!rawForm) {
+                                    console.error('Target form post-test-form not found');
+                                    this.isSubmitting = false;
+                                    this.showConfirmSubmitModal = false;
+                                    return;
                                 }
 
-                                openSubmitModal({
-                                    title: missing > 0 ? 'Kirim Jawaban (' + missing + ' Belum Terjawab)?' : '{{ $initialPostScore !== null ? 'Kirim Jawaban Latihan Ulang?' : 'Kirim Jawaban Post-test?' }}',
-                                    description: missing > 0 
-                                        ? 'Masih ada ' + missing + ' butir soal evaluasi yang belum Anda jawab. Apakah Anda yakin ingin mengirimkannya sekarang?'
-                                        : 'Luar biasa! Anda telah menjawab seluruh ' + this.totalQuestions + ' butir soal post-test. Siap untuk mengumpulkan?',
-                                    accentColor: 'rose',
-                                    warningText: warningMsg,
-                                    confirmLabel: '{{ $initialPostScore !== null ? 'Kirim Jawaban Latihan' : 'Kirim Jawaban Post-test' }}'
-                                }, formEl);
+                                const unproxied = (window.Alpine && typeof window.Alpine.raw === 'function') 
+                                    ? window.Alpine.raw(rawForm) 
+                                    : rawForm;
+
+                                try {
+                                    HTMLFormElement.prototype.submit.call(unproxied);
+                                } catch (err) {
+                                    try {
+                                        if (typeof unproxied.requestSubmit === 'function') {
+                                            unproxied.requestSubmit();
+                                        } else {
+                                            unproxied.submit();
+                                        }
+                                    } catch (err2) {
+                                        unproxied.submit();
+                                    }
+                                }
+                            },
+                            attemptSubmit(formEl) {
+                                this.openSubmitModal();
                             }
                         }"
+                        @start-post-retake.window="startRetake()"
+                        @quiz-timer-resume.window="isPaused = false; handleVisibilityChange()"
                         @keydown="handleKeyDown($event)"
                         @copy.prevent="triggerAntiCopyWarning()"
                         @cut.prevent="triggerAntiCopyWarning()"
@@ -561,17 +656,9 @@
                                      x-cloak
                                      class="p-3 sm:p-6 rounded-2xl sm:rounded-3xl bg-slate-50/60 border-0 sm:border sm:border-slate-200/70 space-y-5 sm:space-y-6">
                                     
-                                    {{-- Header Butir Soal --}}
-                                    <div class="flex flex-wrap items-center justify-between pb-3 border-b border-slate-200/80 gap-2 sm:gap-3">
-                                        <div class="flex items-center gap-2">
-                                            <span class="w-8 h-8 rounded-xl bg-rose-600 text-white text-xs font-black flex items-center justify-center shadow-xs shrink-0">
-                                                {{ $idx + 1 }}
-                                            </span>
-                                            <div>
-                                                <h4 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Butir Soal Nomor {{ $idx + 1 }}</h4>
-                                                <span class="text-[10px] text-slate-400 font-medium">Post-test Sumatif</span>
-                                            </div>
-                                        </div>
+                                    {{-- Status & Timer Butir Soal --}}
+                                    <div class="flex flex-wrap items-center justify-end gap-2 sm:gap-3"
+                                         x-show="getCurrentAllottedTime() > 0 || expiredQuestions[{{ $idx }}] || isAnswered('{{ $q->id }}')">
 
                                         <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
                                             {{-- Countdown Timer Soal Ini --}}
@@ -591,9 +678,6 @@
                                                 </div>
                                             </template>
 
-                                            <span class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-[11px] font-bold text-slate-600">
-                                                Bobot: {{ $q->score_weight ?: 10 }} Poin
-                                            </span>
                                             <span x-show="expiredQuestions[{{ $idx }}]"
                                                   class="px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-200 text-[11px] font-bold text-rose-700">
                                                 ⏰ Waktu Habis
@@ -607,7 +691,7 @@
 
                                     {{-- Countdown Timer Slim Progress Bar --}}
                                     <template x-if="getCurrentAllottedTime() > 0">
-                                        <div class="w-full bg-slate-200/70 rounded-full h-1.5 overflow-hidden -mt-3">
+                                        <div class="w-full bg-slate-200/70 rounded-full h-1.5 overflow-hidden">
                                             <div class="h-1.5 rounded-full transition-all duration-1000 ease-linear"
                                                  :class="{
                                                      'bg-red-500 animate-pulse': timeLeft <= 5,
@@ -645,7 +729,6 @@
                                                         <input type="radio"
                                                                name="answers[{{ $q->id }}]"
                                                                value="{{ $optKey }}"
-                                                               :disabled="expiredQuestions[{{ $idx }}]"
                                                                x-model="answers['{{ $q->id }}']"
                                                                class="w-4 h-4 text-rose-600 focus:ring-rose-500 border-slate-300">
                                                         <span :class="answers['{{ $q->id }}'] === '{{ $optKey }}'
@@ -710,18 +793,26 @@
                                     {{-- Tombol Selesai & Kirim Ujian (Hanya muncul di soal terakhir) --}}
                                     <template x-if="currentQuestion === totalQuestions - 1">
                                         <button type="button"
-                                                @click="attemptSubmit(document.getElementById('post-test-form'))"
-                                                :disabled="!isCurrentQuestionAnswered()"
-                                                :style="isCurrentQuestionAnswered()
-                                                    ? 'background: linear-gradient(135deg, #e11d48 0%, #be123c 100%) !important; color: #ffffff !important;'
-                                                    : 'background-color: #f1f5f9 !important; color: #64748b !important; border: 1px solid #cbd5e1 !important;'"
-                                                :class="isCurrentQuestionAnswered()
-                                                    ? 'shadow-md shadow-rose-600/25 cursor-pointer ring-4 ring-rose-500/20 hover:opacity-95'
-                                                    : 'cursor-not-allowed opacity-80'"
+                                                @click="openSubmitModal()"
+                                                :disabled="isSubmitting"
+                                                :class="isSubmitting ? 'opacity-80 cursor-wait' : 'cursor-pointer hover:opacity-95 active:scale-95 shadow-md shadow-rose-600/25 ring-4 ring-rose-500/20'"
+                                                style="background: linear-gradient(135deg, #e11d48 0%, #be123c 100%) !important; color: #ffffff !important;"
                                                 class="w-full sm:w-auto px-6 py-2.5 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-2">
-                                            <span>🏁</span>
-                                            <span x-show="!isCurrentQuestionAnswered()" style="color: #64748b !important;">Pilih Jawaban Terakhir</span>
-                                            <span x-show="isCurrentQuestionAnswered()" style="color: #ffffff !important;" class="font-black">{{ $initialPostScore !== null ? 'Kirim Jawaban Latihan' : 'Kirim Jawaban Post-test' }}</span>
+                                            <template x-if="!isSubmitting">
+                                                <span class="flex items-center gap-1.5">
+                                                    <span>🏁</span>
+                                                    <span>{{ $initialPostScore !== null ? 'Kirim Jawaban Latihan' : 'Kirim Jawaban Post-test' }}</span>
+                                                </span>
+                                            </template>
+                                            <template x-if="isSubmitting">
+                                                <span class="flex items-center gap-2">
+                                                    <svg class="w-4 h-4 animate-spin shrink-0 text-white" fill="none" viewBox="0 0 24 24">
+                                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    </svg>
+                                                    <span>Mengirim Jawaban...</span>
+                                                </span>
+                                            </template>
                                         </button>
                                     </template>
                                 </div>
@@ -729,7 +820,7 @@
                         </form>
 
                         {{-- ══ MOBILE FIXED BOTTOM ACTION BAR (KHUSUS SMARTPHONE / TABLET) ══ --}}
-                        <div class="fixed bottom-0 inset-x-0 z-40 lg:hidden bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-[0_-4px_25px_rgba(15,23,42,0.12)] px-3 py-2.5 transition-all select-none"
+                        <div class="fixed bottom-0 inset-x-0 z-50 lg:hidden bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-[0_-4px_25px_rgba(15,23,42,0.12)] px-3 py-2.5 transition-all select-none"
                              style="padding-bottom: max(0.6rem, env(safe-area-inset-bottom));">
                             <div class="max-w-md mx-auto flex items-center justify-between gap-2">
                                 {{-- Tombol Batal jika sedang mode Latihan Ulang --}}
@@ -771,20 +862,156 @@
                                 {{-- Tombol Kirim Jawaban (Di Soal Terakhir) --}}
                                 <template x-if="currentQuestion === totalQuestions - 1">
                                     <button type="button"
-                                            @click="attemptSubmit(document.getElementById('post-test-form'))"
-                                            :disabled="!isCurrentQuestionAnswered()"
-                                            :class="{
-                                                'bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-md shadow-rose-600/30 ring-2 ring-rose-400/50 cursor-pointer active:scale-95 animate-pulse': isCurrentQuestionAnswered(),
-                                                'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed opacity-75': !isCurrentQuestionAnswered()
-                                            }"
-                                            class="flex-1 py-2.5 px-3 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-1.5 shadow-2xs">
-                                        <span>🏁</span>
-                                        <span x-show="!isCurrentQuestionAnswered()" class="truncate">Pilih Jawaban Terakhir</span>
-                                        <span x-show="isCurrentQuestionAnswered()" class="truncate">
-                                            {{ $initialPostScore !== null ? 'Kirim Jawaban Latihan' : 'Kirim Jawaban Post-test' }}
-                                        </span>
+                                            form="post-test-form"
+                                            @click="openSubmitModal()"
+                                            :disabled="isSubmitting"
+                                            :class="isSubmitting ? 'opacity-80 cursor-wait' : 'cursor-pointer active:scale-95 animate-pulse'"
+                                            class="flex-1 py-2.5 px-3 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-1.5 shadow-2xs bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-rose-600/30 ring-2 ring-rose-400/50">
+                                        <template x-if="!isSubmitting">
+                                            <span class="truncate flex items-center gap-1">
+                                                <span>🏁</span>
+                                                <span>{{ $initialPostScore !== null ? 'Kirim Jawaban Latihan' : 'Kirim Jawaban Post-test' }}</span>
+                                            </span>
+                                        </template>
+                                        <template x-if="isSubmitting">
+                                            <span class="truncate flex items-center gap-1.5">
+                                                <svg class="w-3.5 h-3.5 animate-spin shrink-0 text-white" fill="none" viewBox="0 0 24 24">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                <span>Mengirim...</span>
+                                            </span>
+                                        </template>
                                     </button>
                                 </template>
+                            </div>
+                        </div>
+
+                        {{-- ══ MODAL KONFIRMASI PENGIRIMAN POST-TEST (KHUSUS POST-TEST) ══ --}}
+                        <div x-show="showConfirmSubmitModal"
+                             x-cloak
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0"
+                             x-transition:enter-end="opacity-100"
+                             x-transition:leave="transition ease-in duration-200"
+                             x-transition:leave-start="opacity-100"
+                             x-transition:leave-end="opacity-0"
+                             @keydown.escape.window="closeSubmitModal()"
+                             class="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 select-none"
+                             role="dialog"
+                             aria-modal="true">
+
+                            {{-- Overlay Backdrop --}}
+                            <div class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity"
+                                 @click="closeSubmitModal()"></div>
+
+                            {{-- Modal Card / Sheet --}}
+                            <div class="relative w-full max-w-lg bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all z-10"
+                                 x-transition:enter="transition ease-out duration-300"
+                                 x-transition:enter-start="opacity-0 translate-y-8 sm:scale-95 sm:translate-y-0"
+                                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                                 x-transition:leave="transition ease-in duration-200"
+                                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                                 x-transition:leave-end="opacity-0 translate-y-8 sm:scale-95 sm:translate-y-0">
+
+                                {{-- Handle Mobile --}}
+                                <div class="sm:hidden flex justify-center pt-3 pb-1">
+                                    <div class="w-10 h-1 rounded-full bg-slate-200"></div>
+                                </div>
+
+                                {{-- Header --}}
+                                <div class="px-6 pt-5 pb-4 border-b border-slate-100 flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center text-lg font-black shrink-0 shadow-2xs">
+                                            🎯
+                                        </div>
+                                        <div>
+                                            <span class="text-[10px] font-black uppercase tracking-wider text-rose-600 block">
+                                                {{ $initialPostScore !== null ? 'Konfirmasi Latihan Ulang' : 'Konfirmasi Post-test' }}
+                                            </span>
+                                            <h3 class="text-base sm:text-lg font-black text-slate-900 leading-tight">
+                                                Kirim Jawaban Post-test
+                                            </h3>
+                                        </div>
+                                    </div>
+                                    <button type="button"
+                                            @click="closeSubmitModal()"
+                                            :disabled="isSubmitting"
+                                            class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-700 flex items-center justify-center transition cursor-pointer disabled:opacity-40">
+                                        ✕
+                                    </button>
+                                </div>
+
+                                {{-- Body --}}
+                                <div class="px-6 py-5 space-y-4 text-left">
+                                    {{-- Peringatan jika belum lengkap --}}
+                                    <template x-if="totalQuestions - answeredCount > 0">
+                                        <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5">
+                                            <span class="text-base shrink-0">⚠️</span>
+                                            <div class="leading-relaxed">
+                                                <strong class="font-bold block text-amber-800">Masih Ada Soal Belum Terjawab</strong>
+                                                Anda baru menjawab <span class="font-black text-amber-900" x-text="answeredCount"></span> dari <span class="font-black text-amber-900" x-text="totalQuestions"></span> butir soal (<span class="font-bold text-rose-600" x-text="(totalQuestions - answeredCount) + ' soal belum dijawab'"></span>).
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    {{-- Tulisan Pertanyaan Utama --}}
+                                    <p class="text-sm font-semibold text-slate-700 leading-relaxed">
+                                        {{ $initialPostScore !== null ? 'Apakah Anda yakin ingin mengirimkan seluruh jawaban Latihan Ulang Post-test ini?' : 'Apakah Anda yakin ingin mengirimkan seluruh jawaban Post-test ini?' }}
+                                    </p>
+
+                                    {{-- Ringkasan Butir Soal --}}
+                                    <div class="grid grid-cols-2 gap-2.5 p-3 rounded-2xl bg-slate-50 border border-slate-100 text-xs">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                                            <span class="text-slate-500 font-medium">Terjawab:</span>
+                                            <span class="font-black text-slate-800" x-text="answeredCount + ' Soal'"></span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-2.5 h-2.5 rounded-full" :class="(totalQuestions - answeredCount) > 0 ? 'bg-amber-500' : 'bg-slate-300'"></span>
+                                            <span class="text-slate-500 font-medium">Belum:</span>
+                                            <span class="font-black" :class="(totalQuestions - answeredCount) > 0 ? 'text-amber-600' : 'text-slate-600'" x-text="(totalQuestions - answeredCount) + ' Soal'"></span>
+                                        </div>
+                                    </div>
+
+                                    @if($initialPostScore !== null)
+                                        <div class="p-3 rounded-xl bg-rose-50/70 border border-rose-200/70 text-[11px] text-rose-800 flex items-start gap-2">
+                                            <span class="shrink-0">📌</span>
+                                            <span>Nilai awal resmi Anda (<strong class="font-bold">{{ $initialPostScore }}/100</strong>) tetap terkunci permanen. Nilai sesi ini dicatat sebagai perbandingan latihan.</span>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                {{-- Footer Buttons --}}
+                                <div class="px-6 py-4 bg-slate-50/80 border-t border-slate-100 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5">
+                                    <button type="button"
+                                            @click="closeSubmitModal()"
+                                            :disabled="isSubmitting"
+                                            class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs sm:text-sm transition cursor-pointer disabled:opacity-50">
+                                        Periksa Kembali
+                                    </button>
+
+                                    <button type="button"
+                                            @click="confirmAndSubmit()"
+                                            :disabled="isSubmitting"
+                                            class="flex-1 sm:flex-none px-6 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-black text-xs sm:text-sm shadow-md shadow-rose-600/30 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75 disabled:cursor-wait">
+                                        <template x-if="!isSubmitting">
+                                            <span class="flex items-center gap-1.5">
+                                                <span>Ya, Kirim Sekarang</span>
+                                                <span>🎯</span>
+                                            </span>
+                                        </template>
+                                        <template x-if="isSubmitting">
+                                            <span class="flex items-center gap-2">
+                                                <svg class="w-4 h-4 animate-spin shrink-0 text-white" fill="none" viewBox="0 0 24 24">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                <span>Mengirim Jawaban...</span>
+                                            </span>
+                                        </template>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

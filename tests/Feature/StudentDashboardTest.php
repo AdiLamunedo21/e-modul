@@ -521,6 +521,9 @@ class StudentDashboardTest extends TestCase
             $this->markTestSkipped('Seed data required.');
         }
 
+        // Pastikan tidak ada modul aktif lain di kelas sebelum pengujian
+        Module::where('class_id', $class->id)->update(['is_active' => false]);
+
         // Buat 1 modul aktif di kelas siswa
         $activeMod = Module::create([
             'teacher_id' => $teachers[0]->id,

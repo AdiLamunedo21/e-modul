@@ -173,7 +173,16 @@ class PreTestController extends Controller
         ]);
 
         $status = $module->has_pre_test ? 'diaktifkan' : 'dinonaktifkan';
+        $message = "Fitur Pre-test berhasil {$status}! ✅";
 
-        return back()->with('success', "Fitur Pre-test berhasil {$status}! ✅");
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success'      => true,
+                'has_pre_test' => (bool) $module->has_pre_test,
+                'message'      => $message,
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 }

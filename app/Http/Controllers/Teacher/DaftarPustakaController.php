@@ -120,7 +120,17 @@ class DaftarPustakaController extends Controller
         $module->update(['informasi_umum_data' => $data]);
 
         $statusText = $toggles['daftar_pustaka'] ? 'diaktifkan (ON)' : 'dinonaktifkan (OFF)';
+        $message = "Komponen 'Daftar Pustaka' berhasil {$statusText}. ✅";
 
-        return back()->with('success', "Komponen 'Daftar Pustaka' berhasil {$statusText}. ✅");
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success'   => true,
+                'is_active' => (bool) $toggles['daftar_pustaka'],
+                'component' => 'daftar_pustaka',
+                'message'   => $message,
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 }

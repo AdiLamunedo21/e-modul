@@ -58,8 +58,8 @@
             {{-- Sentinel akhir bahan bacaan untuk deteksi scroll --}}
             <div class="reading-end-sentinel h-1 w-full pointer-events-none my-1" data-page="materi"></div>
 
-            {{-- Tombol Tandai Selesai Membaca Materi --}}
-            <div class="mt-8 pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+            {{-- Tombol Tandai Selesai Membaca Materi (Hanya tampil di desktop, di mobile sudah terwakili di nav bawah) --}}
+            <div class="hidden lg:flex mt-8 pt-6 border-t border-slate-100 flex-col sm:flex-row items-center justify-between gap-4">
                 <p class="text-xs text-slate-500">
                     💡 Tandai materi ini telah dipelajari untuk membuka langkah berikutnya pada navigasi bawah.
                 </p>

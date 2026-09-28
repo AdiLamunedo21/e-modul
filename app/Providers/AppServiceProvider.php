@@ -35,15 +35,25 @@ class AppServiceProvider extends ServiceProvider
             if ($student) {
                 $joinedClassIds = $student->joinedClassIds();
                 if (!empty($joinedClassIds)) {
+                    $studentSubjectIds = $student->subjects()->pluck('subjects.id')->toArray();
+
                     // Hitung jumlah modul dalam progres dan selesai untuk badge sidebar (hanya kolom metadata penting)
-                    $modules = Module::select([
-                            'id', 'class_id', 'is_active',
+                    $modulesQuery = Module::select([
+                            'id', 'class_id', 'subject_id', 'is_active',
                             'has_pre_test', 'has_materi', 'has_video', 'has_embed',
                             'has_job_sheet', 'has_lkpd', 'has_post_test'
                         ])
                         ->whereIn('class_id', $joinedClassIds)
-                        ->where('status', 'published')
-                        ->with([
+                        ->where(function ($q) {
+                            $q->where('status', 'published')
+                              ->orWhere('is_active', true);
+                        });
+
+                    if (!empty($studentSubjectIds)) {
+                        $modulesQuery->whereIn('subject_id', $studentSubjectIds);
+                    }
+
+                    $modules = $modulesQuery->with([
                             'studentResults'        => fn($q) => $q->select(['id', 'module_id', 'student_id', 'pre_test_score', 'post_test_score', 'read_components'])->where('student_id', $student->id),
                             'jobSheets'             => fn($q) => $q->select(['id', 'module_id']),
                             'jobSheets.submissions' => fn($q) => $q->select(['id', 'job_sheet_id', 'student_id'])->where('student_id', $student->id),
@@ -76,6 +86,11 @@ class AppServiceProvider extends ServiceProvider
                         } elseif ($pct > 0 || (bool) $mod->is_active) {
                             $inProgressCount++;
                         }
+                    }
+
+                    // Fallback jika belum ada modul dalam progres, namun ada modul yang belum selesai
+                    if ($inProgressCount === 0 && $modules->isNotEmpty() && $completedCount < $modules->count()) {
+                        $inProgressCount = 1;
                     }
 
                     $sidebarStats['in_progress']   = $inProgressCount;

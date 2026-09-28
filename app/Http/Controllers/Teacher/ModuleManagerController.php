@@ -242,13 +242,42 @@ class ModuleManagerController extends Controller
             'status' => ['required', 'in:draft,published,closed'],
         ]);
 
-        $module->update(['status' => $validated['status']]);
+        $oldStatus = $module->status;
+        $newStatus = $validated['status'];
 
-        $label = match($validated['status']) {
+        $updateData = ['status' => $newStatus];
+        if ($newStatus === 'closed' || $newStatus === 'draft') {
+            $updateData['is_active'] = false;
+        } elseif ($newStatus === 'published') {
+            // Jika di kelas tujuan belum ada modul yang aktif, otomatis aktifkan modul ini
+            if ($module->class_id) {
+                $hasActiveModuleInClass = Module::where('class_id', $module->class_id)
+                    ->where('id', '!=', $module->id)
+                    ->where('is_active', true)
+                    ->exists();
+                if (!$hasActiveModuleInClass) {
+                    $updateData['is_active'] = true;
+                }
+            }
+        }
+
+        $module->update($updateData);
+
+        $label = match($newStatus) {
             'published' => 'Modul berhasil dipublikasikan dan dapat diakses siswa!',
             'closed'    => 'Modul ditutup dan tidak bisa diakses siswa.',
             default     => 'Modul dikembalikan ke status Draft.',
         };
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success'    => true,
+                'status'     => $module->status,
+                'old_status' => $oldStatus,
+                'badge'      => $module->statusLabel(),
+                'message'    => $label,
+            ]);
+        }
 
         return back()->with('success', $label);
     }
@@ -259,7 +288,17 @@ class ModuleManagerController extends Controller
     public function destroy(Module $module)
     {
         $this->authorizeModule($module);
+        $status = $module->status;
         $module->delete();
+
+        if (request()->wantsJson() || request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'status'  => $status,
+                'message' => 'Modul berhasil dihapus.',
+            ]);
+        }
+
         return redirect()->route('teacher.modules.index')->with('success', 'Modul berhasil dihapus.');
     }
 

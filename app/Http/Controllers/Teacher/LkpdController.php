@@ -224,7 +224,16 @@ class LkpdController extends Controller
         ]);
 
         $status = $module->has_lkpd ? 'diaktifkan' : 'dinonaktifkan';
+        $message = "Komponen LKPD berhasil {$status}! ✅";
 
-        return back()->with('success', "Komponen LKPD berhasil {$status}! ✅");
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success'  => true,
+                'has_lkpd' => (bool) $module->has_lkpd,
+                'message'  => $message,
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 }

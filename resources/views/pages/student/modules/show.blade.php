@@ -68,7 +68,7 @@
     $hasLkpd = (bool) $module->has_lkpd;
     $hasSec4 = $hasEmbed || $hasJobSheet || $hasLkpd;
 
-    $hasPostTest = (bool) ($module->has_post_test && $module->postTest);
+    $hasPostTest = (bool) ($module->has_post_test && ($module->postTest || $module->isPostTestInheritingPreTest()));
     $hasDaftarPustaka = (bool) ($module->isInfoComponentActive('daftar_pustaka') && (
         !empty($informasiUmum['daftar_pustaka']['daftar_pustaka']) ||
         (!empty($informasiUmum['daftar_pustaka']) && is_array($informasiUmum['daftar_pustaka']) && count(array_filter($informasiUmum['daftar_pustaka'])) > 0) ||
@@ -143,14 +143,14 @@
     $initialViewMode = $hasPageParam ? 'learn' : 'overview';
     $initialPage = request()->query('page', $pagesList[0]['id'] ?? 'kata_pengantar');
 
-    // Status pengerjaan backend
-    $isPreTestDone = (bool) ($studentResult && $studentResult->pre_test_score !== null);
+    // Status pengerjaan backend (termasuk pemeriksaan jika ada riwayat pengerjaan tes)
+    $isPreTestDone = (bool) ($studentResult && ($studentResult->pre_test_score !== null || $studentResult->getTestAttemptCount('pre_test') > 0));
     $isMateriDone = (bool) ($studentResult && $studentResult->isComponentRead('materi'));
     $isVideoDone = (bool) $videoSummary;
     $isEmbedDone = (bool) $embedSubmission;
     $isJobSheetDone = (bool) $jobSheetSubmission;
     $isLkpdDone = (bool) $lkpdSubmission;
-    $isPostTestDone = (bool) ($studentResult && $studentResult->post_test_score !== null);
+    $isPostTestDone = (bool) ($studentResult && ($studentResult->post_test_score !== null || $studentResult->getTestAttemptCount('post_test') > 0));
 
     // Tautan kembali ke daftar modul kelas spesifik
     $classSubjectModulesUrl = $module->class_id
@@ -160,6 +160,9 @@
 @endphp
 
 <div class="w-full space-y-6"
+     @open-submit-modal.window="openSubmitModal($event.detail.config, $event.detail.formEl)"
+     @open-cancel-modal.window="openCancelModal($event.detail.config, $event.detail.formEl)"
+     @close-submit-modal.window="closeSubmitModal()"
      x-data="{
         viewMode: '{{ $initialViewMode }}',
         activePage: '{{ $initialPage }}',
@@ -201,7 +204,7 @@
             @endif
         },
         get isTakingPostTest() {
-            @if($module->has_post_test && $module->postTest)
+            @if($module->has_post_test && ($module->postTest || $module->isPostTestInheritingPreTest()))
                 return !{{ $isPostTestDone ? 'true' : 'false' }} || this.showPostRetakeForm;
             @else
                 return false;
@@ -214,6 +217,23 @@
             return false;
         },
         init() {
+            // Global helper bindings agar dapat dipanggil dari child x-data
+            window.openSubmitModal = (config, formEl) => this.openSubmitModal(config, formEl);
+            window.openCancelModal = (config, formEl) => this.openCancelModal(config, formEl);
+            window.closeSubmitModal = () => this.closeSubmitModal();
+            window.confirmSubmit = () => this.confirmSubmit();
+
+            this.$watch('showPreRetakeForm', val => {
+                if (val) {
+                    window.dispatchEvent(new CustomEvent('start-pre-retake'));
+                }
+            });
+            this.$watch('showPostRetakeForm', val => {
+                if (val) {
+                    window.dispatchEvent(new CustomEvent('start-post-retake'));
+                }
+            });
+
             this.$watch('isTakingTest', val => {
                 window.dispatchEvent(new CustomEvent('set-sidebar-open', { detail: !val && window.innerWidth >= 1024 }));
             });
@@ -378,10 +398,16 @@
 
         // Memeriksa apakah suatu halaman sudah terbuka berdasarkan alur sekuensial
         isUnlocked(pageId) {
+            // Halaman yang sudah pernah diselesaikan (misalnya pre-test mandiri / kuis live, post-test, tugas, atau bacaan)
+            // harus selalu terbuka dan bisa diakses kembali kapan saja walau langkah sebelumnya belum selesai / terkunci.
+            if (this.isCompleted(pageId)) {
+                return true;
+            }
+
             const idx = this.pages.findIndex(p => p.id === pageId);
             if (idx <= 0) return true; // Halaman pertama (Kata Pengantar / Orientasi) selalu terbuka
             
-            // Halaman terbuka hanya jika seluruh halaman sebelumnya sudah diselesaikan
+            // Halaman baru terbuka hanya jika seluruh halaman sebelumnya sudah diselesaikan
             for (let i = 0; i < idx; i++) {
                 if (!this.isCompleted(this.pages[i].id)) {
                     return false;
@@ -409,10 +435,24 @@
             this.goToPage(target);
         },
 
+        showLockedNotice(customMessage) {
+            const message = customMessage || 'Halaman ini masih terkunci! Silakan baca dan selesaikan langkah sebelumnya terlebih dahulu.';
+            if (window.showStatusPopup) {
+                window.showStatusPopup({
+                    message: message,
+                    icon: '🔒',
+                    duration: 4000
+                });
+            } else {
+                alert(message);
+            }
+        },
+
         // Berpindah ke halaman tertentu jika sudah terbuka
         goToPage(pageId) {
-            if (!this.isUnlocked(pageId)) {
-                alert('⚠️ Halaman ini masih terkunci! Silakan baca dan selesaikan langkah sebelumnya terlebih dahulu.');
+            // Jika halaman sudah selesai dikerjakan (khususnya pre-test atau post-test yang sudah tuntas), selalu izinkan masuk
+            if (!this.isUnlocked(pageId) && !this.isCompleted(pageId)) {
+                this.showLockedNotice();
                 return;
             }
             this.activePage = pageId;
@@ -498,7 +538,8 @@
             this.submitModal.confirmLabel = config.confirmLabel || 'Kirim Sekarang';
             this.submitModal.category = config.category || 'Konfirmasi Pengiriman';
             this.submitModal.loadingLabel = config.loadingLabel || 'Mengirim...';
-            this.submitModal.formEl = formEl;
+            this.submitModal.formId = (formEl && formEl.id) ? formEl.id : (config.formId || '');
+            window._pendingSubmitForm = formEl || (this.submitModal.formId ? document.getElementById(this.submitModal.formId) : null);
             document.body.style.overflow = 'hidden';
         },
         openCancelModal(config, formEl) {
@@ -511,19 +552,98 @@
             this.submitModal.confirmLabel = config.confirmLabel || 'Ya, Batalkan Tugas';
             this.submitModal.category = 'Konfirmasi Pembatalan';
             this.submitModal.loadingLabel = 'Membatalkan...';
-            this.submitModal.formEl = formEl;
+            this.submitModal.formId = (formEl && formEl.id) ? formEl.id : '';
+            window._pendingSubmitForm = formEl || (this.submitModal.formId ? document.getElementById(this.submitModal.formId) : null);
             document.body.style.overflow = 'hidden';
         },
         closeSubmitModal() {
             if (this.submitModal.submitting) return;
             this.submitModal.open = false;
-            this.submitModal.formEl = null;
+            window._pendingSubmitForm = null;
             document.body.style.overflow = '';
+            window.dispatchEvent(new CustomEvent('quiz-timer-resume'));
         },
         confirmSubmit() {
-            if (!this.submitModal.formEl || this.submitModal.submitting) return;
+            if (this.submitModal.submitting) return;
+
+            let target = null;
+            // Selalu prioritaskan pencarian element murni via ID agar bebas dari Alpine.js Proxy wrapping
+            if (this.submitModal.formId) {
+                target = document.getElementById(this.submitModal.formId);
+            }
+            if (!target && window._pendingSubmitForm) {
+                target = (window._pendingSubmitForm.id ? document.getElementById(window._pendingSubmitForm.id) : null) || window._pendingSubmitForm;
+            }
+            if (!target) {
+                if (this.activePage === 'pre_test') {
+                    target = document.getElementById('pre-test-form');
+                } else if (this.activePage === 'post_test') {
+                    target = document.getElementById('post-test-form');
+                }
+            }
+
+            if (!target) {
+                console.error('Target form element not found for submission.');
+                this.closeSubmitModal();
+                return;
+            }
+
+            // Unwrap jika masih ada lapisan proxy Alpine
+            if (window.Alpine && typeof window.Alpine.raw === 'function') {
+                target = window.Alpine.raw(target);
+            }
+
             this.submitModal.submitting = true;
-            this.submitModal.formEl.submit();
+            try {
+                if (typeof target.requestSubmit === 'function') {
+                    target.requestSubmit();
+                } else {
+                    HTMLFormElement.prototype.submit.call(target);
+                }
+            } catch (err) {
+                try {
+                    HTMLFormElement.prototype.submit.call(target);
+                } catch (err2) {
+                    try {
+                        target.submit();
+                    } catch (err3) {
+                        console.error('Submit execution error:', err3);
+                        this.submitModal.submitting = false;
+                    }
+                }
+            }
+        },
+
+        isReloading: false,
+        async silentReload(showNotice = true) {
+            if (this.isReloading) return;
+            this.isReloading = true;
+            try {
+                const res = await fetch(window.location.href, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const html = await res.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                // Sinkronkan card overview modul siswa
+                const newOverview = doc.querySelector('#student-module-overview');
+                const curOverview = document.querySelector('#student-module-overview');
+                if (newOverview && curOverview) {
+                    curOverview.innerHTML = newOverview.innerHTML;
+                    if (window.Alpine) {
+                        window.Alpine.initTree(curOverview);
+                    }
+                }
+
+                if (showNotice && window.showStatusPopup) {
+                    window.showStatusPopup({ message: 'Konten modul belajar berhasil disinkronkan secara real-time!', icon: '🔄' });
+                }
+            } catch (e) {
+                console.error('Error silentReload student module:', e);
+            } finally {
+                this.isReloading = false;
+            }
         }
      }">
 

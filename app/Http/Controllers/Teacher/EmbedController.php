@@ -165,7 +165,16 @@ class EmbedController extends Controller
         ]);
 
         $status = $module->has_embed ? 'diaktifkan' : 'dinonaktifkan';
+        $message = "Komponen Praktik Interaktif (Embed) berhasil {$status}! ✅";
 
-        return back()->with('success', "Komponen Praktik Interaktif (Embed) berhasil {$status}! ✅");
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success'   => true,
+                'has_embed' => (bool) $module->has_embed,
+                'message'   => $message,
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 }

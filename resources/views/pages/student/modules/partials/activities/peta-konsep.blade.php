@@ -44,8 +44,8 @@
         {{-- Sentinel akhir bahan bacaan untuk deteksi scroll --}}
         <div class="reading-end-sentinel h-1 w-full pointer-events-none my-1" data-page="peta_konsep"></div>
 
-        {{-- Tombol Tandai Selesai Dibaca --}}
-        <div class="pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+        {{-- Tombol Tandai Selesai Dibaca (Hanya tampil di desktop, di mobile sudah terwakili di nav bawah) --}}
+        <div class="hidden lg:flex pt-6 border-t border-slate-100 flex-col sm:flex-row items-center justify-between gap-4">
             <p class="text-xs text-slate-500">
                 💡 Amati struktur keterkaitan materi pada bagan di atas, lalu tandai selesai untuk membuka langkah berikutnya pada navigasi bawah.
             </p>

@@ -63,14 +63,12 @@
     </div>
 
     {{-- Tombol Kanan: Selanjutnya --}}
-    <div>
         <template x-if="nextPage">
             <button type="button"
-                    @click="goToPage(nextPage.id)"
-                    :disabled="!isCompleted(activePage)"
+                    @click="isCompleted(activePage) ? goToPage(nextPage.id) : showLockedNotice()"
                     :class="{
                         'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/25 cursor-pointer active:scale-95': isCompleted(activePage),
-                        'bg-slate-200 text-slate-400 border border-slate-200 cursor-not-allowed opacity-75': !isCompleted(activePage)
+                        'bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-300 shadow-sm cursor-pointer active:scale-95': !isCompleted(activePage)
                     }"
                     class="px-6 py-3 rounded-2xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2">
                 <span x-show="isCompleted(activePage)">Selanjutnya: <strong x-text="nextPage.title"></strong> →</span>
@@ -89,7 +87,8 @@
 </div>
 
 {{-- ── 2. TAMPILAN MOBILE (FIXED DOCK MENEMPEL DI BAWAH LAYAR SMARTPHONE) ── --}}
-<div class="fixed bottom-0 inset-x-0 z-40 lg:hidden bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-[0_-4px_25px_rgba(15,23,42,0.12)] px-3 py-2.5 transition-all select-none"
+<div x-show="!isTakingTest"
+     class="fixed bottom-0 inset-x-0 z-40 lg:hidden bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-[0_-4px_25px_rgba(15,23,42,0.12)] px-3 py-2.5 transition-all select-none"
      style="padding-bottom: max(0.6rem, env(safe-area-inset-bottom));">
     
     <div class="max-w-md mx-auto flex items-center justify-between gap-2">
@@ -147,18 +146,17 @@
 
         {{-- Tombol Kanan: Selanjutnya --}}
         <button type="button"
-                @click="if (isCompleted(activePage)) { if (nextPage) { goToPage(nextPage.id); } else { viewMode = 'overview'; } }"
-                :disabled="!isCompleted(activePage)"
+                @click="if (isCompleted(activePage)) { if (nextPage) { goToPage(nextPage.id); } else { viewMode = 'overview'; } } else { showLockedNotice(); }"
                 :class="{
                     'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/25 cursor-pointer active:scale-95': isCompleted(activePage),
-                    'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed opacity-75': !isCompleted(activePage)
+                    'bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-300 cursor-pointer active:scale-95': !isCompleted(activePage)
                 }"
                 class="flex-1 py-2.5 px-2 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-1 shadow-2xs">
             <span class="truncate" x-text="nextPage ? 'Selanjutnya' : 'Selesai'">Selanjutnya</span>
             <svg x-show="isCompleted(activePage)" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
             </svg>
-            <svg x-show="!isCompleted(activePage)" class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <svg x-show="!isCompleted(activePage)" class="w-3.5 h-3.5 text-amber-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
             </svg>
         </button>

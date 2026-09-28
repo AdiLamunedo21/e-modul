@@ -290,6 +290,152 @@
     {{-- ════ NAVIGASI DIGITAL KHUSUS VERSI MOBILE (ROLE SISWA) ════ --}}
     @include('layouts.student.mobile-nav')
 
+    {{-- ════ POP-UP MENGAMBANG NOTIFIKASI AKTIVITAS / SINKRONISASI / TERKUNCI SISWA ════ --}}
+    @php
+        $studentStatusPopupMessage = null;
+        $studentStatusPopupIcon = '✨';
+        $studentStatusPopupBorder = 'border-emerald-500/80';
+        $studentStatusPopupShadow = 'shadow-[0_20px_50px_rgba(16,185,129,0.35)]';
+        $studentStatusPopupIconBg = 'from-emerald-500 to-teal-600 shadow-emerald-500/30';
+        $studentStatusPopupBar = 'from-emerald-400 via-teal-300 to-cyan-400';
+
+        $flashSuccess = session('success');
+        $flashError = session('error');
+        $activeStudentFlash = $flashSuccess ?? $flashError;
+
+        if ($activeStudentFlash) {
+            $studentStatusPopupMessage = $activeStudentFlash;
+            if (str_contains($activeStudentFlash, 'terkunci') || str_contains($activeStudentFlash, 'Terkunci') || str_contains($activeStudentFlash, 'kunci')) {
+                $studentStatusPopupIcon = '🔒';
+                $studentStatusPopupBorder = 'border-amber-500/80';
+                $studentStatusPopupShadow = 'shadow-[0_20px_50px_rgba(245,158,11,0.35)]';
+                $studentStatusPopupIconBg = 'from-amber-500 to-amber-600 shadow-amber-500/30';
+                $studentStatusPopupBar = 'from-amber-400 via-amber-300 to-yellow-300';
+            } elseif (str_contains($activeStudentFlash, 'berhasil') || str_contains($activeStudentFlash, 'selesai') || str_contains($activeStudentFlash, 'Selesai')) {
+                $studentStatusPopupIcon = '🎉';
+                $studentStatusPopupBorder = 'border-emerald-500/80';
+                $studentStatusPopupShadow = 'shadow-[0_20px_50px_rgba(16,185,129,0.35)]';
+                $studentStatusPopupIconBg = 'from-emerald-500 to-teal-600 shadow-emerald-500/30';
+                $studentStatusPopupBar = 'from-emerald-400 via-teal-300 to-cyan-400';
+            } elseif ($flashError) {
+                $studentStatusPopupIcon = '⚠️';
+                $studentStatusPopupBorder = 'border-rose-500/80';
+                $studentStatusPopupShadow = 'shadow-[0_20px_50px_rgba(244,63,94,0.35)]';
+                $studentStatusPopupIconBg = 'from-rose-500 to-red-600 shadow-rose-500/30';
+                $studentStatusPopupBar = 'from-rose-400 via-red-300 to-amber-300';
+            }
+        }
+    @endphp
+
+    <div x-data="{
+            show: {{ $studentStatusPopupMessage ? 'true' : 'false' }},
+            message: '{{ addslashes($studentStatusPopupMessage ?? '') }}',
+            icon: '{{ $studentStatusPopupIcon }}',
+            border: '{{ $studentStatusPopupBorder }}',
+            shadow: '{{ $studentStatusPopupShadow }}',
+            iconBg: '{{ $studentStatusPopupIconBg }}',
+            bar: '{{ $studentStatusPopupBar }}',
+            progressWidth: 100,
+            timer: null,
+            init() {
+                window.addEventListener('show-status-popup', (e) => {
+                    this.trigger(e.detail);
+                });
+                if (this.show) {
+                    this.startCountdown();
+                }
+            },
+            trigger(detail) {
+                if (!detail) return;
+                const msg = typeof detail === 'string' ? detail : (detail.message || '');
+                if (!msg) return;
+                this.message = msg;
+                const dur = (typeof detail === 'object' && detail.duration) ? detail.duration : 4000;
+
+                if (msg.includes('terkunci') || msg.includes('Terkunci') || msg.includes('kunci') || msg.includes('Kunci')) {
+                    this.icon = '🔒';
+                    this.border = 'border-amber-500/80';
+                    this.shadow = 'shadow-[0_20px_50px_rgba(245,158,11,0.35)]';
+                    this.iconBg = 'from-amber-500 to-amber-600 shadow-amber-500/30';
+                    this.bar = 'from-amber-400 via-amber-300 to-yellow-300';
+                } else if (msg.includes('berhasil') || msg.includes('selesai') || msg.includes('Selesai')) {
+                    this.icon = '🎉';
+                    this.border = 'border-emerald-500/80';
+                    this.shadow = 'shadow-[0_20px_50px_rgba(16,185,129,0.35)]';
+                    this.iconBg = 'from-emerald-500 to-teal-600 shadow-emerald-500/30';
+                    this.bar = 'from-emerald-400 via-teal-300 to-cyan-400';
+                } else if (msg.includes('disinkronkan') || msg.includes('Sinkron')) {
+                    this.icon = '🔄';
+                    this.border = 'border-blue-500/80';
+                    this.shadow = 'shadow-[0_20px_50px_rgba(59,130,246,0.35)]';
+                    this.iconBg = 'from-blue-500 to-indigo-600 shadow-blue-500/30';
+                    this.bar = 'from-blue-400 via-indigo-300 to-cyan-300';
+                } else {
+                    this.icon = (typeof detail === 'object' && detail.icon) ? detail.icon : '✨';
+                    this.border = (typeof detail === 'object' && detail.border) ? detail.border : 'border-blue-500/80';
+                    this.shadow = (typeof detail === 'object' && detail.shadow) ? detail.shadow : 'shadow-[0_20px_50px_rgba(59,130,246,0.35)]';
+                    this.iconBg = (typeof detail === 'object' && detail.iconBg) ? detail.iconBg : 'from-blue-500 to-indigo-600 shadow-blue-500/30';
+                    this.bar = (typeof detail === 'object' && detail.bar) ? detail.bar : 'from-blue-400 via-indigo-300 to-cyan-300';
+                }
+                this.show = true;
+                this.startCountdown(dur);
+            },
+            startCountdown(dur = 4000) {
+                if (this.timer) clearTimeout(this.timer);
+                this.progressWidth = 100;
+                this.$nextTick(() => {
+                    setTimeout(() => { this.progressWidth = 0; }, 50);
+                    this.timer = setTimeout(() => { this.show = false; }, dur);
+                });
+            }
+         }"
+         x-on:show-status-popup.window="trigger($event.detail)"
+         x-show="show"
+         x-transition:enter="transition cubic-bezier(0.16, 1, 0.3, 1) duration-500"
+         x-transition:enter-start="opacity-0 -translate-y-8 scale-90"
+         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+         x-transition:leave="transition cubic-bezier(0.16, 1, 0.3, 1) duration-400"
+         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+         x-transition:leave-end="opacity-0 -translate-y-6 scale-95"
+         x-cloak
+         class="fixed top-6 left-1/2 -translate-x-1/2 z-[9999] max-w-lg w-[92%] sm:w-auto rounded-3xl bg-slate-900/95 text-white backdrop-blur-xl border-2 p-4 sm:p-5 overflow-hidden select-none"
+         :class="[border, shadow]"
+         role="alert">
+        
+        <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-2xl bg-gradient-to-br text-white flex items-center justify-center text-2xl font-black shadow-lg shrink-0"
+                 :class="iconBg"
+                 x-text="icon">
+            </div>
+
+            <div class="flex-1 pr-2 min-w-0">
+                <h4 class="text-sm font-black text-white leading-snug" x-text="message">
+                </h4>
+            </div>
+
+            <button type="button"
+                    @click="show = false"
+                    class="w-7 h-7 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-xs font-bold transition-all cursor-pointer shrink-0"
+                    title="Tutup">
+                ✕
+            </button>
+        </div>
+
+        <div class="w-full bg-slate-800/80 rounded-full h-1 overflow-hidden mt-3.5">
+            <div class="bg-gradient-to-r h-full rounded-full transition-all duration-[4000ms] ease-linear"
+                 :class="bar"
+                 :style="'width: ' + progressWidth + '%'"></div>
+        </div>
+    </div>
+
+    <script>
+        window.showStatusPopup = function(detail) {
+            window.dispatchEvent(new CustomEvent('show-status-popup', {
+                detail: typeof detail === 'string' ? { message: detail } : detail
+            }));
+        };
+    </script>
+
     @stack('scripts')
 </body>
 </html>

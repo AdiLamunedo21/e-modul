@@ -141,13 +141,27 @@
             <div class="absolute right-1/3 -top-10 w-56 h-56 bg-teal-500/15 rounded-full blur-2xl pointer-events-none"></div>
 
             <div class="relative z-10 max-w-3xl space-y-4">
-                <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-950/60 backdrop-blur-md border border-white/20 text-[11px] sm:text-xs font-bold tracking-wide text-white shadow-sm">
-                    <span class="flex items-center gap-1.5 text-emerald-300">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span>Akun Siswa Aktif</span>
-                    </span>
-                    <span class="text-white/30">•</span>
-                    <span class="text-emerald-100 text-[11px] sm:text-xs font-medium">NISN: {{ $student->identity_number }}</span>
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                    <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-950/60 backdrop-blur-md border border-white/20 text-[11px] sm:text-xs font-bold tracking-wide text-white shadow-sm">
+                        <span class="flex items-center gap-1.5 text-emerald-300">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span>Akun Siswa Aktif</span>
+                        </span>
+                        <span class="text-white/30">•</span>
+                        <span class="text-emerald-100 text-[11px] sm:text-xs font-medium">NISN: {{ $student->identity_number }}</span>
+                    </div>
+
+                    <form action="{{ route('logout.student') }}" method="POST" class="inline lg:hidden">
+                        @csrf
+                        <button type="submit"
+                                title="Keluar dari Akun Siswa"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/25 hover:bg-rose-500/40 text-rose-200 border border-rose-400/40 text-xs font-bold transition-all shadow-sm cursor-pointer">
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/>
+                            </svg>
+                            <span>Keluar</span>
+                        </button>
+                    </form>
                 </div>
 
                 <h1 class="text-[23px] sm:text-4xl font-extrabold tracking-tight text-white leading-tight drop-shadow-sm">
@@ -272,20 +286,37 @@
                         </p>
                     </div>
 
-                    {{-- Identitas Akun Siswa --}}
-                    <div class="flex items-center shrink-0">
-                        <div class="bg-slate-950/50 border border-white/20 p-4 rounded-2xl backdrop-blur-md shadow-sm">
-                            <div class="flex items-center gap-3">
-                                <div class="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-300 text-2xl shrink-0 font-black">
-                                    🎓
+                    {{-- Identitas Akun Siswa & Tombol Logout Mobile --}}
+                    <div class="flex items-center shrink-0 w-full sm:w-auto">
+                        <div class="bg-slate-950/50 border border-white/20 p-4 rounded-2xl backdrop-blur-md shadow-sm w-full">
+                            <div class="flex items-center justify-between gap-3">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div class="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-300 text-2xl shrink-0 font-black">
+                                        🎓
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider truncate">{{ $student->name }}</p>
+                                        <p class="text-[11px] sm:text-xs text-emerald-200/90 mt-0.5 font-medium">NISN: <span class="font-bold text-white">{{ $student->identity_number }}</span></p>
+                                        <span class="inline-flex items-center gap-1.5 mt-1 text-[10px] sm:text-[11px] font-bold text-emerald-300">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                            Status: Akun Siswa Aktif
+                                        </span>
+                                    </div>
                                 </div>
-                                <div class="min-w-0">
-                                    <p class="text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider">{{ $student->name }}</p>
-                                    <p class="text-[11px] sm:text-xs text-emerald-200/90 mt-0.5 font-medium">NISN: <span class="font-bold text-white">{{ $student->identity_number }}</span></p>
-                                    <span class="inline-flex items-center gap-1.5 mt-1 text-[10px] sm:text-[11px] font-bold text-emerald-300">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                                        Status: Akun Siswa Aktif
-                                    </span>
+
+                                {{-- Tombol Logout Khusus Mobile di Banner --}}
+                                <div class="lg:hidden shrink-0 pl-2">
+                                    <form action="{{ route('logout.student') }}" method="POST">
+                                        @csrf
+                                        <button type="submit"
+                                                title="Keluar dari Akun Siswa"
+                                                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-rose-500/25 hover:bg-rose-500/40 text-rose-200 border border-rose-400/40 text-[11px] font-bold transition-all shadow-xs cursor-pointer">
+                                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/>
+                                            </svg>
+                                            <span>Keluar</span>
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -309,6 +340,45 @@
             moduleItems: {{ Js::from($processedModules) }},
             tabAllModules: {{ Js::from($tabAllModules) }},
             inProgressModules: {{ Js::from($inProgressModules) }},
+            isReloading: false,
+
+            async silentReload(showNotice = true) {
+                if (this.isReloading) return;
+                this.isReloading = true;
+                try {
+                    const res = await fetch(window.location.href, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    const html = await res.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+
+                    // Sinkronkan card KPI ringkasan statistik
+                    const newStats = doc.querySelector('#student-stats-kpi-grid');
+                    const curStats = document.querySelector('#student-stats-kpi-grid');
+                    if (newStats && curStats) {
+                        curStats.innerHTML = newStats.innerHTML;
+                    }
+
+                    // Sinkronkan container konten tab utama siswa
+                    const newTabs = doc.querySelector('#student-main-tabs-content');
+                    const curTabs = document.querySelector('#student-main-tabs-content');
+                    if (newTabs && curTabs) {
+                        curTabs.innerHTML = newTabs.innerHTML;
+                        if (window.Alpine) {
+                            window.Alpine.initTree(curTabs);
+                        }
+                    }
+
+                    if (showNotice && window.showStatusPopup) {
+                        window.showStatusPopup({ message: 'Daftar modul & rombel kelas berhasil disinkronkan secara real-time!', icon: '🔄' });
+                    }
+                } catch (e) {
+                    console.error('Error silentReload student dashboard:', e);
+                } finally {
+                    this.isReloading = false;
+                }
+            },
 
             switchTab(tab) {
                 this.activeTab = tab;
@@ -356,7 +426,8 @@
                 if (!item) return false;
 
                 if (requiredStatus === 'in_progress') {
-                    if (!item.is_active_in_class) {
+                    const inList = this.inProgressModules && this.inProgressModules.some(m => m.id === item.id);
+                    if (!inList && !item.is_active_in_class && item.progress_status !== 'in_progress') {
                         return false;
                     }
                 } else if (requiredStatus && item.progress_status !== requiredStatus) {
@@ -365,7 +436,8 @@
 
                 if (!requiredStatus && this.selectedStatus !== 'all') {
                     if (this.selectedStatus === 'in_progress') {
-                        if (!item.is_active_in_class) {
+                        const inList = this.inProgressModules && this.inProgressModules.some(m => m.id === item.id);
+                        if (!inList && !item.is_active_in_class && item.progress_status !== 'in_progress') {
                             return false;
                         }
                     } else if (item.progress_status !== this.selectedStatus) {
@@ -415,12 +487,16 @@
                 this.selectedStatus = 'all';
             }
         }"
-        x-init="window.dispatchEvent(new CustomEvent('student-tab-changed', { detail: activeTab }))"
+        x-init="
+            window.dispatchEvent(new CustomEvent('student-tab-changed', { detail: activeTab }));
+            setInterval(() => { silentReload(false); }, 30000);
+        "
         x-on:switch-student-tab.window="switchTab($event.detail)"
         class="space-y-8">
 
             {{-- ══ 2. RINGKASAN KPI BELAJAR SISWA (STATS CARDS) — KHUSUS DITAMPILKAN PADA TAB KELAS SAYA (DISEMBUNYIKAN PADA SEDANG DIKERJAKAN, RIWAYAT SELESAI, & SEMUA MODUL) ══ --}}
-            <div x-show="activeTab === 'classes'"
+            <div id="student-stats-kpi-grid"
+                 x-show="activeTab === 'classes'"
                  x-cloak
                  @if($filterStatus !== 'classes') style="display: none;" @endif
                  x-transition:enter="transition ease-out duration-200"
@@ -488,7 +564,7 @@
             </div>
 
             {{-- ══ 3. INTERACTIVE NAVIGATION TABS & FILTER HUB ══ --}}
-            <div class="space-y-6">
+            <div id="student-main-tabs-content" class="space-y-6">
 
                 {{-- ═══ TAB SELECTOR NAVIGATION BAR (KHUSUS DESKTOP, PADA MOBILE DIGANTIKAN BOTTOM NAV) ═══ --}}
                 <div class="hidden lg:flex items-center justify-between gap-3 border-b border-slate-200/80 pb-3">
@@ -538,13 +614,24 @@
                         <span>📚 Semua Modul</span>
                         <span class="px-2 py-0.5 rounded-full text-[10px]"
                               :class="activeTab === 'all_modules' ? 'bg-blue-700 text-white' : 'bg-slate-300/60 text-slate-600'">
-                            {{ min(15, $stats['total_modules']) }}
+                            {{ $stats['total_modules'] }}
                         </span>
                     </button>
                 </div>
 
-                {{-- Action: Tambah Kelas Baru --}}
+                {{-- Action: Tambah Kelas Baru & Auto-Sync --}}
                 <div class="flex items-center gap-2 shrink-0">
+                    <button type="button"
+                            @click="silentReload()"
+                            :disabled="isReloading"
+                            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:text-blue-600 hover:border-blue-200 shadow-sm transition-all cursor-pointer"
+                            title="Perbarui daftar kelas & modul siswa di latar belakang tanpa reload">
+                        <svg class="w-3.5 h-3.5 text-blue-500" :class="{ 'animate-spin': isReloading }" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                        </svg>
+                        <span x-text="isReloading ? 'Menyinkronkan...' : 'Auto-Sync'"></span>
+                    </button>
+
                     <button type="button"
                             @click="joinModalOpen = true"
                             class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-600/25 transition-all group">
@@ -868,7 +955,7 @@
                                 <a href="{{ route('student.modules.show', $mod['id']) }}"
                                    class="w-full py-3 px-4 rounded-2xl text-white font-extrabold text-[11px] sm:text-xs transition-all shadow-md flex items-center justify-center gap-2 group-hover:scale-[1.01]
                                    {{ !empty($mod['is_active_in_class']) ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-emerald-600/25' : 'bg-amber-600 hover:bg-amber-500 shadow-amber-600/20' }}">
-                                    <span>{{ !empty($mod['is_active_in_class']) && $mod['progress_percent'] == 0 ? 'Mulai Belajar (Sedang Dibahas di Kelas)' : ($mod['progress_percent'] >= 100 ? 'Buka & Pelajari Ulang Modul' : 'Lanjutkan Belajar Modul') }}</span>
+                                    <span>{{ !empty($mod['is_active_in_class']) && $mod['progress_percent'] == 0 ? 'Mulai Belajar (Sedang Dibahas di Kelas)' : ($mod['progress_percent'] >= 100 ? 'Buka & Pelajari Ulang Modul' : ($mod['progress_percent'] == 0 ? 'Mulai Belajar Modul' : 'Lanjutkan Belajar Modul')) }}</span>
                                     <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
                                     </svg>

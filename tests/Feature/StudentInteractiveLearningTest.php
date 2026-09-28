@@ -451,5 +451,171 @@ class StudentInteractiveLearningTest extends TestCase
 
         $module->delete();
     }
+
+    public function test_completed_pre_test_and_post_test_remain_accessible_even_without_earlier_reading_steps()
+    {
+        $student = Student::first();
+        $teacher = Teacher::first();
+        $subject = Subject::first();
+
+        if (!$student || !$teacher || !$subject) {
+            $this->markTestSkipped('Student, teacher, subject required.');
+        }
+
+        $student->subjects()->syncWithoutDetaching([$subject->id]);
+
+        $module = Module::create([
+            'teacher_id'   => $teacher->id,
+            'class_id'     => $student->class_id,
+            'subject_id'   => $subject->id,
+            'title'        => 'Modul Pre Post Unlock Test ' . uniqid(),
+            'status'       => 'published',
+            'has_pre_test' => true,
+            'has_post_test' => true,
+            'informasi_umum_data' => [
+                'toggles' => [
+                    'kata_pengantar' => true,
+                    'petunjuk_penggunaan' => true,
+                ],
+            ],
+        ]);
+
+        $preTest = PreTest::create([
+            'module_id' => $module->id,
+            'title'     => 'Kuis Pre Test Diagnostik',
+        ]);
+        $postTest = PostTest::create([
+            'module_id' => $module->id,
+            'title'     => 'Kuis Post Test Evaluasi',
+        ]);
+
+        // Simulasikan siswa telah menyelesaikan pre-test (misal dari kuis live) namun belum membaca kata pengantar
+        StudentResult::create([
+            'module_id'       => $module->id,
+            'student_id'      => $student->id,
+            'pre_test_score'  => 85,
+            'post_test_score' => 90,
+            'summative_score' => 90,
+            'read_components' => [], // Belum ada langkah awal yang dibaca
+        ]);
+
+        $response = $this->actingAs($student, 'student')
+            ->get(route('student.modules.show', $module));
+
+        $response->assertStatus(200);
+
+        // Pastikan view memiliki serverStatus pre_test: true dan post_test: true
+        $response->assertSee('pre_test: true', false);
+        $response->assertSee('post_test: true', false);
+
+        // Pastikan tombol skor tampil dan bukan label terkunci
+        $response->assertSee('Skor: 85');
+        $response->assertSee('Skor: 90');
+        $response->assertSee('goToPage(\'pre_test\')', false);
+        $response->assertSee('goToPage(\'post_test\')', false);
+
+        $module->delete();
+    }
+
+    public function test_student_can_retake_pre_test_and_post_test_in_practice_mode()
+    {
+        $student = Student::first();
+        $teacher = Teacher::first();
+        $subject = Subject::first();
+
+        if (!$student || !$teacher || !$subject) {
+            $this->markTestSkipped('Student, teacher, subject required.');
+        }
+
+        $student->subjects()->syncWithoutDetaching([$subject->id]);
+
+        $module = Module::create([
+            'teacher_id'   => $teacher->id,
+            'class_id'     => $student->class_id,
+            'subject_id'   => $subject->id,
+            'title'        => 'Modul Latihan Ulang ' . uniqid(),
+            'status'       => 'published',
+            'has_pre_test' => true,
+            'has_post_test'=> true,
+        ]);
+
+        try {
+            $preTest = PreTest::create([
+            'module_id' => $module->id,
+            'title'     => 'Kuis Pre Test Diagnostik',
+        ]);
+        $preQ = PreTestQuestion::create([
+            'pre_test_id'    => $preTest->id,
+            'question_text'  => 'Soal Pre-test Latihan?',
+            'options'        => ['A' => 'Benar', 'B' => 'Salah'],
+            'correct_answer' => 'A',
+            'score_weight'   => 10,
+        ]);
+
+        $postTest = PostTest::create([
+            'module_id' => $module->id,
+            'title'     => 'Kuis Post Test Evaluasi',
+        ]);
+        $postQ = PostTestQuestion::create([
+            'post_test_id'   => $postTest->id,
+            'question_text'  => 'Soal Post-test Latihan?',
+            'options'        => ['A' => 'Benar', 'B' => 'Salah'],
+            'correct_answer' => 'A',
+            'score_weight'   => 10,
+        ]);
+
+        // Percobaan pertama (skor resmi)
+        $this->actingAs($student, 'student')
+            ->post(route('student.modules.pre-test.submit', $module), [
+                'answers' => [$preQ->id => 'A'],
+            ])
+            ->assertRedirect(route('student.modules.show', ['module' => $module->id, 'page' => 'pre_test']));
+
+        $result = StudentResult::where('module_id', $module->id)->where('student_id', $student->id)->first();
+        $this->assertNotNull($result);
+        $this->assertEquals(100, $result->pre_test_score);
+
+        // Percobaan kedua (mode latihan ulang)
+        $this->actingAs($student, 'student')
+            ->post(route('student.modules.pre-test.submit', $module), [
+                'answers' => [$preQ->id => 'B'],
+            ])
+            ->assertRedirect(route('student.modules.show', ['module' => $module->id, 'page' => 'pre_test']));
+
+        $result->refresh();
+        // Nilai awal tetap terkunci
+        $this->assertEquals(100, $result->pre_test_score);
+        // Namun latihan kedua tercatat
+        $this->assertEquals(0, $result->getLatestRetakeScore('pre_test'));
+        $this->assertEquals(2, $result->getTestAttemptCount('pre_test'));
+
+        // Post-test percobaan pertama (skor resmi)
+        $this->actingAs($student, 'student')
+            ->post(route('student.modules.post-test.submit', $module), [
+                'answers' => [$postQ->id => 'A'],
+            ])
+            ->assertRedirect(route('student.modules.show', ['module' => $module->id, 'page' => 'post_test']));
+
+        $result->refresh();
+        $this->assertEquals(100, $result->post_test_score);
+
+        // Post-test percobaan kedua (latihan ulang)
+        $this->actingAs($student, 'student')
+            ->post(route('student.modules.post-test.submit', $module), [
+                'answers' => [$postQ->id => 'B'],
+            ])
+            ->assertRedirect(route('student.modules.show', ['module' => $module->id, 'page' => 'post_test']));
+
+        $result->refresh();
+        // Nilai resmi tetap 100
+        $this->assertEquals(100, $result->post_test_score);
+        // Latihan ulang tercatat
+        $this->assertEquals(0, $result->getLatestRetakeScore('post_test'));
+        $this->assertEquals(2, $result->getTestAttemptCount('post_test'));
+        } finally {
+            $module->studentResults()->delete();
+            $module->delete();
+        }
+    }
 }
 

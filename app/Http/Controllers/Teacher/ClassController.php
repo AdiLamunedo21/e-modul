@@ -360,7 +360,10 @@ class ClassController extends Controller
                 ->where('id', '!=', $module->id)
                 ->update(['is_active' => false]);
 
-            $module->update(['is_active' => true]);
+            $module->update([
+                'is_active' => true,
+                'status'    => 'published',
+            ]);
             $message = "Modul '{$module->title}' berhasil DIAKTIFKAN untuk pembelajaran di kelas {$class->full_name}! (Modul lain di kelas ini otomatis dinonaktifkan).";
             $type = 'success';
         }
@@ -369,6 +372,7 @@ class ClassController extends Controller
             return response()->json([
                 'success'   => true,
                 'is_active' => (bool) $module->is_active,
+                'status'    => $module->status,
                 'message'   => $message,
             ]);
         }

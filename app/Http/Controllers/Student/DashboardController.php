@@ -70,7 +70,10 @@ class DashboardController extends Controller
                     'has_job_sheet', 'has_lkpd', 'has_post_test'
                 ])
                 ->whereIn('class_id', $joinedClassIds)
-                ->where('status', 'published')
+                ->where(function ($q) {
+                    $q->where('status', 'published')
+                      ->orWhere('is_active', true);
+                })
                 ->with([
                     'teacher:id,name',
                     'subject:id,name,code,icon,color',
@@ -304,12 +307,18 @@ class DashboardController extends Controller
         });
 
         // Kategori modul terpisah untuk akses cepat tab dashboard:
-        // Tab Sedang Dikerjakan HANYA menampilkan SATU modul aktif di kelas (seperti pergantian mapel di kelas).
-        // Modul yang tampil adalah modul yang secara eksplisit DIAKTIFKAN oleh guru di kelas (is_active_in_class = true).
-        // Jika guru belum mengaktifkan modul di kelas, tab ini tidak menampilkan modul aktif.
-        $inProgressModules = $processedModules->where('is_active_in_class', true)
-            ->take(1)
-            ->values();
+        // Prioritas Tab Sedang Dikerjakan:
+        // 1. Modul yang secara eksplisit DIAKTIFKAN oleh guru di kelas (is_active_in_class = true)
+        // 2. Modul yang sedang berstatus in_progress oleh siswa (progress_status = in_progress)
+        $inProgressModules = $processedModules->filter(function ($m) {
+            return !empty($m['is_active_in_class']) || $m['progress_status'] === 'in_progress';
+        })->sortByDesc('is_active_in_class')->values();
+
+        // Jika belum ada modul yang ditandai aktif di kelas dan belum ada progres siswa,
+        // namun ada modul terbit di kelasnya, fallback tampilkan modul terbit yang belum tuntas
+        if ($inProgressModules->isEmpty() && $processedModules->isNotEmpty()) {
+            $inProgressModules = $processedModules->where('progress_status', '!=', 'completed')->take(1)->values();
+        }
         $completedModules = $processedModules->where('progress_status', 'completed')->values();
 
         // Batasi modul yang tampil di tab Semua Modul dashboard siswa maksimal 15 modul (prioritaskan modul aktif di kelas dan terbaru)

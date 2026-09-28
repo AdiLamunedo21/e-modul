@@ -39,18 +39,19 @@
                 </div>
             </div>
 
-            {{-- Nilai Akhir Sumatif --}}
-            @if($studentResult)
-                <div class="pl-3.5 border-l border-slate-200 text-center min-w-[80px]">
-                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Nilai Akhir</p>
-                    <p class="text-xl font-black {{ $studentResult->summative_score >= 75 ? 'text-emerald-600' : 'text-amber-600' }}">
-                        {{ $studentResult->summative_score }}
-                    </p>
-                </div>
-            @endif
 
-            {{-- Switch View Mode Buttons --}}
+            {{-- Switch View Mode Buttons & Auto-Sync --}}
             <div class="flex items-center gap-1.5 pl-2 border-l border-slate-200">
+                <button type="button"
+                        @click="silentReload()"
+                        :disabled="isReloading"
+                        class="px-2.5 py-2 rounded-xl text-xs transition flex items-center gap-1 bg-white border border-slate-200 text-slate-700 hover:text-indigo-600 hover:border-indigo-200 shadow-2xs cursor-pointer font-bold"
+                        title="Sinkronkan pembaruan modul dari guru tanpa reload">
+                    <svg class="w-3.5 h-3.5 text-indigo-500" :class="{ 'animate-spin': isReloading }" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                    </svg>
+                    <span x-text="isReloading ? 'Sinkron...' : 'Auto-Sync'"></span>
+                </button>
                 <button type="button"
                         @click="viewMode = 'overview'"
                         :class="viewMode === 'overview' ? 'bg-white text-indigo-700 shadow-sm border border-slate-200 font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'"

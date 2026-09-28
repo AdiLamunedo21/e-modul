@@ -53,11 +53,10 @@
                         @foreach($sec1Pages as $page)
                             <button type="button"
                                     @click="goToPage('{{ $page['id'] }}')"
-                                    :disabled="!isUnlocked('{{ $page['id'] }}')"
                                     :class="{
                                         'sidebar-item-active': activePage === '{{ $page['id'] }}',
                                         'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/60 cursor-pointer': activePage !== '{{ $page['id'] }}' && isUnlocked('{{ $page['id'] }}'),
-                                        'bg-slate-100/70 text-slate-400 border border-slate-200/40 opacity-60 cursor-not-allowed': !isUnlocked('{{ $page['id'] }}')
+                                        'bg-slate-100/70 text-slate-400 border border-slate-200/40 opacity-60 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-300 cursor-pointer': !isUnlocked('{{ $page['id'] }}')
                                     }"
                                     class="w-full px-3 py-2.5 rounded-xl text-left text-xs font-bold transition flex items-center justify-between gap-2">
                                 <span class="flex items-center gap-2 truncate">
@@ -96,11 +95,10 @@
                         @foreach($sec2Pages as $page)
                             <button type="button"
                                     @click="goToPage('{{ $page['id'] }}')"
-                                    :disabled="!isUnlocked('{{ $page['id'] }}')"
                                     :class="{
                                         'sidebar-item-active': activePage === '{{ $page['id'] }}',
                                         'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/60 cursor-pointer': activePage !== '{{ $page['id'] }}' && isUnlocked('{{ $page['id'] }}'),
-                                        'bg-slate-100/70 text-slate-400 border border-slate-200/40 opacity-60 cursor-not-allowed': !isUnlocked('{{ $page['id'] }}')
+                                        'bg-slate-100/70 text-slate-400 border border-slate-200/40 opacity-60 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-300 cursor-pointer': !isUnlocked('{{ $page['id'] }}')
                                     }"
                                     class="w-full px-3 py-2.5 rounded-xl text-left text-xs font-bold transition flex items-center justify-between gap-2">
                                 <span class="flex items-center gap-2 truncate">
@@ -139,11 +137,10 @@
                         @foreach($sec3Pages as $page)
                             <button type="button"
                                     @click="goToPage('{{ $page['id'] }}')"
-                                    :disabled="!isUnlocked('{{ $page['id'] }}')"
                                     :class="{
                                         'sidebar-item-active': activePage === '{{ $page['id'] }}',
                                         'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/60 cursor-pointer': activePage !== '{{ $page['id'] }}' && isUnlocked('{{ $page['id'] }}'),
-                                        'bg-slate-100/70 text-slate-400 border border-slate-200/40 opacity-60 cursor-not-allowed': !isUnlocked('{{ $page['id'] }}')
+                                        'bg-slate-100/70 text-slate-400 border border-slate-200/40 opacity-60 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-300 cursor-pointer': !isUnlocked('{{ $page['id'] }}')
                                     }"
                                     class="w-full px-3 py-2.5 rounded-xl text-left text-xs font-bold transition flex items-center justify-between gap-2">
                                 <span class="flex items-center gap-2 truncate">
@@ -182,11 +179,10 @@
                         @foreach($sec4Pages as $page)
                             <button type="button"
                                     @click="goToPage('{{ $page['id'] }}')"
-                                    :disabled="!isUnlocked('{{ $page['id'] }}')"
                                     :class="{
                                         'sidebar-item-active': activePage === '{{ $page['id'] }}',
                                         'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/60 cursor-pointer': activePage !== '{{ $page['id'] }}' && isUnlocked('{{ $page['id'] }}'),
-                                        'bg-slate-100/70 text-slate-400 border border-slate-200/40 opacity-60 cursor-not-allowed': !isUnlocked('{{ $page['id'] }}')
+                                        'bg-slate-100/70 text-slate-400 border border-slate-200/40 opacity-60 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-300 cursor-pointer': !isUnlocked('{{ $page['id'] }}')
                                     }"
                                     class="w-full px-3 py-2.5 rounded-xl text-left text-xs font-bold transition flex items-center justify-between gap-2">
                                 <span class="flex items-center gap-2 truncate">
@@ -225,11 +221,10 @@
                         @foreach($sec5Pages as $page)
                             <button type="button"
                                     @click="goToPage('{{ $page['id'] }}')"
-                                    :disabled="!isUnlocked('{{ $page['id'] }}')"
                                     :class="{
                                         'sidebar-item-active': activePage === '{{ $page['id'] }}',
                                         'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/60 cursor-pointer': activePage !== '{{ $page['id'] }}' && isUnlocked('{{ $page['id'] }}'),
-                                        'bg-slate-100/70 text-slate-400 border border-slate-200/40 opacity-60 cursor-not-allowed': !isUnlocked('{{ $page['id'] }}')
+                                        'bg-slate-100/70 text-slate-400 border border-slate-200/40 opacity-60 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-300 cursor-pointer': !isUnlocked('{{ $page['id'] }}')
                                     }"
                                     class="w-full px-3 py-2.5 rounded-xl text-left text-xs font-bold transition flex items-center justify-between gap-2">
                                 <span class="flex items-center gap-2 truncate">

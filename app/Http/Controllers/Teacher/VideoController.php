@@ -258,7 +258,16 @@ class VideoController extends Controller
         ]);
 
         $status = $module->has_video ? 'diaktifkan' : 'dinonaktifkan';
+        $message = "Komponen Video & Ringkasan YouTube berhasil {$status}! ✅";
 
-        return back()->with('success', "Komponen Video & Ringkasan YouTube berhasil {$status}! ✅");
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success'   => true,
+                'has_video' => (bool) $module->has_video,
+                'message'   => $message,
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 }

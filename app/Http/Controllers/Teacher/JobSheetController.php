@@ -226,7 +226,16 @@ class JobSheetController extends Controller
         ]);
 
         $status = $module->has_job_sheet ? 'diaktifkan' : 'dinonaktifkan';
+        $message = "Komponen Lembar Praktikum (Job Sheet) berhasil {$status}! ✅";
 
-        return back()->with('success', "Komponen Lembar Praktikum (Job Sheet) berhasil {$status}! ✅");
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success'       => true,
+                'has_job_sheet' => (bool) $module->has_job_sheet,
+                'message'       => $message,
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 }

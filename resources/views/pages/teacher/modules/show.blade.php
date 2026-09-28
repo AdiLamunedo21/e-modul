@@ -5,7 +5,7 @@
 
 @section('content')
 
-<div x-data="{ deleteModalOpen: false, deleteUrl: '', deleteTitle: '', editModalOpen: false }">
+<div x-data="teacherDetailModuleApp()">
 
 {{-- ══ Breadcrumb ══ --}}
 <nav class="flex items-center gap-2 text-sm text-slate-500 mb-6">
@@ -15,7 +15,7 @@
 </nav>
 
 {{-- ══ Flash Alert ══ --}}
-@if(session('success'))
+@if(session('success') && !str_contains(session('success'), 'Komponen') && !str_contains(session('success'), 'Pre-test') && !str_contains(session('success'), 'Post-test'))
     <div class="mb-6 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-800 shadow-sm animate-fade-in">
         <svg class="w-5 h-5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
         <span>{{ session('success') }}</span>
@@ -84,6 +84,18 @@
 
         {{-- Status Action Buttons --}}
         <div class="flex flex-wrap items-center gap-3 shrink-0">
+            {{-- Auto-Sync Button --}}
+            <button type="button"
+                    @click="silentReload()"
+                    :disabled="isReloading"
+                    class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-white border border-slate-200 text-xs sm:text-sm font-bold text-slate-700 hover:text-blue-600 hover:border-blue-200 shadow-sm transition-all cursor-pointer"
+                    title="Perbarui data komponen di latar belakang tanpa reload">
+                <svg class="w-4 h-4 text-blue-500" :class="{ 'animate-spin': isReloading }" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                </svg>
+                <span x-text="isReloading ? 'Menyinkronkan...' : 'Auto-Sync Aktif'"></span>
+            </button>
+
             {{-- Edit Module Identity Button --}}
             <button type="button"
                     @click="editModalOpen = true"
@@ -98,7 +110,7 @@
     </div>
 
     {{-- ══ Summary Progress & Quick Jump ══ --}}
-    <div class="mt-6 pt-6 border-t border-slate-100">
+    <div class="mt-6 pt-6 border-t border-slate-100" id="module-summary-container">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 font-extrabold text-sm shrink-0">
@@ -139,6 +151,7 @@
      BARIS 1: BAGIAN 1 & BAGIAN 2 SEJAJAR (INFORMASI UMUM MODUL)
      1. Bagian Awal  <─── SEJAJAR ───>  2. Pendahuluan
      ══════════════════════════════════════════════════════════════════════════════ --}}
+<div id="module-sections-grid" class="space-y-8">
 <div class="mb-8">
     <div class="flex items-center gap-3 mb-4">
         <span class="px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-indigo-50 text-indigo-900 border border-indigo-200/80 flex items-center gap-2">
@@ -591,6 +604,7 @@
 
     </div>
 </div>
+</div>
 
 {{-- ══ Footer Actions ══ --}}
 <div class="flex items-center justify-between gap-4 pt-6 border-t border-slate-200/80">
@@ -711,13 +725,65 @@
 
 @push('scripts')
 <script>
-    function animateToggleAndSubmit(event, button) {
+    function teacherDetailModuleApp() {
+        return {
+            deleteModalOpen: false,
+            deleteUrl: '',
+            deleteTitle: '',
+            editModalOpen: false,
+            isReloading: false,
+
+            async silentReload(showNotice = true) {
+                if (this.isReloading) return;
+                this.isReloading = true;
+                try {
+                    const res = await fetch(window.location.href, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    const html = await res.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+
+                    // Sinkronkan ringkasan persentase progress dan tombol quick jump
+                    const newSummary = doc.querySelector('#module-summary-container');
+                    const curSummary = document.querySelector('#module-summary-container');
+                    if (newSummary && curSummary) {
+                        curSummary.innerHTML = newSummary.innerHTML;
+                    }
+
+                    // Sinkronkan grid sakelar komponen
+                    const newGrid = doc.querySelector('#module-sections-grid');
+                    const curGrid = document.querySelector('#module-sections-grid');
+                    if (newGrid && curGrid) {
+                        curGrid.innerHTML = newGrid.innerHTML;
+                        if (window.Alpine) {
+                            window.Alpine.initTree(curGrid);
+                        }
+                    }
+
+                    if (showNotice && window.showStatusPopup) {
+                        window.showStatusPopup({ message: 'Struktur modul berhasil disinkronkan secara real-time!', icon: '🔄' });
+                    }
+                } catch (e) {
+                    console.error('Error silentReload detail:', e);
+                } finally {
+                    this.isReloading = false;
+                }
+            }
+        };
+    }
+
+    async function animateToggleAndSubmit(event, button) {
         event.preventDefault();
+        if (button.disabled) return;
+        button.disabled = true;
+
         const form = button.closest('form');
         const thumb = button.querySelector('span');
-        const isCurrentlyActive = button.classList.contains('bg-emerald-500');
+        const wasActive = button.classList.contains('bg-emerald-500');
 
-        if (isCurrentlyActive) {
+        // Optimistic UI: langsung ubah sakelar tanpa nunggu response server
+        if (wasActive) {
             button.classList.remove('bg-emerald-500', 'border-emerald-600');
             button.classList.add('bg-slate-200', 'border-slate-400');
             if (thumb) thumb.style.transform = 'translateX(0px)';
@@ -727,9 +793,55 @@
             if (thumb) thumb.style.transform = 'translateX(20px)';
         }
 
-        setTimeout(() => {
-            form.submit();
-        }, 220);
+        try {
+            const token = form.querySelector('input[name="_token"]')?.value 
+                       || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            
+            const res = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                // Update title & status attribute
+                const compName = button.getAttribute('aria-label') || 'Komponen';
+                button.setAttribute('title', `${compName}: ${data.is_active ? 'Aktif (Klik untuk Nonaktifkan)' : 'Nonaktif (Klik untuk Aktifkan)'}`);
+
+                // Pop up iklan mengambang 5 detik
+                if (window.showStatusPopup) {
+                    window.showStatusPopup(data.message);
+                }
+
+                // Perbarui ringkasan total aktif & progress bar secara silent tanpa refresh halaman
+                const alpineEl = document.querySelector('[x-data]');
+                if (alpineEl && alpineEl._x_dataStack && alpineEl._x_dataStack[0].silentReload) {
+                    alpineEl._x_dataStack[0].silentReload(false);
+                }
+            } else {
+                throw new Error(data.message || 'Gagal mengubah status komponen.');
+            }
+        } catch (err) {
+            console.error(err);
+            // Kembalikan posisi sakelar jika gagal
+            if (wasActive) {
+                button.classList.remove('bg-slate-200', 'border-slate-400');
+                button.classList.add('bg-emerald-500', 'border-emerald-600');
+                if (thumb) thumb.style.transform = 'translateX(20px)';
+            } else {
+                button.classList.remove('bg-emerald-500', 'border-emerald-600');
+                button.classList.add('bg-slate-200', 'border-slate-400');
+                if (thumb) thumb.style.transform = 'translateX(0px)';
+            }
+            alert(err.message || 'Terjadi gangguan jaringan.');
+        } finally {
+            button.disabled = false;
+        }
     }
 </script>
 @endpush

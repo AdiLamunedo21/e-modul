@@ -181,7 +181,16 @@ class PostTestController extends Controller
         ]);
 
         $status = $module->has_post_test ? 'diaktifkan' : 'dinonaktifkan';
+        $message = "Fitur Post-test berhasil {$status}! ✅";
 
-        return back()->with('success', "Fitur Post-test berhasil {$status}! ✅");
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success'       => true,
+                'has_post_test' => (bool) $module->has_post_test,
+                'message'       => $message,
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 }

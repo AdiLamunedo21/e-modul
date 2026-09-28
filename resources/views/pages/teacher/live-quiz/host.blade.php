@@ -13,10 +13,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
 
     <style>
+        html, body {
+            background-color: #06090e !important;
+            color: #f8fafc;
+            min-height: 100vh;
+        }
         body {
             font-family: 'Outfit', sans-serif;
-            background-color: #06090e;
-            color: #f8fafc;
             overflow-x: hidden;
         }
         .font-mono-num {
@@ -26,7 +29,8 @@
 
         /* Glowing background ambient lights */
         .ambient-glow-emerald {
-            background: radial-gradient(circle at 50% 20%, rgba(16, 185, 129, 0.12) 0%, rgba(6, 9, 14, 0) 70%);
+            background-color: #06090e !important;
+            background-image: radial-gradient(circle at 50% 20%, rgba(16, 185, 129, 0.15) 0%, rgba(6, 9, 14, 0.98) 70%, #06090e 100%) !important;
         }
         .pin-neon-glow {
             text-shadow: 0 0 25px rgba(52, 211, 153, 0.45);
@@ -441,18 +445,22 @@
         {{-- ══════════════════════════════════════════════════════════════
              STATE 4: PODIUM AKHIR (BERSIH, TANPA KARAKTER KARTUN / RINGAN)
              ══════════════════════════════════════════════════════════════ --}}
-        <div x-show="status === 'finished'" x-cloak class="w-full max-w-4xl flex flex-col space-y-8 my-auto animate-fade-in">
+        <div x-show="status === 'finished'" x-cloak class="w-full max-w-4xl flex flex-col space-y-8 my-auto animate-fade-in bg-gradient-to-b from-slate-900/95 via-[#0a1218]/90 to-slate-950/95 border border-emerald-500/30 rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
             
-            <div class="text-center space-y-2">
+            {{-- Ambient light effects --}}
+            <div class="absolute -top-32 -left-32 w-72 h-72 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-32 -right-32 w-72 h-72 bg-amber-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="relative z-10 text-center space-y-2">
                 <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-black uppercase tracking-wider">
                     🎉 Kuis Selesai
                 </div>
-                <h2 class="text-3xl sm:text-4xl font-black text-white">Podium Juara Kuis Live</h2>
-                <p class="text-sm text-slate-400">Selamat kepada seluruh siswa yang telah berpartisipasi dengan luar biasa!</p>
+                <h2 class="text-3xl sm:text-4xl font-black bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-500 bg-clip-text text-transparent drop-shadow-[0_2px_12px_rgba(251,191,36,0.35)]">Podium Juara Kuis Live</h2>
+                <p class="text-sm text-slate-300 font-semibold">Selamat kepada seluruh siswa yang telah berpartisipasi dengan luar biasa!</p>
             </div>
 
             {{-- 3-Tier Clean CSS Podium (No cartoon characters, lightweight) --}}
-            <div class="flex items-end justify-center gap-3 sm:gap-6 pt-10 pb-4">
+            <div class="relative z-10 flex items-end justify-center gap-3 sm:gap-6 pt-10 pb-4">
                 
                 {{-- JUARA 2 (SILVER - KIRI) --}}
                 <div class="flex-1 max-w-[200px] flex flex-col items-center">
@@ -510,7 +518,7 @@
             </div>
 
             {{-- One-Click Action: Simpan Nilai ke Pusat Penilaian --}}
-            <div class="bg-[#091117] border border-emerald-500/25 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+            <div class="relative z-10 bg-[#091117]/90 border border-emerald-500/25 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
                 <div>
                     <h3 class="font-bold text-white text-base">Sinkronisasi Nilai Kuis</h3>
                     <p class="text-xs text-slate-400 mt-1 max-w-md">
@@ -537,6 +545,50 @@
                         Tutup Sesi
                     </a>
                 </div>
+            </div>
+        </div>
+
+        {{-- ══ MODAL / POP-UP NOTIFIKASI SINKRONISASI (4 DETIK) ══ --}}
+        <div x-show="toast.show"
+             x-transition:enter="transition cubic-bezier(0.16, 1, 0.3, 1) duration-500"
+             x-transition:enter-start="opacity-0 -translate-y-8 scale-90"
+             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+             x-transition:leave="transition cubic-bezier(0.16, 1, 0.3, 1) duration-400"
+             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+             x-transition:leave-end="opacity-0 -translate-y-6 scale-95"
+             x-cloak
+             @keydown.escape.window="closeToast()"
+             class="fixed top-6 left-1/2 -translate-x-1/2 z-[9999] max-w-lg w-[92%] sm:w-auto rounded-3xl bg-slate-900/95 text-white backdrop-blur-xl border-2 p-4 sm:p-5 overflow-hidden select-none"
+             :class="toast.type === 'error' ? 'border-rose-500/80 shadow-[0_20px_50px_rgba(244,63,94,0.35)]' : 'border-emerald-500/80 shadow-[0_20px_50px_rgba(16,185,129,0.35)]'"
+             role="alert">
+
+            <div class="flex items-center gap-3.5">
+                {{-- Icon Status --}}
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-br flex items-center justify-center text-2xl font-black shadow-lg shrink-0 text-white"
+                     :class="toast.type === 'error' ? 'from-rose-500 to-red-600 shadow-rose-500/30' : 'from-emerald-500 to-teal-600 shadow-emerald-500/30'">
+                    <span x-text="toast.type === 'error' ? '⚠️' : '✅'"></span>
+                </div>
+
+                {{-- Konten Modal (Judul Tebal Ringkas, TANPA keterangan detik) --}}
+                <div class="flex-1 pr-2 min-w-0">
+                    <h4 class="text-sm font-black text-white leading-snug" x-text="toast.message">
+                    </h4>
+                </div>
+
+                {{-- Tombol Tutup Manual --}}
+                <button type="button"
+                        @click="closeToast()"
+                        class="w-7 h-7 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-xs font-bold transition-all cursor-pointer shrink-0"
+                        title="Tutup">
+                    ✕
+                </button>
+            </div>
+
+            {{-- Progress Bar Countdown 4 Detik (Visual indikator halus, tanpa teks detik) --}}
+            <div class="w-full bg-slate-800/80 rounded-full h-1 overflow-hidden mt-3.5">
+                <div class="bg-gradient-to-r h-full rounded-full transition-all duration-[4000ms] ease-linear"
+                     :class="toast.type === 'error' ? 'from-rose-400 via-red-300 to-amber-300' : 'from-emerald-400 via-teal-300 to-cyan-400'"
+                     :style="'width: ' + toast.progressWidth + '%'"></div>
             </div>
         </div>
 
@@ -576,6 +628,35 @@
                 pinCopied: false,
                 soundEnabled: true,
                 audioCtx: null,
+                toast: {
+                    show: false,
+                    message: '',
+                    type: 'success',
+                    progressWidth: 100,
+                    timer: null,
+                },
+
+                showToast(message, type = 'success') {
+                    if (this.toast.timer) clearTimeout(this.toast.timer);
+                    this.toast.message = message;
+                    this.toast.type = type;
+                    this.toast.progressWidth = 100;
+                    this.toast.show = true;
+
+                    this.$nextTick(() => {
+                        setTimeout(() => {
+                            this.toast.progressWidth = 0;
+                        }, 50);
+                        this.toast.timer = setTimeout(() => {
+                            this.toast.show = false;
+                        }, 4000);
+                    });
+                },
+
+                closeToast() {
+                    if (this.toast.timer) clearTimeout(this.toast.timer);
+                    this.toast.show = false;
+                },
 
                 init() {
                     this.poll();
@@ -639,7 +720,7 @@
 
                 copyUrl() {
                     navigator.clipboard.writeText('{{ url("/student/live-quiz/join") }}');
-                    alert('Tautan bergabung kuis berhasil disalin!');
+                    this.showToast('Tautan bergabung kuis berhasil disalin!', 'success');
                 },
 
                 async poll() {
@@ -796,12 +877,13 @@
                         const data = await res.json();
                         if (data.success) {
                             this.gradesSaved = true;
-                            alert(`Berhasil menyimpan ${data.count} nilai siswa ke Pusat Penilaian!`);
+                            const count = (data.count !== undefined && data.count !== null) ? data.count : 1;
+                            this.showToast(`Berhasil menyimpan ${count} nilai siswa ke Pusat Penilaian!`, 'success');
                         } else {
-                            alert(data.message || 'Gagal menyimpan nilai.');
+                            this.showToast(data.message || 'Gagal menyimpan nilai.', 'error');
                         }
                     } catch (e) {
-                        alert('Terjadi kesalahan saat menyimpan nilai.');
+                        this.showToast('Terjadi kesalahan saat menyimpan nilai.', 'error');
                     } finally {
                         this.savingGrades = false;
                     }

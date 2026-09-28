@@ -162,6 +162,9 @@ class PendahuluanController extends Controller
         ];
 
         if (!array_key_exists($component, $allowed)) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Komponen Pendahuluan tidak valid.'], 422);
+            }
             return back()->with('error', 'Komponen Pendahuluan tidak valid.');
         }
 
@@ -176,7 +179,17 @@ class PendahuluanController extends Controller
 
         $statusText = $toggles[$component] ? 'diaktifkan (ON)' : 'dinonaktifkan (OFF)';
         $componentLabel = $allowed[$component];
+        $message = "Komponen '{$componentLabel}' berhasil {$statusText}. ✅";
 
-        return back()->with('success', "Komponen '{$componentLabel}' berhasil {$statusText}. ✅");
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success'   => true,
+                'is_active' => (bool) $toggles[$component],
+                'component' => $component,
+                'message'   => $message,
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 }
