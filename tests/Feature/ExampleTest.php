@@ -15,5 +15,13 @@ class ExampleTest extends TestCase
         $response = $this->get('/');
 
         $response->assertStatus(200);
+        $response->assertSee('SMK Negeri 3 Yogyakarta');
+        $response->assertSee('Alur 5 Fase Pembelajaran');
+        $response->assertSee('Portal Siswa');
+        $response->assertSee('Ruang Guru');
+        $response->assertSee('Supervisi Sistem');
+        $response->assertSee(route('login.student'));
+        $response->assertSee(route('login.teacher'));
+        $response->assertSee(route('login.admin'));
     }
 }

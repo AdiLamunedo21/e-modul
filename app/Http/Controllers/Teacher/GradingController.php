@@ -445,28 +445,43 @@ class GradingController extends Controller
 
             // 2. Simpan skor ke tabel EmbedSubmission jika aktif
             if ($module->has_embed && $request->has('embed_score')) {
-                EmbedSubmission::updateOrCreate(
-                    ['module_id' => $module->id, 'student_id' => $student->id],
-                    ['manual_score' => $request->embed_score]
-                );
+                $embedSub = EmbedSubmission::firstOrNew([
+                    'module_id'  => $module->id,
+                    'student_id' => $student->id,
+                ]);
+                $embedSub->manual_score = $request->embed_score;
+                if (!isset($embedSub->screenshot_path) || $embedSub->screenshot_path === null) {
+                    $embedSub->screenshot_path = '';
+                }
+                $embedSub->save();
             }
 
             // 3. Simpan skor ke tabel JobSheetSubmission jika aktif
             if ($module->has_job_sheet && $request->has('job_sheet_score')) {
                 $jobSheet = $module->jobSheets()->firstOrCreate(['module_id' => $module->id], ['pdf_file_path' => 'default.pdf']);
-                JobSheetSubmission::updateOrCreate(
-                    ['job_sheet_id' => $jobSheet->id, 'student_id' => $student->id],
-                    ['manual_score' => $request->job_sheet_score]
-                );
+                $jsSub = JobSheetSubmission::firstOrNew([
+                    'job_sheet_id' => $jobSheet->id,
+                    'student_id'   => $student->id,
+                ]);
+                $jsSub->manual_score = $request->job_sheet_score;
+                if (!isset($jsSub->uploaded_file_path) || $jsSub->uploaded_file_path === null) {
+                    $jsSub->uploaded_file_path = '';
+                }
+                $jsSub->save();
             }
 
             // 4. Simpan skor ke tabel Submission LKPD jika aktif
             if ($module->has_lkpd && $request->has('lkpd_score')) {
                 $lkpd = $module->lkpds()->firstOrCreate(['module_id' => $module->id], ['pdf_file_path' => 'default.pdf']);
-                Submission::updateOrCreate(
-                    ['lkpd_id' => $lkpd->id, 'student_id' => $student->id],
-                    ['manual_score' => $request->lkpd_score]
-                );
+                $lkpdSub = Submission::firstOrNew([
+                    'lkpd_id'    => $lkpd->id,
+                    'student_id' => $student->id,
+                ]);
+                $lkpdSub->manual_score = $request->lkpd_score;
+                if (!isset($lkpdSub->uploaded_file_path) || $lkpdSub->uploaded_file_path === null) {
+                    $lkpdSub->uploaded_file_path = '';
+                }
+                $lkpdSub->save();
             }
 
             // 5. Simpan / Perbarui StudentResult
@@ -539,28 +554,43 @@ class GradingController extends Controller
 
                 if (isset($scores['embed_score']) && $scores['embed_score'] !== '') {
                     $result->embed_score = (int) $scores['embed_score'];
-                    EmbedSubmission::updateOrCreate(
-                        ['module_id' => $module->id, 'student_id' => $student->id],
-                        ['manual_score' => (int) $scores['embed_score']]
-                    );
+                    $embedSub = EmbedSubmission::firstOrNew([
+                        'module_id'  => $module->id,
+                        'student_id' => $student->id,
+                    ]);
+                    $embedSub->manual_score = (int) $scores['embed_score'];
+                    if (!isset($embedSub->screenshot_path) || $embedSub->screenshot_path === null) {
+                        $embedSub->screenshot_path = '';
+                    }
+                    $embedSub->save();
                 }
 
                 if (isset($scores['job_sheet_score']) && $scores['job_sheet_score'] !== '') {
                     $result->job_sheet_score = (int) $scores['job_sheet_score'];
                     $jobSheet = $module->jobSheets()->firstOrCreate(['module_id' => $module->id], ['pdf_file_path' => 'default.pdf']);
-                    JobSheetSubmission::updateOrCreate(
-                        ['job_sheet_id' => $jobSheet->id, 'student_id' => $student->id],
-                        ['manual_score' => (int) $scores['job_sheet_score']]
-                    );
+                    $jsSub = JobSheetSubmission::firstOrNew([
+                        'job_sheet_id' => $jobSheet->id,
+                        'student_id'   => $student->id,
+                    ]);
+                    $jsSub->manual_score = (int) $scores['job_sheet_score'];
+                    if (!isset($jsSub->uploaded_file_path) || $jsSub->uploaded_file_path === null) {
+                        $jsSub->uploaded_file_path = '';
+                    }
+                    $jsSub->save();
                 }
 
                 if (isset($scores['lkpd_score']) && $scores['lkpd_score'] !== '') {
                     $result->lkpd_score = (int) $scores['lkpd_score'];
                     $lkpd = $module->lkpds()->firstOrCreate(['module_id' => $module->id], ['pdf_file_path' => 'default.pdf']);
-                    Submission::updateOrCreate(
-                        ['lkpd_id' => $lkpd->id, 'student_id' => $student->id],
-                        ['manual_score' => (int) $scores['lkpd_score']]
-                    );
+                    $lkpdSub = Submission::firstOrNew([
+                        'lkpd_id'    => $lkpd->id,
+                        'student_id' => $student->id,
+                    ]);
+                    $lkpdSub->manual_score = (int) $scores['lkpd_score'];
+                    if (!isset($lkpdSub->uploaded_file_path) || $lkpdSub->uploaded_file_path === null) {
+                        $lkpdSub->uploaded_file_path = '';
+                    }
+                    $lkpdSub->save();
                 }
 
                 $result->summative_score = $result->calculateSummativeScore($module);

@@ -210,8 +210,8 @@
                 <select name="subject_id"
                         onchange="this.form.submit()"
                         class="text-xs rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-slate-700 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
-                    <option value="all">-- Semua Mata Pelajaran --</option>
-                    @foreach($subjects as $sbj)
+                    <option value="all">-- Semua Mata Pelajaran Kelas --</option>
+                    @foreach($classSubjects->isNotEmpty() ? $classSubjects : $subjects as $sbj)
                         <option value="{{ $sbj->id }}" {{ (string)($subjectId ?? '') === (string)$sbj->id ? 'selected' : '' }}>
                             {{ $sbj->name }}
                         </option>
@@ -407,31 +407,31 @@
                                 <input type="password" name="password" required minlength="6" placeholder="Minimal 6 karakter" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
                             </div>
 
-                            {{-- Ploting Mata Pelajaran yang Ditempuh (Centang / Checkboxes) --}}
-                            <div>
-                                <div class="flex items-center justify-between mb-1">
-                                    <label class="block font-bold text-slate-700">Mata Pelajaran yang Ditempuh</label>
-                                    <button type="button"
-                                            onclick="const cbs = document.querySelectorAll('#create-subjects-container input[type=checkbox]'); const anyChecked = Array.from(cbs).some(c => c.checked); cbs.forEach(c => c.checked = !anyChecked);"
-                                            class="text-[11px] font-bold text-indigo-600 hover:text-indigo-700">
-                                        Pilih / Batalkan Semua
-                                    </button>
-                                </div>
-                                <p class="text-[11px] text-slate-500 mb-1.5">
-                                    <span class="text-indigo-600 font-bold">Otomatis:</span> Jika dikosongkan, siswa otomatis mendapat semua mapel kelas ini.
-                                </p>
-                                <div id="create-subjects-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-44 overflow-y-auto p-2.5 rounded-2xl bg-slate-50 border border-slate-200">
-                                    @forelse($subjects as $s)
-                                        <label class="flex items-center gap-2.5 text-slate-700 cursor-pointer p-2 rounded-xl hover:bg-white transition-all border border-transparent hover:border-slate-200">
-                                            <input type="checkbox" name="subject_ids[]" value="{{ $s->id }}" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300">
-                                            <div class="min-w-0">
-                                                <p class="text-xs font-bold text-slate-800 truncate">{{ $s->name }}</p>
-                                                <p class="text-[10px] font-mono text-slate-500">{{ $s->code }}</p>
-                                            </div>
-                                        </label>
-                                    @empty
-                                        <p class="col-span-2 text-xs text-slate-400 italic p-2">Belum ada data mata pelajaran.</p>
-                                    @endforelse
+                            {{-- Mata Pelajaran yang Ditempuh (Otomatis dari Guru Pengampu Rombel) --}}
+                            <div class="rounded-2xl border border-indigo-100 bg-indigo-50/70 p-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0 mt-0.5">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0118 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="text-xs font-bold text-indigo-900">Mata Pelajaran yang Ditempuh (Otomatis)</h4>
+                                        <p class="text-[11px] text-indigo-700/80 mt-1 leading-relaxed">
+                                            Siswa otomatis menempuh seluruh mata pelajaran yang diampu oleh guru pada kelas <strong>{{ $class->full_name }}</strong>:
+                                        </p>
+                                        <div class="flex flex-wrap gap-1.5 mt-2.5">
+                                            @forelse($classSubjects as $cs)
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold {{ $cs->badgeClasses() }}">
+                                                    {{ $cs->name }} ({{ $cs->code }})
+                                                </span>
+                                            @empty
+                                                <span class="text-[11px] text-amber-600 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 font-medium">
+                                                    Belum ada guru/mapel yang diplot untuk kelas ini
+                                                </span>
+                                            @endforelse
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -515,33 +515,31 @@
                                 <input type="password" name="password" minlength="6" placeholder="Kosongkan jika tidak ingin mengubah password" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
                             </div>
 
-                            {{-- Ploting Mata Pelajaran yang Ditempuh (Centang / Checkboxes) --}}
-                            <div>
-                                <div class="flex items-center justify-between mb-1">
-                                    <label class="block font-bold text-slate-700">Mata Pelajaran yang Ditempuh</label>
-                                    <button type="button"
-                                            onclick="const cbs = document.querySelectorAll('#edit-subjects-container input[type=checkbox]'); const anyChecked = Array.from(cbs).some(c => c.checked); cbs.forEach(c => { c.checked = !anyChecked; c.dispatchEvent(new Event('change')); });"
-                                            class="text-[11px] font-bold text-indigo-600 hover:text-indigo-700">
-                                        Pilih / Batalkan Semua
-                                    </button>
-                                </div>
-                                <p class="text-[11px] text-slate-500 mb-1.5">Centang mapel yang ditempuh siswa ini:</p>
-                                <div id="edit-subjects-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-44 overflow-y-auto p-2.5 rounded-2xl bg-slate-50 border border-slate-200">
-                                    @forelse($subjects as $s)
-                                        <label class="flex items-center gap-2.5 text-slate-700 cursor-pointer p-2 rounded-xl hover:bg-white transition-all border border-transparent hover:border-slate-200">
-                                            <input type="checkbox"
-                                                   name="subject_ids[]"
-                                                   value="{{ $s->id }}"
-                                                   :checked="activeStudent.subject_ids && activeStudent.subject_ids.includes({{ $s->id }})"
-                                                   class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300">
-                                            <div class="min-w-0">
-                                                <p class="text-xs font-bold text-slate-800 truncate">{{ $s->name }}</p>
-                                                <p class="text-[10px] font-mono text-slate-500">{{ $s->code }}</p>
-                                            </div>
-                                        </label>
-                                    @empty
-                                        <p class="col-span-2 text-xs text-slate-400 italic p-2">Belum ada data mata pelajaran.</p>
-                                    @endforelse
+                            {{-- Mata Pelajaran yang Ditempuh (Otomatis dari Guru Pengampu Rombel) --}}
+                            <div class="rounded-2xl border border-indigo-100 bg-indigo-50/70 p-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0 mt-0.5">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0118 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="text-xs font-bold text-indigo-900">Mata Pelajaran yang Ditempuh: Otomatis Mengikuti Kelas</h4>
+                                        <p class="text-[11px] text-indigo-700/80 mt-1 leading-relaxed">
+                                            Mata pelajaran siswa disinkronkan secara otomatis mengikuti seluruh mata pelajaran guru pengampu pada rombel kelas ini:
+                                        </p>
+                                        <div class="flex flex-wrap gap-1.5 mt-2.5">
+                                            @forelse($classSubjects as $cs)
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold {{ $cs->badgeClasses() }}">
+                                                    {{ $cs->name }} ({{ $cs->code }})
+                                                </span>
+                                            @empty
+                                                <span class="text-[11px] text-amber-600 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 font-medium">
+                                                    Belum ada guru/mapel yang diplot untuk kelas ini
+                                                </span>
+                                            @endforelse
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

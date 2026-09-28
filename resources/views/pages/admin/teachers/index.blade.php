@@ -14,6 +14,8 @@
         this.activeTeacher = JSON.parse(JSON.stringify(teacher));
         if (!this.activeTeacher.class_ids) this.activeTeacher.class_ids = [];
         if (!this.activeTeacher.subject_ids) this.activeTeacher.subject_ids = [];
+        this.activeTeacher.subject_ids = this.activeTeacher.subject_ids.map(id => parseInt(id, 10));
+        this.activeTeacher.class_ids = this.activeTeacher.class_ids.map(id => parseInt(id, 10));
         this.editModalOpen = true;
     },
     openDelete(teacher) {
@@ -142,8 +144,8 @@
                 <tbody class="divide-y divide-slate-100">
                     @forelse($teachers as $t)
                         @php
-                            $tSubjectsIds = $t->subjects->pluck('id')->toArray();
-                            $tClassIds = $t->classes->pluck('id')->toArray();
+                            $tSubjectsIds = $t->allAssignedSubjectIds();
+                            $tClassIds = $t->allAssignedClassIds();
                             $tDataJson = json_encode([
                                 'id' => $t->id,
                                 'name' => $t->name,
@@ -179,7 +181,7 @@
                             {{-- Mata Pelajaran --}}
                             <td class="py-4 px-4">
                                 <div class="flex flex-wrap gap-1 max-w-[220px]">
-                                    @forelse($t->subjects as $subj)
+                                    @forelse($t->allAssignedSubjects() as $subj)
                                         <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
                                             {{ $subj->name }}
                                         </span>
@@ -192,7 +194,7 @@
                             {{-- Kelas Didik --}}
                             <td class="py-4 px-4">
                                 <div class="flex flex-wrap gap-1 max-w-[240px]">
-                                    @forelse($t->classes as $cls)
+                                    @forelse($t->assignedClasses() as $cls)
                                         <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
                                             {{ $cls->short_name }}
                                         </span>
@@ -456,11 +458,12 @@
                                             <input type="checkbox"
                                                    name="subject_ids[]"
                                                    value="{{ $s->id }}"
-                                                   :checked="activeTeacher.subject_ids && activeTeacher.subject_ids.includes({{ $s->id }})"
+                                                   :value="{{ $s->id }}"
+                                                   x-model="activeTeacher.subject_ids"
                                                    class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300">
                                             <div class="min-w-0">
-                                                <p class="text-xs font-bold text-slate-800 truncate">{{ $s->name }}</p>
-                                                <p class="text-[10px] font-mono text-slate-500">{{ $s->code }}</p>
+                                                 <p class="text-xs font-bold text-slate-800 truncate">{{ $s->name }}</p>
+                                                 <p class="text-[10px] font-mono text-slate-500">{{ $s->code }}</p>
                                             </div>
                                         </label>
                                     @empty
@@ -479,7 +482,8 @@
                                             <input type="checkbox"
                                                    name="class_ids[]"
                                                    value="{{ $cls->id }}"
-                                                   :checked="activeTeacher.class_ids && activeTeacher.class_ids.includes({{ $cls->id }})"
+                                                   :value="{{ $cls->id }}"
+                                                   x-model="activeTeacher.class_ids"
                                                    class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300">
                                             <div class="min-w-0">
                                                 <p class="text-xs font-bold text-slate-800 truncate">{{ $cls->full_name }}</p>

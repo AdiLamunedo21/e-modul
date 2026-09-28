@@ -307,12 +307,12 @@ class DashboardController extends Controller
         });
 
         // Kategori modul terpisah untuk akses cepat tab dashboard:
-        // Prioritas Tab Sedang Dikerjakan:
-        // 1. Modul yang secara eksplisit DIAKTIFKAN oleh guru di kelas (is_active_in_class = true)
-        // 2. Modul yang sedang berstatus in_progress oleh siswa (progress_status = in_progress)
+        // Tab Sedang Dikerjakan HANYA menampilkan SATU modul aktif di kelas (seperti pergantian mapel di kelas).
+        // Prioritas utama adalah modul yang sedang aktif diajarkan guru di kelas (is_active_in_class = true).
+        // Jika tidak ada modul aktif di kelas, tampilkan maksimal 1 modul yang sedang dikerjakan siswa.
         $inProgressModules = $processedModules->filter(function ($m) {
             return !empty($m['is_active_in_class']) || $m['progress_status'] === 'in_progress';
-        })->sortByDesc('is_active_in_class')->values();
+        })->sortByDesc('is_active_in_class')->take(1)->values();
 
         // Jika belum ada modul yang ditandai aktif di kelas dan belum ada progres siswa,
         // namun ada modul terbit di kelasnya, fallback tampilkan modul terbit yang belum tuntas

@@ -108,6 +108,7 @@ class StudentController extends Controller
         // Data pendukung
         $classes = SchoolClass::with('major')->orderBy('grade')->orderBy('major_name')->get();
         $subjects = Subject::orderBy('name')->get();
+        $classSubjects = $class->getAvailableSubjects();
 
         $classTotalStudents = $class->students()->count();
         $classAssignedStudents = $class->students()->has('subjects')->count();
@@ -124,6 +125,7 @@ class StudentController extends Controller
             'students',
             'classes',
             'subjects',
+            'classSubjects',
             'classStats',
             'search',
             'subjectId'
@@ -221,9 +223,9 @@ class StudentController extends Controller
             $schoolClass = SchoolClass::find($student->class_id);
             if ($schoolClass) {
                 $student->classes()->syncWithoutDetaching([$schoolClass->id]);
-                if (isset($validated['subject_ids'])) {
+                if (isset($validated['subject_ids']) && !empty($validated['subject_ids'])) {
                     $student->subjects()->sync($validated['subject_ids']);
-                } elseif ($previousClassId != $student->class_id || !$student->subjects()->exists()) {
+                } else {
                     $student->syncSubjectsFromClass($schoolClass);
                 }
             }
@@ -240,29 +242,15 @@ class StudentController extends Controller
      */
     public function syncClassSubjects(Request $request, SchoolClass $class)
     {
-        $students = $class->students()->get();
-        if ($students->isEmpty()) {
-            $students = Student::where('class_id', $class->id)->get();
-        }
+        $syncedCount = $class->syncAllStudentsSubjects();
 
-        if ($students->isEmpty()) {
+        if ($syncedCount === 0) {
             return redirect()->route('admin.students.class', $class->id)
-                ->with('info', "Belum ada siswa terdaftar di {$class->full_name} untuk disinkronkan.");
-        }
-
-        $availableSubjectIds = $class->getAvailableSubjectIds();
-        $syncedCount = 0;
-
-        foreach ($students as $student) {
-            $student->classes()->syncWithoutDetaching([$class->id]);
-            if (!empty($availableSubjectIds)) {
-                $student->subjects()->syncWithoutDetaching($availableSubjectIds);
-            }
-            $syncedCount++;
+                ->with('info', "Belum ada siswa terdaftar atau belum ada mata pelajaran di {$class->full_name} untuk disinkronkan.");
         }
 
         return redirect()->route('admin.students.class', $class->id)
-            ->with('success', "Berhasil menyinkronkan mata pelajaran untuk {$syncedCount} siswa di {$class->full_name}!");
+            ->with('success', "Berhasil menyinkronkan seluruh mata pelajaran untuk {$syncedCount} siswa di {$class->full_name}!");
     }
 
     /**

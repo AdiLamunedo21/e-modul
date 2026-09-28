@@ -11,8 +11,8 @@
         id: {{ $teacher->id }},
         name: '{{ addslashes($teacher->name) }}',
         identity_number: '{{ $teacher->identity_number }}',
-        subject_ids: {{ json_encode($teacher->subjects->pluck('id')->toArray()) }},
-        class_ids: {{ json_encode($teacher->classes->pluck('id')->toArray()) }}
+        subject_ids: {{ json_encode($teacher->allAssignedSubjectIds()) }},
+        class_ids: {{ json_encode($teacher->allAssignedClassIds()) }}
     }
 }">
 
@@ -94,7 +94,7 @@
                         <div>
                             <span class="text-[11px] font-bold text-slate-400 block mb-1">Mata Pelajaran:</span>
                             <div class="flex flex-wrap gap-1">
-                                @forelse($teacher->subjects as $subj)
+                                @forelse($teacher->allAssignedSubjects() as $subj)
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
                                         {{ $subj->name }} ({{ $subj->code }})
                                     </span>
@@ -108,7 +108,7 @@
                         <div>
                             <span class="text-[11px] font-bold text-slate-400 block mb-1">Kelas Didik:</span>
                             <div class="flex flex-wrap gap-1">
-                                @forelse($teacher->classes as $cls)
+                                @forelse($teacher->assignedClasses() as $cls)
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
                                         {{ $cls->full_name }}
                                     </span>
@@ -396,7 +396,8 @@
                                             <input type="checkbox"
                                                    name="subject_ids[]"
                                                    value="{{ $s->id }}"
-                                                   :checked="activeTeacher.subject_ids && activeTeacher.subject_ids.includes({{ $s->id }})"
+                                                   :value="{{ $s->id }}"
+                                                   x-model="activeTeacher.subject_ids"
                                                    class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300">
                                             <div class="min-w-0">
                                                 <p class="text-xs font-bold text-slate-800 truncate">{{ $s->name }}</p>
@@ -417,7 +418,8 @@
                                             <input type="checkbox"
                                                    name="class_ids[]"
                                                    value="{{ $cls->id }}"
-                                                   :checked="activeTeacher.class_ids && activeTeacher.class_ids.includes({{ $cls->id }})"
+                                                   :value="{{ $cls->id }}"
+                                                   x-model="activeTeacher.class_ids"
                                                    class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300">
                                             <div class="min-w-0">
                                                 <p class="text-xs font-bold text-slate-800 truncate">{{ $cls->full_name }}</p>

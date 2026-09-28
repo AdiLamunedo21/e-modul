@@ -185,6 +185,16 @@ class ModuleLibraryController extends Controller
         // Eksekusi Deep Copy
         $newModule = $module->cloneToTeacher($currentTeacher, (int) $validated['class_id'], $customTitle);
 
+        if ($newModule->subject_id) {
+            $currentTeacher->subjects()->syncWithoutDetaching([$newModule->subject_id]);
+        }
+
+        if ($newModule->class_id) {
+            $currentTeacher->classes()->syncWithoutDetaching([$newModule->class_id]);
+            $schoolClass = SchoolClass::find($newModule->class_id);
+            $schoolClass?->syncAllStudentsSubjects();
+        }
+
         return redirect()
             ->route('teacher.modules.show', $newModule)
             ->with('success', "Modul \"{$newModule->title}\" berhasil disalin ke workspace Anda! Seluruh komponen siap disesuaikan secara mandiri.");

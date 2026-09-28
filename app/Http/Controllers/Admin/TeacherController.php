@@ -163,6 +163,10 @@ class TeacherController extends Controller
 
         if (!empty($validated['class_ids'])) {
             $teacher->classes()->sync($validated['class_ids']);
+            $classes = SchoolClass::whereIn('id', $validated['class_ids'])->get();
+            foreach ($classes as $cls) {
+                $cls->syncAllStudentsSubjects();
+            }
         }
 
         return redirect()->route('admin.teachers.index')
@@ -203,8 +207,25 @@ class TeacherController extends Controller
 
         $teacher->save();
 
-        $teacher->subjects()->sync($validated['subject_ids'] ?? []);
-        $teacher->classes()->sync($validated['class_ids'] ?? []);
+        // Gabungkan mata pelajaran yang dipilih admin dengan mata pelajaran modul aktif milik guru
+        // agar data plotting tidak hilang tanpa sengaja
+        $submittedSubjectIds = array_map('intval', $validated['subject_ids'] ?? []);
+        $moduleSubjectIds = $teacher->modules()->whereNotNull('subject_id')->pluck('subject_id')->map(fn($id) => (int)$id)->toArray();
+        $finalSubjectIds = array_values(array_unique(array_merge($submittedSubjectIds, $moduleSubjectIds)));
+        $teacher->subjects()->sync($finalSubjectIds);
+
+        // Begitu juga dengan kelas binaan
+        $submittedClassIds = array_map('intval', $validated['class_ids'] ?? []);
+        $moduleClassIds = $teacher->modules()->whereNotNull('class_id')->pluck('class_id')->map(fn($id) => (int)$id)->toArray();
+        $finalClassIds = array_values(array_unique(array_merge($submittedClassIds, $moduleClassIds)));
+        $teacher->classes()->sync($finalClassIds);
+
+        if (!empty($finalClassIds)) {
+            $classes = SchoolClass::whereIn('id', $finalClassIds)->get();
+            foreach ($classes as $cls) {
+                $cls->syncAllStudentsSubjects();
+            }
+        }
 
         return redirect()->route('admin.teachers.index')
             ->with('success', "Data guru {$teacher->name} berhasil diperbarui.");

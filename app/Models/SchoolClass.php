@@ -161,5 +161,46 @@ class SchoolClass extends Model
 
         return $ids;
     }
+
+    /**
+     * Mengambil daftar model Subject yang aktif/tersedia untuk rombel kelas ini.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getAvailableSubjects()
+    {
+        $ids = $this->getAvailableSubjectIds();
+        if (empty($ids)) {
+            return collect();
+        }
+        return Subject::whereIn('id', $ids)->orderBy('name')->get();
+    }
+
+    /**
+     * Menyinkronkan seluruh siswa di kelas ini dengan seluruh mata pelajaran kelas.
+     *
+     * @return int Jumlah siswa yang disinkronkan
+     */
+    public function syncAllStudentsSubjects(): int
+    {
+        $subjectIds = $this->getAvailableSubjectIds();
+        if (empty($subjectIds)) {
+            return 0;
+        }
+
+        $students = $this->students()->get();
+        if ($students->isEmpty()) {
+            $students = Student::where('class_id', $this->id)->get();
+        }
+
+        $count = 0;
+        foreach ($students as $student) {
+            $student->classes()->syncWithoutDetaching([$this->id]);
+            $student->subjects()->syncWithoutDetaching($subjectIds);
+            $count++;
+        }
+
+        return $count;
+    }
 }
 

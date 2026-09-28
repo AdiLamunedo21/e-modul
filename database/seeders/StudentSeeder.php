@@ -82,10 +82,10 @@ class StudentSeeder extends Seeder
 
             if ($st['class_id']) {
                 $student->classes()->syncWithoutDetaching([$st['class_id']]);
-            }
-
-            if (!empty($subjectIds)) {
-                $student->subjects()->syncWithoutDetaching($subjectIds);
+                $schoolClass = SchoolClass::find($st['class_id']);
+                if ($schoolClass) {
+                    $student->syncSubjectsFromClass($schoolClass);
+                }
             }
         }
     }

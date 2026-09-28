@@ -164,14 +164,25 @@ class ModuleManagerController extends Controller
             'subject_id.exists'   => 'Mata pelajaran yang dipilih tidak valid.',
         ]);
 
+        $teacher = $this->teacher();
         $module = Module::create([
-            'teacher_id' => $this->teacher()->id,
+            'teacher_id' => $teacher->id,
             'subject_id' => $validated['subject_id'],
             'semester'   => $validated['semester'] ?? '1',
             'title'      => $validated['title'],
             'class_id'   => $validated['class_id'],
             'status'     => 'draft',
         ]);
+
+        if ($module->subject_id) {
+            $teacher->subjects()->syncWithoutDetaching([$module->subject_id]);
+        }
+
+        if ($module->class_id) {
+            $teacher->classes()->syncWithoutDetaching([$module->class_id]);
+            $schoolClass = SchoolClass::find($module->class_id);
+            $schoolClass?->syncAllStudentsSubjects();
+        }
 
         return redirect()
             ->route('teacher.modules.show', $module)
@@ -226,6 +237,17 @@ class ModuleManagerController extends Controller
             'subject_id' => $validated['subject_id'],
             'semester'   => $validated['semester'] ?? '1',
         ]);
+
+        $teacher = $this->teacher();
+        if ($module->subject_id) {
+            $teacher->subjects()->syncWithoutDetaching([$module->subject_id]);
+        }
+
+        if ($module->class_id) {
+            $teacher->classes()->syncWithoutDetaching([$module->class_id]);
+            $schoolClass = SchoolClass::find($module->class_id);
+            $schoolClass?->syncAllStudentsSubjects();
+        }
 
         return redirect()->route('teacher.modules.show', $module)
             ->with('success', 'Nama dan identitas modul berhasil diperbarui!');
