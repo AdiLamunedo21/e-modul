@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Module;
 use App\Models\Subject;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -23,6 +24,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Paksa skema HTTPS jika diakses melalui ngrok atau proxy dengan SSL
+        if (request()->header('x-forwarded-proto') === 'https' || str_contains(request()->header('host', ''), 'ngrok')) {
+            URL::forceScheme('https');
+        }
+
         // View Composer untuk Sidebar & Mobile Nav Siswa: Membagikan daftar Mata Pelajaran & Jumlah Modul
         View::composer(['layouts.student.sidebar', 'layouts.student.mobile-nav'], function ($view) {
             $student = Auth::guard('student')->user();
