@@ -222,7 +222,62 @@
                  x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                  class="relative z-10 w-full max-w-md mx-auto transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all my-8 border border-slate-100">
                 
-                <form action="{{ route('admin.majors.store') }}" method="POST">
+                <form action="{{ route('admin.majors.store') }}" method="POST"
+                      x-data="{
+                          name: '',
+                          nameDuplicate: false,
+                          nameChecking: false,
+                          nameTimer: null,
+                          code: '',
+                          codeDuplicate: false,
+                          codeChecking: false,
+                          codeTimer: null,
+                          get hasDuplicate() {
+                              return this.nameDuplicate || this.codeDuplicate;
+                          },
+                          get isChecking() {
+                              return this.nameChecking || this.codeChecking;
+                          },
+                          checkName() {
+                              clearTimeout(this.nameTimer);
+                              const val = this.name.trim();
+                              if (!val) {
+                                  this.nameDuplicate = false;
+                                  this.nameChecking = false;
+                                  return;
+                              }
+                              this.nameChecking = true;
+                              this.timer = setTimeout(() => {
+                                  fetch(`/api/check-unique?type=major_name&value=${encodeURIComponent(val)}`)
+                                      .then(res => res.json())
+                                      .then(data => {
+                                          this.nameDuplicate = data.exists;
+                                          this.nameChecking = false;
+                                      })
+                                      .catch(() => { this.nameChecking = false; });
+                              }, 300);
+                          },
+                          checkCode() {
+                              clearTimeout(this.codeTimer);
+                              const val = this.code.trim();
+                              if (!val) {
+                                  this.codeDuplicate = false;
+                                  this.codeChecking = false;
+                                  return;
+                              }
+                              this.codeChecking = true;
+                              this.codeTimer = setTimeout(() => {
+                                  fetch(`/api/check-unique?type=major_code&value=${encodeURIComponent(val)}`)
+                                      .then(res => res.json())
+                                      .then(data => {
+                                          this.codeDuplicate = data.exists;
+                                          this.codeChecking = false;
+                                      })
+                                      .catch(() => { this.codeChecking = false; });
+                              }, 300);
+                          }
+                      }"
+                      @submit="if (hasDuplicate) { $event.preventDefault(); return false; }">
                     @csrf
                     <div class="bg-white p-6 sm:p-7">
                         <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
@@ -233,12 +288,42 @@
                         <div class="space-y-4 text-xs">
                             <div>
                                 <label class="block font-bold text-slate-700 mb-1">Nama Jurusan / Konsentrasi Keahlian <span class="text-red-500">*</span></label>
-                                <input type="text" name="name" required placeholder="Contoh: Pengembangan Perangkat Lunak dan GIM" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                                <div class="relative">
+                                    <input type="text" name="name" required placeholder="Contoh: Pengembangan Perangkat Lunak dan GIM"
+                                           x-model="name"
+                                           @input="checkName()"
+                                           class="w-full px-3.5 py-2.5 rounded-xl border bg-slate-50 focus:bg-white focus:ring-1 transition-all"
+                                           :class="nameDuplicate ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500 text-rose-900 bg-rose-50/40' : 'border-slate-200 focus:border-indigo-500 focus:ring-indigo-500'">
+                                    <span x-show="nameChecking" class="absolute right-3 top-2.5 text-xs text-slate-400 animate-spin">⏳</span>
+                                </div>
+                                <template x-if="nameDuplicate">
+                                    <p class="mt-1.5 text-xs text-rose-600 font-semibold flex items-center gap-1.5">
+                                        <svg class="w-4 h-4 shrink-0 text-rose-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                        </svg>
+                                        <span>tidak bisa submit karena data ini sudah digunakan</span>
+                                    </p>
+                                </template>
                             </div>
 
                             <div>
                                 <label class="block font-bold text-slate-700 mb-1">Kode Singkatan Jurusan <span class="text-red-500">*</span></label>
-                                <input type="text" name="code" required placeholder="Contoh: PPLG atau RPL" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 uppercase font-mono">
+                                <div class="relative">
+                                    <input type="text" name="code" required placeholder="Contoh: PPLG atau RPL"
+                                           x-model="code"
+                                           @input="checkCode()"
+                                           class="w-full px-3.5 py-2.5 rounded-xl border bg-slate-50 focus:bg-white focus:ring-1 uppercase font-mono transition-all"
+                                           :class="codeDuplicate ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500 text-rose-900 bg-rose-50/40' : 'border-slate-200 focus:border-indigo-500 focus:ring-indigo-500'">
+                                    <span x-show="codeChecking" class="absolute right-3 top-2.5 text-xs text-slate-400 animate-spin">⏳</span>
+                                </div>
+                                <template x-if="codeDuplicate">
+                                    <p class="mt-1.5 text-xs text-rose-600 font-semibold flex items-center gap-1.5">
+                                        <svg class="w-4 h-4 shrink-0 text-rose-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                        </svg>
+                                        <span>tidak bisa submit karena data ini sudah digunakan</span>
+                                    </p>
+                                </template>
                             </div>
 
                             <div>
@@ -252,7 +337,9 @@
                         <button type="button" @click="createModalOpen = false" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 transition-colors">
                             Batal
                         </button>
-                        <button type="submit" class="px-5 py-2 rounded-xl text-xs font-extrabold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/25 transition-all">
+                        <button type="submit" 
+                                :disabled="hasDuplicate || isChecking"
+                                class="px-5 py-2 rounded-xl text-xs font-extrabold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-indigo-600 shadow-md shadow-indigo-600/25 transition-all cursor-pointer">
                             Simpan Jurusan
                         </button>
                     </div>

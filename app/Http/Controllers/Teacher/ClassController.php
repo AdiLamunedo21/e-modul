@@ -207,13 +207,15 @@ class ClassController extends Controller
                 'semester', 'status', 'is_active',
                 'has_pre_test', 'has_materi', 'has_video', 'has_embed',
                 'has_job_sheet', 'has_lkpd', 'has_post_test',
-                'created_at', 'updated_at'
+                'created_at', 'updated_at', 'cloned_from_id'
             ])
             ->where('teacher_id', $teacher->id)
             ->where('class_id', $class->id)
             ->with([
                 'studentResults' => fn($q) => $q->select(['id', 'module_id', 'student_id', 'grading_status', 'summative_score']),
-                'subject'        => fn($q) => $q->select(['id', 'name', 'code', 'icon', 'color'])
+                'subject'        => fn($q) => $q->select(['id', 'name', 'code', 'icon', 'color']),
+                'teacher'        => fn($q) => $q->select(['id', 'name', 'identity_number']),
+                'clonedFrom.schoolClass' => fn($q) => $q->select(['id', 'major_name', 'grade', 'section'])
             ])
             ->orderByDesc('is_active')
             ->latest()

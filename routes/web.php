@@ -30,10 +30,14 @@ use App\Http\Controllers\Admin\AdminManagementController;
 use App\Http\Controllers\Admin\ClassPromotionController as AdminClassPromotionController;
 use App\Http\Controllers\Teacher\LiveQuizController as TeacherLiveQuizController;
 use App\Http\Controllers\Student\LiveQuizController as StudentLiveQuizController;
+use App\Http\Controllers\UniqueCheckController;
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+// ─── Live Data Duplicate Check API ──────────────────────────────────────────
+Route::get('/api/check-unique', [UniqueCheckController::class, 'check'])->name('api.check-unique');
 
 // ─── Admin Auth ────────────────────────────────────────────────────────────
 Route::get('/login/admin',  [AuthController::class, 'showAdminLogin'])->name('login.admin');

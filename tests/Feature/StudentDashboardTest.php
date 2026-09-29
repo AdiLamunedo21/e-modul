@@ -32,7 +32,7 @@ class StudentDashboardTest extends TestCase
         $response->assertSee($student->name);
         $response->assertSee($student->identity_number);
         $response->assertSee('Kelas yang Anda Ikuti', false);
-        $response->assertSee('Rombel Diikuti', false);
+        $response->assertDontSee('Rombel Diikuti');
     }
 
     public function test_student_dashboard_displays_subjects_with_teachers_and_module_counts()
@@ -373,8 +373,6 @@ class StudentDashboardTest extends TestCase
             $respProgress->assertSee($teacher->name);
             $respProgress->assertSee('Lanjutkan Belajar Modul');
 
-            // Pastikan KPI stats card disembunyikan (style="display: none;")
-            $respProgress->assertSee('style="display: none;"', false);
 
             // 2. Akses menu 'Riwayat Selesai' (?status=completed)
             $respCompleted = $this->actingAs($student, 'student')
@@ -387,8 +385,6 @@ class StudentDashboardTest extends TestCase
             $respCompleted->assertSee($subject->name);
             $respCompleted->assertSee('95 / 100');
             $respCompleted->assertSee('Pelajari Ulang Modul');
-            // Pastikan KPI stats card disembunyikan (style="display: none;")
-            $respCompleted->assertSee('style="display: none;"', false);
         } finally {
             // Cleanup
             $moduleInProgress->studentResults()->delete();

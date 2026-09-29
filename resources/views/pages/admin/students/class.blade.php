@@ -26,7 +26,7 @@
             <nav class="flex items-center gap-2 text-xs text-slate-400 mb-1">
                 <a href="{{ route('admin.dashboard') }}" class="hover:text-indigo-600 transition-colors">Dashboard</a>
                 <span>/</span>
-                <a href="{{ route('admin.students.index') }}" class="hover:text-indigo-600 transition-colors">Master Data Siswa</a>
+                <a href="{{ route('admin.students.index') }}" class="hover:text-indigo-600 transition-colors">Master Data Kelas & Siswa</a>
                 <span>/</span>
                 <span class="text-slate-700 font-semibold">{{ $class->full_name }}</span>
             </nav>
@@ -365,7 +365,33 @@
                  x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                  class="relative z-10 w-full max-w-md mx-auto transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all my-8 border border-slate-100">
                 
-                <form action="{{ route('admin.students.store') }}" method="POST">
+                <form action="{{ route('admin.students.store') }}" method="POST"
+                      x-data="{
+                          nisn: '',
+                          isDuplicate: false,
+                          isChecking: false,
+                          timer: null,
+                          checkNisn() {
+                              clearTimeout(this.timer);
+                              const val = this.nisn.trim();
+                              if (!val) {
+                                  this.isDuplicate = false;
+                                  this.isChecking = false;
+                                  return;
+                              }
+                              this.isChecking = true;
+                              this.timer = setTimeout(() => {
+                                  fetch(`/api/check-unique?type=student_nisn&value=${encodeURIComponent(val)}`)
+                                      .then(res => res.json())
+                                      .then(data => {
+                                          this.isDuplicate = data.exists;
+                                          this.isChecking = false;
+                                      })
+                                      .catch(() => { this.isChecking = false; });
+                              }, 300);
+                          }
+                      }"
+                      @submit="if (isDuplicate) { $event.preventDefault(); return false; }">
                     @csrf
                     <div class="bg-white p-6 sm:p-7">
                         <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
@@ -386,7 +412,22 @@
                             {{-- NISN / Identitas --}}
                             <div>
                                 <label class="block font-bold text-slate-700 mb-1">NISN / Nomor Induk Siswa <span class="text-red-500">*</span></label>
-                                <input type="text" name="identity_number" required placeholder="Contoh: 0076543210" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono">
+                                <div class="relative">
+                                    <input type="text" name="identity_number" required placeholder="Contoh: 0076543210"
+                                           x-model="nisn"
+                                           @input="checkNisn()"
+                                           class="w-full px-3.5 py-2.5 rounded-xl border bg-slate-50 focus:bg-white focus:ring-1 font-mono transition-all"
+                                           :class="isDuplicate ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500 text-rose-900 bg-rose-50/40' : 'border-slate-200 focus:border-indigo-500 focus:ring-indigo-500'">
+                                    <span x-show="isChecking" class="absolute right-3 top-2.5 text-xs text-slate-400 animate-spin">⏳</span>
+                                </div>
+                                <template x-if="isDuplicate">
+                                    <p class="mt-1.5 text-xs text-rose-600 font-semibold flex items-center gap-1.5">
+                                        <svg class="w-4 h-4 shrink-0 text-rose-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                        </svg>
+                                        <span>tidak bisa submit karena data ini sudah digunakan</span>
+                                    </p>
+                                </template>
                             </div>
 
                             {{-- Rombel Kelas (Pre-selected) --}}
@@ -441,7 +482,9 @@
                         <button type="button" @click="createModalOpen = false" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 transition-colors">
                             Batal
                         </button>
-                        <button type="submit" class="px-5 py-2 rounded-xl text-xs font-extrabold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/25 transition-all">
+                        <button type="submit" 
+                                :disabled="isDuplicate || isChecking"
+                                class="px-5 py-2 rounded-xl text-xs font-extrabold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-indigo-600 shadow-md shadow-indigo-600/25 transition-all cursor-pointer">
                             Simpan Data Siswa
                         </button>
                     </div>

@@ -45,7 +45,7 @@ class StudentController extends Controller
             $query->where('major_id', $majorId);
         }
 
-        $classesList = $query->orderBy('grade')->orderBy('section')->get();
+        $classesList = $query->orderBy('grade')->orderBy('section')->paginate(15)->withQueryString();
 
         // Data pendukung untuk modal registrasi cepat & filter
         $classes = SchoolClass::with('major')->orderBy('grade')->orderBy('major_name')->get();

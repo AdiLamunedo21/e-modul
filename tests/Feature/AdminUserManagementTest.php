@@ -158,6 +158,10 @@ class AdminUserManagementTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Master Data & Registrasi Siswa', false);
         $response->assertSee('Daftarkan Siswa Baru', false);
+
+        $classesList = $response->viewData('classesList');
+        $this->assertInstanceOf(\Illuminate\Contracts\Pagination\LengthAwarePaginator::class, $classesList);
+        $this->assertEquals(15, $classesList->perPage());
     }
 
     public function test_admin_can_view_students_in_class()

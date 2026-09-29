@@ -397,7 +397,62 @@
             </form>
 
             {{-- Form Mode B: Input Manual --}}
-            <form x-show="createMode === 'manual'" action="{{ route('admin.admins.store') }}" method="POST" class="p-6 space-y-4">
+            <form x-show="createMode === 'manual'" action="{{ route('admin.admins.store') }}" method="POST" class="p-6 space-y-4"
+                  x-data="{
+                      email: '',
+                      emailDuplicate: false,
+                      emailChecking: false,
+                      emailTimer: null,
+                      nip: '',
+                      nipDuplicate: false,
+                      nipChecking: false,
+                      nipTimer: null,
+                      get hasDuplicate() {
+                          return this.emailDuplicate || this.nipDuplicate;
+                      },
+                      get isChecking() {
+                          return this.emailChecking || this.nipChecking;
+                      },
+                      checkEmail() {
+                          clearTimeout(this.emailTimer);
+                          const val = this.email.trim();
+                          if (!val) {
+                              this.emailDuplicate = false;
+                              this.emailChecking = false;
+                              return;
+                          }
+                          this.emailChecking = true;
+                          this.emailTimer = setTimeout(() => {
+                              fetch(`/api/check-unique?type=admin_email&value=${encodeURIComponent(val)}`)
+                                  .then(res => res.json())
+                                  .then(data => {
+                                      this.emailDuplicate = data.exists;
+                                      this.emailChecking = false;
+                                  })
+                                  .catch(() => { this.emailChecking = false; });
+                          }, 300);
+                      },
+                      checkNip() {
+                          clearTimeout(this.nipTimer);
+                          const val = this.nip.trim();
+                          if (!val) {
+                              this.nipDuplicate = false;
+                              this.nipChecking = false;
+                              return;
+                          }
+                          this.nipChecking = true;
+                          this.nipTimer = setTimeout(() => {
+                              fetch(`/api/check-unique?type=admin_nip&value=${encodeURIComponent(val)}`)
+                                  .then(res => res.json())
+                                  .then(data => {
+                                      this.nipDuplicate = data.exists;
+                                      this.nipChecking = false;
+                                  })
+                                  .catch(() => { this.nipChecking = false; });
+                          }, 300);
+                      }
+                  }"
+                  @submit="if (hasDuplicate) { $event.preventDefault(); return false; }">
                 @csrf
                 <input type="hidden" name="source_type" value="manual">
 
@@ -416,11 +471,25 @@
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                         Email Administrator (Login) <span class="text-red-500">*</span>
                     </label>
-                    <input type="email"
-                           name="email"
-                           required
-                           placeholder="namaSingkat@gmail.com"
-                           class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none font-mono">
+                    <div class="relative">
+                        <input type="email"
+                               name="email"
+                               required
+                               placeholder="namaSingkat@gmail.com"
+                               x-model="email"
+                               @input="checkEmail()"
+                               class="w-full px-3.5 py-2.5 text-xs rounded-xl border bg-slate-50 focus:bg-white focus:ring-1 font-mono outline-none transition-all"
+                               :class="emailDuplicate ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500 text-rose-900 bg-rose-50/40' : 'border-slate-300 focus:border-indigo-500 focus:ring-indigo-500'">
+                        <span x-show="emailChecking" class="absolute right-3 top-2.5 text-xs text-slate-400 animate-spin">⏳</span>
+                    </div>
+                    <template x-if="emailDuplicate">
+                        <p class="mt-1.5 text-xs text-rose-600 font-semibold flex items-center gap-1.5">
+                            <svg class="w-4 h-4 shrink-0 text-rose-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                            <span>tidak bisa submit karena data ini sudah digunakan</span>
+                        </p>
+                    </template>
                     <p class="text-[11px] text-slate-500 mt-1">
                         Format: <strong>namaSingkat@gmail.com</strong> (digunakan untuk login ke panel admin).
                     </p>
@@ -430,11 +499,25 @@
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                         NIP / Nomor Identitas Pegawai <span class="text-red-500">*</span>
                     </label>
-                    <input type="text"
-                           name="identity_number"
-                           required
-                           placeholder="Contoh: 198005122005011002"
-                           class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none font-mono">
+                    <div class="relative">
+                        <input type="text"
+                               name="identity_number"
+                               required
+                               placeholder="Contoh: 198005122005011002"
+                               x-model="nip"
+                               @input="checkNip()"
+                               class="w-full px-3.5 py-2.5 text-xs rounded-xl border bg-slate-50 focus:bg-white focus:ring-1 font-mono outline-none transition-all"
+                               :class="nipDuplicate ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500 text-rose-900 bg-rose-50/40' : 'border-slate-300 focus:border-indigo-500 focus:ring-indigo-500'">
+                        <span x-show="nipChecking" class="absolute right-3 top-2.5 text-xs text-slate-400 animate-spin">⏳</span>
+                    </div>
+                    <template x-if="nipDuplicate">
+                        <p class="mt-1.5 text-xs text-rose-600 font-semibold flex items-center gap-1.5">
+                            <svg class="w-4 h-4 shrink-0 text-rose-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                            <span>tidak bisa submit karena data ini sudah digunakan</span>
+                        </p>
+                    </template>
                     <p class="text-[11px] text-slate-500 mt-1">
                         Bisa menggunakan NIP guru yang sudah ada. Jika sama, akun ini akan otomatis saling terhubung.
                     </p>
@@ -470,7 +553,8 @@
                         Batal
                     </button>
                     <button type="submit"
-                            class="px-5 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm transition-all cursor-pointer">
+                            :disabled="hasDuplicate || isChecking"
+                            class="px-5 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-indigo-600 rounded-xl shadow-sm transition-all cursor-pointer">
                         Simpan Administrator
                     </button>
                 </div>

@@ -1,14 +1,19 @@
 @extends('layouts.admin.dashboardadmin')
 
-@section('title', 'Master Data Siswa per Rombel Kelas — Admin E-Modul')
-@section('page-title', 'Master Data Siswa')
+@section('title', 'Master Data Kelas & Siswa per Rombel Kelas — Admin E-Modul')
+@section('page-title', 'Master Data Kelas & Siswa')
 
 @section('content')
 
 <div x-data="{
     createModalOpen: false,
     importModalOpen: false,
-    selectedClassId: '{{ $classes->first()?->id ?? '' }}'
+    selectedClassId: '{{ $classes->first()?->id ?? '' }}',
+    viewMode: localStorage.getItem('admin_student_classes_view_mode') || 'grid',
+    setViewMode(mode) {
+        this.viewMode = mode;
+        localStorage.setItem('admin_student_classes_view_mode', mode);
+    }
 }">
 
     {{-- ══ 1. BREADCRUMB & HEADER ══ --}}
@@ -17,7 +22,7 @@
             <nav class="flex items-center gap-2 text-xs text-slate-400 mb-1">
                 <a href="{{ route('admin.dashboard') }}" class="hover:text-indigo-600 transition-colors">Dashboard</a>
                 <span>/</span>
-                <span class="text-slate-700 font-semibold">Master Data Siswa</span>
+                <span class="text-slate-700 font-semibold">Master Data Kelas & Siswa</span>
             </nav>
             <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
                 <span>Master Data & Registrasi Siswa</span>
@@ -213,8 +218,41 @@
         </form>
     </div>
 
-    {{-- ══ 4. GRID DIREKTORI KELAS ══ --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+    {{-- ══ 4. BAR KONTROL TAMPILAN (VIEW TOGGLE) ══ --}}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+        <div class="flex items-center gap-2.5">
+            <h2 class="text-base sm:text-lg font-black text-slate-900 tracking-tight">Direktori Rombel Kelas</h2>
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                Halaman {{ $classesList->currentPage() }} dari {{ $classesList->lastPage() }}
+            </span>
+        </div>
+
+        {{-- Switcher Mode: Grid vs Daftar Rinci --}}
+        <div class="inline-flex p-1 rounded-2xl bg-slate-100 border border-slate-200/80 gap-1 self-start sm:self-auto shadow-2xs">
+            <button type="button"
+                    @click="setViewMode('grid')"
+                    :class="viewMode === 'grid' ? 'bg-white text-indigo-600 shadow-sm font-bold' : 'text-slate-500 hover:text-slate-800 font-semibold'"
+                    class="px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                </svg>
+                <span>Tampilan Grid</span>
+            </button>
+
+            <button type="button"
+                    @click="setViewMode('table')"
+                    :class="viewMode === 'table' ? 'bg-white text-indigo-600 shadow-sm font-bold' : 'text-slate-500 hover:text-slate-800 font-semibold'"
+                    class="px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z" />
+                </svg>
+                <span>Daftar Rinci</span>
+            </button>
+        </div>
+    </div>
+
+    {{-- ══ 4A. TAMPILAN GRID KARTU KELAS ══ --}}
+    <div x-show="viewMode === 'grid'" x-cloak class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mb-8">
         @forelse($classesList as $cls)
             <div class="group relative rounded-3xl bg-white border border-slate-200/80 hover:border-indigo-300 transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md">
                 
@@ -279,6 +317,110 @@
         @endforelse
     </div>
 
+    {{-- ══ 4B. TAMPILAN DAFTAR RINCI (TABEL) KELAS ══ --}}
+    <div x-show="viewMode === 'table'" x-cloak class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden mb-8">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-600">
+                <thead class="bg-slate-50/80 text-[11px] font-black uppercase tracking-wider text-slate-500 border-b border-slate-200/80">
+                    <tr>
+                        <th scope="col" class="py-4 px-5">Rombel Kelas</th>
+                        <th scope="col" class="py-4 px-4">Tingkat & Rombel</th>
+                        <th scope="col" class="py-4 px-4">Konsentrasi Keahlian / Jurusan</th>
+                        <th scope="col" class="py-4 px-4 text-center">Jumlah Siswa</th>
+                        <th scope="col" class="py-4 px-4 text-center">Modul</th>
+                        <th scope="col" class="py-4 px-6 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @forelse($classesList as $cls)
+                        <tr class="hover:bg-slate-50/70 transition-colors group">
+                            {{-- Rombel Kelas --}}
+                            <td class="py-4 px-5">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-black text-sm shrink-0 border border-indigo-100 group-hover:scale-105 transition-transform">
+                                        {{ $cls->grade }}
+                                    </div>
+                                    <div class="min-w-0">
+                                        <a href="{{ route('admin.students.class', $cls->id) }}" class="font-black text-slate-900 hover:text-indigo-600 transition-colors text-sm truncate block">
+                                            {{ $cls->full_name }}
+                                        </a>
+                                        <span class="text-[11px] text-slate-400 font-mono">{{ $cls->code ?? 'Kode: -' }}</span>
+                                    </div>
+                                </div>
+                            </td>
+
+                            {{-- Tingkat & Rombel --}}
+                            <td class="py-4 px-4 whitespace-nowrap">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                        Kelas {{ $cls->grade }}
+                                    </span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                                        Rombel {{ $cls->section }}
+                                    </span>
+                                </div>
+                            </td>
+
+                            {{-- Jurusan --}}
+                            <td class="py-4 px-4">
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-black bg-sky-50 text-sky-700 border border-sky-200 font-mono">
+                                        {{ $cls->major?->code ?? $cls->major_name }}
+                                    </span>
+                                    <span class="text-xs text-slate-700 font-medium truncate max-w-xs block">
+                                        {{ $cls->major ? $cls->major->name : $cls->major_name }}
+                                    </span>
+                                </div>
+                            </td>
+
+                            {{-- Jumlah Siswa --}}
+                            <td class="py-4 px-4 text-center whitespace-nowrap">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200">
+                                    <svg class="w-3.5 h-3.5 text-sky-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                                    </svg>
+                                    <span>{{ $cls->students_count }} Siswa</span>
+                                </span>
+                            </td>
+
+                            {{-- Modul --}}
+                            <td class="py-4 px-4 text-center whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                    {{ $cls->modules_count }} Modul
+                                </span>
+                            </td>
+
+                            {{-- Aksi --}}
+                            <td class="py-4 px-6 text-right whitespace-nowrap">
+                                <a href="{{ route('admin.students.class', $cls->id) }}"
+                                   class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-600/20 hover:shadow-md transition-all">
+                                    <span>Buka Data Siswa</span>
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+                                    </svg>
+                                </a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="py-12 text-center">
+                                <p class="text-sm font-bold text-slate-700">Tidak ada rombel kelas yang cocok dengan filter.</p>
+                                <p class="text-xs text-slate-400 mt-1">Coba sesuaikan kata kunci pencarian atau reset filter.</p>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{-- Pagination Direktori Rombel Kelas --}}
+    @if ($classesList->hasPages())
+        <div class="mb-8">
+            {{ $classesList->links() }}
+        </div>
+    @endif
+
     {{-- ══ 5. MODAL: DAFTARKAN SISWA BARU (GLOBAL) ══ --}}
     <div x-cloak 
          x-show="createModalOpen" 
@@ -305,7 +447,33 @@
                  x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                  class="relative z-10 w-full max-w-md mx-auto transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all my-8 border border-slate-100">
                 
-                <form action="{{ route('admin.students.store') }}" method="POST">
+                <form action="{{ route('admin.students.store') }}" method="POST"
+                      x-data="{
+                          nisn: '',
+                          isDuplicate: false,
+                          isChecking: false,
+                          timer: null,
+                          checkNisn() {
+                              clearTimeout(this.timer);
+                              const val = this.nisn.trim();
+                              if (!val) {
+                                  this.isDuplicate = false;
+                                  this.isChecking = false;
+                                  return;
+                              }
+                              this.isChecking = true;
+                              this.timer = setTimeout(() => {
+                                  fetch(`/api/check-unique?type=student_nisn&value=${encodeURIComponent(val)}`)
+                                      .then(res => res.json())
+                                      .then(data => {
+                                          this.isDuplicate = data.exists;
+                                          this.isChecking = false;
+                                      })
+                                      .catch(() => { this.isChecking = false; });
+                              }, 300);
+                          }
+                      }"
+                      @submit="if (isDuplicate) { $event.preventDefault(); return false; }">
                     @csrf
                     <div class="bg-white p-6 sm:p-7">
                         <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
@@ -323,7 +491,22 @@
                             {{-- NISN / Identitas --}}
                             <div>
                                 <label class="block font-bold text-slate-700 mb-1">NISN / Nomor Induk Siswa <span class="text-red-500">*</span></label>
-                                <input type="text" name="identity_number" required placeholder="Contoh: 0076543210" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono">
+                                <div class="relative">
+                                    <input type="text" name="identity_number" required placeholder="Contoh: 0076543210"
+                                           x-model="nisn"
+                                           @input="checkNisn()"
+                                           class="w-full px-3.5 py-2.5 rounded-xl border bg-slate-50 focus:bg-white focus:ring-1 font-mono transition-all"
+                                           :class="isDuplicate ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500 text-rose-900 bg-rose-50/40' : 'border-slate-200 focus:border-indigo-500 focus:ring-indigo-500'">
+                                    <span x-show="isChecking" class="absolute right-3 top-2.5 text-xs text-slate-400 animate-spin">⏳</span>
+                                </div>
+                                <template x-if="isDuplicate">
+                                    <p class="mt-1.5 text-xs text-rose-600 font-semibold flex items-center gap-1.5">
+                                        <svg class="w-4 h-4 shrink-0 text-rose-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                        </svg>
+                                        <span>tidak bisa submit karena data ini sudah digunakan</span>
+                                    </p>
+                                </template>
                             </div>
 
                             {{-- Rombel Kelas --}}
@@ -367,7 +550,9 @@
                         <button type="button" @click="createModalOpen = false" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 transition-colors">
                             Batal
                         </button>
-                        <button type="submit" class="px-5 py-2 rounded-xl text-xs font-extrabold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/25 transition-all">
+                        <button type="submit" 
+                                :disabled="isDuplicate || isChecking"
+                                class="px-5 py-2 rounded-xl text-xs font-extrabold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-indigo-600 shadow-md shadow-indigo-600/25 transition-all cursor-pointer">
                             Simpan Data Siswa
                         </button>
                     </div>

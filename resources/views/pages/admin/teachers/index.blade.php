@@ -319,7 +319,62 @@
                  x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                  class="relative z-10 w-full max-w-lg mx-auto transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all my-8 border border-slate-100">
                 
-                <form action="{{ route('admin.teachers.store') }}" method="POST">
+                <form action="{{ route('admin.teachers.store') }}" method="POST"
+                      x-data="{
+                          email: '',
+                          emailDuplicate: false,
+                          emailChecking: false,
+                          emailTimer: null,
+                          nip: '',
+                          nipDuplicate: false,
+                          nipChecking: false,
+                          nipTimer: null,
+                          get hasDuplicate() {
+                              return this.emailDuplicate || this.nipDuplicate;
+                          },
+                          get isChecking() {
+                              return this.emailChecking || this.nipChecking;
+                          },
+                          checkEmail() {
+                              clearTimeout(this.emailTimer);
+                              const val = this.email.trim();
+                              if (!val) {
+                                  this.emailDuplicate = false;
+                                  this.emailChecking = false;
+                                  return;
+                              }
+                              this.emailChecking = true;
+                              this.emailTimer = setTimeout(() => {
+                                  fetch(`/api/check-unique?type=teacher_email&value=${encodeURIComponent(val)}`)
+                                      .then(res => res.json())
+                                      .then(data => {
+                                          this.emailDuplicate = data.exists;
+                                          this.emailChecking = false;
+                                      })
+                                      .catch(() => { this.emailChecking = false; });
+                              }, 300);
+                          },
+                          checkNip() {
+                              clearTimeout(this.nipTimer);
+                              const val = this.nip.trim();
+                              if (!val) {
+                                  this.nipDuplicate = false;
+                                  this.nipChecking = false;
+                                  return;
+                              }
+                              this.nipChecking = true;
+                              this.nipTimer = setTimeout(() => {
+                                  fetch(`/api/check-unique?type=teacher_nip&value=${encodeURIComponent(val)}`)
+                                      .then(res => res.json())
+                                      .then(data => {
+                                          this.nipDuplicate = data.exists;
+                                          this.nipChecking = false;
+                                      })
+                                      .catch(() => { this.nipChecking = false; });
+                              }, 300);
+                          }
+                      }"
+                      @submit="if (hasDuplicate) { $event.preventDefault(); return false; }">
                     @csrf
                     <div class="bg-white p-6 sm:p-7">
                         <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
@@ -337,14 +392,44 @@
                             {{-- Email Guru (Login) --}}
                             <div>
                                 <label class="block font-bold text-slate-700 mb-1">Email Guru (Login) <span class="text-red-500">*</span></label>
-                                <input type="email" name="email" required placeholder="namaSingkat@gmail.com" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono">
+                                <div class="relative">
+                                    <input type="email" name="email" required placeholder="namaSingkat@gmail.com"
+                                           x-model="email"
+                                           @input="checkEmail()"
+                                           class="w-full px-3.5 py-2.5 rounded-xl border bg-slate-50 focus:bg-white focus:ring-1 font-mono transition-all"
+                                           :class="emailDuplicate ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500 text-rose-900 bg-rose-50/40' : 'border-slate-200 focus:border-indigo-500 focus:ring-indigo-500'">
+                                    <span x-show="emailChecking" class="absolute right-3 top-2.5 text-xs text-slate-400 animate-spin">⏳</span>
+                                </div>
+                                <template x-if="emailDuplicate">
+                                    <p class="mt-1.5 text-xs text-rose-600 font-semibold flex items-center gap-1.5">
+                                        <svg class="w-4 h-4 shrink-0 text-rose-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                        </svg>
+                                        <span>tidak bisa submit karena data ini sudah digunakan</span>
+                                    </p>
+                                </template>
                                 <p class="text-[11px] text-slate-400 mt-1">Format: <strong>namaSingkat@gmail.com</strong> (digunakan guru untuk login ke sistem)</p>
                             </div>
 
                             {{-- NIP / Identitas --}}
                             <div>
                                 <label class="block font-bold text-slate-700 mb-1">NIP / NUPTK / No. Identitas <span class="text-red-500">*</span></label>
-                                <input type="text" name="identity_number" required placeholder="Contoh: 198501152010011002" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono">
+                                <div class="relative">
+                                    <input type="text" name="identity_number" required placeholder="Contoh: 198501152010011002"
+                                           x-model="nip"
+                                           @input="checkNip()"
+                                           class="w-full px-3.5 py-2.5 rounded-xl border bg-slate-50 focus:bg-white focus:ring-1 font-mono transition-all"
+                                           :class="nipDuplicate ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500 text-rose-900 bg-rose-50/40' : 'border-slate-200 focus:border-indigo-500 focus:ring-indigo-500'">
+                                    <span x-show="nipChecking" class="absolute right-3 top-2.5 text-xs text-slate-400 animate-spin">⏳</span>
+                                </div>
+                                <template x-if="nipDuplicate">
+                                    <p class="mt-1.5 text-xs text-rose-600 font-semibold flex items-center gap-1.5">
+                                        <svg class="w-4 h-4 shrink-0 text-rose-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                        </svg>
+                                        <span>tidak bisa submit karena data ini sudah digunakan</span>
+                                    </p>
+                                </template>
                             </div>
 
                             {{-- Password --}}
@@ -397,7 +482,9 @@
                         <button type="button" @click="createModalOpen = false" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 transition-colors">
                             Batal
                         </button>
-                        <button type="submit" class="px-5 py-2 rounded-xl text-xs font-extrabold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/25 transition-all">
+                        <button type="submit" 
+                                :disabled="hasDuplicate || isChecking"
+                                class="px-5 py-2 rounded-xl text-xs font-extrabold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-indigo-600 shadow-md shadow-indigo-600/25 transition-all cursor-pointer">
                             Simpan Data Guru
                         </button>
                     </div>

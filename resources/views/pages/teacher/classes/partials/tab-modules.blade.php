@@ -6,6 +6,8 @@
             'subject_name' => $m->subject?->name ?? '',
             'subject_code' => $m->subject?->code ?? '',
             'description'  => $m->description ?? '',
+            'teacher_name' => $m->teacher?->name ?? '',
+            'created_at'   => $m->created_at ? $m->created_at->format('d M Y') : '',
             'semester'     => (string) ($m->semester ?? 1),
             'status'       => $m->status,
             'is_active'    => (bool) $m->is_active,
@@ -55,7 +57,9 @@
                  const titleMatch = (mod.title || '').toLowerCase().includes(kw);
                  const subjMatch = (mod.subject_name || '').toLowerCase().includes(kw) || (mod.subject_code || '').toLowerCase().includes(kw);
                  const descMatch = (mod.description || '').toLowerCase().includes(kw);
-                 if (!titleMatch && !subjMatch && !descMatch) return false;
+                 const teacherMatch = (mod.teacher_name || '').toLowerCase().includes(kw);
+                 const dateMatch = (mod.created_at || '').toLowerCase().includes(kw);
+                 if (!titleMatch && !subjMatch && !descMatch && !teacherMatch && !dateMatch) return false;
              }
 
              return true;
@@ -361,6 +365,43 @@
                             @endif
                         </div>
 
+                        {{-- Info Pembuatan Modul --}}
+                        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-100 space-y-1.5 text-xs">
+                            <div class="flex items-center justify-between gap-2">
+                                <div class="flex items-center gap-1.5 min-w-0">
+                                    <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+                                    </svg>
+                                    <span class="text-[11px] text-slate-600 truncate">
+                                        Oleh: <strong class="text-slate-800">{{ $mod->teacher?->name ?? 'Guru Pengampu' }}</strong>
+                                    </span>
+                                </div>
+                                @if($mod->clonedFrom)
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 shrink-0" title="Diimpor dari modul {{ $mod->clonedFrom->title }} ({{ $mod->clonedFrom->schoolClass?->full_name ?? 'Kelas Lain' }})">
+                                        📥 Salinan Impor
+                                    </span>
+                                @else
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 shrink-0">
+                                        ✨ Modul Orisinal
+                                    </span>
+                                @endif
+                            </div>
+
+                            <div class="flex items-center justify-between gap-2 text-[10px] text-slate-400 pt-1.5 border-t border-slate-200/60">
+                                <span class="flex items-center gap-1">
+                                    <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5" />
+                                    </svg>
+                                    <span>Dibuat: {{ $mod->created_at ? $mod->created_at->format('d M Y, H:i') : '-' }}</span>
+                                </span>
+                                @if($mod->updated_at && $mod->updated_at->gt($mod->created_at))
+                                    <span title="Terakhir diperbarui: {{ $mod->updated_at->format('d M Y, H:i') }}">
+                                        Edit: {{ $mod->updated_at->diffForHumans() }}
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+
                         {{-- Komponen Penilaian & Aktivitas Aktif --}}
                         <div class="space-y-1.5 pt-1">
                             <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Komponen Aktif ({{ count($activeComps) }})</p>
@@ -503,6 +544,37 @@
                                             @if(!empty($mod->description))
                                                 <span class="text-[11px] text-slate-400 truncate max-w-[280px]">
                                                     {{ $mod->description }}
+                                                </span>
+                                            @endif
+                                        </div>
+
+                                        {{-- Info Pembuatan Modul di Baris Rinci --}}
+                                        <div class="flex items-center gap-2.5 mt-2 text-[10px] text-slate-500 flex-wrap">
+                                            <span class="inline-flex items-center gap-1 font-semibold text-slate-700">
+                                                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+                                                </svg>
+                                                <span>{{ $mod->teacher?->name ?? 'Guru Pengampu' }}</span>
+                                            </span>
+                                            <span class="text-slate-300">•</span>
+                                            <span class="inline-flex items-center gap-1 text-slate-500">
+                                                <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5" />
+                                                </svg>
+                                                <span>Dibuat: {{ $mod->created_at ? $mod->created_at->format('d M Y, H:i') : '-' }}</span>
+                                            </span>
+                                            @if($mod->clonedFrom)
+                                                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-200" title="Diimpor dari modul {{ $mod->clonedFrom->title }} ({{ $mod->clonedFrom->schoolClass?->full_name ?? 'Kelas Lain' }})">
+                                                    Salinan Impor
+                                                </span>
+                                            @else
+                                                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                                    Orisinal
+                                                </span>
+                                            @endif
+                                            @if($mod->updated_at && $mod->updated_at->gt($mod->created_at))
+                                                <span class="text-slate-400" title="Terakhir diedit: {{ $mod->updated_at->format('d M Y, H:i') }}">
+                                                    (Edit: {{ $mod->updated_at->diffForHumans() }})
                                                 </span>
                                             @endif
                                         </div>

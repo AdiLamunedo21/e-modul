@@ -353,12 +353,6 @@
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
 
-                    // Sinkronkan card KPI ringkasan statistik
-                    const newStats = doc.querySelector('#student-stats-kpi-grid');
-                    const curStats = document.querySelector('#student-stats-kpi-grid');
-                    if (newStats && curStats) {
-                        curStats.innerHTML = newStats.innerHTML;
-                    }
 
                     // Sinkronkan container konten tab utama siswa
                     const newTabs = doc.querySelector('#student-main-tabs-content');
@@ -493,75 +487,6 @@
         "
         x-on:switch-student-tab.window="switchTab($event.detail)"
         class="space-y-8">
-
-            {{-- ══ 2. RINGKASAN KPI BELAJAR SISWA (STATS CARDS) — KHUSUS DITAMPILKAN PADA TAB KELAS SAYA (DISEMBUNYIKAN PADA SEDANG DIKERJAKAN, RIWAYAT SELESAI, & SEMUA MODUL) ══ --}}
-            <div id="student-stats-kpi-grid"
-                 x-show="activeTab === 'classes'"
-                 x-cloak
-                 @if($filterStatus !== 'classes') style="display: none;" @endif
-                 x-transition:enter="transition ease-out duration-200"
-                 x-transition:enter-start="opacity-0 -translate-y-2"
-                 x-transition:enter-end="opacity-100 translate-y-0"
-                 class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                
-                {{-- Card 1: Total Kelas --}}
-                <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex items-center gap-4">
-                    <div class="w-13 h-13 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center text-2xl shrink-0 font-bold">
-                        🏫
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400">Rombel Diikuti</p>
-                        <p class="text-[23px] sm:text-2xl font-black text-slate-900 tracking-tight">{{ $stats['total_joined_classes'] }} <span class="text-[11px] sm:text-xs font-semibold text-slate-500">Kelas</span></p>
-                        <p class="text-[10px] sm:text-[11px] text-emerald-600 font-medium truncate">Terhubung Aktif</p>
-                    </div>
-                </div>
-
-                {{-- Card 2: Total Modul Pembelajaran --}}
-                <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex items-center gap-4">
-                    <div class="w-13 h-13 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center text-2xl shrink-0 font-bold">
-                        📚
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400">Total E-Modul</p>
-                        <p class="text-[23px] sm:text-2xl font-black text-slate-900 tracking-tight">{{ $stats['total_modules'] }} <span class="text-[11px] sm:text-xs font-semibold text-slate-500">Modul</span></p>
-                        <p class="text-[10px] sm:text-[11px] text-blue-600 font-medium truncate">Dari {{ $stats['total_subjects'] }} Mata Pelajaran</p>
-                    </div>
-                </div>
-
-                {{-- Card 3: Rata-Rata Progres Belajar --}}
-                <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex items-center gap-4">
-                    <div class="w-13 h-13 rounded-2xl bg-teal-50 text-teal-600 border border-teal-100 flex items-center justify-center text-2xl shrink-0 font-bold">
-                        📈
-                    </div>
-                    <div class="min-w-0 flex-1">
-                        <p class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400">Rata-Rata Progres</p>
-                        <div class="flex items-baseline gap-2">
-                            <p class="text-[23px] sm:text-2xl font-black text-slate-900 tracking-tight">{{ $stats['avg_progress'] }}%</p>
-                            <span class="text-[10px] sm:text-[11px] text-slate-500 font-medium">{{ $stats['completed_modules'] }}/{{ $stats['total_modules'] }} Tuntas</span>
-                        </div>
-                        <div class="w-full bg-slate-100 rounded-full h-1.5 mt-1.5 overflow-hidden">
-                            <div class="bg-teal-500 h-1.5 rounded-full transition-all duration-500" style="width: {{ $stats['avg_progress'] }}%"></div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Card 4: Tugas & Praktikum --}}
-                <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex items-center gap-4">
-                    <div class="w-13 h-13 rounded-2xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center text-2xl shrink-0 font-bold">
-                        📝
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400">Tugas & Evaluasi</p>
-                        <p class="text-[23px] sm:text-2xl font-black text-slate-900 tracking-tight">{{ $stats['pending_tasks_count'] }} <span class="text-[11px] sm:text-xs font-semibold text-slate-500">Tugas</span></p>
-                        @if($stats['pending_tasks_count'] === 0)
-                            <p class="text-[10px] sm:text-[11px] text-emerald-600 font-bold truncate">Semua Tugas Tuntas 🎉</p>
-                        @else
-                            <p class="text-[10px] sm:text-[11px] text-amber-600 font-medium truncate">Menunggu Dikerjakan</p>
-                        @endif
-                    </div>
-                </div>
-
-            </div>
 
             {{-- ══ 3. INTERACTIVE NAVIGATION TABS & FILTER HUB ══ --}}
             <div id="student-main-tabs-content" class="space-y-6">

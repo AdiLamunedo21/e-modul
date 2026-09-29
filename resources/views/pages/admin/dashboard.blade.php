@@ -60,7 +60,7 @@
                 <span class="text-xs font-semibold text-slate-500">Siswa ({{ $stats['total_classes'] }} Kelas)</span>
             </div>
             <a href="{{ route('admin.students.index') }}" class="text-[11px] font-bold text-sky-600 hover:text-sky-700 mt-2 inline-flex items-center gap-1">
-                <span>Lihat Master Siswa</span>
+                <span>Lihat Master Kelas & Siswa</span>
                 <span>&rarr;</span>
             </a>
         </div>

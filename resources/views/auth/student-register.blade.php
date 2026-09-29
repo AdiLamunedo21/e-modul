@@ -28,7 +28,34 @@
 
         {{-- Form Container --}}
         <div class="p-6 sm:p-8">
-            <form action="{{ route('register.student') }}" method="POST" class="space-y-4">
+            <form action="{{ route('register.student') }}" method="POST" class="space-y-4"
+                  x-data="{
+                      nisn: '{{ old('identity_number', '') }}',
+                      isDuplicate: false,
+                      isChecking: false,
+                      timer: null,
+                      checkNisn() {
+                          clearTimeout(this.timer);
+                          const val = this.nisn.trim();
+                          if (!val) {
+                              this.isDuplicate = false;
+                              this.isChecking = false;
+                              return;
+                          }
+                          this.isChecking = true;
+                          this.timer = setTimeout(() => {
+                              fetch(`/api/check-unique?type=student_nisn&value=${encodeURIComponent(val)}`)
+                                  .then(res => res.json())
+                                  .then(data => {
+                                      this.isDuplicate = data.exists;
+                                      this.isChecking = false;
+                                  })
+                                  .catch(() => { this.isChecking = false; });
+                          }, 300);
+                      }
+                  }"
+                  x-init="if (nisn) checkNisn()"
+                  @submit="if (isDuplicate) { $event.preventDefault(); return false; }">
                 @csrf
 
                 {{-- Nama Lengkap --}}
@@ -49,9 +76,23 @@
                     <label for="identity_number" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
                         Nomor Induk Siswa Nasional (NISN) <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" name="identity_number" id="identity_number" value="{{ old('identity_number') }}" required
-                           class="w-full px-4 py-2.5 text-sm font-mono bg-slate-50 border @error('identity_number') border-red-400 bg-red-50/30 @else border-slate-200 @enderror rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none"
-                           placeholder="Contoh: 0081234567">
+                    <div class="relative">
+                        <input type="text" name="identity_number" id="identity_number" required
+                               x-model="nisn"
+                               @input="checkNisn()"
+                               class="w-full px-4 py-2.5 text-sm font-mono bg-slate-50 border rounded-xl focus:bg-white focus:ring-2 transition outline-none"
+                               :class="isDuplicate ? 'border-rose-500 focus:ring-rose-500 text-rose-900 bg-rose-50/40' : 'border-slate-200 focus:ring-blue-500 focus:border-blue-500'"
+                               placeholder="Contoh: 0081234567">
+                        <span x-show="isChecking" class="absolute right-3 top-2.5 text-xs text-slate-400 animate-spin">⏳</span>
+                    </div>
+                    <template x-if="isDuplicate">
+                        <p class="mt-1.5 text-xs text-rose-600 font-semibold flex items-center gap-1.5">
+                            <svg class="w-4 h-4 shrink-0 text-rose-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                            <span>tidak bisa submit karena data ini sudah digunakan</span>
+                        </p>
+                    </template>
                     @error('identity_number')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -103,7 +144,9 @@
                 </div>
 
                 <div class="pt-2">
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-3.5 rounded-xl transition duration-300 shadow-md shadow-blue-600/30 hover:shadow-lg focus:ring-4 focus:ring-blue-500/50 text-sm">
+                    <button type="submit" 
+                            :disabled="isDuplicate || isChecking"
+                            class="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600 text-white font-extrabold py-3.5 rounded-xl transition duration-300 shadow-md shadow-blue-600/30 hover:shadow-lg focus:ring-4 focus:ring-blue-500/50 text-sm cursor-pointer">
                         Daftar & Masuk ke E-Modul
                     </button>
                 </div>

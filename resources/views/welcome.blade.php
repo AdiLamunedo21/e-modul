@@ -172,11 +172,6 @@
                     </span>
                 </h1>
 
-                <!-- Paragraph description -->
-                <p class="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed font-normal">
-                    Platform e-modul komprehensif yang dirancang untuk kurikulum vokasi. Mulai dari orientasi konsep, video materi refleksi, simulator praktik embed, LKPD digital, hingga Job Sheet standar industri dalam satu ekosistem terpadu.
-                </p>
-
                 <!-- Action Buttons -->
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2">
                     <a href="#portal" 
@@ -195,23 +190,6 @@
                         <span>Fitur Platform</span>
                     </a>
                 </div>
-
-                <!-- Highlight Badges below CTA -->
-                <div class="pt-6 flex flex-wrap items-center justify-center gap-5 sm:gap-8 text-xs sm:text-sm font-semibold text-slate-500">
-                    <div class="flex items-center gap-2">
-                        <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">✓</span>
-                        <span>Kurikulum Merdeka Vokasi</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="w-5 h-5 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center font-bold text-xs">✓</span>
-                        <span>Praktik Simulator & Job Sheet</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">✓</span>
-                        <span>Rekap Nilai Otomatis Excel</span>
-                    </div>
-                </div>
-
             </div>
         </main>
 
