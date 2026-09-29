@@ -116,7 +116,7 @@
                         <div>
                             <span class="text-[11px] font-bold text-slate-400 block mb-1">Kelas Didik:</span>
                             <div class="flex flex-wrap gap-1">
-                                @forelse($teacher->assignedClasses() as $cls)
+                                @forelse($teacher->classes as $cls)
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
                                         {{ $cls->full_name }}
                                     </span>

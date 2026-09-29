@@ -696,7 +696,7 @@ class ModuleController extends Controller
     }
 
     /**
-     * Stream berkas PDF LKPD untuk siswa.
+     * Stream berkas PDF LKPD atau unduh berkas Word untuk siswa.
      */
     public function streamLkpdPdf(Module $module)
     {
@@ -704,10 +704,16 @@ class ModuleController extends Controller
 
         $lkpd = $module->lkpds->first();
         $pdfPath = $lkpd?->pdf_file_path;
-        $pdfName = $lkpd?->pdf_file_name ?? 'Panduan_LKPD.pdf';
+        $extension = $pdfPath ? strtolower(pathinfo($pdfPath, PATHINFO_EXTENSION)) : 'pdf';
+        $pdfName = $lkpd?->pdf_file_name ?? "Panduan_LKPD.{$extension}";
 
         if (!$pdfPath || !Storage::disk('public')->exists($pdfPath)) {
             abort(404, 'Berkas panduan LKPD tidak ditemukan.');
+        }
+
+        // Jika berkas adalah Word (DOC / DOCX), langsung unduh
+        if (in_array($extension, ['doc', 'docx'])) {
+            return Storage::disk('public')->download($pdfPath, $pdfName);
         }
 
         $fullPath = Storage::disk('public')->path($pdfPath);

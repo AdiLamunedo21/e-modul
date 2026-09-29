@@ -25,7 +25,50 @@
                 @php
                     $lkpdPdfUrl = route('student.modules.lkpd.stream-pdf', $module);
                     $lkpdPdfName = $lkpdData['judul_lkpd'] ?? 'Lembar Kerja Peserta Didik (LKPD)';
+                    $lkpdFileExt = strtolower(pathinfo($lkpd->pdf_file_path, PATHINFO_EXTENSION));
+                    $lkpdIsWord = in_array($lkpdFileExt, ['doc', 'docx']);
                 @endphp
+
+                @if($lkpdIsWord)
+                    {{-- Banner Dokumen Word untuk Siswa --}}
+                    <div class="rounded-3xl border border-blue-200 bg-gradient-to-br from-blue-50/80 via-white to-indigo-50/40 p-6 sm:p-7 shadow-sm">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+                            <div class="flex items-start gap-4">
+                                <div class="w-13 h-13 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-md shadow-blue-600/30">
+                                    {{ strtoupper($lkpdFileExt) }}
+                                </div>
+                                <div class="space-y-1">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h4 class="text-sm sm:text-base font-bold text-slate-900">
+                                            {{ $lkpdPdfName }}
+                                        </h4>
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-blue-100 text-blue-800 border border-blue-200">
+                                            <span>📝</span> Dokumen Word
+                                        </span>
+                                    </div>
+                                    <p class="text-xs text-slate-600">
+                                        {{ $lkpdData['pdf_file_name'] ?? 'Berkas-Panduan-LKPD.' . $lkpdFileExt }}
+                                        @if(!empty($lkpdData['pdf_file_size']))
+                                            • {{ round($lkpdData['pdf_file_size'] / 1024, 1) }} KB
+                                        @endif
+                                    </p>
+                                    <p class="text-[11px] text-slate-500 pt-0.5">
+                                        💡 Unduh berkas format Microsoft Word ini ke perangkat Anda untuk melihat instruksi dan melengkapi lembar jawaban tugas.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="shrink-0 flex items-center">
+                                <a href="{{ $lkpdPdfUrl }}"
+                                   download
+                                   class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-md shadow-blue-600/25 flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.5V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                                    <span>Unduh Berkas LKPD ({{ strtoupper($lkpdFileExt) }})</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                @else
                 <div x-data="{
                         isFullscreen: false,
                         expandedHeight: true,
@@ -159,6 +202,7 @@
                         </div>
                     </div>
                 </div>
+                @endif
             @endif
 
             {{-- Form / Status Pengumpulan LKPD --}}

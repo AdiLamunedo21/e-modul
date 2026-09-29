@@ -199,7 +199,7 @@
                             {{-- Kelas Didik --}}
                             <td class="py-4 px-4">
                                 <div class="flex flex-wrap gap-1 max-w-[240px]">
-                                    @forelse($t->assignedClasses() as $cls)
+                                    @forelse($t->classes as $cls)
                                         <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
                                             {{ $cls->short_name }}
                                         </span>

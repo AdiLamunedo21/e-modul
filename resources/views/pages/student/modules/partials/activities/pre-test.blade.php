@@ -632,7 +632,7 @@
 
                                     {{-- Teks Soal (Tanpa border dalam agar teks mobile leluasa) --}}
                                     <div class="py-1 px-1 sm:px-2">
-                                        <p class="text-sm sm:text-base font-bold text-slate-900 leading-relaxed select-none pointer-events-none"
+                                        <p class="text-sm sm:text-base font-bold text-slate-900 leading-relaxed select-none pointer-events-none whitespace-pre-line"
                                            style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">
                                             {{ $q->question_text }}
                                         </p>

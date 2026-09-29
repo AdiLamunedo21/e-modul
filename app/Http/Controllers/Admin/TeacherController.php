@@ -275,14 +275,13 @@ class TeacherController extends Controller
         $finalSubjectIds = array_values(array_unique(array_merge($submittedSubjectIds, $moduleSubjectIds)));
         $teacher->subjects()->sync($finalSubjectIds);
 
-        // Begitu juga dengan kelas binaan
+        // Penugasan kelas didik (tanggung jawab mengajar): murni mengikuti pilihan Admin
+        // agar Admin leluasa menambah maupun mengurangi rombel binaan guru
         $submittedClassIds = array_map('intval', $validated['class_ids'] ?? []);
-        $moduleClassIds = $teacher->modules()->whereNotNull('class_id')->pluck('class_id')->map(fn($id) => (int)$id)->toArray();
-        $finalClassIds = array_values(array_unique(array_merge($submittedClassIds, $moduleClassIds)));
-        $teacher->classes()->sync($finalClassIds);
+        $teacher->classes()->sync($submittedClassIds);
 
-        if (!empty($finalClassIds)) {
-            $classes = SchoolClass::whereIn('id', $finalClassIds)->get();
+        if (!empty($submittedClassIds)) {
+            $classes = SchoolClass::whereIn('id', $submittedClassIds)->get();
             foreach ($classes as $cls) {
                 $cls->syncAllStudentsSubjects();
             }

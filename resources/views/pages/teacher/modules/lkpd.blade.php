@@ -263,78 +263,35 @@
                 </div>
             </div>
 
-            {{-- Card 4: Rubrik & Kriteria Penilaian --}}
-            <div class="rounded-3xl bg-white border border-slate-200/80 shadow-sm p-6 sm:p-7 space-y-6">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-4">
-                    <div>
-                        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                            <span class="w-7 h-7 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center text-xs font-black">3</span>
-                            Rubrik / Kriteria Penilaian LKPD
-                        </h3>
-                        <p class="text-xs text-slate-500 mt-1">
-                            Kriteria ini akan menjadi acuan guru saat menilai laporan LKPD di Grading Center dan ditampilkan transparan kepada siswa.
-                        </p>
-                    </div>
-                    <button type="button" onclick="addRubricItem()"
-                            class="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold transition-all flex items-center gap-1.5">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                        Tambah Kriteria
-                    </button>
-                </div>
-
-                <div id="rubric-container" class="space-y-3">
-                    @forelse(old('assessment_rubric', $data['assessment_rubric']) as $index => $item)
-                        <div class="flex items-center gap-3 fade-in-item rubric-row">
-                            <span class="w-7 h-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold shrink-0 row-number">
-                                {{ $loop->iteration }}
-                            </span>
-                            <input type="text" name="assessment_rubric[]" value="{{ $item }}"
-                                   placeholder="Contoh: Identifikasi & Analisis Masalah"
-                                   class="flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all">
-                            <button type="button" onclick="removeRow(this)"
-                                    class="p-2.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-colors" title="Hapus Kriteria">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
-                            </button>
-                        </div>
-                    @empty
-                        <div class="flex items-center gap-3 fade-in-item rubric-row">
-                            <span class="w-7 h-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold shrink-0 row-number">1</span>
-                            <input type="text" name="assessment_rubric[]" value="Pemahaman Masalah & Kedalaman Analisis Kasus"
-                                   class="flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all">
-                            <button type="button" onclick="removeRow(this)"
-                                    class="p-2.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-colors" title="Hapus Kriteria">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
-                            </button>
-                        </div>
-                    @endforelse
-                </div>
-            </div>
-
-            {{-- Card 5: Unggah Berkas Panduan PDF LKPD Guru --}}
+            {{-- Card 4: Unggah Berkas Panduan LKPD Guru (PDF / Word) --}}
             <div class="rounded-3xl bg-white border border-slate-200/80 shadow-sm p-6 sm:p-7 space-y-6">
                 <div class="border-b border-slate-100 pb-4">
                     <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                        <span class="w-7 h-7 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center text-xs font-black">4</span>
-                        Lampiran Berkas Panduan LKPD Guru (PDF)
+                        <span class="w-7 h-7 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-black">3</span>
+                        Lampiran Berkas Panduan LKPD Guru (PDF / Word)
                     </h3>
                     <p class="text-xs text-slate-500 mt-1">
-                        Unggah berkas lembar kerja resmi atau formulir template PDF yang dapat diunduh oleh siswa saat mengerjakan tugas.
+                        Unggah berkas lembar kerja resmi atau formulir template (format <strong class="text-slate-700 font-semibold">PDF</strong> atau <strong class="text-slate-700 font-semibold">Word .DOCX / .DOC</strong>) yang dapat diunduh oleh siswa saat mengerjakan tugas.
                     </p>
                 </div>
 
                 {{-- Status Berkas Saat Ini --}}
                 @if(!empty($data['pdf_file_path']))
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200/80">
+                @php
+                    $curExt = strtolower(pathinfo($data['pdf_file_path'] ?? '', PATHINFO_EXTENSION));
+                    $curIsWord = in_array($curExt, ['doc', 'docx']);
+                @endphp
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl {{ $curIsWord ? 'bg-blue-50/70 border-blue-200/80' : 'bg-rose-50/70 border-rose-200/80' }} border">
                     <div class="flex items-center gap-3.5">
-                        <div class="w-11 h-11 rounded-xl bg-rose-500 text-white flex items-center justify-center font-black text-xs shrink-0 shadow-md">
-                            PDF
+                        <div class="w-11 h-11 rounded-xl {{ $curIsWord ? 'bg-blue-600' : 'bg-rose-500' }} text-white flex items-center justify-center font-black text-xs shrink-0 shadow-md">
+                            {{ $curIsWord ? strtoupper($curExt) : 'PDF' }}
                         </div>
                         <div class="space-y-0.5">
                             <span class="text-xs font-bold text-slate-900 block truncate max-w-sm">
-                                {{ $data['pdf_file_name'] ?? 'Berkas-LKPD.pdf' }}
+                                {{ $data['pdf_file_name'] ?? ($curIsWord ? 'Berkas-LKPD.docx' : 'Berkas-LKPD.pdf') }}
                             </span>
                             <span class="text-[11px] text-slate-500 block">
-                                {{ !empty($data['pdf_file_size']) ? round($data['pdf_file_size'] / 1024, 1) . ' KB' : 'Tersimpan di Storage' }} • Siap Diunduh Siswa
+                                {{ !empty($data['pdf_file_size']) ? round($data['pdf_file_size'] / 1024, 1) . ' KB' : 'Tersimpan di Storage' }} • Dokumen {{ $curIsWord ? 'Microsoft Word' : 'PDF' }} (Siap Diunduh Siswa)
                             </span>
                         </div>
                     </div>
@@ -356,11 +313,11 @@
                 {{-- Area Unggah Berkas Baru --}}
                 <div class="space-y-2">
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                        {{ !empty($data['pdf_file_path']) ? 'Ganti / Perbarui Berkas PDF LKPD' : 'Pilih Berkas PDF Panduan LKPD' }}
+                        {{ !empty($data['pdf_file_path']) ? 'Ganti / Perbarui Berkas LKPD (PDF / Word)' : 'Pilih Berkas Panduan LKPD (PDF / Word)' }}
                     </label>
 
                     <div class="relative border-2 border-dashed border-slate-300 hover:border-indigo-400 rounded-3xl p-6 text-center transition-all bg-slate-50/50 hover:bg-indigo-50/30">
-                        <input type="file" name="pdf_file" id="pdf_file" accept=".pdf,application/pdf"
+                        <input type="file" name="pdf_file" id="pdf_file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                onchange="handlePdfSelect(this)">
 
@@ -370,10 +327,10 @@
                             </div>
                             <div class="space-y-0.5">
                                 <p class="text-sm font-bold text-slate-800" id="pdf-filename-display">
-                                    Klik atau seret berkas PDF panduan LKPD ke sini
+                                    Klik atau seret berkas panduan LKPD (PDF atau Word) ke sini
                                 </p>
                                 <p class="text-xs text-slate-500">
-                                    Format resmi <strong class="text-slate-700">.PDF</strong> (Maksimal ukuran: 15 MB)
+                                    Mendukung format <strong class="text-slate-700">.PDF</strong>, <strong class="text-slate-700">.DOCX</strong>, atau <strong class="text-slate-700">.DOC</strong> (Maksimal ukuran: 15 MB)
                                 </p>
                             </div>
                         </div>
@@ -415,7 +372,7 @@
                         <span class="font-bold text-slate-800">{{ $data['estimated_duration'] ?? 90 }} Menit</span>
                     </div>
                     <div class="flex items-center justify-between py-1 border-b border-slate-50">
-                        <span class="text-slate-500">Panduan PDF Guru</span>
+                        <span class="text-slate-500">Berkas Panduan LKPD</span>
                         <span class="font-bold {{ !empty($data['pdf_file_path']) ? 'text-emerald-600' : 'text-slate-400' }}">
                             {{ !empty($data['pdf_file_path']) ? '✓ Dilampirkan' : '○ Tidak ada' }}
                         </span>
@@ -520,50 +477,14 @@
         }
     }
 
-    // Tambah baris rubrik penilaian
-    function addRubricItem() {
-        const container = document.getElementById('rubric-container');
-        const count = container.querySelectorAll('.rubric-row').length + 1;
-
-        const row = document.createElement('div');
-        row.className = 'flex items-center gap-3 fade-in-item rubric-row';
-        row.innerHTML = `
-            <span class="w-7 h-7 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold shrink-0 row-number">
-                ${count}
-            </span>
-            <input type="text" name="assessment_rubric[]" placeholder="Kriteria penilaian..."
-                   class="flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all">
-            <button type="button" onclick="removeRow(this)"
-                    class="p-2.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-colors" title="Hapus Kriteria">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
-            </button>
-        `;
-
-        container.appendChild(row);
-        updateRowNumbers();
-    }
-
-    // Hapus baris
-    function removeRow(btn) {
-        const row = btn.closest('.rubric-row');
-        row.remove();
-        updateRowNumbers();
-    }
-
-    // Update penomoran baris
-    function updateRowNumbers() {
-        document.querySelectorAll('.rubric-row').forEach((row, idx) => {
-            const num = row.querySelector('.row-number');
-            if (num) num.innerText = idx + 1;
-        });
-    }
-
     // Tampilkan nama file saat dipilih
     function handlePdfSelect(input) {
         const display = document.getElementById('pdf-filename-display');
         if (input.files && input.files[0]) {
             const file = input.files[0];
-            display.innerText = `📄 Terpilih: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+            const ext = file.name.split('.').pop().toLowerCase();
+            const icon = (ext === 'doc' || ext === 'docx') ? '📝 Word' : '📄 PDF';
+            display.innerText = `${icon} Terpilih: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
             display.classList.add('text-indigo-700');
         }
     }

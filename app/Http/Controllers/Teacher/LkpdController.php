@@ -114,13 +114,13 @@ class LkpdController extends Controller
             'instructions'        => ['nullable', 'string'],
             'assessment_rubric'   => ['nullable', 'array'],
             'assessment_rubric.*' => ['nullable', 'string', 'max:255'],
-            'pdf_file'            => ['nullable', 'file', 'mimes:pdf', 'max:15360'], // Maks 15MB untuk guru
+            'pdf_file'            => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:15360'], // Maks 15MB untuk guru (PDF/Word)
         ];
 
         $request->validate($rules, [
             'lkpd_title.required' => 'Judul Lembar Kerja Peserta Didik (LKPD) wajib diisi jika komponen diaktifkan.',
             'work_mode.in'        => 'Mode pengerjaan harus berupa Kelompok atau Individu.',
-            'pdf_file.mimes'      => 'Berkas panduan LKPD harus berformat PDF resmi.',
+            'pdf_file.mimes'      => 'Berkas panduan LKPD harus berformat PDF atau Word (.pdf, .docx, .doc).',
             'pdf_file.max'        => 'Ukuran berkas panduan LKPD tidak boleh lebih dari 15 MB.',
         ]);
 
@@ -203,10 +203,11 @@ class LkpdController extends Controller
 
         $lkpdData = is_array($module->lkpd_data) ? $module->lkpd_data : [];
         $pdfPath = $lkpdData['pdf_file_path'] ?? null;
-        $pdfName = $lkpdData['pdf_file_name'] ?? "LKPD-{$module->id}.pdf";
+        $extension = $pdfPath ? strtolower(pathinfo($pdfPath, PATHINFO_EXTENSION)) : 'pdf';
+        $pdfName = $lkpdData['pdf_file_name'] ?? "LKPD-{$module->id}.{$extension}";
 
         if (!$pdfPath || !Storage::disk('public')->exists($pdfPath)) {
-            return back()->with('error', 'Berkas PDF panduan LKPD tidak ditemukan di server.');
+            return back()->with('error', 'Berkas panduan LKPD tidak ditemukan di server.');
         }
 
         return Storage::disk('public')->download($pdfPath, $pdfName);

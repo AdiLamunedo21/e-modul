@@ -120,35 +120,39 @@
 
                     {{-- Card Berkas Panduan LKPD Guru (Jika ada) --}}
                     @if(!empty($data['pdf_file_path']))
+                    @php
+                        $prevExt = strtolower(pathinfo($data['pdf_file_path'] ?? '', PATHINFO_EXTENSION));
+                        $prevIsWord = in_array($prevExt, ['doc', 'docx']);
+                    @endphp
                     <div class="bg-white rounded-3xl shadow-sm border border-slate-200/80 p-6 space-y-4">
                         <div class="flex items-center justify-between">
                             <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
                                 <span>📑</span> Berkas Panduan / Format LKPD Resmi
                             </h3>
                             <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                                Tersedia
+                                Tersedia ({{ $prevIsWord ? 'Word' : 'PDF' }})
                             </span>
                         </div>
 
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl {{ $prevIsWord ? 'bg-blue-50/70 border-blue-200/80' : 'bg-slate-50 border-slate-200' }} border">
                             <div class="flex items-center gap-3.5">
-                                <div class="w-11 h-11 rounded-xl bg-rose-500 text-white flex items-center justify-center font-black text-xs shrink-0 shadow-md">
-                                    PDF
+                                <div class="w-11 h-11 rounded-xl {{ $prevIsWord ? 'bg-blue-600' : 'bg-rose-500' }} text-white flex items-center justify-center font-black text-xs shrink-0 shadow-md">
+                                    {{ $prevIsWord ? strtoupper($prevExt) : 'PDF' }}
                                 </div>
                                 <div>
                                     <h4 class="text-xs font-bold text-slate-900 truncate max-w-xs">
-                                        {{ $data['pdf_file_name'] ?? 'Panduan-LKPD.pdf' }}
+                                        {{ $data['pdf_file_name'] ?? ($prevIsWord ? 'Panduan-LKPD.docx' : 'Panduan-LKPD.pdf') }}
                                     </h4>
                                     <p class="text-[11px] text-slate-500 mt-0.5">
-                                        {{ !empty($data['pdf_file_size']) ? round($data['pdf_file_size'] / 1024, 1) . ' KB' : 'Dokumen PDF' }} • Lembar instruksi guru
+                                        {{ !empty($data['pdf_file_size']) ? round($data['pdf_file_size'] / 1024, 1) . ' KB' : 'Dokumen' }} • Lembar instruksi guru ({{ $prevIsWord ? 'Microsoft Word' : 'PDF' }})
                                     </p>
                                 </div>
                             </div>
 
                             <a href="{{ route('teacher.modules.lkpd.download', $module) }}"
-                               class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 shrink-0">
+                               class="px-4 py-2 rounded-xl {{ $prevIsWord ? 'bg-blue-600 hover:bg-blue-700' : 'bg-indigo-600 hover:bg-indigo-700' }} text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 shrink-0">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.5V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
-                                Unduh Panduan LKPD
+                                Unduh Panduan LKPD ({{ $prevIsWord ? strtoupper($prevExt) : 'PDF' }})
                             </a>
                         </div>
                     </div>

@@ -57,9 +57,7 @@ class Teacher extends Authenticatable
      */
     public function allAssignedClassIds(): array
     {
-        $pivotIds = $this->classes()->pluck('classes.id')->toArray();
-        $moduleIds = $this->modules()->whereNotNull('class_id')->pluck('class_id')->toArray();
-        return array_values(array_unique(array_map('intval', array_merge($pivotIds, $moduleIds))));
+        return $this->classes()->pluck('classes.id')->map(fn($id) => (int)$id)->toArray();
     }
 
     /**
@@ -89,23 +87,9 @@ class Teacher extends Authenticatable
 
     /**
      * Mengambil daftar kelas binaan (kelas didik yang ditugaskan ke guru).
-     * Dapat difilter berdasarkan subject_id jika ada.
      */
     public function assignedClasses(?int $subjectId = null)
     {
-        if ($this->classes()->exists()) {
-            return $this->classes()->with(['major', 'students', 'modules.studentResults'])->get();
-        }
-
-        $query = $this->modules()->with(['schoolClass.major', 'schoolClass.students', 'schoolClass.modules.studentResults']);
-        if ($subjectId) {
-            $query->where('subject_id', $subjectId);
-        }
-
-        return $query
-            ->get()
-            ->pluck('schoolClass')
-            ->filter()
-            ->unique('id');
+        return $this->classes()->with(['major', 'students', 'modules.studentResults'])->get();
     }
 }

@@ -138,7 +138,7 @@
                                     </div>
                                 </div>
 
-                                <p class="text-sm font-semibold text-slate-900 leading-relaxed pt-1">
+                                <p class="text-sm font-semibold text-slate-900 leading-relaxed pt-1 whitespace-pre-line">
                                     {{ $q->question_text }}
                                 </p>
 

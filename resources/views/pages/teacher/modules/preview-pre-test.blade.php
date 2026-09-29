@@ -106,7 +106,7 @@
                                         </span>
                                     </div>
                                 </div>
-                                <p class="text-sm font-semibold text-slate-900 leading-relaxed">{{ $q->question_text }}</p>
+                                <p class="text-sm font-semibold text-slate-900 leading-relaxed whitespace-pre-line">{{ $q->question_text }}</p>
 
                                 <div class="space-y-2 pt-2">
                                     @foreach($q->options ?? [] as $opt => $text)
