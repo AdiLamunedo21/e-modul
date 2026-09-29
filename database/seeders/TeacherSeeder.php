@@ -47,7 +47,7 @@ class TeacherSeeder extends Seeder
                 'name'            => 'Adi Chandra W PPG',
                 'identity_number' => 'Nim25105260007',
                 'email'           => 'adikun879@gmail.com',
-                'password'        => Hash::make('Meliodas4693'),
+                'password'        => Hash::make('Meliodas9999'),
                 'classes'         => $allClassIds,
             ],
         ];
