@@ -284,14 +284,19 @@ class MateriController extends Controller
     }
 
     /**
-     * Upload gambar dari editor uraian materi (rich text / notepad).
+     * Upload gambar dari editor uraian materi (rich text / notepad / clipboard paste).
      */
     public function uploadImage(Request $request, Module $module)
     {
         $this->authorize($module);
 
         $request->validate([
-            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120'], // Maks 5MB
+            'image' => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp,gif,svg,bmp', 'max:15360'], // Maks 15MB
+        ], [
+            'image.required' => 'Berkas gambar belum dipilih.',
+            'image.image'    => 'Berkas yang diunggah harus berupa gambar yang valid.',
+            'image.mimes'    => 'Format gambar harus JPG, JPEG, PNG, WEBP, GIF, atau SVG.',
+            'image.max'      => 'Ukuran gambar maksimal 15 MB.',
         ]);
 
         $file = $request->file('image');

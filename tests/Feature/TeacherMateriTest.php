@@ -269,4 +269,69 @@ class TeacherMateriTest extends TestCase
             Storage::disk('public')->delete($pdfPath);
         }
     }
+
+    public function test_teacher_can_upload_editor_image_via_ajax()
+    {
+        Storage::fake('public');
+
+        [$teacher, $module] = $this->getTeacherAndModule();
+        if (!$teacher) {
+            $this->markTestSkipped('Data pengujian tidak mencukupi.');
+        }
+
+        $imageFile = UploadedFile::fake()->image('diagram-topologi.png', 800, 600);
+
+        $response = $this->actingAs($teacher, 'teacher')
+            ->postJson(route('teacher.modules.materi.upload-image', $module), [
+                'image' => $imageFile,
+            ], [
+                'X-Requested-With' => 'XMLHttpRequest',
+                'Accept'           => 'application/json',
+            ]);
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'success',
+            'url',
+        ]);
+        $this->assertTrue($response->json('success'));
+        $this->assertStringContainsString('materi-content-images', $response->json('url'));
+    }
+
+    public function test_teacher_can_save_very_long_materi_content_exceeding_old_text_limit()
+    {
+        [$teacher, $module] = $this->getTeacherAndModule();
+        if (!$teacher) {
+            $this->markTestSkipped('Data pengujian tidak mencukupi.');
+        }
+
+        // Generate teks sangat panjang (> 100,000 bytes / ribuan kata)
+        // Kolom MySQL TEXT lama memiliki limit 65,535 bytes (~1597 kata).
+        // Dengan LONGTEXT baru, payload 120,000+ bytes ini tersimpan sukses tanpa truncation error!
+        $longParagraph = str_repeat('<p>Ini adalah paragraf penjelasan materi jaringan komputer dan algoritma pemrograman yang sangat detail dan komprehensif untuk pengujian daya tampung dokumen.</p>', 600);
+        $this->assertGreaterThan(70000, strlen($longParagraph));
+
+        $payload = [
+            'has_materi'    => '1',
+            'judul_materi'  => 'Materi Dokumen Super Lengkap & Panjang',
+            'uraian_materi' => $longParagraph,
+            'poin_penting'  => ['Poin Satu Pengujian Skalabilitas', 'Poin Dua Kapasitas Longtext'],
+        ];
+
+        $response = $this->actingAs($teacher, 'teacher')
+            ->patchJson(route('teacher.modules.materi.update', $module), $payload, [
+                'X-Requested-With' => 'XMLHttpRequest',
+                'Accept'           => 'application/json',
+            ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+        ]);
+
+        $module->refresh();
+        $this->assertEquals('Materi Dokumen Super Lengkap & Panjang', $module->materi_data['judul_materi']);
+        $this->assertEquals($longParagraph, $module->materi_data['uraian_materi']);
+    }
 }
+

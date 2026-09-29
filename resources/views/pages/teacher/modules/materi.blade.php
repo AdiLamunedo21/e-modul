@@ -792,6 +792,13 @@
         </button>
     </div>
 
+    {{-- Duplicate Image --}}
+    <div class="border-l border-slate-700 pl-1.5">
+        <button type="button" onclick="duplicateSelectedImg()" class="p-1.5 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white transition-all cursor-pointer" title="Duplikat Gambar (Salin Cepat)">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75"/></svg>
+        </button>
+    </div>
+
     {{-- Delete Image --}}
     <div class="border-l border-slate-700 pl-1.5">
         <button type="button" onclick="deleteSelectedImg()" class="p-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-600 text-rose-300 hover:text-white transition-all cursor-pointer" title="Hapus Gambar">
@@ -884,48 +891,116 @@
         }
     }
 
-    // ── UPLOAD IMAGE INTO NOTEPAD ─────────────────────────
-    function uploadEditorImage(input) {
-        const file = input.files[0];
-        if (!file) return;
+    // ── UPLOAD IMAGE INTO NOTEPAD (BLOB & FILE PICKER & CLIPBOARD) ──
+    function uploadImageBlob(file, customName = null) {
+        if (!file) return Promise.reject('No file provided');
 
+        const fileName = customName || file.name || ('gambar-' + Date.now() + '.png');
         const formData = new FormData();
-        formData.append('image', file);
+        formData.append('image', file, fileName);
         formData.append('_token', '{{ csrf_token() }}');
 
-        // Temporary placeholder
-        const placeholderId = 'uploading-img-' + Date.now();
-        document.execCommand('insertHTML', false, `<span id="${placeholderId}" class="text-xs text-blue-600 font-semibold italic">⏳ Sedang mengunggah gambar (${file.name})...</span>`);
+        // Temporary animated placeholder in editor
+        const placeholderId = 'uploading-img-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+        document.execCommand('insertHTML', false, `<span id="${placeholderId}" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 text-xs font-semibold animate-pulse border border-blue-200 select-none my-2"><svg class="w-3.5 h-3.5 animate-spin text-blue-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg> Sedang mengunggah gambar (${fileName})...</span><p><br></p>`);
 
-        fetch("{{ route('teacher.modules.materi.upload-image', $module) }}", {
+        return fetch("{{ route('teacher.modules.materi.upload-image', $module) }}", {
             method: 'POST',
             body: formData,
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
             }
         })
-        .then(res => res.json())
-        .then(data => {
+        .then(async res => {
+            const data = await res.json().catch(() => ({}));
             const placeholder = document.getElementById(placeholderId);
-            if (data.success && data.url) {
-                const imgHtml = `<img src="${data.url}" alt="${file.name}" style="width: 75%; max-width: 100%; height: auto; display: block; margin: 1rem auto;" class="rounded-xl shadow-md my-4"><p><br></p>`;
+
+            if (res.ok && data.success && data.url) {
+                const imgHtml = `<img src="${data.url}" alt="${fileName}" style="width: 75%; max-width: 100%; height: auto; display: block; margin: 1rem auto;" class="rounded-xl shadow-md my-4"><p><br></p>`;
                 if (placeholder) {
                     placeholder.outerHTML = imgHtml;
                 } else {
                     document.execCommand('insertHTML', false, imgHtml);
                 }
+                showMateriToast('success', 'Gambar Disimpan', 'Gambar berhasil diunggah ke penyimpanan dan disematkan!');
             } else {
-                if (placeholder) placeholder.outerHTML = `<span class="text-xs text-rose-600">❌ Gagal mengunggah gambar.</span>`;
+                const errMsg = data.message || (data.errors && Object.values(data.errors)[0]?.[0]) || 'Gagal mengunggah berkas gambar.';
+                if (placeholder) {
+                    placeholder.outerHTML = `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 text-rose-600 text-xs font-bold border border-rose-200 my-2">❌ ${errMsg}</span><p><br></p>`;
+                }
+                showMateriToast('error', 'Unggah Gagal', errMsg);
             }
             onEditorInput();
         })
         .catch(err => {
             console.error(err);
             const placeholder = document.getElementById(placeholderId);
-            if (placeholder) placeholder.outerHTML = `<span class="text-xs text-rose-600">❌ Gagal mengunggah gambar.</span>`;
+            if (placeholder) {
+                placeholder.outerHTML = `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 text-rose-600 text-xs font-bold border border-rose-200 my-2">❌ Gagal terhubung ke server saat mengunggah gambar.</span><p><br></p>`;
+            }
+            showMateriToast('error', 'Unggah Gagal', 'Gagal menghubungi server saat mengunggah gambar.');
+            onEditorInput();
+        });
+    }
+
+    function uploadEditorImage(input) {
+        const file = input.files[0];
+        if (!file) return;
+        uploadImageBlob(file);
+        input.value = '';
+    }
+
+    // ── AUTO-UPLOAD BASE64 INLINE IMAGES (PASTED FROM EXTERNAL/WORD) ──
+    async function autoUploadInlineBase64Images() {
+        if (!editor) return;
+        const allImgs = Array.from(editor.querySelectorAll('img'));
+        const base64Imgs = allImgs.filter(img => {
+            const src = img.getAttribute('src') || '';
+            return src.startsWith('data:image/');
         });
 
-        input.value = '';
+        if (base64Imgs.length === 0) return;
+
+        for (let i = 0; i < base64Imgs.length; i++) {
+            const img = base64Imgs[i];
+            const src = img.getAttribute('src');
+            if (!src || !src.startsWith('data:image/')) continue;
+
+            try {
+                img.style.opacity = '0.5';
+                img.style.filter = 'grayscale(50%)';
+
+                const res = await fetch(src);
+                const blob = await res.blob();
+                const mime = blob.type || 'image/png';
+                const ext = mime.split('/')[1] || 'png';
+                const file = new File([blob], `pasted-image-${Date.now()}-${i}.${ext}`, { type: mime });
+
+                const formData = new FormData();
+                formData.append('image', file);
+                formData.append('_token', '{{ csrf_token() }}');
+
+                const uploadRes = await fetch("{{ route('teacher.modules.materi.upload-image', $module) }}", {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+
+                if (uploadRes.ok) {
+                    const json = await uploadRes.json();
+                    if (json.success && json.url) {
+                        img.src = json.url;
+                        img.removeAttribute('srcset');
+                    }
+                }
+            } catch (err) {
+                console.error('Error auto-uploading base64 image:', err);
+            } finally {
+                img.style.opacity = '1';
+                img.style.filter = 'none';
+            }
+        }
+        onEditorInput();
     }
 
     // ── IMAGE RESIZING & SELECTION LOGIC ──────────────────
@@ -1053,6 +1128,26 @@
         onEditorInput();
     }
 
+    function duplicateSelectedImg() {
+        if (!selectedImage) return;
+        const clone = selectedImage.cloneNode(true);
+        clone.classList.remove('is-selected-img');
+        const p = document.createElement('p');
+        p.innerHTML = '<br>';
+
+        if (selectedImage.nextSibling) {
+            selectedImage.parentNode.insertBefore(clone, selectedImage.nextSibling);
+            selectedImage.parentNode.insertBefore(p, clone.nextSibling);
+        } else {
+            selectedImage.parentNode.appendChild(clone);
+            selectedImage.parentNode.appendChild(p);
+        }
+
+        selectImage(clone);
+        onEditorInput();
+        showMateriToast('success', 'Duplikat Berhasil', 'Gambar berhasil diduplikat.');
+    }
+
     function deleteSelectedImg() {
         if (!selectedImage) return;
         if (confirm('Hapus gambar ini dari materi?')) {
@@ -1074,6 +1169,64 @@
         editor.addEventListener('scroll', () => {
             if (selectedImage) positionImgToolbar(selectedImage);
         }, { passive: true });
+
+        // ── CLIPBOARD PASTE HANDLER (PASTE GAMBAR LANGSUNG) ──
+        editor.addEventListener('paste', function(e) {
+            const clipboardData = e.clipboardData || window.clipboardData;
+            if (!clipboardData) return;
+
+            // 1. Direct Image File in Clipboard (e.g. Snipping tool, PrintScreen, Copy Image)
+            const items = clipboardData.items;
+            let imageFile = null;
+
+            if (items) {
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].type && items[i].type.startsWith('image/')) {
+                        imageFile = items[i].getAsFile();
+                        break;
+                    }
+                }
+            }
+
+            if (imageFile) {
+                e.preventDefault();
+                showMateriToast('success', 'Papan Klip', 'Gambar terdeteksi dari clipboard, sedang diunggah...');
+                uploadImageBlob(imageFile, 'clipboard-' + Date.now() + '.png');
+                return;
+            }
+
+            // 2. Rich HTML pasted from Word or website that contains data:image/
+            setTimeout(() => {
+                autoUploadInlineBase64Images();
+            }, 60);
+        });
+
+        // ── DRAG & DROP GAMBAR KE KANVAS EDITOR ───────────
+        editor.addEventListener('dragover', function(e) {
+            if (e.dataTransfer && e.dataTransfer.types && Array.from(e.dataTransfer.types).includes('Files')) {
+                e.preventDefault();
+                editor.classList.add('ring-2', 'ring-blue-400', 'bg-blue-50/20');
+            }
+        });
+
+        editor.addEventListener('dragleave', function(e) {
+            editor.classList.remove('ring-2', 'ring-blue-400', 'bg-blue-50/20');
+        });
+
+        editor.addEventListener('drop', function(e) {
+            editor.classList.remove('ring-2', 'ring-blue-400', 'bg-blue-50/20');
+            if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                const imgFiles = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+                if (imgFiles.length > 0) {
+                    e.preventDefault();
+                    imgFiles.forEach((f, idx) => {
+                        setTimeout(() => {
+                            uploadImageBlob(f);
+                        }, idx * 150);
+                    });
+                }
+            }
+        });
     }
 
     // ── INSERT CUSTOM TABLE ──────────────────────────────
@@ -1338,8 +1491,6 @@
         if (e) e.preventDefault();
         if (isSubmitting) return false;
 
-        syncEditorContent();
-
         const form = document.getElementById('materi-form');
         const submitBtn = document.getElementById('btn-submit-materi');
         const submitText = document.getElementById('btn-submit-text');
@@ -1358,6 +1509,16 @@
             if (submitIcon) submitIcon.classList.add('hidden');
             if (submitText) submitText.textContent = 'Menyimpan Materi...';
         }
+
+        // Auto convert any base64 images to server files before submit
+        const base64Imgs = editor ? editor.querySelectorAll('img[src^="data:image/"]') : [];
+        if (base64Imgs.length > 0) {
+            if (submitText) submitText.textContent = 'Mengunggah Gambar...';
+            showMateriToast('success', 'Mengunggah Gambar', 'Sedang mengunggah dan mengonversi gambar tempel/duplikat ke server...');
+            await autoUploadInlineBase64Images();
+        }
+
+        syncEditorContent();
 
         const formData = new FormData(form);
 
