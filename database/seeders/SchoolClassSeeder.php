@@ -13,33 +13,26 @@ class SchoolClassSeeder extends Seeder
      */
     public function run(): void
     {
-        $majorTe = Major::where('code', 'TE')->first();
-        $majorDp = Major::where('code', 'DP')->first();
-        $majorTkj = Major::where('code', 'TKJ')->first();
+        $majorTo = Major::where('code', 'TO')->first();
+        $majorTl = Major::where('code', 'TL')->first();
 
         $classes = [
             [
-                'major_id'   => $majorTe?->id,
+                'major_id'   => $majorTo?->id,
                 'grade'      => 'X',
-                'section'    => '1',
-                'major_name' => 'TE',
+                'section'    => '2',
+                'major_name' => 'TO',
             ],
             [
-                'major_id'   => $majorDp?->id,
+                'major_id'   => $majorTl?->id,
                 'grade'      => 'X',
-                'section'    => '1',
-                'major_name' => 'DP',
-            ],
-            [
-                'major_id'   => $majorTkj?->id,
-                'grade'      => 'X',
-                'section'    => '1',
-                'major_name' => 'TKJ',
+                'section'    => '3',
+                'major_name' => 'TL',
             ],
         ];
 
         foreach ($classes as $classData) {
-            SchoolClass::firstOrCreate(
+            SchoolClass::updateOrCreate(
                 [
                     'major_id' => $classData['major_id'],
                     'grade'    => $classData['grade'],

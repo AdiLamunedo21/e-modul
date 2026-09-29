@@ -13,36 +13,30 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        $password = Hash::make('password');
+        $admins = [
+            [
+                'name'            => 'Superadmin1',
+                'identity_number' => '100000000000001',
+                'email'           => 'superskagata@gamil.com',
+                'password'        => Hash::make('superadmin123'),
+            ],
+            [
+                'name'            => 'MARYONO, S.Pd, M.Pd',
+                'identity_number' => '197205172006041012',
+                'email'           => 'maryonoskagata@gmail.com',
+                'password'        => Hash::make('mayono123'),
+            ],
+        ];
 
-        $admin = Admin::where('identity_number', '197501011999031001')
-            ->orWhere('identity_number', 'NIP999001')
-            ->orWhere('name', 'Drs. Ahmad Fauzi, M.Pd.')
-            ->orderBy('id')
-            ->first();
-
-        if ($admin) {
-            // Hapus duplikat lain jika ada
-            Admin::where('id', '!=', $admin->id)
-                ->where(function ($q) {
-                    $q->where('identity_number', '197501011999031001')
-                      ->orWhere('name', 'Drs. Ahmad Fauzi, M.Pd.');
-                })
-                ->delete();
-
-            $admin->update([
-                'name'            => 'Drs. Ahmad Fauzi, M.Pd.',
-                'email'           => 'ahmad@gmail.com',
-                'identity_number' => '197501011999031001',
-                'password'        => $password,
-            ]);
-        } else {
-            Admin::create([
-                'name'            => 'Drs. Ahmad Fauzi, M.Pd.',
-                'email'           => 'ahmad@gmail.com',
-                'identity_number' => '197501011999031001',
-                'password'        => $password,
-            ]);
+        foreach ($admins as $adminData) {
+            Admin::updateOrCreate(
+                ['identity_number' => $adminData['identity_number']],
+                [
+                    'name'     => $adminData['name'],
+                    'email'    => $adminData['email'],
+                    'password' => $adminData['password'],
+                ]
+            );
         }
     }
 }

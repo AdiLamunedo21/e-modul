@@ -14,24 +14,24 @@ class MajorSeeder extends Seeder
     {
         $majors = [
             [
-                'code'        => 'TE',
-                'name'        => 'Teknik Elektro',
-                'description' => 'Program keahlian sistem elektronika, instrumentasi, logika digital, dan sistem kontrol.',
+                'code'        => 'INF',
+                'name'        => 'Informatika',
+                'description' => 'Program keahlian informatika, logika algoritma, dan teknologi sistem komputer.',
             ],
             [
-                'code'        => 'DP',
-                'name'        => 'Desain Permodelan & Informasi Bangunan',
-                'description' => 'Program keahlian gambar teknik digital, pemodelan 3D, dan Building Information Modeling (BIM).',
+                'code'        => 'TO',
+                'name'        => 'Teknik Otomotif',
+                'description' => 'Program keahlian rekayasa teknologi dan perawatan kendaraan bermotor.',
             ],
             [
-                'code'        => 'TKJ',
-                'name'        => 'Teknik Komputer & Jaringan',
-                'description' => 'Program keahlian infrastruktur jaringan komputer, sistem komputasi, dan rekayasa perangkat lunak.',
+                'code'        => 'TL',
+                'name'        => 'Teknik Ketenagalistrikan',
+                'description' => 'Program keahlian instalasi tenaga listrik dan sistem kontrol ketenagalistrikan.',
             ],
         ];
 
         foreach ($majors as $major) {
-            Major::firstOrCreate(
+            Major::updateOrCreate(
                 ['code' => $major['code']],
                 [
                     'name'        => $major['name'],

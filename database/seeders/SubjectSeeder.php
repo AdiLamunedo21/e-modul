@@ -17,20 +17,13 @@ class SubjectSeeder extends Seeder
                 'code'        => 'INF',
                 'name'        => 'Informatika',
                 'icon'        => '💻',
-                'color'       => 'blue',
-                'description' => 'Mata pelajaran informatika, logika pemrograman, algoritma, dan sistem komputasi.',
-            ],
-            [
-                'code'        => 'JAR',
-                'name'        => 'Jaringan',
-                'icon'        => '🌐',
                 'color'       => 'indigo',
-                'description' => 'Mata pelajaran infrastruktur jaringan komputer, konfigurasi subnetting, routing, dan komunikasi data.',
+                'description' => 'Mata pelajaran Informatika: dasar komputasi, algoritma pemrograman, dan literasi digital.',
             ],
         ];
 
         foreach ($subjects as $subject) {
-            Subject::firstOrCreate(
+            Subject::updateOrCreate(
                 ['code' => $subject['code']],
                 [
                     'name'        => $subject['name'],

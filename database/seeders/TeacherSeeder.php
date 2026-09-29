@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Major;
 use App\Models\SchoolClass;
 use App\Models\Subject;
 use App\Models\Teacher;
@@ -16,87 +15,61 @@ class TeacherSeeder extends Seeder
      */
     public function run(): void
     {
-        $password = Hash::make('password');
+        $subjectInf = Subject::where('code', 'INF')->first();
+        $classTo2 = SchoolClass::where('major_name', 'TO')->where('grade', 'X')->where('section', '2')->first();
+        $classTl3 = SchoolClass::where('major_name', 'TL')->where('grade', 'X')->where('section', '3')->first();
 
-        $majorTe = Major::where('code', 'TE')->first();
-        $majorDp = Major::where('code', 'DP')->first();
-        $majorTkj = Major::where('code', 'TKJ')->first();
-
-        $classTe1 = SchoolClass::where('major_id', $majorTe?->id)->where('grade', 'X')->where('section', '1')->first();
-        $classDp1 = SchoolClass::where('major_id', $majorDp?->id)->where('grade', 'X')->where('section', '1')->first();
-        $classTkj1 = SchoolClass::where('major_id', $majorTkj?->id)->where('grade', 'X')->where('section', '1')->first();
-
-        $subjectIds = Subject::whereIn('code', ['INF', 'JAR'])->pluck('id')->toArray();
+        $allClassIds = array_values(array_filter([$classTo2?->id, $classTl3?->id]));
 
         $teachers = [
             [
-                'name'             => 'Budi Santoso, S.Kom.',
-                'email'            => 'budi@gmail.com',
-                'identity_number'  => '198501152010011002',
-                'old_identities'   => ['NIP123456', '198501152010011002'],
-                'classes'          => array_filter([$classTe1?->id, $classDp1?->id]),
+                'name'            => 'Jumari, S.Pd., M.Eng.',
+                'identity_number' => '198311152024211006',
+                'email'           => 'jumariskagata@gmail.com',
+                'password'        => Hash::make('jumari123'),
+                'classes'         => $allClassIds,
             ],
             [
-                'name'             => 'Siti Aminah, M.T.',
-                'email'            => 'siti@gmail.com',
-                'identity_number'  => '198804122015022001',
-                'old_identities'   => ['NIP123457', '198804122015022001'],
-                'classes'          => array_filter([$classDp1?->id]),
+                'name'            => 'Febriyana, S.T',
+                'identity_number' => '198402032024212007',
+                'email'           => 'febriyanaskagata@gmail.com',
+                'password'        => Hash::make('febriyana123'),
+                'classes'         => [],
             ],
             [
-                'name'             => 'Hendra Wijaya, S.T.',
-                'email'            => 'hendra@gmail.com',
-                'identity_number'  => '199008202019031003',
-                'old_identities'   => ['NIP123458', '199008202019031003'],
-                'classes'          => array_filter([$classTkj1?->id]),
+                'name'            => 'Siti Nurhidayatun, S.Kom',
+                'identity_number' => '1000000000003333',
+                'email'           => 'sitinurskagata@gmail.com',
+                'password'        => Hash::make('sitinur123'),
+                'classes'         => [],
+            ],
+            [
+                'name'            => 'Adi Chandra W PPG',
+                'identity_number' => 'Nim25105260007',
+                'email'           => 'adikun879@gmail.com',
+                'password'        => Hash::make('Meliodas4693'),
+                'classes'         => $allClassIds,
             ],
         ];
 
         foreach ($teachers as $tData) {
-            // Cari guru utama (prioritaskan yang sudah memiliki modul)
-            $teacher = Teacher::where('name', $tData['name'])
-                ->orWhereIn('identity_number', $tData['old_identities'])
-                ->withCount('modules')
-                ->orderByDesc('modules_count')
-                ->orderBy('id')
-                ->first();
+            $teacher = Teacher::updateOrCreate(
+                ['identity_number' => $tData['identity_number']],
+                [
+                    'name'     => $tData['name'],
+                    'email'    => $tData['email'],
+                    'password' => $tData['password'],
+                ]
+            );
 
-            if ($teacher) {
-                // Bersihkan duplikat guru jika ada
-                $duplicates = Teacher::where('id', '!=', $teacher->id)
-                    ->where(function ($q) use ($tData) {
-                        $q->where('name', $tData['name'])
-                          ->orWhereIn('identity_number', $tData['old_identities']);
-                    })
-                    ->get();
-
-                foreach ($duplicates as $dup) {
-                    $dup->modules()->update(['teacher_id' => $teacher->id]);
-                    $dup->classes()->detach();
-                    $dup->subjects()->detach();
-                    $dup->delete();
-                }
-
-                $teacher->update([
-                    'name'            => $tData['name'],
-                    'email'           => $tData['email'],
-                    'identity_number' => $tData['identity_number'],
-                    'password'        => $password,
-                ]);
-            } else {
-                $teacher = Teacher::create([
-                    'name'            => $tData['name'],
-                    'email'           => $tData['email'],
-                    'identity_number' => $tData['identity_number'],
-                    'password'        => $password,
-                ]);
+            if ($subjectInf) {
+                $teacher->subjects()->sync([$subjectInf->id]);
             }
 
-            if (!empty($subjectIds)) {
-                $teacher->subjects()->syncWithoutDetaching($subjectIds);
-            }
             if (!empty($tData['classes'])) {
-                $teacher->classes()->syncWithoutDetaching($tData['classes']);
+                $teacher->classes()->sync($tData['classes']);
+            } else {
+                $teacher->classes()->detach();
             }
         }
     }
