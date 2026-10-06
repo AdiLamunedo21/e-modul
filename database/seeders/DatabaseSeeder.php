@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             StudentSeeder::class,
             ModuleSeeder::class,
             PythonModuleTestsSeeder::class,
+            NotasiAlgoritmaModuleSeeder::class,
         ]);
     }
 }
