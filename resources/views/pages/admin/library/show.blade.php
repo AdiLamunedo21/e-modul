@@ -1083,7 +1083,7 @@
                                             </td>
                                             <td class="py-3.5 px-4">
                                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $clone->status === 'published' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">
-                                                    {{ ucfirst($clone->status) }}
+                                                    {{ ucfirst($clone->status ?? '') }}
                                                 </span>
                                             </td>
                                             <td class="py-3.5 px-4 text-slate-400 font-mono text-[11px]">

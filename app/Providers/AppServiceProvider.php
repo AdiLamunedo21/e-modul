@@ -24,8 +24,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Paksa skema HTTPS jika diakses melalui ngrok atau proxy dengan SSL
-        if (request()->header('x-forwarded-proto') === 'https' || str_contains(request()->header('host', ''), 'ngrok')) {
+        // Paksa skema HTTPS jika diakses di production, URL https, ngrok, atau proxy dengan SSL
+        if (app()->environment('production') || str_starts_with((string) config('app.url'), 'https://') || request()->header('x-forwarded-proto') === 'https' || str_contains(request()->header('host', ''), 'ngrok')) {
             URL::forceScheme('https');
         }
 

@@ -128,10 +128,10 @@ class ClassController extends Controller
         ];
 
         // Daftar modul guru yang tersedia untuk diimpor ke kelas lain (kolom ringkas)
-        $myModules = Module::select(['id', 'teacher_id', 'class_id', 'subject_id', 'title'])
+        $myModules = Module::select(['id', 'teacher_id', 'class_id', 'subject_id', 'title', 'status'])
             ->where('teacher_id', $teacher->id)
             ->with([
-                'schoolClass' => fn($q) => $q->select(['id', 'major_name', 'grade', 'section']),
+                'schoolClass' => fn($q) => $q->select(['id', 'major_id', 'major_name', 'grade', 'section']),
                 'subject'     => fn($q) => $q->select(['id', 'name', 'code', 'icon', 'color'])
             ])
             ->orderBy('title')
@@ -215,7 +215,7 @@ class ClassController extends Controller
                 'studentResults' => fn($q) => $q->select(['id', 'module_id', 'student_id', 'grading_status', 'summative_score']),
                 'subject'        => fn($q) => $q->select(['id', 'name', 'code', 'icon', 'color']),
                 'teacher'        => fn($q) => $q->select(['id', 'name', 'identity_number']),
-                'clonedFrom.schoolClass' => fn($q) => $q->select(['id', 'major_name', 'grade', 'section'])
+                'clonedFrom.schoolClass' => fn($q) => $q->select(['id', 'major_id', 'major_name', 'grade', 'section'])
             ])
             ->orderByDesc('is_active')
             ->latest()
@@ -227,12 +227,12 @@ class ClassController extends Controller
 
         // Modul guru dari kelas LAIN yang siap diimpor ke kelas ini (kolom ringkas untuk modal)
         $otherClassModules = Module::select([
-                'id', 'teacher_id', 'class_id', 'subject_id', 'title', 'created_at'
+                'id', 'teacher_id', 'class_id', 'subject_id', 'title', 'status', 'created_at'
             ])
             ->where('teacher_id', $teacher->id)
             ->where('class_id', '!=', $class->id)
             ->with([
-                'schoolClass' => fn($q) => $q->select(['id', 'major_name', 'grade', 'section']),
+                'schoolClass' => fn($q) => $q->select(['id', 'major_id', 'major_name', 'grade', 'section']),
                 'subject'     => fn($q) => $q->select(['id', 'name', 'code', 'icon', 'color'])
             ])
             ->latest()

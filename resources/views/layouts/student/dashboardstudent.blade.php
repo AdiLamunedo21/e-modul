@@ -39,7 +39,7 @@
     class="bg-slate-100 antialiased text-slate-900"
     x-data="{ 
         sidebarOpen: window.innerWidth >= 1024,
-        joinModalOpen: {{ $errors->has('class_code') || request()->filled('join_code') ? 'true' : 'false' }},
+        joinModalOpen: {{ (isset($errors) && $errors->has('class_code')) || request()->filled('join_code') ? 'true' : 'false' }},
         joinCodeInput: '{{ old('class_code', request('join_code', '')) }}',
         leaveClassModalOpen: false,
         leaveClassTarget: { id: null, name: '' }

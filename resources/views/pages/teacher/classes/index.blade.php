@@ -508,7 +508,7 @@
                                                     <span>•</span>
                                                     <span>Asal: {{ $mMod->schoolClass->full_name ?? 'Kelas' }}</span>
                                                     <span>•</span>
-                                                    <span class="font-semibold {{ $mMod->status === 'published' ? 'text-emerald-600' : 'text-slate-400' }}">{{ ucfirst($mMod->status) }}</span>
+                                                    <span class="font-semibold {{ ($mMod->status ?? '') === 'published' ? 'text-emerald-600' : 'text-slate-400' }}">{{ ucfirst($mMod->status ?? '') }}</span>
                                                 </div>
                                             </div>
                                         </label>
