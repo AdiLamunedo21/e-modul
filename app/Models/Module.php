@@ -9,6 +9,9 @@ class Module extends Model
     protected $guarded = [];
 
     protected $casts = [
+        'teacher_id'          => 'integer',
+        'class_id'            => 'integer',
+        'subject_id'          => 'integer',
         'informasi_umum_data' => 'array',
         'bagian_akhir_data' => 'array',
         'pre_test_data'     => 'array',

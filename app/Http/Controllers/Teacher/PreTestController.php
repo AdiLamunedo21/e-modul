@@ -29,7 +29,7 @@ class PreTestController extends Controller
 
     private function authorize(Module $module): void
     {
-        abort_if($module->teacher_id !== $this->teacher()->id, 403, 'Anda tidak memiliki akses ke modul ini.');
+        abort_if((int) $module->teacher_id !== (int) $this->teacher()?->id, 403, 'Anda tidak memiliki akses ke modul ini.');
     }
 
     /**
