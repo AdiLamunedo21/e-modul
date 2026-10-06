@@ -42,13 +42,14 @@ if (-not $SkipGitPush) {
 
 # 3. Server: Git Pull, Composer & Migration
 Write-Host "`n🔄 [3/4] Menjalankan update di server VPS..." -ForegroundColor Yellow
+$PHP_BIN = "/opt/cpanel/ea-php83/root/usr/bin/php"
 $remoteCommands = @(
     "cd $REMOTE_DIR",
     "git pull origin master",
     "composer install --no-dev --optimize-autoloader",
-    "php artisan migrate --force",
-    "php artisan storage:link",
-    "php artisan optimize"
+    "$PHP_BIN artisan migrate --force",
+    "$PHP_BIN artisan storage:link",
+    "$PHP_BIN artisan optimize"
 ) -join " && "
 
 ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" "$SSH_USER@$SSH_HOST" "$remoteCommands"
@@ -56,6 +57,7 @@ ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" "$SSH_USER@$SSH_HOST" "$remoteComm
 # 4. Upload Built Assets
 Write-Host "`n☁️ [4/4] Mengunggah compiled assets (public/build) ke server..." -ForegroundColor Yellow
 scp -r -o StrictHostKeyChecking=no -i "$SSH_KEY" "public/build" "$SSH_USER@$SSH_HOST`:$REMOTE_DIR/public/"
+ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" "$SSH_USER@$SSH_HOST" "chmod -R 755 $REMOTE_DIR/public/build && cd $REMOTE_DIR && $PHP_BIN artisan optimize"
 
 Write-Host "`n==========================================================" -ForegroundColor Green
 Write-Host " ✨ DEPLOYMENT SELESAI DENGAN SUKSES! ✨" -ForegroundColor Green
