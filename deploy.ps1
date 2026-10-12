@@ -15,33 +15,33 @@ $SSH_KEY  = "$env:USERPROFILE\.ssh\id_ed25519"
 $REMOTE_DIR = "/home/skagataa/e-modul"
 
 Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host " 🚀 MEMULAI PROSES DEPLOYMENT E-MODUL SKAGATA KE SERVER" -ForegroundColor Cyan
+Write-Host " [>>] MEMULAI PROSES DEPLOYMENT E-MODUL SKAGATA KE SERVER" -ForegroundColor Cyan
 Write-Host "==========================================================" -ForegroundColor Cyan
 
 # 1. Build Frontend Assets
 if (-not $SkipBuild) {
-    Write-Host "`n📦 [1/4] Membangun Frontend Assets (Vite)..." -ForegroundColor Yellow
+    Write-Host "`n[*] [1/4] Membangun Frontend Assets (Vite)..." -ForegroundColor Yellow
     npm.cmd run build
     if ($LASTEXITCODE -ne 0) {
         Write-Error "Gagal membangun frontend assets (Vite)."
     }
 } else {
-    Write-Host "`n⏩ [1/4] Melewati build frontend (SkipBuild aktif)." -ForegroundColor Gray
+    Write-Host "`n[-] [1/4] Melewati build frontend (SkipBuild aktif)." -ForegroundColor Gray
 }
 
 # 2. Git Push (jika ada commit yang belum di-push)
 if (-not $SkipGitPush) {
-    Write-Host "`n📤 [2/4] Memeriksa status Git lokal..." -ForegroundColor Yellow
+    Write-Host "`n[*] [2/4] Memeriksa status Git lokal..." -ForegroundColor Yellow
     $gitStatus = git status --porcelain
     if ($gitStatus) {
-        Write-Host "⚠️ Ada perubahan lokal yang belum di-commit. Disarankan commit terlebih dahulu." -ForegroundColor Yellow
+        Write-Host "[!] Ada perubahan lokal yang belum di-commit. Disarankan commit terlebih dahulu." -ForegroundColor Yellow
     }
     Write-Host "Melakukan push ke GitHub (master)..." -ForegroundColor Yellow
     git push origin master
 }
 
 # 3. Server: Git Pull, Composer & Migration
-Write-Host "`n🔄 [3/4] Menjalankan update di server VPS..." -ForegroundColor Yellow
+Write-Host "`n[*] [3/4] Menjalankan update di server VPS..." -ForegroundColor Yellow
 $PHP_BIN = "/opt/cpanel/ea-php83/root/usr/bin/php"
 $remoteCommands = @(
     "cd $REMOTE_DIR",
@@ -55,11 +55,11 @@ $remoteCommands = @(
 ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" "$SSH_USER@$SSH_HOST" "$remoteCommands"
 
 # 4. Upload Built Assets
-Write-Host "`n☁️ [4/4] Mengunggah compiled assets (public/build) ke server..." -ForegroundColor Yellow
+Write-Host "`n[*] [4/4] Mengunggah compiled assets (public/build) ke server..." -ForegroundColor Yellow
 scp -r -o StrictHostKeyChecking=no -i "$SSH_KEY" "public/build" "$SSH_USER@$SSH_HOST`:$REMOTE_DIR/public/"
 ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" "$SSH_USER@$SSH_HOST" "chmod -R 755 $REMOTE_DIR/public/build && cd $REMOTE_DIR && $PHP_BIN artisan optimize"
 
 Write-Host "`n==========================================================" -ForegroundColor Green
-Write-Host " ✨ DEPLOYMENT SELESAI DENGAN SUKSES! ✨" -ForegroundColor Green
-Write-Host " 🌐 Website: https://skagataaa.my.id" -ForegroundColor Green
+Write-Host " [OK] DEPLOYMENT SELESAI DENGAN SUKSES!" -ForegroundColor Green
+Write-Host " Website: https://skagataaa.my.id" -ForegroundColor Green
 Write-Host "==========================================================" -ForegroundColor Green
