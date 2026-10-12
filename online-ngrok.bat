@@ -14,7 +14,8 @@ for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":8000" ^| findstr "LISTENING
     taskkill /F /PID %%a >nul 2>&1
 )
 
-echo [2/3] Menjalankan server aplikasi Laravel (Port 8000)...
+echo [2/3] Menjalankan server aplikasi Laravel (Port 8000, Multi-Worker 10)...
+set PHP_CLI_SERVER_WORKERS=10
 start /B php artisan serve --port=8000 >nul 2>&1
 
 echo [3/3] Menghubungkan tunnel Ngrok...

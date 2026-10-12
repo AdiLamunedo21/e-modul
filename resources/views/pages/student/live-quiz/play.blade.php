@@ -471,17 +471,34 @@
                 myRank: 1,
                 totalParticipants: 1,
                 questionStartedAt: null,
-                pollInterval: null,
+                isPolling: false,
+                pollTimeout: null,
                 timerInterval: null,
 
                 init() {
-                    this.poll();
-                    this.pollInterval = setInterval(() => this.poll(), 1200);
+                    this.scheduleNextPoll(50);
 
                     // Countdown timer lokal yang disinkronkan dengan jam server
                     this.timerInterval = setInterval(() => {
                         this.tickTimer();
                     }, 500);
+                },
+
+                scheduleNextPoll(delayMs) {
+                    if (this.pollTimeout) clearTimeout(this.pollTimeout);
+                    this.pollTimeout = setTimeout(async () => {
+                        await this.poll();
+                        // Interval adaptif: di lobby 2500ms, di soal 2000ms, di reveal/leaderboard 1800ms
+                        let nextDelay = 2000;
+                        if (this.status === 'lobby') {
+                            nextDelay = 2500;
+                        } else if (this.showAnswer || this.showLeaderboard) {
+                            nextDelay = 1800;
+                        } else {
+                            nextDelay = 2000;
+                        }
+                        this.scheduleNextPoll(nextDelay);
+                    }, delayMs);
                 },
 
                 tickTimer() {
@@ -497,6 +514,8 @@
                 },
 
                 async poll() {
+                    if (this.isPolling) return;
+                    this.isPolling = true;
                     try {
                         const res = await fetch(`/student/live-quiz/${this.sessionId}/poll`);
                         if (!res.ok) return;
@@ -562,6 +581,8 @@
                         }
                     } catch (e) {
                         console.error('Player poll error:', e);
+                    } finally {
+                        this.isPolling = false;
                     }
                 },
 

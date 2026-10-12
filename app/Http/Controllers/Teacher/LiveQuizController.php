@@ -377,6 +377,8 @@ class LiveQuizController extends Controller
     public function hostPoll(LiveQuizSession $session)
     {
         $this->authorizeSession($session);
+        // Lepas session lock segera agar tidak memblokir antrean request lainnya
+        session()->save();
 
         $participantsCount = $session->participants()->count();
         $currentQuestion = $session->currentQuestion();
@@ -388,11 +390,15 @@ class LiveQuizController extends Controller
                 ->count();
         }
 
-        $participants = $session->participants()->with('student.schoolClass')->get()->map(fn($p) => [
-            'id'    => $p->id,
-            'name'  => $p->nickname,
-            'class' => $p->student?->schoolClass?->name ?? 'Siswa',
-        ]);
+        // Ambil daftar peserta (terutama saat lobby agar guru memantau yang baru masuk)
+        $participants = [];
+        if ($session->status === 'lobby' || $session->status === 'finished') {
+            $participants = $session->participants()->with('student.schoolClass')->get()->map(fn($p) => [
+                'id'    => $p->id,
+                'name'  => $p->nickname,
+                'class' => $p->student?->schoolClass?->name ?? 'Siswa',
+            ]);
+        }
 
         $questionData = null;
         if ($currentQuestion) {
@@ -404,23 +410,33 @@ class LiveQuizController extends Controller
             ];
         }
 
-        $leaderboardData = $session->getTopLeaderboard(10)->map(fn($p) => [
-            'participant_id' => $p->id,
-            'name'           => $p->nickname,
-            'class_name'     => $p->student?->schoolClass?->name ?? 'Siswa',
-            'total_score'    => $p->total_score,
-            'correct_count'  => $p->correct_answers_count,
-        ]);
+        // Leaderboard & Podium hanya dihitung saat status reveal, leaderboard, atau finished
+        $leaderboardData = collect();
+        $podiumData = ['first' => null, 'second' => null, 'third' => null];
+        if (in_array($session->status, ['reveal', 'leaderboard', 'finished'])) {
+            $leaderboardData = $session->getTopLeaderboard(10)->map(fn($p) => [
+                'participant_id' => $p->id,
+                'name'           => $p->nickname,
+                'class_name'     => $p->student?->schoolClass?->name ?? 'Siswa',
+                'total_score'    => $p->total_score,
+                'correct_count'  => $p->correct_answers_count,
+            ]);
 
-        $podiumRaw = $session->getPodium();
-        $podiumData = [
-            'first'  => isset($podiumRaw[0]) ? ['name' => $podiumRaw[0]->nickname, 'score' => $podiumRaw[0]->total_score, 'class' => $podiumRaw[0]->student?->schoolClass?->name] : null,
-            'second' => isset($podiumRaw[1]) ? ['name' => $podiumRaw[1]->nickname, 'score' => $podiumRaw[1]->total_score, 'class' => $podiumRaw[1]->student?->schoolClass?->name] : null,
-            'third'  => isset($podiumRaw[2]) ? ['name' => $podiumRaw[2]->nickname, 'score' => $podiumRaw[2]->total_score, 'class' => $podiumRaw[2]->student?->schoolClass?->name] : null,
-        ];
+            $podiumRaw = $session->getPodium();
+            $podiumData = [
+                'first'  => isset($podiumRaw[0]) ? ['name' => $podiumRaw[0]->nickname, 'score' => $podiumRaw[0]->total_score, 'class' => $podiumRaw[0]->student?->schoolClass?->name] : null,
+                'second' => isset($podiumRaw[1]) ? ['name' => $podiumRaw[1]->nickname, 'score' => $podiumRaw[1]->total_score, 'class' => $podiumRaw[1]->student?->schoolClass?->name] : null,
+                'third'  => isset($podiumRaw[2]) ? ['name' => $podiumRaw[2]->nickname, 'score' => $podiumRaw[2]->total_score, 'class' => $podiumRaw[2]->student?->schoolClass?->name] : null,
+            ];
+        }
 
-        $dist = $session->getAnswerDistribution();
-        $distCounts = $dist['counts'] ?? ['A' => 0, 'B' => 0, 'C' => 0, 'D' => 0, 'E' => 0];
+        // Distribusi jawaban dihitung saat reveal, leaderboard, finished atau saat question
+        $distCounts = ['A' => 0, 'B' => 0, 'C' => 0, 'D' => 0, 'E' => 0];
+        $dist = [];
+        if ($session->status !== 'lobby') {
+            $dist = $session->getAnswerDistribution();
+            $distCounts = $dist['counts'] ?? $distCounts;
+        }
 
         $data = [
             'status'                 => $session->status,

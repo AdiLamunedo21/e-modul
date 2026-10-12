@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class LiveQuizSession extends Model
 {
@@ -75,16 +76,18 @@ class LiveQuizSession extends Model
      */
     public function getQuestionsList(): Collection
     {
-        if ($this->test_type === 'pre_test') {
-            $test = $this->module?->preTest;
-            return $test ? $test->questions()->orderBy('order_num', 'asc')->get() : collect();
-        } else {
-            if ($this->module) {
-                return $this->module->getEffectivePostTestQuestions();
+        return Cache::remember("live_quiz_session_{$this->id}_questions", 3600, function () {
+            if ($this->test_type === 'pre_test') {
+                $test = $this->module?->preTest;
+                return $test ? $test->questions()->orderBy('order_num', 'asc')->get() : collect();
+            } else {
+                if ($this->module) {
+                    return $this->module->getEffectivePostTestQuestions();
+                }
+                $test = $this->module?->postTest;
+                return $test ? $test->questions()->orderBy('order_num', 'asc')->get() : collect();
             }
-            $test = $this->module?->postTest;
-            return $test ? $test->questions()->orderBy('order_num', 'asc')->get() : collect();
-        }
+        });
     }
 
     /**

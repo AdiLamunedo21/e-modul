@@ -612,7 +612,8 @@
                 timerSeconds: 30,
                 timerProgress: 100,
                 timerInterval: null,
-                pollInterval: null,
+                isPolling: false,
+                pollTimeout: null,
                 startedAtTs: null,
                 showAnswer: false,
                 showLeaderboard: false,
@@ -659,13 +660,28 @@
                 },
 
                 init() {
-                    this.poll();
-                    this.pollInterval = setInterval(() => this.poll(), 1200);
+                    this.scheduleNextPoll(50);
 
                     // Countdown timer lokal untuk visual yang mulus setiap detik
                     this.timerInterval = setInterval(() => {
                         this.tickTimer();
                     }, 500);
+                },
+
+                scheduleNextPoll(delayMs) {
+                    if (this.pollTimeout) clearTimeout(this.pollTimeout);
+                    this.pollTimeout = setTimeout(async () => {
+                        await this.poll();
+                        let nextDelay = 1800;
+                        if (this.status === 'lobby') {
+                            nextDelay = 2200;
+                        } else if (this.status === 'question' && !this.showAnswer) {
+                            nextDelay = 1500;
+                        } else {
+                            nextDelay = 1800;
+                        }
+                        this.scheduleNextPoll(nextDelay);
+                    }, delayMs);
                 },
 
                 tickTimer() {
@@ -724,6 +740,8 @@
                 },
 
                 async poll() {
+                    if (this.isPolling) return;
+                    this.isPolling = true;
                     try {
                         const res = await fetch(`/teacher/live-quiz/${this.sessionId}/host-poll`);
                         if (!res.ok) return;
@@ -759,6 +777,8 @@
                         this.tickTimer();
                     } catch (e) {
                         console.error('Poll error:', e);
+                    } finally {
+                        this.isPolling = false;
                     }
                 },
 

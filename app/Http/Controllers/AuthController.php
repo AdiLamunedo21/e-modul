@@ -6,6 +6,7 @@ use App\Models\SchoolClass;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -192,7 +193,7 @@ class AuthController extends Controller
         ], [
             'name.required'            => 'Nama lengkap wajib diisi.',
             'identity_number.required' => 'NISN / No. Identitas wajib diisi.',
-            'identity_number.unique'   => 'NISN ini sudah terdaftar di sistem.',
+            'identity_number.unique'   => 'NISN ini sudah terdaftar di sistem. Jika Anda baru saja mendaftar saat koneksi lambat, akun Anda mungkin sudah aktif. Silakan langsung login.',
             'password.required'        => 'Password wajib diisi.',
             'password.min'             => 'Password minimal 6 karakter.',
             'password.confirmed'       => 'Konfirmasi password tidak cocok.',
@@ -209,16 +210,20 @@ class AuthController extends Controller
             }
         }
 
-        $student = Student::create([
-            'name'            => $validated['name'],
-            'identity_number' => $validated['identity_number'],
-            'password'        => Hash::make($validated['password']),
-            'class_id'        => $class?->id,
-        ]);
+        $student = DB::transaction(function () use ($validated, $class) {
+            $created = Student::create([
+                'name'            => $validated['name'],
+                'identity_number' => $validated['identity_number'],
+                'password'        => Hash::make($validated['password']),
+                'class_id'        => $class?->id,
+            ]);
 
-        if ($class) {
-            $student->joinClass($class);
-        }
+            if ($class) {
+                $created->joinClass($class);
+            }
+
+            return $created;
+        });
 
         Auth::guard('student')->login($student);
         $request->session()->regenerate();

@@ -56,6 +56,12 @@ Route::get('/register/student',  [AuthController::class, 'showStudentRegister'])
 Route::post('/register/student', [AuthController::class, 'studentRegister']);
 Route::post('/logout/student',   [AuthController::class, 'studentLogout'])->name('logout.student');
 
+// ─── Shortcut & Redirection Fallbacks ───────────────────────────────────────
+Route::redirect('/register', '/register/student');
+Route::redirect('/login', '/login/student');
+Route::redirect('/student', '/student/dashboard');
+Route::redirect('/dashboard', '/student/dashboard');
+
 // ─── Admin Protected ───────────────────────────────────────────────────────
 Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');

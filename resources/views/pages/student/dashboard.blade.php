@@ -31,7 +31,8 @@
     function studentDashboardLiveQuiz(initialQuiz) {
         return {
             quiz: initialQuiz,
-            pollInterval: null,
+            isChecking: false,
+            pollTimeout: null,
             get hasActiveQuiz() {
                 return this.quiz !== null && this.quiz !== undefined;
             },
@@ -53,10 +54,26 @@
                 return 'Kuis Live Sedang Berlangsung!';
             },
             init() {
-                // Polling berkala setiap 3 detik untuk deteksi instan saat guru memulai kuis
-                this.pollInterval = setInterval(() => this.checkActive(), 3000);
+                // Polling adaptif setiap 6 detik, hanya saat tab aktif
+                this.scheduleCheck(6000);
+                document.addEventListener('visibilitychange', () => {
+                    if (document.visibilityState === 'visible') {
+                        this.checkActive();
+                    }
+                });
+            },
+            scheduleCheck(delayMs) {
+                if (this.pollTimeout) clearTimeout(this.pollTimeout);
+                this.pollTimeout = setTimeout(async () => {
+                    if (document.visibilityState === 'visible') {
+                        await this.checkActive();
+                    }
+                    this.scheduleCheck(6000);
+                }, delayMs);
             },
             async checkActive() {
+                if (this.isChecking) return;
+                this.isChecking = true;
                 try {
                     const res = await fetch('{{ route('student.live-quiz.active-check') }}', {
                         headers: { 'Accept': 'application/json' }
@@ -70,6 +87,8 @@
                     }
                 } catch (e) {
                     // Ignore network errors during silent poll
+                } finally {
+                    this.isChecking = false;
                 }
             }
         };

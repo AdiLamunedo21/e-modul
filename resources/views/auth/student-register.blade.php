@@ -33,6 +33,7 @@
                       nisn: '{{ old('identity_number', '') }}',
                       isDuplicate: false,
                       isChecking: false,
+                      isSubmitting: false,
                       timer: null,
                       checkNisn() {
                           clearTimeout(this.timer);
@@ -52,10 +53,17 @@
                                   })
                                   .catch(() => { this.isChecking = false; });
                           }, 300);
+                      },
+                      handleSubmit(e) {
+                          if (this.isDuplicate || this.isChecking || this.isSubmitting) {
+                              e.preventDefault();
+                              return false;
+                          }
+                          this.isSubmitting = true;
                       }
                   }"
                   x-init="if (nisn) checkNisn()"
-                  @submit="if (isDuplicate) { $event.preventDefault(); return false; }">
+                  @submit="handleSubmit($event)">
                 @csrf
 
                 {{-- Nama Lengkap --}}
@@ -145,10 +153,24 @@
 
                 <div class="pt-2">
                     <button type="submit" 
-                            :disabled="isDuplicate || isChecking"
-                            class="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600 text-white font-extrabold py-3.5 rounded-xl transition duration-300 shadow-md shadow-blue-600/30 hover:shadow-lg focus:ring-4 focus:ring-blue-500/50 text-sm cursor-pointer">
-                        Daftar & Masuk ke E-Modul
+                            :disabled="isDuplicate || isChecking || isSubmitting"
+                            class="w-full inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600 text-white font-extrabold py-3.5 rounded-xl transition duration-300 shadow-md shadow-blue-600/30 hover:shadow-lg focus:ring-4 focus:ring-blue-500/50 text-sm cursor-pointer">
+                        <template x-if="isSubmitting">
+                            <span class="inline-flex items-center justify-center gap-2">
+                                <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span>Mendaftarkan... Mohon Tunggu</span>
+                            </span>
+                        </template>
+                        <template x-if="!isSubmitting">
+                            <span>Daftar & Masuk ke E-Modul</span>
+                        </template>
                     </button>
+                    <p x-show="isSubmitting" class="text-center text-xs text-blue-600 font-medium mt-2 animate-pulse">
+                        Sedang menghubungkan ke server, mohon jangan tutup atau refresh halaman...
+                    </p>
                 </div>
             </form>
 

@@ -9,6 +9,7 @@ use App\Models\LiveQuizSession;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class LiveQuizController extends Controller
 {
@@ -25,40 +26,42 @@ class LiveQuizController extends Controller
     public function checkActiveSession(Request $request)
     {
         $student = $this->student();
+        // Lepas session lock segera agar tidak memblokir antrean request lainnya
+        session()->save();
 
         $joinedClasses = $student->classes()->pluck('classes.id')->toArray();
         if ($student->class_id) {
             $joinedClasses[] = (int) $student->class_id;
         }
         $joinedClassIds = array_unique($joinedClasses);
+        sort($joinedClassIds);
+        $classKey = implode('-', $joinedClassIds);
 
-        $activeLiveQuiz = LiveQuizSession::with(['module.subject', 'teacher', 'schoolClass'])
-            ->where('is_active', true)
-            ->where('status', '!=', 'finished')
-            ->whereHas('module', function ($mq) {
-                $mq->where('is_active', true);
-            })
-            ->where(function ($q) use ($joinedClassIds) {
-                $q->whereNull('class_id');
-                if (!empty($joinedClassIds)) {
-                    $q->orWhereIn('class_id', $joinedClassIds)
-                      ->orWhereHas('module', function ($mq) use ($joinedClassIds) {
-                          $mq->whereIn('class_id', $joinedClassIds);
-                      });
-                }
-            })
-            ->latest()
-            ->first();
+        // Cache hasil pengecekan sesi aktif per kombinasi kelas selama 4 detik
+        $quizData = Cache::remember("active_quiz_check_classes_{$classKey}", 4, function () use ($joinedClassIds) {
+            $activeLiveQuiz = LiveQuizSession::with(['module.subject', 'teacher', 'schoolClass'])
+                ->where('is_active', true)
+                ->where('status', '!=', 'finished')
+                ->whereHas('module', function ($mq) {
+                    $mq->where('is_active', true);
+                })
+                ->where(function ($q) use ($joinedClassIds) {
+                    $q->whereNull('class_id');
+                    if (!empty($joinedClassIds)) {
+                        $q->orWhereIn('class_id', $joinedClassIds)
+                          ->orWhereHas('module', function ($mq) use ($joinedClassIds) {
+                              $mq->whereIn('class_id', $joinedClassIds);
+                          });
+                    }
+                })
+                ->latest()
+                ->first();
 
-        if (!$activeLiveQuiz) {
-            return response()->json([
-                'has_active_quiz' => false,
-            ]);
-        }
+            if (!$activeLiveQuiz) {
+                return null;
+            }
 
-        return response()->json([
-            'has_active_quiz' => true,
-            'quiz' => [
+            return [
                 'id'              => $activeLiveQuiz->id,
                 'pin'             => $activeLiveQuiz->pin,
                 'title'           => $activeLiveQuiz->module->title ?? 'Kuis Live',
@@ -67,7 +70,18 @@ class LiveQuizController extends Controller
                 'teacher_name'    => $activeLiveQuiz->teacher->name ?? 'Pengampu',
                 'class_name'      => $activeLiveQuiz->schoolClass?->full_name ?? 'Umum',
                 'status'          => $activeLiveQuiz->status,
-            ],
+            ];
+        });
+
+        if (!$quizData) {
+            return response()->json([
+                'has_active_quiz' => false,
+            ]);
+        }
+
+        return response()->json([
+            'has_active_quiz' => true,
+            'quiz'            => $quizData,
         ]);
     }
 
@@ -293,6 +307,8 @@ class LiveQuizController extends Controller
     public function playerPoll(LiveQuizSession $session)
     {
         $student = $this->student();
+        // Lepas session lock segera agar tidak memblokir antrean request lainnya
+        session()->save();
 
         $participant = LiveQuizParticipant::where('live_quiz_session_id', $session->id)
             ->where('student_id', $student->id)
@@ -324,10 +340,17 @@ class LiveQuizController extends Controller
             }
         }
 
-        // Peringkat siswa saat ini
-        $myRank = LiveQuizParticipant::where('live_quiz_session_id', $session->id)
-            ->where('total_score', '>', $participant->total_score)
-            ->count() + 1;
+        // Peringkat siswa saat ini (hanya hitung query berat ini saat reveal/leaderboard/finished)
+        $myRank = 1;
+        if (in_array($session->status, ['reveal', 'leaderboard', 'finished'])) {
+            $myRank = LiveQuizParticipant::where('live_quiz_session_id', $session->id)
+                ->where('total_score', '>', $participant->total_score)
+                ->count() + 1;
+        }
+
+        $totalParticipants = Cache::remember("live_quiz_part_count_{$session->id}", 4, function () use ($session) {
+            return $session->participants()->count();
+        });
 
         $data = [
             'status'                 => !$session->is_active ? 'inactive' : (in_array($session->status, ['question', 'reveal', 'leaderboard']) ? 'active' : $session->status),
@@ -344,7 +367,7 @@ class LiveQuizController extends Controller
             'my_total_score'         => $participant->total_score,
             'my_score'               => $participant->total_score,
             'my_rank'                => $myRank,
-            'total_participants'     => $session->participants()->count(),
+            'total_participants'     => $totalParticipants,
             'my_answer'              => $myAnswer,
         ];
 
