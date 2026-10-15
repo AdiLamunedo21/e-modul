@@ -5,7 +5,7 @@
 
 @section('content')
 
-<div x-data="{ deleteModalOpen: false, deleteUrl: '', deleteTitle: '' }">
+<div x-data="{ deleteModalOpen: false, deleteUrl: '', deleteTitle: '', isDeleting: false }">
 
 {{-- ══ Banner Sambutan Selamat Datang (Otomatis Hilang dalam 5 Detik) ══ --}}
 <div x-data="{

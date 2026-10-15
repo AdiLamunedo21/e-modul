@@ -8,6 +8,8 @@ use App\Models\SchoolClass;
 use App\Models\Subject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * =============================================================================
@@ -311,17 +313,37 @@ class ModuleManagerController extends Controller
     {
         $this->authorizeModule($module);
         $status = $module->status;
-        $module->delete();
+        $title = $module->title;
 
-        if (request()->wantsJson() || request()->ajax()) {
-            return response()->json([
-                'success' => true,
-                'status'  => $status,
-                'message' => 'Modul berhasil dihapus.',
+        try {
+            DB::transaction(function () use ($module) {
+                $module->delete();
+            });
+
+            if (request()->wantsJson() || request()->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'status'  => $status,
+                    'message' => "Modul \"{$title}\" berhasil dihapus permanen.",
+                ]);
+            }
+
+            return redirect()->route('teacher.modules.index')->with('success', "Modul \"{$title}\" berhasil dihapus permanen.");
+        } catch (\Throwable $e) {
+            Log::error('Gagal menghapus modul: ' . $e->getMessage(), [
+                'module_id' => $module->id,
+                'trace'     => $e->getTraceAsString(),
             ]);
-        }
 
-        return redirect()->route('teacher.modules.index')->with('success', 'Modul berhasil dihapus.');
+            if (request()->wantsJson() || request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal menghapus modul: ' . $e->getMessage(),
+                ], 500);
+            }
+
+            return redirect()->route('teacher.modules.index')->with('error', 'Gagal menghapus modul: ' . $e->getMessage());
+        }
     }
 
     private function authorizeModule(Module $module)

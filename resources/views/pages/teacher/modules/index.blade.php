@@ -463,18 +463,19 @@ function moduleManagerApp(config) {
             try {
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                 const res = await fetch(this.deleteUrl, {
-                    method: 'POST',
+                    method: 'DELETE',
                     headers: {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': token,
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify({ _method: 'DELETE' })
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-HTTP-Method-Override': 'DELETE'
+                    }
                 });
 
-                const data = await res.json();
-                if (data.success) {
+                const data = await res.json().catch(() => null);
+
+                if (res.ok && data?.success) {
                     const deletedId = this.deleteId;
                     const deletedStatus = this.deleteStatus;
                     this.deleteModalOpen = false;
@@ -489,16 +490,16 @@ function moduleManagerApp(config) {
                         detail: { id: deletedId, status: deletedStatus }
                     }));
 
-                    // Pop up iklan mengambang 5 detik
+                    // Pop up status mengambang 5 detik
                     window.dispatchEvent(new CustomEvent('show-status-popup', {
                         detail: { message: data.message || 'Modul berhasil dihapus.', icon: '🗑️' }
                     }));
                 } else {
-                    alert(data.message || 'Gagal menghapus modul.');
+                    alert(data?.message || `Gagal menghapus modul (HTTP ${res.status}).`);
                 }
             } catch (e) {
-                console.error(e);
-                alert('Terjadi kesalahan saat menghapus modul.');
+                console.error('Error saat menghapus modul:', e);
+                alert(e.message || 'Terjadi kesalahan saat menghapus modul.');
             } finally {
                 this.isDeleting = false;
             }
@@ -595,21 +596,22 @@ function moduleItem(config) {
             try {
                 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                 const res = await fetch(this.statusUrl, {
-                    method: 'POST',
+                    method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': token,
-                        'X-Requested-With': 'XMLHttpRequest'
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-HTTP-Method-Override': 'PATCH'
                     },
                     body: JSON.stringify({
-                        _method: 'PATCH',
                         status: targetStatus
                     })
                 });
 
-                const data = await res.json();
-                if (data.success) {
+                const data = await res.json().catch(() => null);
+
+                if (res.ok && data?.success) {
                     this.status = targetStatus;
 
                     // Update parent counter
@@ -617,16 +619,16 @@ function moduleItem(config) {
                         detail: { oldStatus, newStatus: targetStatus }
                     }));
 
-                    // Pop up iklan mengambang 5 detik
+                    // Pop up status mengambang 5 detik
                     window.dispatchEvent(new CustomEvent('show-status-popup', {
                         detail: { message: data.message }
                     }));
                 } else {
-                    alert(data.message || 'Gagal mengubah status modul.');
+                    alert(data?.message || `Gagal mengubah status modul (HTTP ${res.status}).`);
                 }
             } catch (e) {
-                console.error(e);
-                alert('Terjadi kesalahan koneksi.');
+                console.error('Error saat mengubah status modul:', e);
+                alert(e.message || 'Terjadi kesalahan koneksi.');
             } finally {
                 this.isUpdatingStatus = false;
             }
