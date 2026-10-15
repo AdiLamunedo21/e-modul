@@ -49,6 +49,7 @@ $remoteCommands = @(
     "composer install --no-dev --optimize-autoloader",
     "$PHP_BIN artisan migrate --force",
     "$PHP_BIN artisan storage:link",
+    "$PHP_BIN artisan optimize:clear",
     "$PHP_BIN artisan optimize"
 ) -join " && "
 
