@@ -109,7 +109,7 @@
 
             {{-- Delete Module Button --}}
             <button type="button"
-                    @click="deleteUrl = '{{ route('teacher.modules.destroy', $module) }}'; deleteTitle = '{{ addslashes($module->title) }}'; deleteModalOpen = true;"
+                    @click="$dispatch('open-delete-modal', { title: '{{ addslashes($module->title) }}', url: '{{ route('teacher.modules.destroy', $module) }}' })"
                     class="inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold text-rose-600 bg-rose-50 border border-rose-200 hover:bg-rose-100 rounded-2xl transition-all shadow-sm cursor-pointer"
                     title="Hapus Modul Permanen">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
