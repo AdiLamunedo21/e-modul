@@ -213,19 +213,16 @@
                         <span>Unggah Jawaban / Laporan LKPD (PDF)</span>
                     </h4>
                     @if($lkpdSubmission && $lkpdSubmission->manual_score === null)
-                        <form id="lkpd-cancel-form" action="{{ route('student.modules.submission.cancel', ['module' => $module->id, 'type' => 'lkpd']) }}" method="POST">
+                        <form action="{{ route('student.modules.submission.cancel', ['module' => $module->id, 'type' => 'lkpd']) }}" method="POST">
                             @csrf
                             @method('DELETE')
-                            <input type="hidden" name="form_page" value="lkpd">
-                            <button type="submit" class="hidden"></button>
                             <button type="button"
                                     @click="openCancelModal({
                                         title: 'Batalkan Berkas LKPD?',
                                         description: 'Apakah Anda yakin ingin membatalkan berkas LKPD ini untuk mengunggah ulang dokumen baru?',
                                         warningText: 'File dokumen laporan LKPD yang sebelumnya diunggah akan dihapus dari sistem dan status pengerjaan modul akan direset sampai Anda mengunggah berkas baru.',
-                                        confirmLabel: 'Ya, Batalkan Berkas',
-                                        formId: 'lkpd-cancel-form'
-                                    }, document.getElementById('lkpd-cancel-form'))"
+                                        confirmLabel: 'Ya, Batalkan Berkas'
+                                    }, $el.closest('form'))"
                                     class="text-xs text-rose-600 hover:text-rose-700 font-bold underline cursor-pointer">
                                 Batalkan / Unggah Ulang
                             </button>
@@ -249,8 +246,8 @@
                                 </span>
                             @endif
                             <a href="{{ asset('storage/' . $lkpdSubmission->uploaded_file_path) }}"
-                                target="_blank"
-                                class="px-4 py-2 rounded-xl bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-bold transition">
+                               target="_blank"
+                               class="px-4 py-2 rounded-xl bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-bold transition">
                                 Lihat Berkas ↗
                             </a>
                             <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
@@ -260,18 +257,8 @@
                         </div>
                     </div>
                 @else
-                    <form id="lkpd-submission-form" action="{{ route('student.modules.lkpd.submit', $module) }}" method="POST" enctype="multipart/form-data" class="space-y-3">
+                    <form action="{{ route('student.modules.lkpd.submit', $module) }}" method="POST" enctype="multipart/form-data" class="space-y-3">
                         @csrf
-                        <input type="hidden" name="form_page" value="lkpd">
-                        <button type="submit" id="lkpd-submit-trigger" class="hidden"></button>
-
-                        @if(isset($errors) && $errors->has('lkpd_file'))
-                            <div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
-                                <span>⚠️</span>
-                                <span>{{ $errors->first('lkpd_file') }}</span>
-                            </div>
-                        @endif
-
                         <div class="border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center hover:border-amber-400 bg-slate-50/50 transition">
                             <span class="text-3xl block mb-2">📄</span>
                             <p class="text-xs sm:text-sm font-bold text-slate-700">Pilih Berkas Jawaban LKPD</p>
@@ -290,9 +277,8 @@
                                         description: 'File PDF jawaban LKPD Anda akan dikumpulkan dan diperiksa oleh guru. Pastikan semua tugas sudah dikerjakan dengan benar.',
                                         accentColor: 'amber',
                                         warningText: 'Tugas LKPD yang sudah dikumpulkan tidak dapat diganti.',
-                                        confirmLabel: 'Kumpulkan Jawaban LKPD',
-                                        formId: 'lkpd-submission-form'
-                                    }, document.getElementById('lkpd-submission-form'))">
+                                        confirmLabel: 'Kumpulkan Jawaban LKPD'
+                                    }, $el.closest('form'))">
                                 Kirim Jawaban LKPD PDF
                             </button>
                         </div>

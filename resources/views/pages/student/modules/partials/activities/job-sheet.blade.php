@@ -169,19 +169,16 @@
                         <span>Unggah Laporan Hasil Praktikum (PDF)</span>
                     </h4>
                     @if($jobSheetSubmission && $jobSheetSubmission->manual_score === null)
-                        <form id="job-sheet-cancel-form" action="{{ route('student.modules.submission.cancel', ['module' => $module->id, 'type' => 'job_sheet']) }}" method="POST">
+                        <form action="{{ route('student.modules.submission.cancel', ['module' => $module->id, 'type' => 'job_sheet']) }}" method="POST">
                             @csrf
                             @method('DELETE')
-                            <input type="hidden" name="form_page" value="job_sheet">
-                            <button type="submit" class="hidden"></button>
                             <button type="button"
                                     @click="openCancelModal({
                                         title: 'Batalkan Berkas Job Sheet?',
                                         description: 'Apakah Anda yakin ingin membatalkan berkas Job Sheet ini untuk mengunggah ulang dokumen baru?',
                                         warningText: 'File dokumen laporan Job Sheet yang sebelumnya diunggah akan dihapus dari sistem dan status pengerjaan modul akan direset sampai Anda mengunggah berkas baru.',
-                                        confirmLabel: 'Ya, Batalkan Berkas',
-                                        formId: 'job-sheet-cancel-form'
-                                    }, document.getElementById('job-sheet-cancel-form'))"
+                                        confirmLabel: 'Ya, Batalkan Berkas'
+                                    }, $el.closest('form'))"
                                     class="text-xs text-rose-600 hover:text-rose-700 font-bold underline cursor-pointer">
                                 Batalkan / Unggah Ulang
                             </button>
@@ -205,8 +202,8 @@
                                 </span>
                             @endif
                             <a href="{{ asset('storage/' . $jobSheetSubmission->uploaded_file_path) }}"
-                                target="_blank"
-                                class="px-4 py-2 rounded-xl bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-bold transition">
+                               target="_blank"
+                               class="px-4 py-2 rounded-xl bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-bold transition">
                                 Lihat Berkas ↗
                             </a>
                             <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
@@ -216,18 +213,8 @@
                         </div>
                     </div>
                 @else
-                    <form id="job-sheet-submission-form" action="{{ route('student.modules.job-sheet.submit', $module) }}" method="POST" enctype="multipart/form-data" class="space-y-3">
+                    <form action="{{ route('student.modules.job-sheet.submit', $module) }}" method="POST" enctype="multipart/form-data" class="space-y-3">
                         @csrf
-                        <input type="hidden" name="form_page" value="job_sheet">
-                        <button type="submit" id="job-sheet-submit-trigger" class="hidden"></button>
-
-                        @if(isset($errors) && $errors->has('job_sheet_file'))
-                            <div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
-                                <span>⚠️</span>
-                                <span>{{ $errors->first('job_sheet_file') }}</span>
-                            </div>
-                        @endif
-
                         <div class="border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center hover:border-rose-400 bg-slate-50/50 transition">
                             <span class="text-3xl block mb-2">📄</span>
                             <p class="text-xs sm:text-sm font-bold text-slate-700">Pilih Berkas Laporan Praktikum Job Sheet</p>
@@ -246,9 +233,8 @@
                                         description: 'File PDF laporan praktikum Anda akan diunggah ke sistem. Pastikan dokumen sudah lengkap dan sesuai format.',
                                         accentColor: 'rose',
                                         warningText: 'Laporan yang sudah dikirim tidak dapat diganti.',
-                                        confirmLabel: 'Kirim Laporan PDF',
-                                        formId: 'job-sheet-submission-form'
-                                    }, document.getElementById('job-sheet-submission-form'))">
+                                        confirmLabel: 'Kirim Laporan PDF'
+                                    }, $el.closest('form'))">
                                 Kirim Laporan Job Sheet PDF
                             </button>
                         </div>

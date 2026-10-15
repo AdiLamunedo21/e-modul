@@ -53,19 +53,16 @@
                         <span>Bukti Tangkapan Layar (Screenshot) Praktik</span>
                     </h4>
                     @if($embedSubmission && $embedSubmission->manual_score === null)
-                        <form id="embed-cancel-form" action="{{ route('student.modules.submission.cancel', ['module' => $module->id, 'type' => 'embed']) }}" method="POST">
+                        <form action="{{ route('student.modules.submission.cancel', ['module' => $module->id, 'type' => 'embed']) }}" method="POST">
                             @csrf
                             @method('DELETE')
-                            <input type="hidden" name="form_page" value="embed">
-                            <button type="submit" class="hidden"></button>
                             <button type="button"
                                     @click="openCancelModal({
                                         title: 'Batalkan Screenshot Simulator?',
                                         description: 'Apakah Anda yakin ingin membatalkan bukti screenshot praktikum ini untuk mengunggah ulang?',
                                         warningText: 'File gambar tangkapan layar simulator yang sebelumnya diunggah akan dihapus dari sistem dan status pengerjaan modul akan direset sampai Anda mengunggah gambar baru.',
-                                        confirmLabel: 'Ya, Batalkan Bukti',
-                                        formId: 'embed-cancel-form'
-                                    }, document.getElementById('embed-cancel-form'))"
+                                        confirmLabel: 'Ya, Batalkan Bukti'
+                                    }, $el.closest('form'))"
                                     class="text-xs text-rose-600 hover:text-rose-700 font-bold underline cursor-pointer">
                                 Batalkan / Unggah Ulang
                             </button>
@@ -95,19 +92,9 @@
                         </div>
                     </div>
                 @else
-                    <form id="embed-submission-form" action="{{ route('student.modules.embed.submit', $module) }}" method="POST" enctype="multipart/form-data" class="space-y-3"
+                    <form action="{{ route('student.modules.embed.submit', $module) }}" method="POST" enctype="multipart/form-data" class="space-y-3"
                           x-data="{ previewUrl: null }">
                         @csrf
-                        <input type="hidden" name="form_page" value="embed">
-                        <button type="submit" id="embed-submission-submit-trigger" class="hidden"></button>
-
-                        @if(isset($errors) && $errors->has('screenshot'))
-                            <div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
-                                <span>⚠️</span>
-                                <span>{{ $errors->first('screenshot') }}</span>
-                            </div>
-                        @endif
-
                         <div class="border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center hover:border-indigo-400 bg-slate-50/50 transition">
                             <template x-if="!previewUrl">
                                 <div>
@@ -137,9 +124,8 @@
                                         description: 'Screenshot praktik Anda akan diunggah dan diperiksa oleh guru. Pastikan gambar menampilkan hasil pekerjaan dengan jelas.',
                                         accentColor: 'indigo',
                                         warningText: 'Screenshot yang sudah dikirim tidak dapat diganti.',
-                                        confirmLabel: 'Kirim Screenshot',
-                                        formId: 'embed-submission-form'
-                                    }, document.getElementById('embed-submission-form'))">
+                                        confirmLabel: 'Kirim Screenshot'
+                                    }, $el.closest('form'))">
                                 Kirim Bukti Screenshot
                             </button>
                         </div>

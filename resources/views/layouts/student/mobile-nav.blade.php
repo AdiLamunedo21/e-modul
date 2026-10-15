@@ -18,7 +18,7 @@
 @endphp
 
 <nav x-data="{
-        inLearnMode: {{ (request()->routeIs('student.modules.show') && (request()->has('page') || request()->has('learn') || session('success') || session('error'))) ? 'true' : 'false' }},
+        inLearnMode: {{ (request()->routeIs('student.modules.show') && (request()->has('page') || session('success') || session('error'))) ? 'true' : 'false' }},
         currentTab: '{{ $isDashboard ? (in_array($currentStatus, ['classes', 'completed', 'all_modules', 'in_progress']) ? $currentStatus : $defaultNavTab) : '' }}',
         goToTab(tab, fallbackUrl) {
             const path = window.location.pathname.replace(/\/$/, '');

@@ -99,19 +99,16 @@
                     </div>
 
                     @if($videoSummary && $videoSummary->manual_score === null)
-                        <form id="video-cancel-form" action="{{ route('student.modules.submission.cancel', ['module' => $module->id, 'type' => 'video']) }}" method="POST">
+                        <form action="{{ route('student.modules.submission.cancel', ['module' => $module->id, 'type' => 'video']) }}" method="POST">
                             @csrf
                             @method('DELETE')
-                            <input type="hidden" name="form_page" value="video">
-                            <button type="submit" class="hidden"></button>
                             <button type="button"
                                     @click="openCancelModal({
                                         title: 'Batalkan Resume Video?',
                                         description: 'Apakah Anda yakin ingin membatalkan resume video ini untuk mengedit ulang?',
                                         warningText: 'Teks resume sebelumnya akan dihapus dari sistem dan status pengerjaan modul ini akan direset sampai Anda mengirimkan resume baru.',
-                                        confirmLabel: 'Ya, Batalkan Resume',
-                                        formId: 'video-cancel-form'
-                                    }, document.getElementById('video-cancel-form'))"
+                                        confirmLabel: 'Ya, Batalkan Resume'
+                                    }, $el.closest('form'))"
                                     class="text-xs text-rose-600 hover:text-rose-700 font-bold underline cursor-pointer">
                                 Batalkan / Edit Ulang
                             </button>
@@ -139,57 +136,32 @@
                         </div>
                     </div>
                 @else
-                    <form id="video-summary-form" action="{{ route('student.modules.video.submit', $module) }}" method="POST" class="space-y-3"
-                          x-data="{ summaryText: @js(old('summary_text', '')), get charCount() { return (this.summaryText || '').length; }, minChars: {{ $minCharsRequired }} }">
+                    <form action="{{ route('student.modules.video.submit', $module) }}" method="POST" class="space-y-3"
+                          x-data="{ summaryText: '', get charCount() { return this.summaryText.length; }, minChars: {{ $minCharsRequired }} }">
                         @csrf
-                        <input type="hidden" name="form_page" value="video">
-                        <button type="submit" id="video-summary-submit-trigger" class="hidden"></button>
-
-                        @if(isset($errors) && $errors->has('summary_text'))
-                            <div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
-                                <span>⚠️</span>
-                                <span>{{ $errors->first('summary_text') }}</span>
-                            </div>
-                        @endif
-
                         <textarea name="summary_text"
                                   x-model="summaryText"
-                                  rows="6"
+                                  rows="5"
                                   required
                                   placeholder="Tuliskan poin-poin penting, intisari materi, dan pemahaman yang Anda peroleh setelah menyimak seluruh video di atas (minimal {{ $minCharsRequired }} karakter)..."
-                                  class="w-full p-4 text-xs sm:text-sm bg-slate-50 border border-slate-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition outline-none leading-relaxed"></textarea>
+                                  class="w-full p-4 text-xs sm:text-sm bg-slate-50 border border-slate-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition outline-none"></textarea>
 
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                            <div class="space-y-1">
-                                <div class="flex items-center gap-2">
-                                    <span :class="charCount < minChars ? 'text-amber-600 font-bold' : 'text-emerald-600 font-bold'">
-                                        Karakter: <span x-text="charCount"></span> / Minimal <span x-text="minChars"></span>
-                                    </span>
-                                    <span x-show="charCount >= minChars" class="text-emerald-600 font-bold text-[11px] bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                                        ✓ Memenuhi syarat
-                                    </span>
-                                </div>
-                                <template x-if="charCount < minChars">
-                                    <p class="text-amber-600 text-[11px]">
-                                        Tulis minimal <strong x-text="minChars - charCount"></strong> karakter lagi agar tombol kirim dapat ditekan.
-                                    </p>
-                                </template>
-                            </div>
-
+                        <div class="flex items-center justify-between text-xs text-slate-500">
+                            <span :class="charCount < minChars ? 'text-amber-600 font-bold' : 'text-emerald-600 font-bold'">
+                                Karakter: <span x-text="charCount"></span> (Min. <span x-text="minChars"></span>)
+                            </span>
                             <button type="button"
                                     :disabled="charCount < minChars"
                                     :class="charCount < minChars ? 'opacity-50 cursor-not-allowed bg-slate-400' : 'bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-600/20 cursor-pointer'"
-                                    class="px-6 py-2.5 rounded-xl text-white font-bold text-xs transition flex items-center justify-center gap-2 shrink-0"
+                                    class="px-6 py-2.5 rounded-xl text-white font-bold text-xs transition"
                                     @click="if (charCount >= minChars) openSubmitModal({
                                         title: 'Kirim Resume Video?',
                                         description: 'Resume video Anda akan disimpan dan dinilai oleh guru. Pastikan isi resume sudah mencakup intisari seluruh video.',
                                         accentColor: 'blue',
                                         warningText: 'Resume yang sudah dikirim tidak dapat diedit kembali.',
-                                        confirmLabel: 'Simpan & Kirim Resume',
-                                        formId: 'video-summary-form'
-                                    }, document.getElementById('video-summary-form'))">
-                                <span>Simpan & Kirim Resume Video</span>
-                                <span>→</span>
+                                        confirmLabel: 'Simpan & Kirim Resume'
+                                    }, $el.closest('form'))">
+                                Simpan & Kirim Resume Video
                             </button>
                         </div>
                     </form>

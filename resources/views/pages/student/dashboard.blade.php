@@ -440,7 +440,7 @@
 
                 if (requiredStatus === 'in_progress') {
                     const inList = this.inProgressModules && this.inProgressModules.some(m => m.id === item.id);
-                    if (!inList) {
+                    if (!inList && !item.is_active_in_class && item.progress_status !== 'in_progress') {
                         return false;
                     }
                 } else if (requiredStatus && item.progress_status !== requiredStatus) {
@@ -450,7 +450,7 @@
                 if (!requiredStatus && this.selectedStatus !== 'all') {
                     if (this.selectedStatus === 'in_progress') {
                         const inList = this.inProgressModules && this.inProgressModules.some(m => m.id === item.id);
-                        if (!inList) {
+                        if (!inList && !item.is_active_in_class && item.progress_status !== 'in_progress') {
                             return false;
                         }
                     } else if (item.progress_status !== this.selectedStatus) {
@@ -510,8 +510,8 @@
             {{-- ══ 3. INTERACTIVE NAVIGATION TABS & FILTER HUB ══ --}}
             <div id="student-main-tabs-content" class="space-y-6">
 
-                {{-- ═══ TAB SELECTOR NAVIGATION BAR (RESPONSIF DESKTOP & MOBILE) ═══ --}}
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-200/80 pb-3">
+                {{-- ═══ TAB SELECTOR NAVIGATION BAR (KHUSUS DESKTOP, PADA MOBILE DIGANTIKAN BOTTOM NAV) ═══ --}}
+                <div class="hidden lg:flex items-center justify-between gap-3 border-b border-slate-200/80 pb-3">
                 <div class="inline-flex p-1.5 rounded-2xl bg-slate-200/70 border border-slate-300/60 backdrop-blur-sm gap-1 overflow-x-auto max-w-full no-scrollbar">
                     
                     {{-- Tab 1: Kelas Saya --}}
@@ -789,31 +789,7 @@
             {{-- ══════════════════════════════════════════════════════════════════════ --}}
             <div x-show="activeTab === 'in_progress'" x-cloak class="space-y-6">
 
-                {{-- Status Counter Bar --}}
-                <div class="flex items-center justify-between gap-3 px-1">
-                    <div>
-                        <h2 class="text-[17px] sm:text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-                            <span>⏳</span>
-                            <span>Modul Sedang Dikerjakan</span>
-                        </h2>
-                        <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Daftar modul pembelajaran yang sedang aktif dipelajari di kelas Anda.</p>
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                        <span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[11px] sm:text-xs font-extrabold"
-                              x-text="countVisibleInProgressModules() + ' Modul Aktif'">
-                        </span>
-                        <div x-show="hasActiveFilters" x-cloak>
-                            <button type="button"
-                                    @click="resetFilters()"
-                                    class="text-[11px] sm:text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline ml-2">
-                                ✕ Reset
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Grid Card Modul Sedang Dikerjakan --}}
+                {{-- Grid Card Modul Sedang Dikerjakan (Maksimal 1 Modul Aktif Sesuai Pergantian Mapel di Kelas) --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @forelse($inProgressModules as $mod)
                         <div x-show="matchesModule(inProgressModules.find(m => m.id === {{ $mod['id'] }}), 'in_progress')"
@@ -872,7 +848,7 @@
 
                                 {{-- Judul Modul & Deskripsi --}}
                                 <div>
-                                    <a href="{{ route('student.modules.show', ['module' => $mod['id'], 'learn' => 1]) }}"
+                                    <a href="{{ route('student.modules.show', $mod['id']) }}"
                                        class="text-[15px] sm:text-lg font-black text-slate-900 group-hover:text-amber-700 transition-colors line-clamp-2 leading-snug">
                                         {{ $mod['title'] }}
                                     </a>
@@ -920,7 +896,7 @@
 
                             {{-- Card Footer Action --}}
                             <div class="p-6 pt-0">
-                                <a href="{{ route('student.modules.show', ['module' => $mod['id'], 'learn' => 1]) }}"
+                                <a href="{{ route('student.modules.show', $mod['id']) }}"
                                    class="w-full py-3 px-4 rounded-2xl text-white font-extrabold text-[11px] sm:text-xs transition-all shadow-md flex items-center justify-center gap-2 group-hover:scale-[1.01]
                                    {{ !empty($mod['is_active_in_class']) ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-emerald-600/25' : 'bg-amber-600 hover:bg-amber-500 shadow-amber-600/20' }}">
                                     <span>{{ !empty($mod['is_active_in_class']) && $mod['progress_percent'] == 0 ? 'Mulai Belajar (Sedang Dibahas di Kelas)' : ($mod['progress_percent'] >= 100 ? 'Buka & Pelajari Ulang Modul' : ($mod['progress_percent'] == 0 ? 'Mulai Belajar Modul' : 'Lanjutkan Belajar Modul')) }}</span>
@@ -1368,7 +1344,7 @@
                                 </div>
 
                                 <div>
-                                    <a href="{{ route('student.modules.show', ['module' => $mod['id'], 'learn' => 1]) }}"
+                                    <a href="{{ route('student.modules.show', $mod['id']) }}"
                                        class="text-[15px] sm:text-lg font-black text-slate-900 group-hover:text-blue-700 transition-colors line-clamp-2 leading-snug">
                                         {{ $mod['title'] }}
                                     </a>
@@ -1400,10 +1376,10 @@
                             </div>
 
                             <div class="p-6 pt-0">
-                                <a href="{{ route('student.modules.show', ['module' => $mod['id'], 'learn' => 1]) }}"
+                                <a href="{{ route('student.modules.show', $mod['id']) }}"
                                    class="w-full py-3 px-4 rounded-2xl text-white font-extrabold text-[11px] sm:text-xs transition-all shadow-md flex items-center justify-center gap-2
                                    {{ $mod['progress_status'] === 'completed' ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-600/20' : ($mod['progress_status'] === 'in_progress' ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-600/20' : 'bg-slate-900 hover:bg-blue-600') }}">
-                                    <span>{{ $mod['progress_status'] === 'completed' ? 'Buka & Pelajari Ulang' : ($mod['progress_status'] === 'in_progress' ? 'Lanjutkan Belajar Modul' : 'Mulai Belajar Modul') }}</span>
+                                    <span>{{ $mod['progress_status'] === 'completed' ? 'Buka & Pelajari Ulang' : ($mod['progress_status'] === 'in_progress' ? 'Lanjutkan Belajar' : 'Mulai Belajar Modul') }}</span>
                                     <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
                                     </svg>

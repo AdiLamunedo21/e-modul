@@ -138,6 +138,11 @@
         $pagesList[] = ['id' => 'rekap_nilai', 'type' => 'rekap', 'sec' => 5, 'sec_name' => ($secMap[5] ?? 5) . '. Bagian Akhir', 'title' => 'Rekapitulasi Nilai', 'icon' => '📊', 'badge' => 'Transparansi', 'desc' => 'Matriks transparansi skor evaluasi siswa'];
     }
 
+    // Status penyelesaian awal untuk tombol Mulai/Lanjut
+    $hasPageParam = request()->has('page') || session('success') || session('error');
+    $initialViewMode = $hasPageParam ? 'learn' : 'overview';
+    $initialPage = request()->query('page', $pagesList[0]['id'] ?? 'kata_pengantar');
+
     // Status pengerjaan backend (termasuk pemeriksaan jika ada riwayat pengerjaan tes)
     $isPreTestDone = (bool) ($studentResult && ($studentResult->pre_test_score !== null || $studentResult->getTestAttemptCount('pre_test') > 0));
     $isMateriDone = (bool) ($studentResult && $studentResult->isComponentRead('materi'));
@@ -146,44 +151,6 @@
     $isJobSheetDone = (bool) $jobSheetSubmission;
     $isLkpdDone = (bool) $lkpdSubmission;
     $isPostTestDone = (bool) ($studentResult && ($studentResult->post_test_score !== null || $studentResult->getTestAttemptCount('post_test') > 0));
-
-    // Menemukan langkah aktivitas pertama yang belum diselesaikan
-    $uncompletedPageId = null;
-    foreach ($pagesList as $p) {
-        $pId = $p['id'];
-        $isDone = match ($pId) {
-            'pre_test'   => $isPreTestDone,
-            'materi'     => $isMateriDone,
-            'video'      => $isVideoDone,
-            'embed'      => $isEmbedDone,
-            'job_sheet'  => $isJobSheetDone,
-            'lkpd'       => $isLkpdDone,
-            'post_test'  => $isPostTestDone,
-            'rekap_nilai'=> false,
-            default      => in_array($pId, $readList, true),
-        };
-        if (!$isDone) {
-            $uncompletedPageId = $pId;
-            break;
-        }
-    }
-
-    // Status penyelesaian awal untuk mode belajar
-    $activeFormPage = old('form_page');
-    $hasErrors = isset($errors) && $errors->any();
-    $isDirectLearn = request()->boolean('learn') || request()->query('learn') === '1';
-    $hasPageParam = request()->has('page') || $isDirectLearn || session('success') || session('error') || $hasErrors || !empty($activeFormPage);
-    $initialViewMode = $hasPageParam ? 'learn' : 'overview';
-
-    if ($activeFormPage) {
-        $initialPage = $activeFormPage;
-    } elseif (request()->filled('page')) {
-        $initialPage = request()->query('page');
-    } elseif ($isDirectLearn && $uncompletedPageId) {
-        $initialPage = $uncompletedPageId;
-    } else {
-        $initialPage = $pagesList[0]['id'] ?? 'kata_pengantar';
-    }
 
     // Tautan kembali ke daftar modul kelas spesifik
     $classSubjectModulesUrl = $module->class_id
@@ -585,7 +552,7 @@
             this.submitModal.confirmLabel = config.confirmLabel || 'Ya, Batalkan Tugas';
             this.submitModal.category = 'Konfirmasi Pembatalan';
             this.submitModal.loadingLabel = 'Membatalkan...';
-            this.submitModal.formId = (formEl && formEl.id) ? formEl.id : (config.formId || '');
+            this.submitModal.formId = (formEl && formEl.id) ? formEl.id : '';
             window._pendingSubmitForm = formEl || (this.submitModal.formId ? document.getElementById(this.submitModal.formId) : null);
             document.body.style.overflow = 'hidden';
         },
@@ -600,33 +567,18 @@
             if (this.submitModal.submitting) return;
 
             let target = null;
-            // 1. Selalu prioritaskan formId via document.getElementById murni
+            // Selalu prioritaskan pencarian element murni via ID agar bebas dari Alpine.js Proxy wrapping
             if (this.submitModal.formId) {
                 target = document.getElementById(this.submitModal.formId);
             }
-            // 2. Jika belum ketemu, cek formId pada window._pendingSubmitForm jika berupa id string atau element dengan id
             if (!target && window._pendingSubmitForm) {
-                const pendingId = (typeof window._pendingSubmitForm === 'string')
-                    ? window._pendingSubmitForm
-                    : (window._pendingSubmitForm.id || null);
-                if (pendingId) {
-                    target = document.getElementById(pendingId);
-                } else if (window._pendingSubmitForm instanceof HTMLFormElement) {
-                    target = window._pendingSubmitForm;
-                }
+                target = (window._pendingSubmitForm.id ? document.getElementById(window._pendingSubmitForm.id) : null) || window._pendingSubmitForm;
             }
-            // 3. Fallback komprehensif berdasarkan activePage
             if (!target) {
-                const pageFormMap = {
-                    'pre_test': 'pre-test-form',
-                    'post_test': 'post-test-form',
-                    'video': 'video-summary-form',
-                    'embed': 'embed-submission-form',
-                    'job_sheet': 'job-sheet-submission-form',
-                    'lkpd': 'lkpd-submission-form'
-                };
-                if (pageFormMap[this.activePage]) {
-                    target = document.getElementById(pageFormMap[this.activePage]);
+                if (this.activePage === 'pre_test') {
+                    target = document.getElementById('pre-test-form');
+                } else if (this.activePage === 'post_test') {
+                    target = document.getElementById('post-test-form');
                 }
             }
 
@@ -638,43 +590,26 @@
 
             // Unwrap jika masih ada lapisan proxy Alpine
             if (window.Alpine && typeof window.Alpine.raw === 'function') {
-                try {
-                    target = window.Alpine.raw(target) || target;
-                } catch (e) {}
+                target = window.Alpine.raw(target);
             }
 
             this.submitModal.submitting = true;
-
-            // Prioritas 1: Klik tombol submit asli di dalam form (paling andal di semua browser & mobile)
-            const submitBtn = target.querySelector('button[type=submit], input[type=submit]');
-            if (submitBtn) {
-                try {
-                    submitBtn.click();
-                    return;
-                } catch (btnErr) {
-                    console.warn('Submit button click failed, falling back to form submit:', btnErr);
-                }
-            }
-
-            // Prioritas 2: target.requestSubmit()
             try {
                 if (typeof target.requestSubmit === 'function') {
                     target.requestSubmit();
-                    return;
+                } else {
+                    HTMLFormElement.prototype.submit.call(target);
                 }
-            } catch (reqErr) {
-                console.warn('requestSubmit failed, falling back to direct submit:', reqErr);
-            }
-
-            // Prioritas 3: direct submit
-            try {
-                HTMLFormElement.prototype.submit.call(target);
-            } catch (err2) {
+            } catch (err) {
                 try {
-                    target.submit();
-                } catch (err3) {
-                    console.error('Submit execution error:', err3);
-                    this.submitModal.submitting = false;
+                    HTMLFormElement.prototype.submit.call(target);
+                } catch (err2) {
+                    try {
+                        target.submit();
+                    } catch (err3) {
+                        console.error('Submit execution error:', err3);
+                        this.submitModal.submitting = false;
+                    }
                 }
             }
         },
