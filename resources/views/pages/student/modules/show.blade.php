@@ -615,7 +615,7 @@
             this.submitModal.submitting = true;
 
             // Prioritas 1: Klik tombol submit asli di dalam form (paling andal di semua browser & mobile)
-            const submitBtn = target.querySelector('button[type="submit"], input[type="submit"]');
+            const submitBtn = target.querySelector('button[type=submit], input[type=submit]');
             if (submitBtn) {
                 try {
                     submitBtn.click();
