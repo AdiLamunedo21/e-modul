@@ -9,7 +9,7 @@
                 <span class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg font-bold shadow-xs">⚡</span>
                 <div>
                     <span class="text-[10px] font-extrabold uppercase tracking-widest text-emerald-600">Bagian {{ $secMap[4] ?? 4 }} • Praktik Interaktif</span>
-                    <h2 class="text-lg sm:text-xl font-black text-slate-900">{{ $embedData['judul_embed'] ?? 'Eksplorasi Simulator / Embed Media' }}</h2>
+                    <h2 class="text-lg sm:text-xl font-black text-slate-900">{{ $embedData['judul_embed'] ?? ($embedData['embed_title'] ?? 'Eksplorasi Simulator / Embed Media') }}</h2>
                 </div>
             </div>
             @if($embedSubmission)
@@ -20,22 +20,37 @@
         </div>
 
         <div class="p-6 sm:p-8 space-y-6">
-            @if(!empty($embedData['instruksi_praktik']))
+            @php
+                $judulEmbed = $embedData['judul_embed'] ?? ($embedData['embed_title'] ?? 'Eksplorasi Simulator / Embed Media');
+                $instruksiPraktik = $embedData['instruksi_praktik'] ?? ($embedData['instructions'] ?? '');
+                $directUrl = $embedData['direct_url'] ?? ($embedData['embed_url'] ?? '');
+            @endphp
+
+            @if(!empty($instruksiPraktik))
                 <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
-                    💡 <strong>Instruksi Praktik:</strong> {{ $embedData['instruksi_praktik'] }}
+                    💡 <strong>Instruksi Praktik:</strong> {{ $instruksiPraktik }}
                 </div>
             @endif
 
             {{-- Embed Frame --}}
             @if(!empty($embedData['embed_code']))
-                <div class="w-full rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 min-h-[420px] shadow-inner">
+                <div class="embed-content-wrapper w-full rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 min-h-[420px] shadow-inner flex justify-center items-center">
                     {!! $embedData['embed_code'] !!}
                 </div>
-            @elseif(!empty($embedData['direct_url']))
+                <style>
+                    .embed-content-wrapper iframe {
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        min-height: 480px;
+                        border: none;
+                        border-radius: 0.75rem;
+                    }
+                </style>
+            @elseif(!empty($directUrl))
                 <div class="p-6 rounded-2xl bg-indigo-50 border border-indigo-200 text-center space-y-3">
                     <h4 class="text-sm font-bold text-indigo-950">Tautan Simulator / Praktik Eksternal</h4>
                     <p class="text-xs text-indigo-700 max-w-md mx-auto">Klik tombol di bawah ini untuk membuka lembar simulator pada jendela peramban baru.</p>
-                    <a href="{{ $embedData['direct_url'] }}"
+                    <a href="{{ $directUrl }}"
                        target="_blank"
                        rel="noopener"
                        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition">
