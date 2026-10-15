@@ -647,6 +647,9 @@
         }
      }">
 
+    {{-- MODAL KONFIRMASI PENGIRIMAN JAWABAN (UNIVERSAL) --}}
+    @include('pages.student.modules.partials.modal-submit')
+
     {{-- ═══ 1. STICKY TOP HEADER & BREADCRUMB ═══ --}}
     <div x-show="!isTakingTest">
         @include('pages.student.modules.partials.header')
@@ -706,9 +709,6 @@
         </div>
 
     </div>
-
-    {{-- MODAL KONFIRMASI PENGIRIMAN JAWABAN (UNIVERSAL) --}}
-    @include('pages.student.modules.partials.modal-submit')
 
 </div>
 

@@ -71,7 +71,8 @@
                     {{ $session->module->title }} — <span class="text-slate-300">{{ $session->schoolClass->name ?? 'Semua Kelas' }}</span>
                 </p>
             </div>
-            {{-- Status Indicator & Action Controls --}}
+        </div>
+        {{-- Status Indicator & Action Controls --}}
         <div class="flex items-center gap-3">
             <div class="hidden sm:flex items-center gap-2 bg-slate-900/90 border border-emerald-500/30 px-3.5 py-1.5 rounded-xl shadow-inner">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>

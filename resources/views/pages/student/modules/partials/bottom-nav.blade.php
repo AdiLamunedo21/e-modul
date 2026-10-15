@@ -63,6 +63,7 @@
     </div>
 
     {{-- Tombol Kanan: Selanjutnya --}}
+    <div class="flex items-center gap-2">
         <template x-if="nextPage">
             <button type="button"
                     @click="isCompleted(activePage) ? goToPage(nextPage.id) : showLockedNotice()"
