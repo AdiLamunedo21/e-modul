@@ -214,7 +214,7 @@
                             <span class="text-[10px] font-bold {{ $recMod['progress_status'] === 'completed' ? 'text-emerald-700' : 'text-amber-700' }}">
                                 {{ $recMod['progress_status'] === 'completed' ? 'Tuntas' : 'Sedang Berjalan' }}
                             </span>
-                            <a href="{{ route('student.modules.show', $recMod['id']) }}"
+                            <a href="{{ route('student.modules.show', ['module' => $recMod['id'], 'learn' => 1]) }}"
                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition">
                                 <span>{{ $recMod['progress_status'] === 'completed' ? 'Mulai Belajar' : ($recMod['progress_status'] === 'in_progress' ? 'Lanjutkan Belajar Modul' : 'Mulai Belajar') }}</span>
                                 <span>→</span>
@@ -368,7 +368,7 @@
 
                     {{-- Action Button --}}
                     <div class="pt-4 mt-4 border-t border-slate-100">
-                        <a href="{{ route('student.modules.show', $mod['id']) }}"
+                        <a href="{{ route('student.modules.show', ['module' => $mod['id'], 'learn' => 1]) }}"
                            class="w-full py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-xs
                            {{ $mod['progress_status'] === 'completed'
                                ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
@@ -408,7 +408,7 @@
                             <td class="py-3.5 px-4 font-bold text-slate-900">
                                 <div>
                                     <div class="flex items-center gap-1.5 flex-wrap">
-                                        <a href="{{ route('student.modules.show', $mod['id']) }}" class="hover:text-emerald-600 font-extrabold">
+                                        <a href="{{ route('student.modules.show', ['module' => $mod['id'], 'learn' => 1]) }}" class="hover:text-emerald-600 font-extrabold">
                                             {{ $mod['title'] }}
                                         </a>
                                         @if(!empty($mod['semester_badge']))
@@ -455,7 +455,7 @@
                                 <span class="text-[10px] text-slate-400 font-bold">{{ $mod['progress_percent'] }}%</span>
                             </td>
                             <td class="py-3.5 px-4 text-right">
-                                <a href="{{ route('student.modules.show', $mod['id']) }}"
+                                <a href="{{ route('student.modules.show', ['module' => $mod['id'], 'learn' => 1]) }}"
                                    class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition inline-flex items-center gap-1">
                                     <span>Mulai Belajar</span>
                                     <span>→</span>

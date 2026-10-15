@@ -138,13 +138,6 @@
         $pagesList[] = ['id' => 'rekap_nilai', 'type' => 'rekap', 'sec' => 5, 'sec_name' => ($secMap[5] ?? 5) . '. Bagian Akhir', 'title' => 'Rekapitulasi Nilai', 'icon' => '📊', 'badge' => 'Transparansi', 'desc' => 'Matriks transparansi skor evaluasi siswa'];
     }
 
-    // Status penyelesaian awal untuk tombol Mulai/Lanjut
-    $activeFormPage = old('form_page');
-    $hasErrors = isset($errors) && $errors->any();
-    $hasPageParam = request()->has('page') || session('success') || session('error') || $hasErrors || !empty($activeFormPage);
-    $initialViewMode = $hasPageParam ? 'learn' : 'overview';
-    $initialPage = $activeFormPage ?: request()->query('page', $pagesList[0]['id'] ?? 'kata_pengantar');
-
     // Status pengerjaan backend (termasuk pemeriksaan jika ada riwayat pengerjaan tes)
     $isPreTestDone = (bool) ($studentResult && ($studentResult->pre_test_score !== null || $studentResult->getTestAttemptCount('pre_test') > 0));
     $isMateriDone = (bool) ($studentResult && $studentResult->isComponentRead('materi'));
@@ -153,6 +146,44 @@
     $isJobSheetDone = (bool) $jobSheetSubmission;
     $isLkpdDone = (bool) $lkpdSubmission;
     $isPostTestDone = (bool) ($studentResult && ($studentResult->post_test_score !== null || $studentResult->getTestAttemptCount('post_test') > 0));
+
+    // Menemukan langkah aktivitas pertama yang belum diselesaikan
+    $uncompletedPageId = null;
+    foreach ($pagesList as $p) {
+        $pId = $p['id'];
+        $isDone = match ($pId) {
+            'pre_test'   => $isPreTestDone,
+            'materi'     => $isMateriDone,
+            'video'      => $isVideoDone,
+            'embed'      => $isEmbedDone,
+            'job_sheet'  => $isJobSheetDone,
+            'lkpd'       => $isLkpdDone,
+            'post_test'  => $isPostTestDone,
+            'rekap_nilai'=> false,
+            default      => in_array($pId, $readList, true),
+        };
+        if (!$isDone) {
+            $uncompletedPageId = $pId;
+            break;
+        }
+    }
+
+    // Status penyelesaian awal untuk mode belajar
+    $activeFormPage = old('form_page');
+    $hasErrors = isset($errors) && $errors->any();
+    $isDirectLearn = request()->boolean('learn') || request()->query('learn') === '1';
+    $hasPageParam = request()->has('page') || $isDirectLearn || session('success') || session('error') || $hasErrors || !empty($activeFormPage);
+    $initialViewMode = $hasPageParam ? 'learn' : 'overview';
+
+    if ($activeFormPage) {
+        $initialPage = $activeFormPage;
+    } elseif (request()->filled('page')) {
+        $initialPage = request()->query('page');
+    } elseif ($isDirectLearn && $uncompletedPageId) {
+        $initialPage = $uncompletedPageId;
+    } else {
+        $initialPage = $pagesList[0]['id'] ?? 'kata_pengantar';
+    }
 
     // Tautan kembali ke daftar modul kelas spesifik
     $classSubjectModulesUrl = $module->class_id
