@@ -307,12 +307,34 @@ class DashboardController extends Controller
         });
 
         // Kategori modul terpisah untuk akses cepat tab dashboard:
-        // Tab Sedang Dikerjakan HANYA menampilkan SATU modul aktif di kelas (seperti pergantian mapel di kelas).
-        // Prioritas utama adalah modul yang sedang aktif diajarkan guru di kelas (is_active_in_class = true).
-        // Jika tidak ada modul aktif di kelas, tampilkan maksimal 1 modul yang sedang dikerjakan siswa.
+        // Tab Sedang Dikerjakan menampilkan modul aktif di kelas dan modul yang sedang dikerjakan siswa.
         $inProgressModules = $processedModules->filter(function ($m) {
             return !empty($m['is_active_in_class']) || $m['progress_status'] === 'in_progress';
-        })->sortByDesc('is_active_in_class')->take(1)->values();
+        })->sortByDesc(function ($m) {
+            return [
+                !empty($m['is_active_in_class']) ? 1 : 0,
+                $m['progress_status'] === 'in_progress' ? 1 : 0,
+                $m['progress_percent'],
+            ];
+        })->values();
+
+        // Modul acuan untuk kartu aksi cepat "Lanjutkan Belajar Modul" di atas dashboard siswa:
+        // 1. Modul yang sedang dikerjakan siswa (progress_status === 'in_progress', diurutkan persentase tertinggi)
+        // 2. Atau modul yang sedang aktif diajarkan guru di kelas (is_active_in_class = true)
+        // 3. Atau modul pembelajaran terbit pertama yang belum tuntas
+        $lastActiveModule = $processedModules->filter(function ($m) {
+            return $m['progress_status'] === 'in_progress';
+        })->sortByDesc('progress_percent')->first();
+
+        if (!$lastActiveModule) {
+            $lastActiveModule = $processedModules->firstWhere('is_active_in_class', true);
+        }
+
+        if (!$lastActiveModule) {
+            $lastActiveModule = $processedModules->filter(function ($m) {
+                return $m['progress_status'] !== 'completed';
+            })->first();
+        }
 
         $completedModules = $processedModules->where('progress_status', 'completed')->values();
 
@@ -321,8 +343,9 @@ class DashboardController extends Controller
 
         // Tentukan default tab pembukaan jika tidak ada parameter status di URL:
         // Jika ada pembelajaran aktif (in_progress > 0), buka 'in_progress' (Sedang Dikerjakan).
-        // Jika tidak ada pembelajaran aktif, buka 'classes' (Kelas Saya).
-        $defaultTab = $inProgressModules->isNotEmpty() ? 'in_progress' : 'classes';
+        // Jika seluruh modul telah tuntas selesai, buka 'completed'.
+        // Jika belum ada modul sama sekali, buka 'classes'.
+        $defaultTab = $inProgressModules->isNotEmpty() ? 'in_progress' : ($completedModules->isNotEmpty() ? 'completed' : 'classes');
         $filterStatus = $request->query('status', $defaultTab);
         $filterSubject = $request->query('subject', 'all');
 
@@ -469,7 +492,8 @@ class DashboardController extends Controller
             'defaultTab',
             'allPendingTasks',
             'isNewlyRegistered',
-            'activeLiveQuiz'
+            'activeLiveQuiz',
+            'lastActiveModule'
         ));
     }
 
