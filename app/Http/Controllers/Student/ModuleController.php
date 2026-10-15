@@ -308,11 +308,14 @@ class ModuleController extends Controller
         $this->authorizeStudentAccess($module);
         abort_if(!$module->has_video, 403, 'Komponen Video tidak aktif pada modul ini.');
 
+        $videoData = $module->video_data ?? [];
+        $minChars = max(10, (int) ($videoData['min_summary_chars'] ?? 20));
+
         $validated = $request->validate([
-            'summary_text' => ['required', 'string', 'min:20'],
+            'summary_text' => ['required', 'string', 'min:' . $minChars],
         ], [
             'summary_text.required' => 'Teks ringkasan materi video wajib diisi.',
-            'summary_text.min'      => 'Ringkasan materi video minimal harus terdiri dari 20 karakter.',
+            'summary_text.min'      => 'Ringkasan materi video minimal harus terdiri dari ' . $minChars . ' karakter.',
         ]);
 
         $student = $this->student();
@@ -538,7 +541,8 @@ class ModuleController extends Controller
                 $sub = VideoSummary::where('module_id', $module->id)->where('student_id', $student->id)->first();
                 if ($sub && $sub->manual_score === null) {
                     $sub->delete();
-                    return back()->with('success', 'Ringkasan video dibatalkan. Anda dapat menulis ulang ringkasan Anda.');
+                    return redirect()->route('student.modules.show', ['module' => $module->id, 'page' => 'video'])
+                        ->with('success', 'Ringkasan video dibatalkan. Anda dapat menulis ulang ringkasan Anda.');
                 }
                 break;
 
@@ -549,7 +553,8 @@ class ModuleController extends Controller
                         Storage::disk('public')->delete($sub->screenshot_path);
                     }
                     $sub->delete();
-                    return back()->with('success', 'Unggahan screenshot simulator dibatalkan. Anda dapat mengunggah ulang.');
+                    return redirect()->route('student.modules.show', ['module' => $module->id, 'page' => 'embed'])
+                        ->with('success', 'Unggahan screenshot simulator dibatalkan. Anda dapat mengunggah ulang.');
                 }
                 break;
 
@@ -562,7 +567,8 @@ class ModuleController extends Controller
                             Storage::disk('public')->delete($sub->uploaded_file_path);
                         }
                         $sub->delete();
-                        return back()->with('success', 'Unggahan laporan Job Sheet PDF dibatalkan. Anda dapat mengunggah ulang.');
+                        return redirect()->route('student.modules.show', ['module' => $module->id, 'page' => 'job_sheet'])
+                            ->with('success', 'Unggahan laporan Job Sheet PDF dibatalkan. Anda dapat mengunggah ulang.');
                     }
                 }
                 break;
@@ -576,13 +582,15 @@ class ModuleController extends Controller
                             Storage::disk('public')->delete($sub->uploaded_file_path);
                         }
                         $sub->delete();
-                        return back()->with('success', 'Unggahan tugas LKPD PDF dibatalkan. Anda dapat mengunggah ulang.');
+                        return redirect()->route('student.modules.show', ['module' => $module->id, 'page' => 'lkpd'])
+                            ->with('success', 'Unggahan tugas LKPD PDF dibatalkan. Anda dapat mengunggah ulang.');
                     }
                 }
                 break;
         }
 
-        return back()->with('error', 'Tugas tidak dapat dibatalkan karena telah dinilai oleh guru atau tidak ditemukan.');
+        return redirect()->route('student.modules.show', ['module' => $module->id, 'page' => $type])
+            ->with('error', 'Tugas tidak dapat dibatalkan karena telah dinilai oleh guru atau tidak ditemukan.');
     }
 
     /**
