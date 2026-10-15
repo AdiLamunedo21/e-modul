@@ -307,7 +307,7 @@ class DashboardController extends Controller
         });
 
         // Kategori modul terpisah untuk akses cepat tab dashboard:
-        // Tab Sedang Dikerjakan menampilkan modul aktif di kelas dan modul yang sedang dikerjakan siswa.
+        // Tab Sedang Dikerjakan menampilkan modul aktif di kelas dan modul yang sedang dikerjakan siswa (dibatasi 1 modul).
         $inProgressModules = $processedModules->filter(function ($m) {
             return !empty($m['is_active_in_class']) || $m['progress_status'] === 'in_progress';
         })->sortByDesc(function ($m) {
@@ -316,7 +316,7 @@ class DashboardController extends Controller
                 $m['progress_status'] === 'in_progress' ? 1 : 0,
                 $m['progress_percent'],
             ];
-        })->values();
+        })->take(1)->values();
 
         // Modul acuan untuk kartu aksi cepat "Lanjutkan Belajar Modul" di atas dashboard siswa:
         // 1. Modul yang sedang dikerjakan siswa (progress_status === 'in_progress', diurutkan persentase tertinggi)

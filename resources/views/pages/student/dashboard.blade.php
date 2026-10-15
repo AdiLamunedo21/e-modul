@@ -510,48 +510,6 @@
             {{-- ══ 3. INTERACTIVE NAVIGATION TABS & FILTER HUB ══ --}}
             <div id="student-main-tabs-content" class="space-y-6">
 
-                {{-- ══ KARTU UTAMA CEPAT: LANJUTKAN BELAJAR MODUL ══ --}}
-                @if(!empty($lastActiveModule))
-                    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 sm:p-7 text-white shadow-xl shadow-slate-950/20 border border-indigo-500/30">
-                        <div class="absolute -right-10 -bottom-10 w-56 h-56 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none"></div>
-                        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
-                            <div class="space-y-2 max-w-2xl">
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/30 text-[11px] font-black uppercase tracking-wider text-amber-300">
-                                        <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
-                                        <span>Lanjutkan Belajar Modul</span>
-                                    </span>
-                                    <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold bg-indigo-500/20 text-indigo-200 border border-indigo-400/30">
-                                        {{ $lastActiveModule['subject_name'] }}
-                                    </span>
-                                    <span class="text-xs text-slate-400 font-medium">• {{ $lastActiveModule['class_name'] }}</span>
-                                </div>
-                                <h2 class="text-lg sm:text-2xl font-black text-white tracking-tight leading-snug">
-                                    {{ $lastActiveModule['title'] }}
-                                </h2>
-                                <div class="flex items-center gap-3 text-xs text-slate-300 pt-1 flex-wrap">
-                                    <span>Guru: <strong class="text-white">{{ $lastActiveModule['teacher_name'] }}</strong></span>
-                                    <span>•</span>
-                                    <span>Progres: <strong class="text-emerald-400 font-bold">{{ $lastActiveModule['completed_tasks'] }}/{{ $lastActiveModule['total_components'] }} Komponen ({{ $lastActiveModule['progress_percent'] }}%)</strong></span>
-                                </div>
-                                <div class="w-full bg-slate-800/80 rounded-full h-2 overflow-hidden max-w-md mt-2">
-                                    <div class="h-2 rounded-full bg-gradient-to-r from-amber-500 to-emerald-500 transition-all duration-500" style="width: {{ $lastActiveModule['progress_percent'] }}%"></div>
-                                </div>
-                            </div>
-
-                            <div class="shrink-0">
-                                <a href="{{ route('student.modules.show', $lastActiveModule['id']) }}"
-                                   class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs sm:text-sm shadow-xl shadow-amber-500/20 transition-all transform hover:scale-105 active:scale-95">
-                                    <span>{{ $lastActiveModule['progress_percent'] > 0 ? 'Lanjutkan Belajar Modul' : 'Mulai Belajar Modul' }}</span>
-                                    <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
-                                    </svg>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-
                 {{-- ═══ TAB SELECTOR NAVIGATION BAR (KHUSUS DESKTOP, PADA MOBILE DIGANTIKAN BOTTOM NAV) ═══ --}}
                 <div class="hidden lg:flex items-center justify-between gap-3 border-b border-slate-200/80 pb-3">
                 <div class="inline-flex p-1.5 rounded-2xl bg-slate-200/70 border border-slate-300/60 backdrop-blur-sm gap-1 overflow-x-auto max-w-full no-scrollbar">
@@ -785,30 +743,6 @@
                                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                                                 <span>{{ $activeInThisClass }} Modul Sedang Dibahas di Kelas</span>
                                             </span>
-                                        </div>
-                                    @endif
-
-                                    {{-- Daftar Modul Pembelajaran di Kelas Ini --}}
-                                    @if($classItem['modules']->isNotEmpty())
-                                        <div class="pt-3 border-t border-slate-100 space-y-2">
-                                            <p class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400">Modul Pembelajaran:</p>
-                                            <div class="space-y-1.5">
-                                                @foreach($classItem['modules']->take(3) as $cMod)
-                                                    <a href="{{ route('student.modules.show', $cMod['id']) }}"
-                                                       class="flex items-center justify-between p-2 rounded-xl bg-slate-50 hover:bg-emerald-50 border border-slate-200/70 hover:border-emerald-300 transition-all group/mod text-left">
-                                                        <div class="flex items-center gap-2 min-w-0 pr-2">
-                                                            <span class="text-xs">📖</span>
-                                                            <span class="text-[11px] sm:text-xs font-bold text-slate-800 group-hover/mod:text-emerald-700 truncate">{{ $cMod['title'] }}</span>
-                                                        </div>
-                                                        <span class="shrink-0 text-[10px] font-extrabold px-2 py-0.5 rounded-full {{ $cMod['progress_status'] === 'completed' ? 'bg-emerald-100 text-emerald-700' : (!empty($cMod['is_active_in_class']) ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700') }}">
-                                                            {{ $cMod['progress_status'] === 'completed' ? '✓ Selesai' : (!empty($cMod['is_active_in_class']) ? 'Aktif di Kelas' : ($cMod['progress_percent'] > 0 ? $cMod['progress_percent'] . '%' : 'Mulai')) }}
-                                                        </span>
-                                                    </a>
-                                                @endforeach
-                                                @if($classItem['modules']->count() > 3)
-                                                    <p class="text-[10px] text-slate-400 text-center font-medium">+ {{ $classItem['modules']->count() - 3 }} modul lainnya</p>
-                                                @endif
-                                            </div>
                                         </div>
                                     @endif
                                 </div>
