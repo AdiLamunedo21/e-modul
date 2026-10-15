@@ -101,12 +101,12 @@
                         <input type="hidden" name="form_page" value="embed">
                         <button type="submit" id="embed-submission-submit-trigger" class="hidden"></button>
 
-                        @error('screenshot')
+                        @if(isset($errors) && $errors->has('screenshot'))
                             <div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
                                 <span>⚠️</span>
-                                <span>{{ $message }}</span>
+                                <span>{{ $errors->first('screenshot') }}</span>
                             </div>
-                        @enderror
+                        @endif
 
                         <div class="border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center hover:border-indigo-400 bg-slate-50/50 transition">
                             <template x-if="!previewUrl">

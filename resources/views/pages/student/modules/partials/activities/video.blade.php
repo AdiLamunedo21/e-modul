@@ -145,12 +145,12 @@
                         <input type="hidden" name="form_page" value="video">
                         <button type="submit" id="video-summary-submit-trigger" class="hidden"></button>
 
-                        @error('summary_text')
+                        @if(isset($errors) && $errors->has('summary_text'))
                             <div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
                                 <span>⚠️</span>
-                                <span>{{ $message }}</span>
+                                <span>{{ $errors->first('summary_text') }}</span>
                             </div>
-                        @enderror
+                        @endif
 
                         <textarea name="summary_text"
                                   x-model="summaryText"
