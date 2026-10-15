@@ -440,7 +440,7 @@
 
                 if (requiredStatus === 'in_progress') {
                     const inList = this.inProgressModules && this.inProgressModules.some(m => m.id === item.id);
-                    if (!inList && !item.is_active_in_class && item.progress_status !== 'in_progress') {
+                    if (!inList) {
                         return false;
                     }
                 } else if (requiredStatus && item.progress_status !== requiredStatus) {
@@ -450,7 +450,7 @@
                 if (!requiredStatus && this.selectedStatus !== 'all') {
                     if (this.selectedStatus === 'in_progress') {
                         const inList = this.inProgressModules && this.inProgressModules.some(m => m.id === item.id);
-                        if (!inList && !item.is_active_in_class && item.progress_status !== 'in_progress') {
+                        if (!inList) {
                             return false;
                         }
                     } else if (item.progress_status !== this.selectedStatus) {
@@ -745,6 +745,30 @@
                                             </span>
                                         </div>
                                     @endif
+
+                                    {{-- Daftar Modul Pembelajaran di Kelas Ini --}}
+                                    @if($classItem['modules']->isNotEmpty())
+                                        <div class="pt-3 border-t border-slate-100 space-y-2">
+                                            <p class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400">Modul Pembelajaran:</p>
+                                            <div class="space-y-1.5">
+                                                @foreach($classItem['modules']->take(3) as $cMod)
+                                                    <a href="{{ route('student.modules.show', $cMod['id']) }}"
+                                                       class="flex items-center justify-between p-2 rounded-xl bg-slate-50 hover:bg-emerald-50 border border-slate-200/70 hover:border-emerald-300 transition-all group/mod text-left">
+                                                        <div class="flex items-center gap-2 min-w-0 pr-2">
+                                                            <span class="text-xs">📖</span>
+                                                            <span class="text-[11px] sm:text-xs font-bold text-slate-800 group-hover/mod:text-emerald-700 truncate">{{ $cMod['title'] }}</span>
+                                                        </div>
+                                                        <span class="shrink-0 text-[10px] font-extrabold px-2 py-0.5 rounded-full {{ $cMod['progress_status'] === 'completed' ? 'bg-emerald-100 text-emerald-700' : (!empty($cMod['is_active_in_class']) ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700') }}">
+                                                            {{ $cMod['progress_status'] === 'completed' ? '✓ Selesai' : (!empty($cMod['is_active_in_class']) ? 'Aktif di Kelas' : ($cMod['progress_percent'] > 0 ? $cMod['progress_percent'] . '%' : 'Mulai')) }}
+                                                        </span>
+                                                    </a>
+                                                @endforeach
+                                                @if($classItem['modules']->count() > 3)
+                                                    <p class="text-[10px] text-slate-400 text-center font-medium">+ {{ $classItem['modules']->count() - 3 }} modul lainnya</p>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
 
@@ -789,7 +813,31 @@
             {{-- ══════════════════════════════════════════════════════════════════════ --}}
             <div x-show="activeTab === 'in_progress'" x-cloak class="space-y-6">
 
-                {{-- Grid Card Modul Sedang Dikerjakan (Maksimal 1 Modul Aktif Sesuai Pergantian Mapel di Kelas) --}}
+                {{-- Status Counter Bar --}}
+                <div class="flex items-center justify-between gap-3 px-1">
+                    <div>
+                        <h2 class="text-[17px] sm:text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                            <span>⏳</span>
+                            <span>Modul Sedang Dikerjakan</span>
+                        </h2>
+                        <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Daftar e-modul pembelajaran yang ditugaskan & sedang aktif dipelajari di kelas Anda.</p>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[11px] sm:text-xs font-extrabold"
+                              x-text="countVisibleInProgressModules() + ' Modul Aktif'">
+                        </span>
+                        <div x-show="hasActiveFilters" x-cloak>
+                            <button type="button"
+                                    @click="resetFilters()"
+                                    class="text-[11px] sm:text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline ml-2">
+                                ✕ Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Grid Card Modul Sedang Dikerjakan --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @forelse($inProgressModules as $mod)
                         <div x-show="matchesModule(inProgressModules.find(m => m.id === {{ $mod['id'] }}), 'in_progress')"
