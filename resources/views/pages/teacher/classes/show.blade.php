@@ -27,6 +27,7 @@
     @include('pages.teacher.classes.partials.modal-import')
     @include('pages.teacher.classes.partials.modal-delete')
     @include('pages.teacher.classes.partials.modal-student-summary')
+    @include('pages.teacher.modules.partials.delete-modal')
 
 </div>
 

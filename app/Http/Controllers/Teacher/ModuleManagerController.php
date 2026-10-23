@@ -328,7 +328,16 @@ class ModuleManagerController extends Controller
                 ]);
             }
 
-            return redirect()->route('teacher.modules.index')->with('success', "Modul \"{$title}\" berhasil dihapus permanen.");
+            if (request()->filled('redirect_to')) {
+                return redirect(request()->input('redirect_to'))->with('success', "Modul \"{$title}\" berhasil dihapus permanen.");
+            }
+
+            // Jika dipanggil langsung dari halaman show modul, kembalikan ke daftar modul
+            if (url()->previous() === route('teacher.modules.show', $module)) {
+                return redirect()->route('teacher.modules.index')->with('success', "Modul \"{$title}\" berhasil dihapus permanen.");
+            }
+
+            return redirect()->back()->with('success', "Modul \"{$title}\" berhasil dihapus permanen.");
         } catch (\Throwable $e) {
             Log::error('Gagal menghapus modul: ' . $e->getMessage(), [
                 'module_id' => $module->id,
@@ -342,7 +351,11 @@ class ModuleManagerController extends Controller
                 ], 500);
             }
 
-            return redirect()->route('teacher.modules.index')->with('error', 'Gagal menghapus modul: ' . $e->getMessage());
+            if (request()->filled('redirect_to')) {
+                return redirect(request()->input('redirect_to'))->with('error', 'Gagal menghapus modul: ' . $e->getMessage());
+            }
+
+            return redirect()->back()->with('error', 'Gagal menghapus modul: ' . $e->getMessage());
         }
     }
 
