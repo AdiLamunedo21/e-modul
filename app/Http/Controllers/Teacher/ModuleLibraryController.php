@@ -173,31 +173,43 @@ class ModuleLibraryController extends Controller
         }
 
         $validated = $request->validate([
-            'class_id' => ['required', 'exists:classes,id'],
-            'title'    => ['nullable', 'string', 'max:255'],
+            'class_id'     => ['required', 'exists:classes,id'],
+            'title'        => ['nullable', 'string', 'max:255'],
+            'custom_title' => ['nullable', 'string', 'max:255'],
         ], [
             'class_id.required' => 'Pilih target kelas binaan untuk modul salinan ini.',
             'class_id.exists'   => 'Kelas binaan yang dipilih tidak valid.',
         ]);
 
-        $customTitle = $validated['title'] ? trim($validated['title']) : null;
+        $titleInput = $validated['title'] ?? $validated['custom_title'] ?? $request->input('title') ?? $request->input('custom_title');
+        $customTitle = !empty($titleInput) ? trim($titleInput) : null;
 
-        // Eksekusi Deep Copy
-        $newModule = $module->cloneToTeacher($currentTeacher, (int) $validated['class_id'], $customTitle);
+        try {
+            // Eksekusi Deep Copy
+            $newModule = $module->cloneToTeacher($currentTeacher, (int) $validated['class_id'], $customTitle);
 
-        if ($newModule->subject_id) {
-            $currentTeacher->subjects()->syncWithoutDetaching([$newModule->subject_id]);
+            if ($newModule->subject_id) {
+                $currentTeacher->subjects()->syncWithoutDetaching([$newModule->subject_id]);
+            }
+
+            if ($newModule->class_id) {
+                $currentTeacher->classes()->syncWithoutDetaching([$newModule->class_id]);
+                $schoolClass = SchoolClass::find($newModule->class_id);
+                $schoolClass?->syncAllStudentsSubjects();
+            }
+
+            return redirect()
+                ->route('teacher.modules.show', $newModule)
+                ->with('success', "Modul \"{$newModule->title}\" berhasil disalin ke workspace Anda! Seluruh komponen siap disesuaikan secara mandiri.");
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Gagal menyalin modul dari library: ' . $e->getMessage(), [
+                'module_id'  => $module->id,
+                'teacher_id' => $currentTeacher->id,
+                'exception'  => $e,
+            ]);
+
+            return back()->withInput()->with('error', 'Terjadi kesalahan saat menyalin modul: ' . $e->getMessage());
         }
-
-        if ($newModule->class_id) {
-            $currentTeacher->classes()->syncWithoutDetaching([$newModule->class_id]);
-            $schoolClass = SchoolClass::find($newModule->class_id);
-            $schoolClass?->syncAllStudentsSubjects();
-        }
-
-        return redirect()
-            ->route('teacher.modules.show', $newModule)
-            ->with('success', "Modul \"{$newModule->title}\" berhasil disalin ke workspace Anda! Seluruh komponen siap disesuaikan secara mandiri.");
     }
 
     /**

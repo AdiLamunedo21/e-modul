@@ -535,7 +535,7 @@
                 <label for="custom_title" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                     Judul Baru Modul (Opsional)
                 </label>
-                <input type="text" name="custom_title" id="custom_title"
+                <input type="text" name="title" id="custom_title"
                        placeholder="Biarkan kosong untuk menggunakan judul asli"
                        class="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-medium">
             </div>
@@ -548,7 +548,7 @@
                         class="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-semibold cursor-pointer">
                     <option value="">-- Pilih Kelas Target Pembelajaran --</option>
                     @foreach($allClasses as $cls)
-                        <option value="{{ $cls->id }}">{{ $cls->grade }} {{ $cls->major_name }}</option>
+                        <option value="{{ $cls->id }}">{{ $cls->full_name ?? ($cls->grade . ' ' . $cls->major_name . ($cls->section ? ' ' . $cls->section : '')) }}</option>
                     @endforeach
                 </select>
                 <p class="text-[11px] text-slate-400 mt-1">Pilih rombel siswa yang akan mempelajari modul hasil salinan ini.</p>

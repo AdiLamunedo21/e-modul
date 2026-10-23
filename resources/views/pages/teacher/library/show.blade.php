@@ -343,7 +343,7 @@
                         class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-semibold text-slate-800 transition-all cursor-pointer">
                     <option value="" disabled selected>-- Pilih Kelas Binaan Target --</option>
                     @foreach($allClasses as $cls)
-                        <option value="{{ $cls->id }}">Kelas {{ $cls->grade }} - {{ $cls->major_name }}</option>
+                        <option value="{{ $cls->id }}">{{ $cls->full_name ?? ('Kelas ' . $cls->grade . ' ' . $cls->major_name . ($cls->section ? ' ' . $cls->section : '')) }}</option>
                     @endforeach
                 </select>
                 <p class="text-[11px] text-slate-400 mt-1">Kelas yang akan menjadi target distribusi modul Anda.</p>

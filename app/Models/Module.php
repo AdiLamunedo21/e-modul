@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Module extends Model
 {
@@ -987,103 +988,106 @@ class Module extends Model
     {
         $newTitle = $newTitle ?: $this->title;
 
-        // 1. Duplikasi record utama modul
-        $cloned = self::create([
-            'teacher_id'          => $targetTeacher->id,
-            'class_id'            => $targetClassId,
-            'subject_id'          => $this->subject_id,
-            'semester'            => $this->semester ?? '1',
-            'title'               => $newTitle,
-            'informasi_umum_data' => $this->informasi_umum_data,
-            'bagian_akhir_data'   => $this->bagian_akhir_data,
-            'pre_test_data'       => $this->pre_test_data,
-            'materi_data'         => $this->materi_data,
-            'video_data'          => $this->video_data,
-            'embed_data'          => $this->embed_data,
-            'job_sheet_data'      => $this->job_sheet_data,
-            'lkpd_data'           => $this->lkpd_data,
-            'post_test_data'      => $this->post_test_data,
-            'has_pre_test'        => $this->has_pre_test,
-            'has_materi'          => $this->has_materi,
-            'has_video'           => $this->has_video,
-            'has_embed'           => $this->has_embed,
-            'has_job_sheet'       => $this->has_job_sheet,
-            'has_lkpd'            => $this->has_lkpd,
-            'has_post_test'       => $this->has_post_test,
-            'status'              => 'draft',
-            'is_shared'           => false,
-            'shared_at'           => null,
-            'cloned_from_id'      => $this->id,
-            'clone_count'         => 0,
-        ]);
-
-        // 2. Duplikasi Pre-test & Butir Soal jika ada
-        if ($this->preTest) {
-            $newPreTest = PreTest::create([
-                'module_id'           => $cloned->id,
-                'title'               => $this->preTest->title,
-                'kktp'                => $this->preTest->kktp,
-                'instructions'        => $this->preTest->instructions,
-                'randomize_questions' => $this->preTest->randomize_questions,
+        return DB::transaction(function () use ($targetTeacher, $targetClassId, $newTitle) {
+            // 1. Duplikasi record utama modul
+            $cloned = self::create([
+                'teacher_id'          => $targetTeacher->id,
+                'class_id'            => $targetClassId,
+                'subject_id'          => $this->subject_id,
+                'semester'            => $this->semester ?? '1',
+                'title'               => $newTitle,
+                'informasi_umum_data' => $this->informasi_umum_data,
+                'bagian_akhir_data'   => $this->bagian_akhir_data,
+                'pre_test_data'       => $this->pre_test_data,
+                'materi_data'         => $this->materi_data,
+                'video_data'          => $this->video_data,
+                'embed_data'          => $this->embed_data,
+                'job_sheet_data'      => $this->job_sheet_data,
+                'lkpd_data'           => $this->lkpd_data,
+                'post_test_data'      => $this->post_test_data,
+                'has_pre_test'        => (bool) $this->has_pre_test,
+                'has_materi'          => (bool) $this->has_materi,
+                'has_video'           => (bool) $this->has_video,
+                'has_embed'           => (bool) $this->has_embed,
+                'has_job_sheet'       => (bool) $this->has_job_sheet,
+                'has_lkpd'            => (bool) $this->has_lkpd,
+                'has_post_test'       => (bool) $this->has_post_test,
+                'status'              => 'draft',
+                'is_active'           => false,
+                'is_shared'           => false,
+                'shared_at'           => null,
+                'cloned_from_id'      => $this->id,
+                'clone_count'         => 0,
             ]);
 
-            foreach ($this->preTest->questions as $q) {
-                PreTestQuestion::create([
-                    'pre_test_id'        => $newPreTest->id,
-                    'question_text'      => $q->question_text,
-                    'options'            => $q->options,
-                    'correct_answer'     => $q->correct_answer,
-                    'score_weight'       => $q->score_weight,
-                    'time_limit_seconds' => $q->time_limit_seconds,
-                    'explanation'        => $q->explanation,
-                    'order_num'          => $q->order_num,
+            // 2. Duplikasi Pre-test & Butir Soal jika ada
+            if ($this->preTest) {
+                $newPreTest = PreTest::create([
+                    'module_id'           => $cloned->id,
+                    'title'               => $this->preTest->title,
+                    'kktp'                => $this->preTest->kktp ?? 75,
+                    'instructions'        => $this->preTest->instructions,
+                    'randomize_questions' => (bool) $this->preTest->randomize_questions,
+                ]);
+
+                foreach ($this->preTest->questions as $q) {
+                    PreTestQuestion::create([
+                        'pre_test_id'        => $newPreTest->id,
+                        'question_text'      => $q->question_text,
+                        'options'            => $q->options,
+                        'correct_answer'     => $q->correct_answer,
+                        'score_weight'       => $q->score_weight ?? 10,
+                        'time_limit_seconds' => $q->time_limit_seconds,
+                        'explanation'        => $q->explanation,
+                        'order_num'          => $q->order_num ?? 1,
+                    ]);
+                }
+            }
+
+            // 3. Duplikasi Post-test & Butir Soal jika ada
+            if ($this->postTest) {
+                $newPostTest = PostTest::create([
+                    'module_id'           => $cloned->id,
+                    'title'               => $this->postTest->title,
+                    'kktp'                => $this->postTest->kktp ?? 75,
+                    'instructions'        => $this->postTest->instructions,
+                    'randomize_questions' => (bool) $this->postTest->randomize_questions,
+                ]);
+
+                foreach ($this->postTest->questions as $q) {
+                    PostTestQuestion::create([
+                        'post_test_id'       => $newPostTest->id,
+                        'question_text'      => $q->question_text,
+                        'options'            => $q->options,
+                        'correct_answer'     => $q->correct_answer,
+                        'score_weight'       => $q->score_weight ?? 10,
+                        'time_limit_seconds' => $q->time_limit_seconds,
+                        'explanation'        => $q->explanation,
+                        'order_num'          => $q->order_num ?? 1,
+                    ]);
+                }
+            }
+
+            // 4. Duplikasi Job Sheets jika ada
+            foreach ($this->jobSheets as $js) {
+                JobSheet::create([
+                    'module_id'     => $cloned->id,
+                    'pdf_file_path' => $js->pdf_file_path,
                 ]);
             }
-        }
 
-        // 3. Duplikasi Post-test & Butir Soal jika ada
-        if ($this->postTest) {
-            $newPostTest = PostTest::create([
-                'module_id'           => $cloned->id,
-                'title'               => $this->postTest->title,
-                'kktp'                => $this->postTest->kktp,
-                'instructions'        => $this->postTest->instructions,
-                'randomize_questions' => $this->postTest->randomize_questions,
-            ]);
-
-            foreach ($this->postTest->questions as $q) {
-                PostTestQuestion::create([
-                    'post_test_id'       => $newPostTest->id,
-                    'question_text'      => $q->question_text,
-                    'options'            => $q->options,
-                    'correct_answer'     => $q->correct_answer,
-                    'score_weight'       => $q->score_weight,
-                    'time_limit_seconds' => $q->time_limit_seconds,
-                    'explanation'        => $q->explanation,
-                    'order_num'          => $q->order_num,
+            // 5. Duplikasi LKPD jika ada
+            foreach ($this->lkpds as $lkpd) {
+                Lkpd::create([
+                    'module_id'     => $cloned->id,
+                    'pdf_file_path' => $lkpd->pdf_file_path,
                 ]);
             }
-        }
 
-        // 4. Duplikasi Job Sheets jika ada
-        foreach ($this->jobSheets as $js) {
-            JobSheet::create([
-                'module_id'     => $cloned->id,
-                'pdf_file_path' => $js->pdf_file_path,
-            ]);
-        }
+            // 6. Tingkatkan counter kloning pada modul sumber
+            $this->increment('clone_count');
 
-        // 5. Duplikasi LKPD jika ada
-        foreach ($this->lkpds as $lkpd) {
-            Lkpd::create([
-                'module_id'     => $cloned->id,
-                'pdf_file_path' => $lkpd->pdf_file_path,
-            ]);
-        }
-
-        // 6. Tingkatkan counter kloning pada modul sumber
-        $this->increment('clone_count');
-
-        return $cloned;
+            return $cloned;
+        });
     }
 }
