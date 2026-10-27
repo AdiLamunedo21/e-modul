@@ -42,7 +42,7 @@ class ModuleLibraryController extends Controller
             ->where('is_shared', true);
 
         // Tab Filter: 'all' (semua modul bersama), 'others' (guru lain), 'my_shared' (milik saya yang dibagikan)
-        $tab = $request->get('tab', 'all');
+        $tab = $request->input('tab', 'all');
         if ($tab === 'others') {
             $query->where('teacher_id', '!=', $currentTeacher->id);
         } elseif ($tab === 'my_shared') {
@@ -97,7 +97,7 @@ class ModuleLibraryController extends Controller
         }
 
         // Sorting Urutan
-        $sort = $request->get('sort', 'latest');
+        $sort = $request->input('sort', 'latest');
         if ($sort === 'popular') {
             $query->orderByDesc('clone_count')->orderByDesc('shared_at')->orderByDesc('id');
         } elseif ($sort === 'title_asc') {

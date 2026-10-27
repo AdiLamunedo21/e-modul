@@ -9,7 +9,6 @@
     $currentTeacherId = (string) auth()->guard('teacher')->id();
     $modulesToSerialize = isset($allSharedModules) && $allSharedModules->isNotEmpty() ? $allSharedModules : $modules->getCollection();
     $modulesJson = $modulesToSerialize->map(function($m) use ($currentTeacherId) {
-        $sections = $m->moduleSectionsSummary();
         return [
             'id' => $m->id,
             'title' => $m->title,

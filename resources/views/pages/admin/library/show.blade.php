@@ -590,7 +590,20 @@
                         <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Tujuan Pembelajaran (TP):</h3>
                         <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-sm text-slate-800 leading-relaxed">
                             @if(!empty($informasiUmum['tujuan_pembelajaran']['tujuan_pembelajaran']))
-                                {!! nl2br(e($informasiUmum['tujuan_pembelajaran']['tujuan_pembelajaran'])) !!}
+                                @if(is_array($informasiUmum['tujuan_pembelajaran']['tujuan_pembelajaran']))
+                                    <ul class="space-y-2">
+                                        @foreach($informasiUmum['tujuan_pembelajaran']['tujuan_pembelajaran'] as $tp)
+                                            <li class="flex items-start gap-2">
+                                                <span class="text-indigo-600 font-bold shrink-0">•</span>
+                                                <span>{{ is_array($tp) ? ($tp['text'] ?? json_encode($tp)) : $tp }}</span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @else
+                                    {!! nl2br(e($informasiUmum['tujuan_pembelajaran']['tujuan_pembelajaran'])) !!}
+                                @endif
+                            @elseif(!empty($informasiUmum['tujuan_pembelajaran']) && is_string($informasiUmum['tujuan_pembelajaran']))
+                                {!! nl2br(e($informasiUmum['tujuan_pembelajaran'])) !!}
                             @else
                                 <p class="italic text-slate-400">Tujuan pembelajaran telah dirumuskan dalam modul ajar kurikulum merdeka.</p>
                             @endif
