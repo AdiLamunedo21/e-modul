@@ -355,18 +355,23 @@ class ClassController extends Controller
             $message = "Modul '{$module->title}' berhasil dinonaktifkan dari pembelajaran aktif di kelas {$class->full_name}.";
             $type = 'info';
         } else {
-            // Pastikan HANYA ADA SATU modul yang aktif di satu kelas pada satu waktu.
-            // Jika guru lain/mapel lain sebelumnya mengaktifkan modul dan belum dinonaktifkan saat kelas berakhir,
-            // seluruh modul lain di kelas ini akan otomatis dinonaktifkan.
-            Module::where('class_id', $class->id)
-                ->where('id', '!=', $module->id)
-                ->update(['is_active' => false]);
+            // Aturan Satu Modul Aktif:
+            // 1. Guru yang bersangkutan HANYA boleh memiliki SATU modul aktif di seluruh kelas yang diampu.
+            // 2. Di rombel kelas yang bersangkutan juga hanya boleh ada SATU modul aktif pada satu waktu.
+            // Saat modul ini diaktifkan, semua modul aktif milik guru ini di kelas manapun (dan modul lain di kelas ini) otomatis dinonaktifkan.
+            Module::where(function ($query) use ($teacher, $class) {
+                $query->where('teacher_id', $teacher->id)
+                      ->orWhere('class_id', $class->id);
+            })
+            ->where('id', '!=', $module->id)
+            ->where('is_active', true)
+            ->update(['is_active' => false]);
 
             $module->update([
                 'is_active' => true,
                 'status'    => 'published',
             ]);
-            $message = "Modul '{$module->title}' berhasil DIAKTIFKAN untuk pembelajaran di kelas {$class->full_name}! (Modul lain di kelas ini otomatis dinonaktifkan).";
+            $message = "Modul '{$module->title}' berhasil DIAKTIFKAN untuk pembelajaran di kelas {$class->full_name}! (Modul aktif lainnya di seluruh kelas yang Anda ampu otomatis dinonaktifkan).";
             $type = 'success';
         }
 

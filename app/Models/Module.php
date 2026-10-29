@@ -41,18 +41,26 @@ class Module extends Model
     }
 
     /**
-     * Aturan Satu Modul Aktif per Kelas (Pergantian Mapel di Kelas):
-     * Setiap kali sebuah modul diaktifkan di suatu kelas, seluruh modul lain
-     * di kelas tersebut otomatis dinonaktifkan.
+     * Aturan Satu Modul Aktif per Guru & per Kelas:
+     * Setiap kali sebuah modul diaktifkan, seluruh modul lain milik guru tersebut
+     * di kelas manapun yang diampu (serta modul lain di kelas tersebut)
+     * otomatis dinonaktifkan.
      */
     protected static function booted()
     {
         static::saving(function (Module $module) {
-            if ($module->is_active && $module->class_id) {
-                static::where('class_id', $module->class_id)
-                    ->when($module->exists, fn($q) => $q->where('id', '!=', $module->id))
-                    ->where('is_active', true)
-                    ->update(['is_active' => false]);
+            if ($module->is_active) {
+                static::where(function ($query) use ($module) {
+                    if ($module->teacher_id) {
+                        $query->where('teacher_id', $module->teacher_id);
+                    }
+                    if ($module->class_id) {
+                        $query->orWhere('class_id', $module->class_id);
+                    }
+                })
+                ->when($module->exists, fn($q) => $q->where('id', '!=', $module->id))
+                ->where('is_active', true)
+                ->update(['is_active' => false]);
             }
         });
     }

@@ -273,13 +273,21 @@ class ModuleManagerController extends Controller
         if ($newStatus === 'closed' || $newStatus === 'draft') {
             $updateData['is_active'] = false;
         } elseif ($newStatus === 'published') {
-            // Jika di kelas tujuan belum ada modul yang aktif, otomatis aktifkan modul ini
+            // Otomatis aktifkan HANYA jika guru belum memiliki modul aktif di kelas manapun dan di kelas ini belum ada modul aktif
             if ($module->class_id) {
+                $hasActiveForTeacher = $module->teacher_id
+                    ? Module::where('teacher_id', $module->teacher_id)
+                        ->where('id', '!=', $module->id)
+                        ->where('is_active', true)
+                        ->exists()
+                    : false;
+
                 $hasActiveModuleInClass = Module::where('class_id', $module->class_id)
                     ->where('id', '!=', $module->id)
                     ->where('is_active', true)
                     ->exists();
-                if (!$hasActiveModuleInClass) {
+
+                if (!$hasActiveForTeacher && !$hasActiveModuleInClass) {
                     $updateData['is_active'] = true;
                 }
             }

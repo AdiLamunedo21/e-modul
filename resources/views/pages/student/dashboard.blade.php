@@ -372,6 +372,19 @@
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
 
+                    // Sinkronkan data JSON reactive Alpine
+                    const newScript = doc.querySelector('#student-dashboard-data');
+                    if (newScript) {
+                        try {
+                            const newData = JSON.parse(newScript.textContent);
+                            this.classItems = newData.classItems;
+                            this.moduleItems = newData.moduleItems;
+                            this.tabAllModules = newData.tabAllModules;
+                            this.inProgressModules = newData.inProgressModules;
+                        } catch (err) {
+                            console.error('Failed to parse updated dashboard data', err);
+                        }
+                    }
 
                     // Sinkronkan container konten tab utama siswa
                     const newTabs = doc.querySelector('#student-main-tabs-content');
@@ -439,20 +452,14 @@
                 if (!item) return false;
 
                 if (requiredStatus === 'in_progress') {
-                    const inList = this.inProgressModules && this.inProgressModules.some(m => m.id === item.id);
-                    if (!inList && !item.is_active_in_class && item.progress_status !== 'in_progress') {
-                        return false;
-                    }
+                    return Boolean(item.is_active_in_class);
                 } else if (requiredStatus && item.progress_status !== requiredStatus) {
                     return false;
                 }
 
                 if (!requiredStatus && this.selectedStatus !== 'all') {
                     if (this.selectedStatus === 'in_progress') {
-                        const inList = this.inProgressModules && this.inProgressModules.some(m => m.id === item.id);
-                        if (!inList && !item.is_active_in_class && item.progress_status !== 'in_progress') {
-                            return false;
-                        }
+                        return Boolean(item.is_active_in_class);
                     } else if (item.progress_status !== this.selectedStatus) {
                         return false;
                     }
@@ -509,6 +516,16 @@
 
             {{-- ══ 3. INTERACTIVE NAVIGATION TABS & FILTER HUB ══ --}}
             <div id="student-main-tabs-content" class="space-y-6">
+
+                {{-- Reactive JSON Payload untuk Sinkronisasi State Alpine Saat Auto-Sync / Silent Reload --}}
+                <script id="student-dashboard-data" type="application/json">
+                {!! json_encode([
+                    'classItems' => $classesWithModules,
+                    'moduleItems' => $processedModules,
+                    'tabAllModules' => $tabAllModules,
+                    'inProgressModules' => $inProgressModules,
+                ]) !!}
+                </script>
 
                 {{-- ═══ TAB SELECTOR NAVIGATION BAR (KHUSUS DESKTOP, PADA MOBILE DIGANTIKAN BOTTOM NAV) ═══ --}}
                 <div class="hidden lg:flex items-center justify-between gap-3 border-b border-slate-200/80 pb-3">
