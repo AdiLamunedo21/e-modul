@@ -37,6 +37,11 @@ class PptConverterService
         $filename = pathinfo($storageRelativePath, PATHINFO_FILENAME);
         $targetPdfPath = ($dir === '.' ? '' : $dir . '/') . $filename . '.pdf';
 
+        if (PHP_OS_FAMILY !== 'Windows') {
+            // Konversi slide otomatis menggunakan PowerPoint COM hanya didukung di server Windows
+            return null;
+        }
+
         $scriptPath = app_path('Services/convert_ppt_to_pdf.ps1');
         if (!file_exists($scriptPath)) {
             Log::warning("PptConverterService: PowerShell script not found at {$scriptPath}");
