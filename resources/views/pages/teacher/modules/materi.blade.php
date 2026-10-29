@@ -548,16 +548,30 @@
                 <div id="ppt-drop-zone"
                      onclick="document.getElementById('ppt_file_input').click()"
                      class="relative flex flex-col items-center justify-center border-2 border-dashed border-slate-300 hover:border-violet-400 bg-slate-50 hover:bg-violet-50/30 rounded-2xl p-8 cursor-pointer transition-all text-center">
-                    <div class="w-14 h-14 bg-violet-100 rounded-2xl flex items-center justify-center mb-3">
+                    <div class="w-14 h-14 bg-violet-100 rounded-2xl flex items-center justify-center mb-3 pointer-events-none">
                         <svg class="w-7 h-7 text-violet-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12l-3-3m0 0l-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
                         </svg>
                     </div>
-                    <p id="ppt-drop-title" class="text-sm font-bold text-slate-700">
+                    <p id="ppt-drop-title" class="text-sm font-bold text-slate-700 pointer-events-none">
                         {{ !empty($data['ppt_file_path']) ? 'Klik atau seret untuk mengganti berkas PPT/PDF' : 'Klik atau seret berkas PPT/PDF ke sini' }}
                     </p>
-                    <p class="text-xs text-slate-500 mt-1">Mendukung format .PDF, .PPT, .PPTX — Ukuran maksimal 15 MB</p>
-                    <p id="ppt-file-selected-name" class="text-xs font-bold text-violet-700 mt-3 hidden bg-violet-100 px-3 py-1 rounded-full"></p>
+                    <p class="text-xs text-slate-500 mt-1 pointer-events-none">Mendukung format .PDF, .PPT, .PPTX — Ukuran maksimal 30 MB</p>
+                    <p id="ppt-file-selected-name" class="text-xs font-bold text-violet-700 mt-3 hidden bg-violet-100 px-3 py-1.5 rounded-full inline-block max-w-full truncate"></p>
+
+                    {{-- Upload Progress Indicator --}}
+                    <div id="ppt-upload-progress-container" class="w-full max-w-md mt-4 hidden text-left pointer-events-none">
+                        <div class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-1.5">
+                            <span id="ppt-upload-status-text" class="flex items-center gap-1.5 text-violet-700 font-medium truncate">
+                                <svg class="w-3.5 h-3.5 animate-spin shrink-0 text-violet-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                <span>Mengunggah slide presentasi...</span>
+                            </span>
+                            <span id="ppt-upload-percentage" class="text-violet-700 font-bold ml-2 shrink-0">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-200/90 rounded-full h-2 overflow-hidden shadow-inner">
+                            <div id="ppt-upload-progress-bar" class="bg-gradient-to-r from-violet-600 to-indigo-600 h-2 rounded-full transition-all duration-150" style="width: 0%"></div>
+                        </div>
+                    </div>
                 </div>
 
                 <p id="error-ppt_file" class="text-xs text-rose-600 mt-2 hidden"></p>
@@ -876,16 +890,58 @@
         }
     }
 
+    function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
     // PPT File selected
     function onPptFileSelected(input) {
-        const file = input.files[0];
+        const file = input.files && input.files[0];
         const label = document.getElementById('ppt-file-selected-name');
         const summaryPpt = document.getElementById('summary-ppt');
 
-        if (file) {
-            const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
-            label.textContent = `📁 File dipilih: ${file.name} (${sizeMb} MB)`;
+        if (!file) return;
+
+        // Validasi ekstensi berkas (.pdf, .ppt, .pptx)
+        const fileName = file.name || '';
+        const ext = fileName.includes('.') ? fileName.substring(fileName.lastIndexOf('.')).toLowerCase() : '';
+        const allowedExts = ['.pdf', '.ppt', '.pptx'];
+        if (!allowedExts.includes(ext)) {
+            showMateriToast('error', 'Format Berkas Tidak Sesuai', 'Format berkas "' + escapeHtml(fileName) + '" tidak didukung. Harap pilih berkas dengan format .PDF, .PPT, atau .PPTX.');
+            input.value = '';
+            if (label) {
+                label.textContent = '';
+                label.classList.add('hidden');
+            }
+            return;
+        }
+
+        const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+
+        // Validasi ukuran berkas maksimal 30 MB
+        if (file.size > 30 * 1024 * 1024) {
+            showMateriToast('error', 'Ukuran Berkas Terlalu Besar', `Berkas "${escapeHtml(fileName)}" berukuran ${sizeMb} MB. Batas maksimal yang diizinkan adalah 30 MB. Silakan kompres slide atau simpan dalam format PDF terlebih dahulu.`);
+            input.value = '';
+            if (label) {
+                label.textContent = '';
+                label.classList.add('hidden');
+            }
+            return;
+        }
+
+        if (label) {
+            if (file.size > 8 * 1024 * 1024) {
+                label.innerHTML = `📁 <strong>${escapeHtml(file.name)}</strong> (${sizeMb} MB) <span class="text-amber-700 ml-1 font-semibold">⚡ Berkas cukup besar (${sizeMb} MB), proses simpan mungkin butuh beberapa detik.</span>`;
+            } else {
+                label.textContent = `📁 File dipilih: ${file.name} (${sizeMb} MB)`;
+            }
             label.classList.remove('hidden');
+        }
+
+        if (summaryPpt) {
             summaryPpt.textContent = 'File Baru Dipilih';
             summaryPpt.className = 'font-bold text-emerald-600';
         }
@@ -1497,6 +1553,17 @@
         const submitSpinner = document.getElementById('btn-submit-spinner');
         const submitIcon = document.getElementById('btn-submit-icon');
 
+        // Validasi dini ukuran berkas PPT di sisi klien
+        const pptInput = document.getElementById('ppt_file_input');
+        const pptFile = pptInput && pptInput.files && pptInput.files[0];
+        if (pptFile) {
+            const sizeMb = (pptFile.size / (1024 * 1024)).toFixed(2);
+            if (pptFile.size > 30 * 1024 * 1024) {
+                showMateriToast('error', 'Ukuran Berkas Terlalu Besar', `Berkas presentasi "${escapeHtml(pptFile.name)}" (${sizeMb} MB) melebihi batas maksimal 30 MB. Silakan kompres berkas slide Anda.`);
+                return false;
+            }
+        }
+
         isSubmitting = true;
         clearErrors();
 
@@ -1507,7 +1574,22 @@
             submitBtn.classList.add('bg-blue-700', 'cursor-not-allowed', 'opacity-90');
             if (submitSpinner) submitSpinner.classList.remove('hidden');
             if (submitIcon) submitIcon.classList.add('hidden');
-            if (submitText) submitText.textContent = 'Menyimpan Materi...';
+            if (submitText) submitText.textContent = pptFile ? 'Menyiapkan berkas...' : 'Menyimpan Materi...';
+        }
+
+        // Progress bar container
+        const progressContainer = document.getElementById('ppt-upload-progress-container');
+        const progressBar = document.getElementById('ppt-upload-progress-bar');
+        const progressPercentage = document.getElementById('ppt-upload-percentage');
+        const progressStatusText = document.getElementById('ppt-upload-status-text');
+
+        if (pptFile && progressContainer) {
+            progressContainer.classList.remove('hidden');
+            if (progressBar) progressBar.style.width = '0%';
+            if (progressPercentage) progressPercentage.textContent = '0%';
+            if (progressStatusText) {
+                progressStatusText.innerHTML = `<svg class="w-3.5 h-3.5 animate-spin shrink-0 text-violet-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg> <span>Menyiapkan pengunggahan berkas...</span>`;
+            }
         }
 
         // Auto convert any base64 images to server files before submit
@@ -1522,18 +1604,46 @@
 
         const formData = new FormData(form);
 
-        try {
-            const response = await fetch(form.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json',
-                }
-            });
+        // Menggunakan XMLHttpRequest agar ada tracking progress persentase saat mengunggah berkas besar
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', form.action, true);
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.setRequestHeader('Accept', 'application/json');
 
-            if (response.ok) {
-                const resData = await response.json();
+        if (xhr.upload && pptFile) {
+            xhr.upload.onprogress = function(event) {
+                if (event.lengthComputable) {
+                    const percent = Math.min(Math.round((event.loaded / event.total) * 100), 100);
+                    const loadedMb = (event.loaded / (1024 * 1024)).toFixed(1);
+                    const totalMb = (event.total / (1024 * 1024)).toFixed(1);
+
+                    if (progressBar) progressBar.style.width = percent + '%';
+                    if (progressPercentage) progressPercentage.textContent = percent + '%';
+                    if (submitText) submitText.textContent = `Mengunggah (${percent}%)...`;
+
+                    if (progressStatusText) {
+                        if (percent < 100) {
+                            progressStatusText.innerHTML = `<svg class="w-3.5 h-3.5 animate-spin shrink-0 text-violet-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg> <span>Mengunggah slide: ${loadedMb} MB / ${totalMb} MB (${percent}%)</span>`;
+                        } else {
+                            progressStatusText.innerHTML = `<svg class="w-3.5 h-3.5 animate-spin shrink-0 text-emerald-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg> <span>Berkas terunggah 100%! Memproses slide di server...</span>`;
+                            if (submitText) submitText.textContent = 'Menyimpan di server...';
+                        }
+                    }
+                }
+            };
+        }
+
+        xhr.onload = function() {
+            let resData = null;
+            try {
+                resData = JSON.parse(xhr.responseText || '{}');
+            } catch (e) {
+                resData = null;
+            }
+
+            if (xhr.status >= 200 && xhr.status < 300 && resData) {
+                // Sembunyikan progress bar
+                if (progressContainer) progressContainer.classList.add('hidden');
 
                 // 1. Toast Notification
                 showMateriToast('success', 'Berhasil Disimpan! ✅', resData.message || 'Materi & Berkas Presentasi berhasil disimpan.');
@@ -1550,7 +1660,7 @@
                     successEl.innerHTML = `
                         <div class="flex items-center gap-3">
                             <svg class="w-5 h-5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            <span>${resData.message}</span>
+                            <span>${escapeHtml(resData.message)}</span>
                         </div>
                         <span class="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full shrink-0">Auto-Saved</span>
                     `;
@@ -1574,7 +1684,7 @@
                                     <div>
                                         <div class="flex items-center gap-2">
                                             <h4 class="text-sm font-bold text-slate-900 truncate max-w-sm">
-                                                ${resData.data.ppt_file_name || 'Berkas Presentasi'}
+                                                ${escapeHtml(resData.data.ppt_file_name || 'Berkas Presentasi')}
                                             </h4>
                                             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">
                                                 Tersedia
@@ -1616,7 +1726,6 @@
                 }
 
                 // Reset file input & label
-                const pptInput = document.getElementById('ppt_file_input');
                 if (pptInput) pptInput.value = '';
                 if (pptSelectedName) {
                     pptSelectedName.textContent = '';
@@ -1654,21 +1763,32 @@
                     isSubmitting = false;
                 }
 
-            } else if (response.status === 422) {
+            } else if (xhr.status === 413) {
+                // HTTP 413 Payload Too Large
+                showMateriToast('error', 'Ukuran Berkas Terlalu Besar (413)', 'Server menolak pengunggahan karena ukuran berkas melebihi batas yang diizinkan (maksimal 30 MB). Silakan kompres slide atau gunakan dokumen PDF.');
+                resetSubmitButton();
+            } else if (xhr.status === 422) {
                 // Validation error
-                const errData = await response.json();
+                const errData = resData || {};
                 showErrors(errData.errors || {}, errData.message || 'Terdapat kesalahan input:');
                 resetSubmitButton();
+            } else if (xhr.status === 504 || xhr.status === 408) {
+                // Timeout
+                showMateriToast('error', 'Waktu Pengunggahan Habis (Timeout)', 'Server memutus koneksi karena proses unggah berlangsung terlalu lama. Periksa kestabilan koneksi internet Anda atau kompres berkas slide.');
+                resetSubmitButton();
             } else {
-                showMateriToast('error', 'Gagal Menyimpan', 'Terjadi kesalahan sistem (' + response.status + ').');
+                showMateriToast('error', 'Gagal Menyimpan', (resData && resData.message) ? resData.message : ('Terjadi kesalahan sistem (' + xhr.status + '). Silakan coba lagi.'));
                 resetSubmitButton();
             }
-        } catch (err) {
-            console.error(err);
-            showMateriToast('error', 'Gagal Terhubung', 'Gagal mengirim data ke server. Pastikan koneksi server aktif.');
-            resetSubmitButton();
-        }
+        };
 
+        xhr.onerror = function() {
+            console.error('XHR network error');
+            showMateriToast('error', 'Gagal Terhubung', 'Gagal mengirim data ke server. Pastikan koneksi internet aktif.');
+            resetSubmitButton();
+        };
+
+        xhr.send(formData);
         return false;
     }
 
@@ -1677,6 +1797,11 @@
         const submitText = document.getElementById('btn-submit-text');
         const submitSpinner = document.getElementById('btn-submit-spinner');
         const submitIcon = document.getElementById('btn-submit-icon');
+        const progressContainer = document.getElementById('ppt-upload-progress-container');
+
+        if (progressContainer) {
+            progressContainer.classList.add('hidden');
+        }
 
         if (submitBtn) {
             submitBtn.disabled = false;
@@ -1703,6 +1828,35 @@
     // Init on page load
     document.addEventListener('DOMContentLoaded', function() {
         updateWordCount();
+
+        // Init Drag & Drop for PPT Drop Zone
+        const dropZone = document.getElementById('ppt-drop-zone');
+        if (dropZone) {
+            ['dragenter', 'dragover'].forEach(name => {
+                dropZone.addEventListener(name, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropZone.classList.add('border-violet-500', 'bg-violet-50/70', 'ring-2', 'ring-violet-300');
+                }, false);
+            });
+            ['dragleave', 'drop'].forEach(name => {
+                dropZone.addEventListener(name, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropZone.classList.remove('border-violet-500', 'bg-violet-50/70', 'ring-2', 'ring-violet-300');
+                }, false);
+            });
+            dropZone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                if (dt && dt.files && dt.files.length > 0) {
+                    const pptInput = document.getElementById('ppt_file_input');
+                    if (pptInput) {
+                        pptInput.files = dt.files;
+                        onPptFileSelected(pptInput);
+                    }
+                }
+            }, false);
+        }
     });
 </script>
 @endpush

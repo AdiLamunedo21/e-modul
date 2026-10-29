@@ -114,14 +114,14 @@ class LkpdController extends Controller
             'instructions'        => ['nullable', 'string'],
             'assessment_rubric'   => ['nullable', 'array'],
             'assessment_rubric.*' => ['nullable', 'string', 'max:255'],
-            'pdf_file'            => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:15360'], // Maks 15MB untuk guru (PDF/Word)
+            'pdf_file'            => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:30720'], // Maks 30MB untuk guru (PDF/Word)
         ];
 
         $request->validate($rules, [
             'lkpd_title.required' => 'Judul Lembar Kerja Peserta Didik (LKPD) wajib diisi jika komponen diaktifkan.',
             'work_mode.in'        => 'Mode pengerjaan harus berupa Kelompok atau Individu.',
             'pdf_file.mimes'      => 'Berkas panduan LKPD harus berformat PDF atau Word (.pdf, .docx, .doc).',
-            'pdf_file.max'        => 'Ukuran berkas panduan LKPD tidak boleh lebih dari 15 MB.',
+            'pdf_file.max'        => 'Ukuran berkas panduan LKPD tidak boleh lebih dari 30 MB.',
         ]);
 
         $existingData = is_array($module->lkpd_data) ? $module->lkpd_data : [];

@@ -92,14 +92,14 @@ class MateriController extends Controller
             'ringkasan_materi' => ['nullable', 'string'],
             'poin_penting'     => ['nullable', 'array'],
             'poin_penting.*'   => ['nullable', 'string', 'max:255'],
-            'ppt_file'         => ['nullable', 'file', 'mimes:pdf,ppt,pptx', 'max:15360'], // Maks 15MB
+            'ppt_file'         => ['nullable', 'file', 'mimes:pdf,ppt,pptx', 'max:30720'], // Maks 30MB
         ];
 
         $request->validate($rules, [
             'judul_materi.required'  => 'Judul materi wajib diisi jika fitur Materi diaktifkan.',
             'uraian_materi.required' => 'Uraian materi wajib diisi minimal 20 karakter jika fitur Materi diaktifkan.',
             'ppt_file.mimes'         => 'Berkas presentasi harus berformat PDF, PPT, atau PPTX.',
-            'ppt_file.max'           => 'Ukuran berkas presentasi tidak boleh lebih dari 15 MB.',
+            'ppt_file.max'           => 'Ukuran berkas presentasi tidak boleh lebih dari 30 MB.',
         ]);
 
         $existingData = is_array($module->materi_data) ? $module->materi_data : [];

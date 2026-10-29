@@ -114,13 +114,13 @@ class JobSheetController extends Controller
             'tools_and_materials.*' => ['nullable', 'string', 'max:255'],
             'assessment_rubric'     => ['nullable', 'array'],
             'assessment_rubric.*'   => ['nullable', 'string', 'max:255'],
-            'pdf_file'              => ['nullable', 'file', 'mimes:pdf', 'max:15360'], // Maks 15MB untuk guru
+            'pdf_file'              => ['nullable', 'file', 'mimes:pdf', 'max:30720'], // Maks 30MB untuk guru
         ];
 
         $request->validate($rules, [
             'job_sheet_title.required' => 'Judul Lembar Praktikum wajib diisi jika komponen diaktifkan.',
             'pdf_file.mimes'           => 'Berkas Job Sheet harus berformat PDF resmi.',
-            'pdf_file.max'             => 'Ukuran berkas Job Sheet PDF tidak boleh lebih dari 15 MB.',
+            'pdf_file.max'             => 'Ukuran berkas Job Sheet PDF tidak boleh lebih dari 30 MB.',
         ]);
 
         $existingData = is_array($module->job_sheet_data) ? $module->job_sheet_data : [];
